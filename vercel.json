@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "turbo run build --filter=@alsari/host",
+  "outputDirectory": ".next",
+  "installCommand": "pnpm install --frozen-lockfile"
+}

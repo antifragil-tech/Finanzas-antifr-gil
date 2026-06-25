@@ -1,0 +1,1 @@
+export { FacturasApp } from './App';

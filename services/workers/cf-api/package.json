@@ -1,0 +1,31 @@
+{
+  "name": "alsari-capital-api",
+  "version": "1.0.0",
+  "description": "Cloudflare Worker API for Alsari Capital Holding Dashboard",
+  "main": "src/worker.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build": "wrangler deploy --dry-run --outdir=dist",
+    "check": "tsc --noEmit"
+  },
+  "keywords": [
+    "cloudflare",
+    "worker",
+    "google-sheets",
+    "financial-dashboard"
+  ],
+  "author": "Alsari Capital",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20240129.0",
+    "typescript": "^5.3.3",
+    "wrangler": "^3.22.1"
+  },
+  "dependencies": {
+    "@types/nodemailer": "^7.0.10",
+    "cf-imap": "^0.0.12",
+    "nodemailer": "^8.0.1",
+    "postal-mime": "^2.7.3"
+  }
+}

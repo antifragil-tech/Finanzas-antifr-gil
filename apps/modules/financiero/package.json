@@ -1,0 +1,39 @@
+{
+  "name": "@alsari/financiero",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --max-warnings 0",
+    "clean": "rimraf dist .turbo"
+  },
+  "dependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@alsari/ui": "workspace:*",
+    "@alsari/utils": "workspace:*",
+    "@alsari/types": "workspace:*",
+    "@alsari/supabase-client": "workspace:*",
+    "lucide-react": "^0.563.0",
+    "recharts": "^2.13.0",
+    "xlsx": "^0.18.5",
+    "@supabase/supabase-js": "^2.49.4"
+  },
+  "devDependencies": {
+    "@alsari/config": "workspace:*",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.14",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8"
+  }
+}

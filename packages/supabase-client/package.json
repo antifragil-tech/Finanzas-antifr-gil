@@ -1,0 +1,17 @@
+{
+  "name": "@alsari/supabase-client",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Cliente Supabase configurado con tipos autogenerados del holding.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "clean": "rimraf dist .turbo"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.2"
+  }
+}

@@ -1,0 +1,18 @@
+name = "alsari-capital-api"
+main = "src/worker.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+SHEET_ID = "1LgkA5LcjqX0ob-jqJRdmfk_5hzonqWUX6KLJZh9nm2E"
+GCP_SERVICE_ACCOUNT_EMAIL = "alsari-bot@alsari-dashboard.iam.gserviceaccount.com"
+DASHBOARD_URL = "http://localhost:5173/invoices"
+
+# GCP_PRIVATE_KEY → usar .dev.vars en local, wrangler secret put en producción
+
+[[kv_namespaces]]
+binding = "WORKSPACE_KV"
+id = "776735be336d405786bd611e1586ec2d"
+
+[triggers]
+crons = ["*/30 * * * *"]

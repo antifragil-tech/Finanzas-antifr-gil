@@ -1,0 +1,6 @@
+packages:
+  - 'apps/host'
+  - 'apps/modules/*'
+  - 'packages/*'
+  # Excluir la plantilla del workspace (es solo referencia, no se instala)
+  - '!apps/modules/_template'

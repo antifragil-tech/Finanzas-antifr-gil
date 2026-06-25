@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "ALSARI_OS_VERSION": "0.2.0",
+    "ALSARI_LOCALE": "es-ES",
+    "ALSARI_TIMEZONE": "Europe/Madrid"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff)",
+      "Bash(git log)",
+      "Bash(git branch)",
+      "Bash(git checkout)",
+      "Bash(git add)",
+      "Bash(git commit)",
+      "Bash(pnpm)",
+      "Bash(npm)",
+      "Bash(node)",
+      "Read(*)",
+      "Edit(*)",
+      "Write(*)",
+      "Bash(git commit -m ' *)",
+      "Bash(grep -iE '\\\\.\\(svg|png|jpg|jpeg|ico|webp\\)$')",
+      "Bash(python -c ' *)",
+      "Bash(pnpm --filter @alsari/financiero type-check)",
+      "Bash(python3 -c ' *)",
+      "Bash(pnpm --filter @alsari/financiero dev)",
+      "Bash(supabase --version)",
+      "Bash(taskkill /F /IM node.exe)",
+      "Bash(python scripts/migrate_alsari_db.py)",
+      "Bash(Remove-Item -Recurse -Force apps/host/.next -ErrorAction SilentlyContinue)",
+      "Bash(netstat -ano)",
+      "Bash(findstr \":3000\")",
+      "Bash(pnpm --filter @alsari/ui type-check)",
+      "Bash(pnpm --filter @alsari/types type-check)",
+      "Bash(gh run *)",
+      "Bash(git stash *)",
+      "Bash(pnpm --filter @alsari/utils type-check)",
+      "Bash(git rm *)",
+      "Bash(pnpm --filter @alsari/financiero lint)",
+      "Bash(pnpm --filter @alsari/utils lint)",
+      "Bash(pnpm --filter @alsari/host lint)",
+      "Bash(git commit *)",
+      "Bash(pnpm --filter @alsari/host dev)",
+      "Bash(node -e ' *)",
+      "Bash(git reset *)",
+      "Bash(pnpm --filter @alsari/contabilidad type-check)",
+      "Bash(npx supabase *)",
+      "Bash(pnpm --filter @alsari/contabilidad lint)",
+      "Bash(xargs grep *)",
+      "Edit(/.claude/skills/lessons-learned/**)",
+      "Bash(git merge *)",
+      "Bash(pnpm --filter @alsari/presupuestos exec tsc --noEmit)",
+      "Bash(pnpm --filter @alsari/host exec tsc --noEmit)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)",
+      "Bash(xargs -I {} sh -c 'echo \"=== {} ===\" && grep \"CREATE TABLE\" {}')",
+      "Bash(pnpm --filter @alsari/facturas type-check)",
+      "Bash(pnpm --filter @alsari/presupuestos type-check)",
+      "Bash(git push *)"
+    ],
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(git push --force)",
+      "Bash(git push -f)",
+      "Bash(curl)",
+      "Bash(wget)",
+      "Read(.env)",
+      "Read(.env.local)",
+      "Read(.env.production)",
+      "Write(.env)",
+      "Write(.env.local)",
+      "Write(.env.production)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/PreToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/PostToolUse.sh"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/SessionStart.sh"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/Stop.sh"
+          }
+        ]
+      }
+    ]
+  }
+}

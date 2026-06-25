@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .glass-panel {
+    @apply bg-zinc-900/40 backdrop-blur-md border border-white/5 shadow-xl;
+  }
+
+  .glass-header {
+    @apply bg-zinc-950/80 backdrop-blur-xl border-b border-white/5;
+  }
+}
+
+/* Custom scrollbar — Quiet Luxury dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #09090b; /* zinc-950 */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a; /* zinc-800 */
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46; /* zinc-700 */
+}

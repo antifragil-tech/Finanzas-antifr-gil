@@ -1,0 +1,92 @@
+# ─── Dependencias ──────────────────────────────────────
+node_modules/
+.pnpm-store/
+
+# ─── Builds ────────────────────────────────────────────
+dist/
+build/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
+
+# ─── Tests y coverage ──────────────────────────────────
+coverage/
+.nyc_output/
+playwright-report/
+test-results/
+playwright/.cache/
+
+# ─── Variables de entorno ──────────────────────────────
+# CRÍTICO: .env nunca al repo. Solo .env.example.
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.staging
+# Permitir explícitamente el .example
+!.env.example
+
+# ─── Logs ──────────────────────────────────────────────
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ─── Sistema operativo ─────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ─── Editores ──────────────────────────────────────────
+# VSCode/Antigravity: ignoramos casi todo, salvo configs compartidas
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+
+.idea/
+*.swp
+*.swo
+*~
+
+# ─── Supabase local ────────────────────────────────────
+**/supabase/.branches
+**/supabase/.temp
+**/supabase/.env
+
+# ─── Claude / IA ───────────────────────────────────────
+# Los archivos .claude/skills/ SÍ van al repo (conocimiento compartido).
+# Solo ignoramos caches locales si las hay.
+.claude/cache/
+.claude/.tmp/
+.claude/worktrees/
+
+# ─── Carpetas legacy (migradas al monorepo) ───────────────────────────────────
+IGNORE/
+
+# ─── Datos financieros sensibles ──────────────────────
+# Excluir cualquier Excel o PDF de facturas/documentación
+# que pueda caer en la raíz durante desarrollo.
+*.xlsx
+*.xls
+*.XLSX
+*.XLS
+*.pdf
+*.PDF
+
+# ─── Misc ──────────────────────────────────────────────
+*.tgz
+*.tar.gz
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# Service Account key (PR D Drive) - no commitear
+.sa-key.json

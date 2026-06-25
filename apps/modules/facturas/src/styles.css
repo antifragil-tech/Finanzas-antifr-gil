@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-zinc-950 text-zinc-100 antialiased selection:bg-blue-500/30;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-zinc-900/40 backdrop-blur-md border border-white/5 shadow-xl;
+  }
+  .glass-header {
+    @apply bg-zinc-950/80 backdrop-blur-xl border-b border-white/5;
+  }
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #14141e; }
+::-webkit-scrollbar-thumb { background: #2a2b38; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+/* Iconos Lucide: trazo fino 1.5 en todo el OS (el atributo SVG por defecto es 2). */
+.lucide { stroke-width: 1.5; }

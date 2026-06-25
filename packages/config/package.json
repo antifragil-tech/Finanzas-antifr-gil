@@ -1,0 +1,14 @@
+{
+  "name": "@alsari/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Configs compartidas del monorepo: TS base, ESLint, Tailwind preset, env Zod.",
+  "exports": {
+    "./tailwind-preset": "./tailwind-preset.js"
+  },
+  "scripts": {
+    "type-check": "echo 'config: no TS sources, skipping'",
+    "clean": "rimraf dist .turbo"
+  }
+}
