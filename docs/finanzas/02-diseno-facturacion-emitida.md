@@ -36,7 +36,7 @@ Tomadas durante la revisión de este diseño. Acotan el alcance y **el sistema d
 
 > **Matización fiscal innegociable (protege D2).** *Cobrar "sin IVA" no convierte en exento un servicio que sea sujeto.* Si la gestoría determina que algún servicio (p.ej. entrenamiento personal) es **sujeto a IVA**, ese precio de catálogo se interpretará como **IVA incluido** (55 € ≈ 45,45 base + 9,55 IVA repercutido) y ese IVA habría que liquidarlo de lo ya cobrado. Por eso `exento_provisional` + `requiere_revision_fiscal` por producto es lo correcto: ahora se cobra limpio, pero **no se pierde el rastro** de qué precios podrían llevar IVA latente. El estado objetivo (cada servicio con su `tipo_operacion` definitivo) sigue siendo el de §4; D2 es el **estado provisional** hasta el criterio de la gestoría.
 
-> **Límite de líneas de trabajo.** Los campos a **nivel de producto/tarifa** (`precio_final`, `base_imponible`, `iva_*`, `tratamiento_fiscal`, `requiere_revision_fiscal`, `criterio_gestoria`) viven en el **catálogo de la Clínica** (`docs/reservas/03-catalogo-tarifas-productos.md`, línea Clínica/Reservas — **no se toca aquí**). Facturación emitida los **consume**; no los redefine.
+> **Límite de líneas de trabajo.** Los campos a **nivel de producto/tarifa** (`precio_final`, `base_imponible`, `iva_*`, `tratamiento_fiscal`, `requiere_revision_fiscal`, `criterio_gestoria`) viven en el **catálogo de la Clínica** (`docs/reservas/03-catalogo-tarifas-productos.md` — *documento futuro de la línea Clínica/Reservas, aún no en `main`* — **no se toca aquí**). Facturación emitida los **consume**; no los redefine.
 
 ---
 
@@ -173,11 +173,11 @@ Recibidas lo construye en el frontend y lo inserta. Para emitidas, lo **coherent
 La exención sanitaria (**art. 20.Uno.3º**) cubre *"la asistencia a personas físicas por profesionales médicos y sanitarios… que consista en diagnóstico, prevención y tratamiento de enfermedades"*. Las claves:
 
 1. **Por finalidad terapéutica.** Exento sólo si la finalidad es **diagnóstico, prevención o tratamiento** de una enfermedad. **Estética/bienestar/rendimiento sin finalidad terapéutica → SUJETO a IVA** (criterio reiterado de la DGT y del TJUE).
-2. **Por profesión sanitaria.** El prestador debe ser profesional sanitario reconocido. Esto **parte el catálogo de la clínica** (ver `docs/reservas/03-catalogo-tarifas-productos.md`):
+2. **Por profesión sanitaria.** El prestador debe ser profesional sanitario reconocido. Esto **parte el catálogo de la clínica** (ver `docs/reservas/03-catalogo-tarifas-productos.md` — *documento de la línea Clínica/Reservas, aún no en `main`; referencia futura*):
 
 | Servicio del catálogo | Profesión | Tratamiento IVA (criterio, **a confirmar con gestoría**) |
 |---|---|---|
-| **Fisioterapia / Fisioterapia deportiva** | Sanitaria (fisioterapeuta) | **Exenta** cuando hay finalidad terapéutica (lesión, rehabilitación). Discutible si es puramente preventivo-deportivo/rendimiento. |
+| **Fisioterapia** | Sanitaria (fisioterapeuta) | Provisionalmente **sin IVA / exenta cuando proceda** (finalidad terapéutica), **pendiente de criterio gestoría**. *Nota: en Antifrágil "fisioterapia deportiva" NO es un servicio separado; "deportiva" es etiqueta / motivo de consulta / contexto clínico, no un producto comercial-fiscal propio.* |
 | **Nutrición** | Dietista-nutricionista = sanitaria | **Exenta** si es terapéutica (patología). Nutrición deportiva/estética/bienestar → **sujeta**. |
 | **Entrenamiento personal** | **NO sanitaria** | **Sujeto a IVA (21 %)** con carácter general. No es asistencia sanitaria. |
 | **Valoraciones, informes, bonos mixtos** | Según contenido | Caso a caso. Un informe pericial no es asistencia → sujeto. |
