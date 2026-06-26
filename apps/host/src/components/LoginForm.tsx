@@ -38,11 +38,11 @@ export function LoginForm() {
             src="/logo.png"
             width={64}
             height={64}
-            alt="Alsari Capital"
+            alt="Antifrágil OS"
             className="mb-6 object-contain"
           />
           <h1 className="text-brand text-xl font-semibold tracking-widest uppercase">
-            Alsari Capital OS
+            Antifrágil OS
           </h1>
           <p className="text-zinc-500 text-xs tracking-widest mt-1 uppercase">
             Neural Finance V3.0

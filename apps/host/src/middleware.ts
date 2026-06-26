@@ -2,6 +2,20 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  // ⚠️ DEMO LOCAL ÚNICAMENTE — NUNCA EN PRODUCCIÓN.
+  // Si ANTIFRAGIL_DEMO_MODE=true (y NO estamos en producción), saltamos el gate
+  // de autenticación para poder enseñar el OS + Reservas en local sin backend.
+  //   · NO elimina el flujo real de auth (sigue intacto justo debajo).
+  //   · NO toca Supabase: retorna ANTES de crear el cliente.
+  //   · Doble protección: se ignora si NODE_ENV === 'production'.
+  //   · La variable es NO pública (sin NEXT_PUBLIC_): solo visible en servidor.
+  if (
+    process.env['ANTIFRAGIL_DEMO_MODE'] === 'true' &&
+    process.env['NODE_ENV'] !== 'production'
+  ) {
+    return NextResponse.next({ request });
+  }
+
   let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(

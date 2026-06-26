@@ -1,7 +1,7 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@alsari/ui', '@alsari/utils', '@alsari/types', '@alsari/financiero', '@alsari/proyectos', '@alsari/contabilidad', '@alsari/presupuestos'],
+  transpilePackages: ['@alsari/ui', '@alsari/utils', '@alsari/types', '@alsari/financiero', '@alsari/proyectos', '@alsari/contabilidad', '@alsari/presupuestos', '@alsari/reservas'],
 };
 
 export default nextConfig;

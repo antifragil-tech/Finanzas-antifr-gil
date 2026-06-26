@@ -13,6 +13,7 @@
   "dependencies": {
     "@alsari/contabilidad": "workspace:*",
     "@alsari/presupuestos": "workspace:*",
+    "@alsari/reservas": "workspace:*",
     "@alsari/financiero": "workspace:*",
     "@alsari/types": "workspace:*",
     "@alsari/ui": "workspace:*",

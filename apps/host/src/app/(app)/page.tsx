@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { BarChart2, BookOpen, ChevronRight, Activity, FolderKanban } from 'lucide-react';
+import { BarChart2, BookOpen, ChevronRight, Activity, FolderKanban, CalendarDays } from 'lucide-react';
 
 const modules = [
   {
@@ -33,6 +33,16 @@ const modules = [
     border: 'border-emerald-500/20',
     dot: 'bg-emerald-400',
   },
+  {
+    href: '/reservas',
+    label: 'Reservas',
+    description: 'Agenda de la clínica: calendario de profesionales y citas. Demo con datos mock.',
+    icon: CalendarDays,
+    color: 'text-amber-400',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/20',
+    dot: 'bg-amber-400',
+  },
 ] as const;
 
 export default function HomePage() {
@@ -42,7 +52,7 @@ export default function HomePage() {
       <header className="px-10 pt-14 pb-10">
         <Image
           src="/logo.png"
-          alt="Alsari Capital"
+          alt="Antifrágil"
           width={160}
           height={46}
           className="object-contain opacity-70 mb-8"
