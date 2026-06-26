@@ -22,6 +22,24 @@ Regla de oro de este documento (heredada de docs 00/01): **fecha de emisión ≠
 
 ---
 
+## 0.1 Decisiones firmes de Guille (2026-06-26)
+
+Tomadas durante la revisión de este diseño. Acotan el alcance y **el sistema debe respetarlas**; el resto del documento se lee bajo estas premisas.
+
+**D1 — El OS NO emite factura legal oficial todavía.** Antifrágil OS es **motor operativo + precontable**: prepara datos, registra cobros, vincula cita/bono/pago/proyecto/cliente y puede generar **borradores / prefacturas internas y datos para la gestoría**. La **emisión fiscal oficial se delega** (gestoría / software homologado) hasta validar el circuito completo con Ramón. → *resuelve la DECISIÓN F4-D en su opción "delegar para arrancar".*
+
+**D2 — Clínica: todos los servicios/productos SIN IVA por ahora.** El precio del catálogo es **precio final, sin IVA añadido** (Fisio 55 €, Programa 5 sesiones 225 €, Nutrición 55 €, Entrenamiento 55 €, bonos, tarifas Founder/VIP/UG, etc.). En la UI **no** se desglosa IVA. Mapeo al modelo de factura/prefactura:
+- por línea, `tipo_operacion = exento_provisional` (o `sin_iva_clinica`), `cuota_iva = 0`, sin desglose de IVA en el documento;
+- **se conservan** los campos fiscales (`iva_porcentaje`, `iva_importe`, `tratamiento_fiscal`, `requiere_revision_fiscal`, `criterio_gestoria`) con sus defaults a 0 / provisional — **no se elimina el soporte fiscal**, sólo se desactiva visualmente.
+
+**D3 — La regla es POR producto/proyecto, no global.** "Sin IVA" es decisión **de la Clínica**, no de toda la aplicación. **9AM / Eventos, Lido Pro y otras líneas podrán llevar IVA.** El tratamiento fiscal debe ser **configurable por producto y por proyecto**, nunca hardcodeado a nivel de toda la app.
+
+> **Matización fiscal innegociable (protege D2).** *Cobrar "sin IVA" no convierte en exento un servicio que sea sujeto.* Si la gestoría determina que algún servicio (p.ej. entrenamiento personal) es **sujeto a IVA**, ese precio de catálogo se interpretará como **IVA incluido** (55 € ≈ 45,45 base + 9,55 IVA repercutido) y ese IVA habría que liquidarlo de lo ya cobrado. Por eso `exento_provisional` + `requiere_revision_fiscal` por producto es lo correcto: ahora se cobra limpio, pero **no se pierde el rastro** de qué precios podrían llevar IVA latente. El estado objetivo (cada servicio con su `tipo_operacion` definitivo) sigue siendo el de §4; D2 es el **estado provisional** hasta el criterio de la gestoría.
+
+> **Límite de líneas de trabajo.** Los campos a **nivel de producto/tarifa** (`precio_final`, `base_imponible`, `iva_*`, `tratamiento_fiscal`, `requiere_revision_fiscal`, `criterio_gestoria`) viven en el **catálogo de la Clínica** (`docs/reservas/03-catalogo-tarifas-productos.md`, línea Clínica/Reservas — **no se toca aquí**). Facturación emitida los **consume**; no los redefine.
+
+---
+
 ## 1. Estado actual de facturas emitidas y gaps concretos
 
 ### 1.1 Qué hay (auditado en código)
@@ -300,8 +318,8 @@ Encaja dentro de la **Fase 4** del plan maestro (doc 00 §9). Ninguna sub-fase c
 
 1. **⚠️ F4-A — ¿Quién puede emitir** facturas de la clínica? (`admin` sólo, o también `recepcion`).
 2. **⚠️ F4-B — Cuenta de ingreso por defecto:** ¿**705** Prestación de servicios para la clínica (recomendado), reservando 700 para productos físicos?
-3. **⚠️ F4-C — Criterio de exención sanitaria** (con la gestoría): mapa exención↔servicio del catálogo y si la clínica queda en **prorrata**.
-4. **⚠️ F4-D — (la grande) ¿Emisor propio homologado (Veri\*factu) o delegar** la emisión oficial en software homologado / gestoría? Recomendado: **delegar para arrancar**.
+3. **⚠️ F4-C — Criterio de exención sanitaria** (con la gestoría): mapa exención↔servicio del catálogo y si la clínica queda en **prorrata**. → **Provisional (2026-06-26, D2):** Clínica **sin IVA** (`exento_provisional`); pendiente de cerrar el mapa definitivo con Ramón.
+4. **⚠️ F4-D — (la grande) ¿Emisor propio homologado (Veri\*factu) o delegar** la emisión oficial en software homologado / gestoría? Recomendado: **delegar para arrancar**. → **Decidido (2026-06-26, D1):** delegar; el OS queda como precontable, no emite factura oficial todavía.
 5. **⚠️ F4-E — ¿Serie propia para la clínica** (p.ej. `C-2026-0001`)? Recomendado: **sí**.
 
 *(Estas se suman a las DECISIONES 1-5 del doc 01, que no se reabren aquí: bajo qué sociedad cuelga la clínica, nº de sociedades, etc.)*
