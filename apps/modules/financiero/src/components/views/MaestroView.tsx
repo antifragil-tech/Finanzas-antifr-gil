@@ -446,7 +446,7 @@ function EstructuraTab({ sociedades, onDetail }: { sociedades: SociedadRow[]; on
 
       {/* Alsari Capital virtual root */}
       <div className="rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3 flex items-center gap-3">
-        <span className="text-blue-300 font-semibold text-sm">Alsari Capital</span>
+        <span className="text-blue-300 font-semibold text-sm">Antifrágil</span>
         <span className="text-2xs text-blue-400/60 font-medium">Entidad virtual consolidada — Pavier + Armia</span>
       </div>
 

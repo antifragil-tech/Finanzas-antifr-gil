@@ -121,7 +121,7 @@ export function FinancieroDashboard() {
 
   const [selectedSociety, setSelectedSociety] = useState<SocietyOption>({
     id: 'alsari_capital',
-    nombre: 'Alsari Capital',
+    nombre: 'Antifrágil',
     idRef: null,
     variant: 'secondary',
     badge: 'Holding principal',
@@ -211,7 +211,7 @@ export function FinancieroDashboard() {
     // Personas físicas: sin CIF (tienen DNI, no CIF de sociedad)
     if (pavier_raw) societies.push({ id: 'javier_alarcon', nombre: 'Javier Alarcón', idRef: pavier_raw['ID-Ref'], variant: 'primary', showCrown: true });
     if (armia_raw)  societies.push({ id: 'ivan_alarcon',   nombre: 'Iván Alarcón',   idRef: armia_raw['ID-Ref'],  variant: 'primary', showCrown: true });
-    societies.push({ id: 'alsari_capital', nombre: 'Alsari Capital', idRef: null, variant: 'secondary', badge: 'Consolidado Total' });
+    societies.push({ id: 'alsari_capital', nombre: 'Antifrágil', idRef: null, variant: 'secondary', badge: 'Consolidado Total' });
     if (pavier_raw) societies.push({ id: pavier_raw['ID-Ref'], nombre: pavier_raw['Nombre de la Sociedad'], idRef: pavier_raw['ID-Ref'], ...cif(pavier_raw), variant: 'secondary', badge: 'Holding Principal' });
     if (armia_raw)  societies.push({ id: armia_raw['ID-Ref'],  nombre: armia_raw['Nombre de la Sociedad'],  idRef: armia_raw['ID-Ref'],  ...cif(armia_raw),  variant: 'secondary', badge: 'Holding Principal' });
     const filiales = data.sociedades

@@ -96,7 +96,7 @@ export function FinancialSidebar({
           <Home size={13} />
         </button>
         <div className="flex-1 flex justify-center">
-          <img src="/logo.png" alt="Alsari Capital" className="h-7 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity"
+          <img src="/logo.png" alt="Antifrágil" className="h-7 w-auto object-contain opacity-90 hover:opacity-100 transition-opacity"
             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
         </div>
         <button

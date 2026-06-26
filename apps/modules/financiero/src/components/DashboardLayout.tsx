@@ -85,7 +85,7 @@ export function DashboardLayout({
                 <PanelLeftOpen size={14} />
               </button>
             )}
-            <span>ALSARI CAPITAL</span>
+            <span>ANTIFRÁGIL</span>
             {!isGlobalView && (
               <>
                 <ChevronRight size={10} className="text-zinc-700" />
