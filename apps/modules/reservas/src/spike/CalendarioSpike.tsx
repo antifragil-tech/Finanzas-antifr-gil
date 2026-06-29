@@ -73,11 +73,11 @@ const finDe = (inicioIso: string, mins: number) => {
 const servicioPorRol = (rol?: string) =>
   rol === 'Entrenador personal' ? 'sv3' : rol === 'Nutricionista' ? 'sv4' : 'sv1';
 
-export function CalendarioSpike() {
+export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vista } = {}) {
   const hoyStr = DayPilot.Date.today().toString('yyyy-MM-dd');
   const [startDate, setStartDate] = useState<string>(hoyStr);
   const [citas, setCitas] = useState<CitaMock[]>(() => crearCitasMock(hoyStr));
-  const [vista, setVista] = useState<Vista>('semana');
+  const [vista, setVista] = useState<Vista>(vistaInicial);
   const [dimDia, setDimDia] = useState<DimDia>('profesional');
   const [profVisibles, setProfVisibles] = useState<string[]>(PROFESIONALES.map((p) => p.id));
   const [servFiltro, setServFiltro] = useState<ServFiltro>('todos');
