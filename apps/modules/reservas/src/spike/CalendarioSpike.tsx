@@ -218,6 +218,7 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
       profesional_id: profId,
       sala_id: esEntreno ? null : salaResource,
       servicio_id: servId,
+      origen: 'directo',
       inicio,
       fin,
       estado_cita: 'pendiente',
@@ -282,7 +283,6 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
   const filtrosServicio: { id: ServFiltro; label: string }[] = [
     { id: 'todos', label: 'Todos' },
     { id: 'fisioterapia', label: 'Fisio' },
-    { id: 'fisioterapia_deportiva', label: 'Fisio dep.' },
     { id: 'entrenamiento_personal', label: 'Entreno' },
     { id: 'nutricion', label: 'Nutrición' },
   ];

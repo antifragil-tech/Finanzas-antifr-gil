@@ -119,6 +119,7 @@ export function AgendaHoy() {
       profesional_id: profId,
       sala_id: esEntreno ? null : 's1',
       servicio_id: servId,
+      origen: 'directo',
       inicio,
       fin,
       estado_cita: 'pendiente',

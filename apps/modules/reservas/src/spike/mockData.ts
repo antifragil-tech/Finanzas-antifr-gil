@@ -19,11 +19,19 @@ export type EstadoPago =
   | 'devuelto'
   | 'no_requiere_pago';
 
-export type CategoriaServicio =
-  | 'fisioterapia'
-  | 'fisioterapia_deportiva'
-  | 'entrenamiento_personal'
-  | 'nutricion';
+// Servicios principales = 3. "Fisio deportiva" NO es servicio: es una etiqueta/
+// contexto dentro de Fisioterapia (campo `etiqueta` en la cita).
+export type CategoriaServicio = 'fisioterapia' | 'entrenamiento_personal' | 'nutricion';
+
+// Origen / partner derivador de la cita. Vivofácil es el caso especial (factura
+// mensual agrupada a 45 €/sesión completada → cobro pendiente B2B).
+export type OrigenCita = 'directo' | 'vivofacil' | 'oasis' | 'lidomare' | 'otro';
+
+export interface Origen {
+  id: OrigenCita;
+  label: string;
+  partner: boolean; // true = derivador externo (no cliente directo)
+}
 
 export interface Profesional {
   id: string;
@@ -56,6 +64,8 @@ export interface CitaMock {
   profesional_id: string;
   sala_id: string | null; // opcional: entrenamiento normalmente sin sala
   servicio_id: string;
+  etiqueta?: string; // contexto dentro del servicio (p. ej. "Deportiva" en fisio)
+  origen: OrigenCita;
   inicio: string; // ISO local "YYYY-MM-DDTHH:mm:ss"
   fin: string;
   estado_cita: EstadoCita;
@@ -84,10 +94,22 @@ export const SALAS: Sala[] = [
 // estándar (las tarifas Founder/VIP/especial se aplican por cliente/producto).
 export const SERVICIOS: Servicio[] = [
   { id: 'sv1', nombre: 'Fisioterapia', categoria: 'fisioterapia', duracion_minutos: 45, precio: 55 },
-  { id: 'sv2', nombre: 'Fisio deportiva', categoria: 'fisioterapia_deportiva', duracion_minutos: 45, precio: 60 },
   { id: 'sv3', nombre: 'Entrenamiento', categoria: 'entrenamiento_personal', duracion_minutos: 60, precio: 40 },
   { id: 'sv4', nombre: 'Nutrición', categoria: 'nutricion', duracion_minutos: 30, precio: 45 },
 ];
+
+// Orígenes / partners. Vivofácil con lógica especial (ver VIVOFACIL_VALOR_SESION).
+export const ORIGENES: Origen[] = [
+  { id: 'directo', label: 'Directo', partner: false },
+  { id: 'vivofacil', label: 'Vivofácil', partner: true },
+  { id: 'oasis', label: 'Oasis', partner: true },
+  { id: 'lidomare', label: 'Lidomare', partner: true },
+  { id: 'otro', label: 'Otro derivador', partner: true },
+];
+
+// Vivofácil: cada sesión COMPLETADA devenga 45 €. Cierre/factura mensual agrupada
+// al partner → cobro pendiente B2B hasta que paga.
+export const VIVOFACIL_VALOR_SESION = 45;
 
 // Color por profesional (acento visual: barra de la cita, punto en filtros y mes).
 export const PROF_COLOR: Record<string, string> = {
@@ -101,14 +123,15 @@ export const PROF_COLOR: Record<string, string> = {
 export const getProfesional = (id: string) => PROFESIONALES.find((p) => p.id === id);
 export const getSala = (id: string | null) => (id ? SALAS.find((s) => s.id === id) : undefined);
 export const getServicio = (id: string) => SERVICIOS.find((s) => s.id === id);
+export const getOrigen = (id: OrigenCita) => ORIGENES.find((o) => o.id === id);
 
 const pad = (x: number) => String(x).padStart(2, '0');
 
 /**
  * Citas mock REPARTIDAS de lunes a viernes de la semana que contiene `hoy`.
- * Cada día tiene varias citas en distintos profesionales/horas (sin choques
- * profesional+hora dentro del mismo día), para que las vistas Semana y Día se
- * vean como una agenda real (no todo amontonado en un día).
+ * Cada día tiene varias citas en distintos profesionales/horas, con un bloque de
+ * citas simultáneas (10:30) para validar el reparto en carriles, y variedad de
+ * estados, pagos y orígenes/partners (incl. Vivofácil) para la agenda y los badges.
  */
 export function crearCitasMock(hoy: string): CitaMock[] {
   const base = new Date(`${hoy}T00:00:00`);
@@ -128,21 +151,18 @@ export function crearCitasMock(hoy: string): CitaMock[] {
     'Ana Belén Torres', 'Rafa Galindo', 'Luis García', 'Bea Romero', 'Paco Reyes',
   ];
 
-  // Plantilla de un día: [hora, min, profesional, sala, servicio]
-  // Incluye un bloque de citas SIMULTÁNEAS a las 10:30 (p1 + p3 + p4) y un solape
-  // parcial a las 9:30, para validar que la vista Semana reparte las citas en
-  // carriles sin pisarse. Datos coherentes: ningún profesional ni sala se duplica
-  // a la misma hora (la validación real de choques irá en backend).
-  const tpl: [number, number, string, string | null, string][] = [
+  // Plantilla de un día: [hora, min, profesional, sala, servicio, etiqueta?]
+  // "Deportiva" es etiqueta de contexto dentro de Fisioterapia (no un servicio).
+  const tpl: [number, number, string, string | null, string, string?][] = [
     [8, 0, 'p1', 's1', 'sv1'],
     [9, 0, 'p4', null, 'sv3'],
-    [9, 30, 'p2', 's2', 'sv2'],
+    [9, 30, 'p2', 's2', 'sv1', 'Deportiva'],
     [10, 30, 'p1', 's1', 'sv1'],
     [10, 30, 'p3', 's2', 'sv1'],
     [10, 30, 'p4', null, 'sv3'],
     [12, 0, 'p5', 's1', 'sv4'],
     [16, 0, 'p4', null, 'sv3'],
-    [17, 0, 'p2', 's2', 'sv2'],
+    [17, 0, 'p2', 's2', 'sv1', 'Deportiva'],
     [18, 30, 'p3', 's1', 'sv1'],
   ];
   const estados: EstadoCita[] = [
@@ -153,12 +173,16 @@ export function crearCitasMock(hoy: string): CitaMock[] {
     'incluido_bono', 'pagado', 'pendiente_pago', 'pendiente_pago', 'pagado',
     'pendiente_pago', 'pagado', 'incluido_bono', 'devuelto',
   ];
+  const origenes: OrigenCita[] = [
+    'directo', 'vivofacil', 'directo', 'oasis', 'vivofacil',
+    'directo', 'lidomare', 'vivofacil', 'directo', 'otro',
+  ];
 
   const out: CitaMock[] = [];
   let n = 0;
   for (let off = 0; off <= 4; off++) {
     const dia = fechaOffset(off);
-    tpl.forEach(([h, m, prof, sala, serv], i) => {
+    tpl.forEach(([h, m, prof, sala, serv, etiqueta], i) => {
       const s = getServicio(serv)!;
       const fin = new Date(new Date(`${dia}T${pad(h)}:${pad(m)}:00`).getTime() + s.duracion_minutos * 60000);
       n += 1;
@@ -168,6 +192,8 @@ export function crearCitasMock(hoy: string): CitaMock[] {
         profesional_id: prof,
         sala_id: sala,
         servicio_id: serv,
+        ...(etiqueta ? { etiqueta } : {}),
+        origen: origenes[i % origenes.length] ?? 'directo',
         inicio: `${dia}T${pad(h)}:${pad(m)}:00`,
         fin: `${dia}T${pad(fin.getHours())}:${pad(fin.getMinutes())}:00`,
         estado_cita: estados[(i + off) % estados.length] ?? 'confirmada',
