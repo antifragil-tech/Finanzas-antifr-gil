@@ -1,19 +1,12 @@
 import { redirect } from 'next/navigation';
 import { isDemoMode } from '@/lib/demo';
-import { EnConstruccion } from '@/components/EnConstruccion';
-import { FileText } from 'lucide-react';
+import { FacturasDemo } from '@/components/demo/screens/FacturasDemo';
 
 export default function FacturasPage() {
-  // En demo mode: placeholder Antifrágil (sin redirigir a legacy).
+  // En demo mode: pantalla demo de Facturación (mock, sin datos fiscales reales).
   // Fuera de demo: comportamiento intacto (redirige a /contabilidad).
   if (isDemoMode()) {
-    return (
-      <EnConstruccion
-        titulo="Facturación"
-        descripcion="Facturación emitida y precontabilidad de Antifrágil. En construcción."
-        icon={FileText}
-      />
-    );
+    return <FacturasDemo />;
   }
   redirect('/contabilidad');
 }

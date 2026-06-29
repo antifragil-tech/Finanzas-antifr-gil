@@ -1,17 +1,9 @@
 import { notFound } from 'next/navigation';
 import { isDemoMode } from '@/lib/demo';
-import { EnConstruccion } from '@/components/EnConstruccion';
-import { TrendingUp } from 'lucide-react';
+import { RentabilidadDemo } from '@/components/demo/screens/RentabilidadDemo';
 
 export default function RentabilidadPage() {
-  // Ruta nueva, solo-demo: en demo muestra placeholder; fuera de demo NO existe
-  // (404), de modo que el legacy mantiene exactamente su superficie de rutas.
+  // Ruta solo-demo: en demo muestra la pantalla mock; fuera de demo NO existe.
   if (!isDemoMode()) notFound();
-  return (
-    <EnConstruccion
-      titulo="Rentabilidad"
-      descripcion="Rentabilidad analítica por servicio, profesional y proyecto de Antifrágil. En construcción."
-      icon={TrendingUp}
-    />
-  );
+  return <RentabilidadDemo />;
 }

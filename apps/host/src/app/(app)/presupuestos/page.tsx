@@ -1,18 +1,12 @@
 import { PresupuestosDashboard } from '@/components/PresupuestosClient';
 import { isDemoMode } from '@/lib/demo';
-import { EnConstruccion } from '@/components/EnConstruccion';
-import { FolderKanban } from 'lucide-react';
+import { ProyectosDemo } from '@/components/demo/screens/ProyectosDemo';
 
 export default function PresupuestosPage() {
-  // En demo mode no se muestra el dashboard legacy; fuera de demo, intacto.
+  // En demo mode: pantalla demo de Proyectos (mock).
+  // Fuera de demo: dashboard legacy intacto.
   if (isDemoMode()) {
-    return (
-      <EnConstruccion
-        titulo="Proyectos"
-        descripcion="Proyectos, objetivos y presupuestos de Antifrágil. En construcción."
-        icon={FolderKanban}
-      />
-    );
+    return <ProyectosDemo />;
   }
   return <PresupuestosDashboard />;
 }
