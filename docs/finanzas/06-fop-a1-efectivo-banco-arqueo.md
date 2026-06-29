@@ -5,7 +5,7 @@
 > **Fecha:** 2026-06-26
 > **Depende de:** [05-backlog...](05-backlog-finanzas-operativas.md) (F-Op A1) · [04-finanzas-operativas...](04-finanzas-operativas-mapa-y-gaps.md) (Lente 1)
 > **Regla:** reutilizar antes de crear. No romper facturas recibidas ni el cashflow actual. Migraciones futuras se aplican a mano por el Dashboard de Supabase (riesgo de drift).
-> **Marcas `⚠️ DECISIÓN`:** bifurcaciones técnicas a confirmar con Guille (recapituladas en §9).
+> **Marcas `✅ DECISIÓN RESUELTA`:** bifurcaciones técnicas ya decididas por Guille (recapituladas en §9).
 
 ---
 
@@ -85,9 +85,9 @@ El hecho de que entra o sale dinero de una `cuenta_tesoreria`:
 | `proyecto_id_ref`, `sociedad_id_ref` | etiquetado dimensional |
 | `movimiento_bancario_id` | FK opcional para conciliar con el extracto (banco) |
 
-⚠️ **DECISIÓN A1-D1 (arquitectura del ledger):** dos opciones —
+✅ **DECISIÓN RESUELTA A1-D1 (arquitectura del ledger) → opción (b); ver §9.** Opciones consideradas —
 - **(a) Ledger único** `movimiento_tesoreria` para caja **y** banco; `movimientos_bancarios` queda como fuente de importación que "alimenta" el ledger.
-- **(b) Dos ledgers + vista** *(recomendado)*: se **conserva** `movimientos_bancarios` como ledger de banco (ya maduro: import + dedup) y se crea un ledger **solo de caja** para el efectivo; una **vista `tesoreria`** unifica ambos y calcula los dos saldos. Menor riesgo, no toca el import de extractos.
+- **(b) Dos ledgers + vista** *(elegida)*: se **conserva** `movimientos_bancarios` como ledger de banco (ya maduro: import + dedup) y se crea un ledger **solo de caja** para el efectivo; una **vista `tesoreria`** unifica ambos y calcula los dos saldos. Menor riesgo, no toca el import de extractos.
 
 ### 3.4 `arqueo_caja` (control, no movimiento)
 Cierre/cuadre de una caja física en una fecha:
@@ -182,13 +182,13 @@ arqueo_caja (solo cajas)        cashflow_consolidado (sin doble conteo)
 
 ---
 
-## 9. Decisiones abiertas (para Guille)
+## 9. Decisiones resueltas (Guille, 2026-06-26)
 
-- **⚠️ A1-D1 — Arquitectura del ledger:** ¿ledger único `movimiento_tesoreria` (a) o dos ledgers + vista unificada (b, recomendado por menor riesgo sobre el import de extractos)?
-- **⚠️ A1-D2 — Alcance del efectivo:** ¿una sola caja física (clínica) o varias cajas por sede/uso? Define la cardinalidad de `cuenta_tesoreria` tipo caja.
-- **⚠️ A1-D3 — Frecuencia de arqueo:** ¿cierre diario estricto o cuadre semanal? (liga con ⚠️ F-1 del doc 04).
-- **⚠️ A1-D4 — Tarjeta/datáfono:** ¿se trata como banco a secas en A1, dejando la comisión del datáfono para la fase de rentabilidad (B), o se separa ya el subtipo?
-- **⚠️ A1-D5 — Saldo banco que manda:** ¿el dashboard muestra el saldo contable (PGC 572) o el operativo (suma de `movimientos_bancarios`)? Afecta a la conciliación futura.
+- **✅ A1-D1 — Arquitectura del ledger → opción (b).** Se **mantiene `movimientos_bancarios`** como ledger de banco, se **crea un ledger separado para caja/efectivo**, y ambos se **unifican mediante una vista de tesorería**. *Motivo:* menor riesgo y no rompe la importación de extractos.
+- **✅ A1-D2 — Alcance del efectivo → una caja inicial, modelo multi-caja.** Se empieza con **una sola caja: `Caja Clínica Playamar`**, pero `cuenta_tesoreria` (tipo caja) se diseña **preparada para varias cajas** futuras (sin hardcodear una única).
+- **✅ A1-D3 — Frecuencia de arqueo → diario con efectivo, semanal si no.** **Arqueo diario** los días con movimientos en efectivo; si no hay efectivo, **mínimo semanal**. (Liga con ⚠️ F-1 del doc 04.)
+- **✅ A1-D4 — Tarjeta/datáfono → en A1 solo el medio `tarjeta`.** Las **comisiones del datáfono quedan fuera de A1** y se tratarán más adelante como **gasto financiero/operativo** (no se separa el subtipo ni la comisión en este lote).
+- **✅ A1-D5 — Saldo de banco → dos saldos etiquetados.** Para **gestión diaria manda el saldo operativo** (suma de `movimientos_bancarios`); para **cierre/gestoría manda el saldo contable/conciliado** (PGC 572). **Ambos pueden coexistir, pero deben mostrarse etiquetados de forma distinta** (no presentarse como una única cifra).
 
 ---
 
