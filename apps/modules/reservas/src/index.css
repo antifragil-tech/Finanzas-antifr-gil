@@ -5,6 +5,15 @@
  * eventos con info operativa. Todo scopeado bajo .dp-quiet.
  */
 
+/* El módulo ocupa la altura de su contenedor: standalone = viewport (html/body/
+   #root al 100%); embebido en el OS = área del DemoShell. Por eso ClinicaDashboard
+   usa h-full (no h-screen) y así no desborda dentro del shell. */
+html,
+body,
+#root {
+  height: 100%;
+}
+
 .dp-quiet,
 .dp-quiet .calendar_default_main,
 .dp-quiet .month_default_main {

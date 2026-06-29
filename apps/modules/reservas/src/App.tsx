@@ -10,7 +10,7 @@ export function ClinicaDashboard() {
   const [vista, setVista] = useState<VistaAgenda>('hoy');
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden bg-zinc-950 text-zinc-100">
+    <div className="flex h-full flex-col overflow-hidden bg-zinc-950 text-zinc-100">
       <header className="glass-header shrink-0 px-6 py-4">
         <p className="text-2xs uppercase tracking-widest text-zinc-500">
           Antifrágil · Clínica Playamar
