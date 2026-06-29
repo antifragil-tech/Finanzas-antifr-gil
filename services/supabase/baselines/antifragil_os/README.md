@@ -70,3 +70,39 @@ Correr `post_bootstrap_checks.sql` y confirmar:
 - **`presupuesto_pagos.estado`**: CHECK ampliado a `pendiente/pagado/cancelado/estimado/confirmado/facturado` para casar con la vista `flujos_proyecto_consolidados` (salda una deuda conocida del esquema heredado).
 - **`vencimientos`**: se conserva la definición de `20260520100000` (la que ganaba por orden de migración: campos `tipo`, `sociedad_id`, `recurrencia`, estados `pendiente/gestionado/vencido`) + `es_entrada`; excluidos los tipos `pignorado`/`prestamo` (lente inversión).
 - **Procedencia**: cada bloque del `.sql` lleva comentarios `-- fuente: <archivo>.sql` apuntando a la migración heredada de la que se derivó.
+
+## 7. Inventario verificado del baseline
+
+Conteo verificado sobre `00000000000000_baseline_antifragil_os.sql` (grep + revisión manual):
+
+| Elemento | Nº | Detalle |
+|---|---|---|
+| **Tablas** | **26** | maestro (3) · config/contabilidad (4) · banco (2) · facturas (2) · pagos append-only (3) · asientos/recon (3) · presupuestos (4) · tesorería/flujos (2) · balance/KPI (2) · proveedores (1) |
+| **Vistas** | **5** | `v_balance_periodos`, `saldo_bancario_por_sociedad`, `compromisos_tesoreria`, `flujos_proyecto_consolidados`, `cashflow_consolidado` |
+| **Funciones** | **5** | 1 trigger (`touch_updated_at`) + 4 RPC |
+| **RPC (security definer)** | **4** | `registrar_pago_factura`, `resolver_incidencia_factura`, `importar_extracto_bancario`, `deshacer_importacion_extracto` |
+| **Triggers** | **15** | `touch_updated_at` BEFORE UPDATE en las 15 tablas con `updated_at` |
+| **Políticas RLS** | **26** | 23 `FOR ALL TO authenticated` + 3 append-only `SELECT` (una por tabla); `anon` sin políticas |
+| **Buckets Storage** | **1** | `facturas` (privado, `public=false`) + 2 políticas (SELECT auth, INSERT acotado) |
+| **Filas de seed (propias)** | **6** | 1 sociedad (`ANT`) + 4 proyectos + 1 fila `configuracion_contabilidad` |
+
+- ✅ **Sin datos reales:** los únicos `INSERT` son (a) lógica dentro de RPC, (b) `storage.buckets`, (c) seed propio de Antifrágil. Sociedad con `cif=NULL`, sin cuentas bancarias, sin facturas/movimientos/balances.
+- ✅ **Sin legacy:** 0 ocurrencias de `Alsari/Pavier/Armia/Rialsa/finanzas_sociedades/proyecto_sociedades/pct_pavier/pct_armia` en el `.sql` (verificado por grep). Lista de exclusiones en `excluded_legacy.md`; verificación en producción en `post_bootstrap_checks.sql` (PARTE 1, checks 12–15).
+
+## 8. Variables de entorno (FASE POSTERIOR — no forma parte del baseline)
+
+> Esto NO se toca al aplicar el baseline. Se documenta aquí solo para la fase de **recableado del cliente**, que es una tarea **separada y aún no autorizada**.
+
+Cuando exista el proyecto nuevo, harán falta (cada una con el valor del proyecto **nuevo**, nunca del legacy):
+
+| Capa | Variables |
+|---|---|
+| Host (Next.js) | `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (en `apps/host/.env.local`) |
+| Módulos (Vite) | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` |
+| Edge Functions | `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` (solo backend, nunca cliente) |
+| Servicio Python | `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_DB_PASSWORD` |
+
+**Qué NO debe hacerse:**
+- ❌ No pegar `anon`/`service_role`/password en el repo ni en esta carpeta.
+- ❌ No reutilizar las claves del proyecto legacy.
+- ⚠️ **`packages/supabase-client/src/index.ts` sigue con el ref + anon key LEGACY hardcodeados como fallback.** Apuntar al proyecto nuevo exige editarlo (idealmente, que lea de variables de entorno en vez de hardcodear). **Ese cambio es una fase aparte, NO forma parte de este baseline** y aquí está explícitamente fuera de alcance.
