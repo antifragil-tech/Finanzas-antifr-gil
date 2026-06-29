@@ -8,7 +8,7 @@ export default function PresupuestosPage() {
   if (isDemoMode()) {
     return (
       <EnConstruccion
-        titulo="Proyectos Antifrágil"
+        titulo="Proyectos"
         descripcion="Proyectos, objetivos y presupuestos de Antifrágil. En construcción."
         icon={FolderKanban}
       />

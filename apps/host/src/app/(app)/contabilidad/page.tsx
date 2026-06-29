@@ -8,7 +8,7 @@ export default function ContabilidadPage() {
   if (isDemoMode()) {
     return (
       <EnConstruccion
-        titulo="Contabilidad y Facturación"
+        titulo="Contabilidad y Gestoría"
         descripcion="Facturas, conciliación y precontabilidad de Antifrágil. En construcción."
         icon={BookOpen}
       />
