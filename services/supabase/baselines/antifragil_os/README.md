@@ -56,7 +56,7 @@ Ver `excluded_legacy.md` para la lista completa. En resumen: nada de la base ant
 
 Correr `post_bootstrap_checks.sql` y confirmar:
 
-- [ ] Existen las ~24 tablas núcleo y las 5 vistas.
+- [ ] Existen las 26 tablas núcleo y las 5 vistas.
 - [ ] RLS activado en todas las tablas; `anon` sin políticas de acceso.
 - [ ] Base **vacía** salvo el seed: `sociedades`=1, `proyectos`=4, `configuracion_contabilidad`=1, resto=0.
 - [ ] Seed correcto: existe `ANT`/`Antifrágil S.C.`; `CLI-PLY` activo; `9AM`/`LIDO`/`EVT` placeholder; **sin CIF/IBAN**.
