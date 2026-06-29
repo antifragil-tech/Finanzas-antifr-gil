@@ -33,20 +33,23 @@ export function Bloque({
   icon: Icon,
   href,
   hrefLabel,
+  tag,
   children,
 }: {
   titulo: string;
   icon: LucideIcon;
   href?: string;
   hrefLabel?: string;
+  tag?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
     <section className="glass-panel flex min-h-[200px] flex-col rounded-2xl p-6">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <Icon size={16} className="text-zinc-400" />
           <h2 className="text-sm font-semibold tracking-tight text-zinc-100">{titulo}</h2>
+          {tag}
         </div>
         {href ? (
           <Link
