@@ -1,8 +1,8 @@
-import { Modal, Button, Badge } from '@alsari/ui';
+import { Modal, Button } from '@alsari/ui';
 import { Check, CheckCheck, UserX, XCircle, Clock, MapPin, User, Euro } from 'lucide-react';
 import type { CitaMock } from './mockData';
 import { getProfesional, getSala, getServicio } from './mockData';
-import { ESTADO_META, PAGO_LABEL, PAGO_TONE } from './estados';
+import { CitaBadges } from '../clinica/badges';
 
 export type AccionCita = 'confirmar' | 'completar' | 'no_asiste' | 'cancelar';
 
@@ -33,23 +33,21 @@ export function CitaModal({ cita, onClose, onAccion }: Props) {
   const prof = getProfesional(cita.profesional_id);
   const sala = getSala(cita.sala_id);
   const serv = getServicio(cita.servicio_id);
-  const meta = ESTADO_META[cita.estado_cita];
   const esFinal = ['completada', 'cancelada', 'no_asiste'].includes(cita.estado_cita);
 
   return (
     <Modal open={!!cita} onClose={onClose} title={`Cita · ${cita.cliente_nombre}`}>
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <Badge tone={meta.tone}>{meta.label}</Badge>
-          <Badge tone={PAGO_TONE[cita.estado_pago]}>{PAGO_LABEL[cita.estado_pago]}</Badge>
-        </div>
+        <CitaBadges estado={cita.estado_cita} pago={cita.estado_pago} origen={cita.origen} />
 
         <div className="space-y-2 rounded-xl border border-white/5 bg-zinc-950/40 p-3">
           <Fila icon={Clock}>
             {hhmm(cita.inicio)}–{hhmm(cita.fin)}
           </Fila>
           <Fila icon={User}>
-            {serv?.nombre} · {prof?.nombre} <span className="text-zinc-500">({prof?.rol})</span>
+            {serv?.nombre}
+            {cita.etiqueta ? ` · ${cita.etiqueta}` : ''} · {prof?.nombre}{' '}
+            <span className="text-zinc-500">({prof?.rol})</span>
           </Fila>
           <Fila icon={MapPin}>{sala?.nombre ?? 'Sin sala (no requiere)'}</Fila>
           <Fila icon={Euro}>{cita.precio_previsto.toFixed(0)} € (previsto)</Fila>
