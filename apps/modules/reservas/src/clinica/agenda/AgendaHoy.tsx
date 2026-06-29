@@ -10,9 +10,12 @@ import {
   getProfesional,
   type CitaMock,
   type EstadoCita,
+  type EstadoPago,
+  type OrigenCita,
 } from '../../spike/mockData';
 import { ESTADO_META, PAGO_SIN_ABONAR } from '../../spike/estados';
-import { CitaModal, type AccionCita } from '../../spike/CitaModal';
+import type { AccionCita } from '../../spike/CitaModal';
+import { CitaPanel } from '../CitaPanel';
 import { repartirCarriles } from './lanes';
 
 type DPId = string | number;
@@ -162,6 +165,28 @@ export function AgendaHoy() {
     );
   };
 
+  const onPago = (estado: EstadoPago) => {
+    if (!seleccionada) return;
+    setCitas((prev) =>
+      prev.map((c) =>
+        c.id === seleccionada.id
+          ? { ...c, estado_pago: estado, cambios: [...c.cambios, { ts: ahora(), accion: 'pago', detalle: `Pago → ${estado}` }] }
+          : c,
+      ),
+    );
+  };
+
+  const onOrigen = (origen: OrigenCita) => {
+    if (!seleccionada) return;
+    setCitas((prev) =>
+      prev.map((c) =>
+        c.id === seleccionada.id
+          ? { ...c, origen, cambios: [...c.cambios, { ts: ahora(), accion: 'origen', detalle: `Origen → ${origen}` }] }
+          : c,
+      ),
+    );
+  };
+
   const nuevaCitaBoton = () => crearCita(`${hoy}T10:00:00`, `${hoy}T10:45:00`);
 
   // Ancho de columna fijo para que las columnas por profesional no se compriman.
@@ -233,7 +258,13 @@ export function AgendaHoy() {
         </div>
       </div>
 
-      <CitaModal cita={seleccionada} onClose={() => setSelectedId(null)} onAccion={onAccion} />
+      <CitaPanel
+        cita={seleccionada}
+        onClose={() => setSelectedId(null)}
+        onAccion={onAccion}
+        onPago={onPago}
+        onOrigen={onOrigen}
+      />
     </div>
   );
 }
