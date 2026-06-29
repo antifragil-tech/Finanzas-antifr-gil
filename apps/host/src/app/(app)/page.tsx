@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { BarChart2, BookOpen, ChevronRight, Activity, FolderKanban, CalendarDays } from 'lucide-react';
 import { isDemoMode } from '@/lib/demo';
+import { PanelDireccion } from '@/components/demo/panel/PanelDireccion';
 
 type ModuleCard = {
   href: string;
@@ -61,39 +62,6 @@ const modulesLegacy: ModuleCard[] = [
     estado: 'Activo',
   },
 ];
-
-// Bloques del Panel de Dirección. ANDAMIAJE (Fase 1): estructura visible sin
-// contenido mock — los bloques se rellenan en Fase 2.
-const panelBloques = ['Hoy', 'Clínica', 'Tesorería', 'Pendientes', 'Rentabilidad', 'Proyectos'] as const;
-
-// Demo Antifrágil: Panel de Dirección dentro del DemoShell (sin doble cabecera).
-function PanelDireccion() {
-  return (
-    <div className="px-8 py-8">
-      <div className="mb-2 flex items-center gap-2 text-2xs font-medium uppercase tracking-widest text-zinc-600">
-        <Activity size={10} />
-        <span>Sistema Operativo</span>
-      </div>
-      <h1 className="mb-1 text-3xl font-light tracking-tight text-white">Panel de Dirección</h1>
-      <p className="mb-8 text-sm font-medium text-zinc-500">
-        Vista de Clínica, Finanzas, Rentabilidad y Proyectos. Andamiaje — los bloques llegan en la siguiente fase.
-      </p>
-
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {panelBloques.map((titulo) => (
-          <section key={titulo} className="glass-panel flex min-h-[160px] flex-col rounded-2xl p-6">
-            <h2 className="text-sm font-semibold tracking-tight text-zinc-200">{titulo}</h2>
-            <div className="flex flex-1 items-center justify-center">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-2xs uppercase tracking-widest text-zinc-500">
-                Próximamente · Fase 2
-              </span>
-            </div>
-          </section>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 // Legacy: landing de módulos a pantalla completa (comportamiento intacto).
 function LegacyHome() {
