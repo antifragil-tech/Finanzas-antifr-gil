@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { DemoSidebar } from './DemoSidebar';
 import { DemoTopbar } from './DemoTopbar';
+import { DemoProvider } from './context/DemoContext';
 
 // Cascarón operativo de la Demo v0.2.
 // Envuelve la experiencia EXISTENTE con sidebar + topbar persistentes.
@@ -42,12 +43,14 @@ export function DemoShell({ children }: { children: React.ReactNode }) {
   }, [supabase.auth, router]);
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <DemoSidebar />
-      <div className="pl-60">
-        <DemoTopbar />
-        <main className="min-h-[calc(100vh-4rem)] overflow-auto">{children}</main>
+    <DemoProvider>
+      <div className="min-h-screen bg-zinc-950 text-zinc-100">
+        <DemoSidebar />
+        <div className="pl-60">
+          <DemoTopbar />
+          <main className="min-h-[calc(100vh-4rem)] overflow-auto">{children}</main>
+        </div>
       </div>
-    </div>
+    </DemoProvider>
   );
 }

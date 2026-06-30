@@ -1,4 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
+import { Lock } from 'lucide-react';
 import { Tag } from '../panel/PanelKit';
 
 // Cabecera común de las pantallas demo (Fase 4): icono + título + badge Demo +
@@ -26,6 +27,21 @@ export function ScreenShell({
         {aviso}
       </div>
       {children}
+    </div>
+  );
+}
+
+// Tarjeta de "bloque oculto por rol". Deja CLARO que es simulación, no permisos.
+export function RestriccionRol({ area, rolLabel }: { area: string; rolLabel: string }) {
+  return (
+    <div className="glass-panel flex min-h-[160px] flex-col items-center justify-center rounded-2xl p-8 text-center">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/5">
+        <Lock size={20} className="text-zinc-500" />
+      </div>
+      <p className="mb-1 text-sm font-medium text-zinc-200">{area} no disponible para el rol {rolLabel}</p>
+      <p className="text-2xs uppercase tracking-widest text-amber-400/80">
+        Vista demo por rol · no aplica permisos reales
+      </p>
     </div>
   );
 }
