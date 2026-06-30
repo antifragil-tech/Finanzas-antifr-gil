@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CalendarioSpike } from './spike/CalendarioSpike';
 import { AgendaHoy } from './clinica/agenda/AgendaHoy';
 import { AgendaNav, type VistaAgenda } from './clinica/AgendaNav';
+import { Pendientes } from './clinica/Pendientes';
 
 // Raíz del módulo Clínica/Reservas. Clínica > Agenda con sub-navegación:
 // Hoy (vista por profesional, núcleo de recepción) por defecto · Semana · Mes ·
@@ -30,13 +31,7 @@ export function ClinicaDashboard() {
         {vista === 'hoy' && <AgendaHoy />}
         {vista === 'semana' && <CalendarioSpike vistaInicial="semana" />}
         {vista === 'mes' && <CalendarioSpike vistaInicial="mes" />}
-        {vista === 'pendientes' && (
-          <div className="flex h-full items-center justify-center">
-            <span className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-2xs uppercase tracking-widest text-zinc-500">
-              Pendientes · próximamente
-            </span>
-          </div>
-        )}
+        {vista === 'pendientes' && <Pendientes />}
       </main>
     </div>
   );
