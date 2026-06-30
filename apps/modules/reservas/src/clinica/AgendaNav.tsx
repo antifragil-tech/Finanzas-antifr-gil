@@ -1,7 +1,7 @@
-import { Calendar, CalendarRange, CalendarDays, ListChecks, Wallet, type LucideIcon } from 'lucide-react';
+import { Calendar, CalendarRange, CalendarDays, ListChecks, Wallet, Building2, type LucideIcon } from 'lucide-react';
 import { Button } from '@alsari/ui';
 
-export type VistaAgenda = 'hoy' | 'semana' | 'mes' | 'pendientes' | 'cobros';
+export type VistaAgenda = 'hoy' | 'semana' | 'mes' | 'pendientes' | 'cobros' | 'vivofacil';
 
 const TABS: { id: VistaAgenda; label: string; icon: LucideIcon }[] = [
   { id: 'hoy', label: 'Hoy', icon: Calendar },
@@ -9,6 +9,7 @@ const TABS: { id: VistaAgenda; label: string; icon: LucideIcon }[] = [
   { id: 'mes', label: 'Mes', icon: CalendarDays },
   { id: 'pendientes', label: 'Pendientes', icon: ListChecks },
   { id: 'cobros', label: 'Cobros', icon: Wallet },
+  { id: 'vivofacil', label: 'Vivofácil', icon: Building2 },
 ];
 
 // Sub-navegación de la Agenda (Clínica > Agenda). ANDAMIAJE de Fase 1: el componente
