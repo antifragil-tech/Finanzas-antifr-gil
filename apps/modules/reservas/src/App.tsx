@@ -5,6 +5,8 @@ import { AgendaNav, type VistaAgenda } from './clinica/AgendaNav';
 import { Pendientes } from './clinica/Pendientes';
 import { Cobros } from './clinica/Cobros';
 import { Vivofacil } from './clinica/Vivofacil';
+import { Clientes } from './clinica/Clientes';
+import { Bonos } from './clinica/Bonos';
 
 // Raíz del módulo Clínica/Reservas. Clínica > Agenda con sub-navegación:
 // Hoy (vista por profesional, núcleo de recepción) por defecto · Semana · Mes ·
@@ -36,6 +38,8 @@ export function ClinicaDashboard() {
         {vista === 'pendientes' && <Pendientes />}
         {vista === 'cobros' && <Cobros />}
         {vista === 'vivofacil' && <Vivofacil />}
+        {vista === 'clientes' && <Clientes />}
+        {vista === 'bonos' && <Bonos />}
       </main>
     </div>
   );
