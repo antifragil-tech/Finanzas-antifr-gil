@@ -1,15 +1,20 @@
 // ─────────────────────────────────────────────────────────────────────────────
 // Tipos canónicos del dominio Clínica/Reservas (contrato compartido).
 //
-// Reflejan 1:1 las columnas de las tablas `clinica_*` (migración Fase 1). Los
-// consumen la agenda interna, la visión cliente y la capa API. Campos en
-// snake_case (como devuelve PostgREST); fechas/horas como string ISO; nullables
-// como `| null`. Enums = uniones de string-literal alineadas con los CHECK del SQL.
+// Definen el contrato de las futuras tablas `clinica_*`. Los consumen la agenda
+// interna, la visión cliente y la capa API. Campos en snake_case (como devuelve
+// PostgREST); fechas/horas como string ISO; nullables como `| null`. Enums =
+// uniones de string-literal que fijarán los CHECK del SQL.
+//
+// GOVERNANCE: el SQL de estas tablas NO viaja en PRs de feature. Irá en el
+// baseline curado (services/supabase/baselines/antifragil_os/) o en un PR de
+// DB específico. Solo datos administrativos: nada clínico (sin diagnóstico,
+// lesión, historia clínica...).
 //
 // Fase 2 (cita, pagos, bonos, auditoría) añadirá sus tipos aquí.
 // ─────────────────────────────────────────────────────────────────────────────
 
-// ── Enums (alineados con los CHECK de la migración) ──────────────────────────
+// ── Enums (fijarán los CHECK del SQL cuando exista) ──────────────────────────
 export type RolClinica =
   | 'admin'
   | 'profesional'
@@ -64,7 +69,7 @@ export type TipoBloqueo =
   | 'baja'
   | 'otro';
 
-// ── Filas (reflejan las tablas clinica_*) ────────────────────────────────────
+// ── Filas (contrato de las futuras tablas clinica_*) ─────────────────────────
 
 export type UsuarioClinica = {
   id: string;

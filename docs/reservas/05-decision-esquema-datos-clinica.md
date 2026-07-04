@@ -3,6 +3,23 @@
 > Estado: **PROPUESTA / provisional** · pendiente de revisión en el PR de Fase 1.
 > Fecha: 2026-06-26 · Ámbito: módulo Reservas/Clínica (datos maestros, Fase 1).
 
+## ⚠️ Governance de SQL (corrección 2026-07-04)
+
+**Este PR ya NO incluye SQL.** La migración inicial
+(`services/supabase/migrations/202606261000_clinica_fase1_catalogos.sql`) se retiró
+del PR: las migraciones activas no viajan en PRs de feature. Regla en adelante:
+
+- **Cualquier SQL de Clínica** irá en el **baseline curado**
+  (`services/supabase/baselines/antifragil_os/`, como paquete revisable sin aplicar)
+  o en un **PR de DB específico**, con sus checks y runbook.
+- Este PR queda limitado a **tipos administrativos compartidos + documentación**.
+  Los tipos de `packages/types/src/clinica.ts` definen el contrato; el SQL que los
+  materialice se revisará por el canal de DB.
+- El borrador de la migración retirada queda como referencia en la historia de la
+  rama (commit `d08058d`); no debe reintroducirse en `services/supabase/migrations/`.
+- Sin datos clínicos: el modelo es administrativo-operativo (agenda, catálogos,
+  cliente administrativo). Nada de diagnóstico, lesión ni historia clínica.
+
 ## Decisión
 
 Las tablas del dominio Clínica se crean en el esquema **`public`** con **prefijo de
@@ -59,8 +76,8 @@ Ninguna de estas pérdidas afecta a funcionalidad ni a seguridad en nuestro caso
 - Menos superficie de error (un olvido de cabecera de esquema = 404 silencioso).
 
 ### 6. Reversibilidad
-**Reversible, con coste contenido**, mientras no haya datos reales (hoy: SQL sólo
-versionado, sin aplicar). Migrar `public.clinica_*` → esquema `clinica` sería
+**Reversible, con coste contenido**, mientras no haya datos reales (hoy: sin SQL en
+el PR — el borrador vive solo en la historia de la rama, sin aplicar). Migrar `public.clinica_*` → esquema `clinica` sería
 `alter table public.clinica_x set schema clinica;` por tabla + exponer el esquema +
 ajustar la cabecera en la capa API. No queda “fijado para siempre”, pero **cuanto más
 tarde** (con datos, RPCs y FKs externas) **más caro**. Por eso se documenta ahora.
