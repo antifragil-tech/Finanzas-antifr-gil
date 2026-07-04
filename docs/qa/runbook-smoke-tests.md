@@ -61,7 +61,8 @@ node scripts/qa/check-no-clinical-data.mjs apps packages  # rutas concretas
 ### d) Scope de la rama actual (antes de abrir PR)
 ```
 node scripts/qa/check-pr-scope.mjs --help
-node scripts/qa/check-pr-scope.mjs                        # compara contra main (o origin/main)
+node scripts/qa/check-pr-scope.mjs                        # perfil default (conservador)
+node scripts/qa/check-pr-scope.mjs --profile reservas     # gate por tipo de PR
 node scripts/qa/check-pr-scope.mjs --base origin/main
 ```
 
@@ -78,6 +79,57 @@ $env:QA_BASE_URL="http://localhost:3000"; node scripts/qa/smoke-routes.mjs --exp
 ```
 
 ---
+
+## 2.b Uso recomendado por tipo de PR
+
+Los detectores tienen dos modos que separan **ruido heredado** de **hallazgos del PR**:
+
+- `--changed-only` → escanea solo el delta contra `main`/`origin/main` + working tree.
+  Es el modo de **gate de PR**: un hallazgo aquí lo introdujo el PR.
+- `--baseline-known-issues` → auditoría global sin ocultar nada, pero clasificando como
+  `KNOWN LEGACY` (no bloquea) lo preexistente en rutas conocidas: legacy Alsari en `apps/**`,
+  `packages/supabase-client/src/index.ts`, `scripts/migrate_alsari_db.py`,
+  `services/python/src/alsari/alerts/**`.
+
+Y `check-pr-scope.mjs --profile <tipo>` valida que el diff encaja en el perfil del PR.
+
+**PR de Reservas:**
+```
+node scripts/qa/check-pr-scope.mjs --profile reservas
+node scripts/qa/check-no-secrets.mjs --changed-only
+node scripts/qa/check-no-clinical-data.mjs --changed-only
+```
+
+**PR de DB (baseline/A1):**
+```
+node scripts/qa/check-pr-scope.mjs --profile db
+node scripts/qa/check-no-secrets.mjs --changed-only
+node scripts/qa/check-legacy-strings.mjs --changed-only
+```
+
+**PR de docs:**
+```
+node scripts/qa/check-pr-scope.mjs --profile docs
+node scripts/qa/check-no-secrets.mjs --changed-only
+```
+
+**PR de demo (host/shell):**
+```
+node scripts/qa/check-pr-scope.mjs --profile demo
+node scripts/qa/check-no-secrets.mjs --changed-only
+node scripts/qa/check-no-clinical-data.mjs --changed-only
+```
+
+**PR de QA (esta suite):**
+```
+node scripts/qa/check-pr-scope.mjs --profile qa
+```
+
+**Auditoría global del repo (informativa, sin bloquear por legacy conocido):**
+```
+node scripts/qa/check-no-secrets.mjs --baseline-known-issues
+node scripts/qa/check-legacy-strings.mjs --baseline-known-issues
+```
 
 ## 3. Cómo interpretar los resultados
 
@@ -98,8 +150,10 @@ $env:QA_BASE_URL="http://localhost:3000"; node scripts/qa/smoke-routes.mjs --exp
 - En PRs nuevos lo que importa es el **delta**: no introducir hallazgos nuevos respecto a `main`.
 
 ### check-pr-scope
-- `OK · no se tocan rutas peligrosas` → bien.
-- `RUTAS PELIGROSAS TOCADAS` = la rama toca `.env*`, `packages/supabase-client`, `services/supabase/migrations`, `pnpm-lock.yaml`, `package.json` raíz, `apps/modules/reservas` o `apps/host` → solo válido si el PR está específicamente autorizado para ello. Código de salida 1.
+- `OK · sin rutas bloqueadas para el perfil` → bien.
+- `BLOQUEADO` = la rama toca rutas fuera de lo permitido por el perfil (`--profile docs|reservas|demo|db|qa|default`), o un bloqueo universal (`.env*`, `packages/supabase-client`, `services/supabase/migrations`, `package.json` raíz — estos no los levanta ningún perfil ni `--allow`). Código de salida 1.
+- `WARN` = archivo fuera del perfil pero no bloqueado (p. ej. `pnpm-lock.yaml` en perfil reservas): revisar a ojo, no bloquea.
+- `--allow <ruta>` autoriza explícitamente un prefijo extra (p. ej. `--profile demo --allow apps/modules/reservas/`).
 - `⚠ Aviso: no existe main…` = no puede comparar (base desactualizada o ausente); no es fallo, pero el diff mostrado puede estar incompleto.
 
 ### smoke-routes

@@ -19,6 +19,7 @@
 //   - .env.example está permitido y se ignora.
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, relative, extname, basename } from 'node:path';
 
@@ -33,9 +34,16 @@ Uso:
   node scripts/qa/check-no-secrets.mjs [rutas...] [opciones]
 
 Opciones:
-  --all     Escanea toda la raíz (por defecto ya escanea la raíz).
-  --soft    Sale con código 0 aunque haya HIGH.
-  --help    Esta ayuda.
+  --all                    Escanea toda la raíz (por defecto ya escanea la raíz).
+  --changed-only           Escanea SOLO archivos modificados contra main/origin/main
+                           más el working tree (delta del PR, no ruido heredado).
+                           Si no puede resolver main ni origin/main → aviso y código 2.
+  --baseline-known-issues  No oculta nada, pero clasifica como KNOWN LEGACY los HIGH
+                           en rutas legacy ya conocidas (supabase-client/index.ts,
+                           migrate_alsari_db.py, services/python/src/alsari/alerts/).
+                           KNOWN LEGACY no afecta al código de salida.
+  --soft                   Sale con código 0 aunque haya HIGH.
+  --help                   Esta ayuda.
 
 Detecta (enmascarado):
   JWT (eyJ........), service_role + token, SUPABASE_SERVICE(_ROLE)_KEY,
@@ -48,8 +56,22 @@ Nunca imprime el secreto completo.`);
   process.exit(0);
 }
 
-const OPT = { soft: args.includes('--soft') };
+const OPT = {
+  soft: args.includes('--soft'),
+  changedOnly: args.includes('--changed-only'),
+  baseline: args.includes('--baseline-known-issues'),
+};
 const pathArgs = args.filter((a) => !a.startsWith('-'));
+
+// Rutas de legacy YA CONOCIDO (documentadas; pendientes de rotación/limpieza).
+const KNOWN_LEGACY_PATHS = [
+  'packages/supabase-client/src/index.ts',
+  'scripts/migrate_alsari_db.py',
+  'services/python/src/alsari/alerts/',
+];
+function isKnownLegacy(rel) {
+  return KNOWN_LEGACY_PATHS.some((p) => (p.endsWith('/') ? rel.startsWith(p) : rel === p));
+}
 
 const EXCLUDE_DIRS = new Set([
   'node_modules', '.git', '.next', '.turbo', 'dist', 'build', 'coverage', '.vercel',
@@ -160,16 +182,57 @@ function scanLine(line, rel) {
   return out;
 }
 
-// Objetivos
-let targets;
-if (pathArgs.length > 0) targets = pathArgs.map((p) => resolve(process.cwd(), p));
-else targets = [ROOT];
+// --changed-only: archivos modificados contra main/origin/main + working tree.
+// Devuelve null si no puede resolver la base (no inventa).
+function changedFiles() {
+  const run = (a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' });
+  let base = null;
+  if (run(['rev-parse', '--verify', '--quiet', 'main']).status === 0) base = 'main';
+  else if (run(['rev-parse', '--verify', '--quiet', 'origin/main']).status === 0) base = 'origin/main';
+  if (!base) return null;
+  const set = new Set();
+  const d = run(['diff', '--name-only', `${base}...HEAD`]);
+  if (d.status === 0) for (const l of (d.stdout || '').split(/\r?\n/)) if (l.trim()) set.add(l.trim());
+  const st = run(['status', '--porcelain']);
+  if (st.status === 0) {
+    for (const l of (st.stdout || '').split(/\r?\n/)) {
+      if (!l) continue;
+      const p = l.slice(3).replace(/^"|"$/g, '').split(' -> ').pop();
+      if (p) set.add(p);
+    }
+  }
+  return { base, list: [...set] };
+}
 
+// Objetivos
 const files = [];
-for (const t of targets) {
-  let st; try { st = statSync(t); } catch { console.error(`! ruta no encontrada: ${t}`); continue; }
-  if (st.isDirectory()) walk(t, files);
-  else files.push(t);
+let changedBase = null;
+
+if (OPT.changedOnly) {
+  const ch = changedFiles();
+  if (!ch) {
+    console.log('=== QA check-no-secrets ===');
+    console.log('✗ --changed-only: no existe main ni origin/main en local; no se puede calcular el delta.');
+    console.log('  Haz fetch de main o corre el modo normal. No se inventa una base.');
+    process.exit(2);
+  }
+  changedBase = ch.base;
+  for (const rel of ch.list) {
+    const full = join(ROOT, rel);
+    let st; try { st = statSync(full); } catch { continue; } // borrado → no se escanea
+    if (!st.isFile()) continue;
+    if (isExcludedPath(rel)) continue;
+    files.push(full); // .env y binarios se filtran/reportan en el bucle principal
+  }
+} else {
+  let targets;
+  if (pathArgs.length > 0) targets = pathArgs.map((p) => resolve(process.cwd(), p));
+  else targets = [ROOT];
+  for (const t of targets) {
+    let st; try { st = statSync(t); } catch { console.error(`! ruta no encontrada: ${t}`); continue; }
+    if (st.isDirectory()) walk(t, files);
+    else files.push(t);
+  }
 }
 
 const findings = [];
@@ -204,12 +267,22 @@ for (const f of files) {
   }
 }
 
+// --baseline-known-issues: reclasificar HIGH en rutas legacy conocidas.
+if (OPT.baseline) {
+  for (const f of findings) {
+    if (f.sev === 'HIGH' && isKnownLegacy(f.file)) f.sev = 'KNOWN';
+  }
+}
+
 const highs = findings.filter((f) => f.sev === 'HIGH');
+const knowns = findings.filter((f) => f.sev === 'KNOWN');
 const warns = findings.filter((f) => f.sev === 'WARN');
 const infos = findings.filter((f) => f.sev === 'INFO');
 
 console.log('=== QA check-no-secrets (valores ENMASCARADOS) ===');
 console.log(`Raíz: ${ROOT} · archivos: ${files.length}`);
+if (OPT.changedOnly) console.log(`Modo: changed-only (delta contra ${changedBase} + working tree)`);
+if (OPT.baseline) console.log('Modo: baseline-known-issues (legacy conocido clasificado aparte, no bloquea)');
 console.log('');
 
 if (highs.length === 0) {
@@ -219,6 +292,14 @@ if (highs.length === 0) {
   for (const h of highs) {
     const loc = h.line ? `${h.file}:${h.line}` : h.file;
     console.log(`  ${loc}  [${h.type}]  ${h.masked}`);
+  }
+}
+if (knowns.length > 0) {
+  console.log('');
+  console.log('KNOWN LEGACY (preexistente en rutas conocidas — no bloquea; pendiente de rotación/limpieza):');
+  for (const k of knowns) {
+    const loc = k.line ? `${k.file}:${k.line}` : k.file;
+    console.log(`  ${loc}  [${k.type}]  ${k.masked}`);
   }
 }
 if (warns.length > 0) {
@@ -231,6 +312,6 @@ if (infos.length > 0) {
   console.log(`(INFO · ${infos.length} menciones sin valor real — placeholders / nombres de rol / prosa)`);
 }
 console.log('');
-console.log(`--- TOTAL HIGH: ${highs.length} · WARN: ${warns.length} · INFO: ${infos.length} ---`);
+console.log(`--- TOTAL HIGH: ${highs.length} · KNOWN LEGACY: ${knowns.length} · WARN: ${warns.length} · INFO: ${infos.length} ---`);
 
 process.exit(OPT.soft ? 0 : highs.length > 0 ? 1 : 0);

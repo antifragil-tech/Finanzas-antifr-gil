@@ -15,6 +15,7 @@
 //   1 — términos clínicos en código/mocks/producto (apps/, packages/, services/, scripts/).
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, relative, extname } from 'node:path';
 
@@ -29,8 +30,11 @@ Uso:
   node scripts/qa/check-no-clinical-data.mjs [rutas...] [opciones]
 
 Opciones:
-  --soft      Sale con código 0 aunque haya hallazgos en código.
-  --help, -h  Esta ayuda.
+  --changed-only  Escanea SOLO archivos modificados contra main/origin/main más el
+                  working tree (delta del PR, no ruido heredado).
+                  Si no puede resolver main ni origin/main → aviso y código 2.
+  --soft          Sale con código 0 aunque haya hallazgos en código.
+  --help, -h      Esta ayuda.
 
 Términos vigilados (con y sin tilde):
   diagnóstico, lesión, dolor, medicación, tratamiento, evolución,
@@ -46,7 +50,10 @@ No modifica ningún archivo. No imprime datos de pacientes (solo archivo:línea 
   process.exit(0);
 }
 
-const OPT = { soft: args.includes('--soft') };
+const OPT = {
+  soft: args.includes('--soft'),
+  changedOnly: args.includes('--changed-only'),
+};
 const pathArgs = args.filter((a) => !a.startsWith('-'));
 
 // \b no funciona bien con tildes/ñ: usamos límites propios (inicio/fin o no-letra).
@@ -129,15 +136,57 @@ function looksBinary(buf) {
   return false;
 }
 
-let targets;
-if (pathArgs.length > 0) targets = pathArgs.map((p) => resolve(process.cwd(), p));
-else targets = [ROOT];
+// --changed-only: archivos modificados contra main/origin/main + working tree.
+// Devuelve null si no puede resolver la base (no inventa).
+function changedFiles() {
+  const run = (a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' });
+  let base = null;
+  if (run(['rev-parse', '--verify', '--quiet', 'main']).status === 0) base = 'main';
+  else if (run(['rev-parse', '--verify', '--quiet', 'origin/main']).status === 0) base = 'origin/main';
+  if (!base) return null;
+  const set = new Set();
+  const d = run(['diff', '--name-only', `${base}...HEAD`]);
+  if (d.status === 0) for (const l of (d.stdout || '').split(/\r?\n/)) if (l.trim()) set.add(l.trim());
+  const st = run(['status', '--porcelain']);
+  if (st.status === 0) {
+    for (const l of (st.stdout || '').split(/\r?\n/)) {
+      if (!l) continue;
+      const p = l.slice(3).replace(/^"|"$/g, '').split(' -> ').pop();
+      if (p) set.add(p);
+    }
+  }
+  return { base, list: [...set] };
+}
 
 const files = [];
-for (const t of targets) {
-  let st; try { st = statSync(t); } catch { console.error(`! ruta no encontrada: ${t}`); continue; }
-  if (st.isDirectory()) walk(t, files);
-  else files.push(t);
+let changedBase = null;
+
+if (OPT.changedOnly) {
+  const ch = changedFiles();
+  if (!ch) {
+    console.log('=== QA check-no-clinical-data ===');
+    console.log('✗ --changed-only: no existe main ni origin/main en local; no se puede calcular el delta.');
+    console.log('  Haz fetch de main o corre el modo normal. No se inventa una base.');
+    process.exit(2);
+  }
+  changedBase = ch.base;
+  for (const rel of ch.list) {
+    const full = join(ROOT, rel);
+    let st; try { st = statSync(full); } catch { continue; } // borrado → no se escanea
+    if (!st.isFile()) continue;
+    if (BINARY_EXT.has(extname(rel).toLowerCase())) continue;
+    if (isExcludedPath(rel)) continue;
+    files.push(full);
+  }
+} else {
+  let targets;
+  if (pathArgs.length > 0) targets = pathArgs.map((p) => resolve(process.cwd(), p));
+  else targets = [ROOT];
+  for (const t of targets) {
+    let st; try { st = statSync(t); } catch { console.error(`! ruta no encontrada: ${t}`); continue; }
+    if (st.isDirectory()) walk(t, files);
+    else files.push(t);
+  }
 }
 
 const fails = [];
@@ -161,6 +210,7 @@ for (const f of files) {
 
 console.log('=== QA check-no-clinical-data ===');
 console.log(`Raíz: ${ROOT} · archivos escaneados: ${files.length}`);
+if (OPT.changedOnly) console.log(`Modo: changed-only (delta contra ${changedBase} + working tree)`);
 console.log('');
 
 if (fails.length === 0 && reviews.length === 0) {

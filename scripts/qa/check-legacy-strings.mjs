@@ -17,6 +17,7 @@
 // Código de salida: 0 si no hay hallazgos; 1 si hay hallazgos (salvo --soft).
 
 import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, resolve, relative, extname } from 'node:path';
 
@@ -31,10 +32,16 @@ Uso:
   node scripts/qa/check-legacy-strings.mjs [rutas...] [opciones]
 
 Opciones:
-  --all           Escanea toda la raíz del repo.
-  --include-docs  Incluye docs/ en el escaneo.
-  --soft          Sale con código 0 aunque haya hallazgos.
-  --help, -h      Esta ayuda.
+  --all                    Escanea toda la raíz del repo.
+  --include-docs           Incluye docs/ en el escaneo.
+  --changed-only           Escanea SOLO archivos modificados contra main/origin/main
+                           más el working tree (delta del PR, no ruido heredado).
+                           Si no puede resolver main ni origin/main → aviso y código 2.
+  --baseline-known-issues  No oculta nada, pero clasifica como KNOWN LEGACY los
+                           hallazgos en rutas legacy ya conocidas (apps/** y las rutas
+                           documentadas). KNOWN LEGACY no afecta al código de salida.
+  --soft                   Sale con código 0 aunque haya hallazgos.
+  --help, -h               Esta ayuda.
 
 Términos detectados:
   Alsari, Pavier, Armia, Rialsa, alsari.net,
@@ -48,6 +55,8 @@ No modifica ningún archivo.`);
 const OPT = {
   all: args.includes('--all'),
   includeDocs: args.includes('--include-docs'),
+  changedOnly: args.includes('--changed-only'),
+  baseline: args.includes('--baseline-known-issues'),
   soft: args.includes('--soft'),
 };
 const pathArgs = args.filter((a) => !a.startsWith('-'));
@@ -119,22 +128,78 @@ function looksBinary(buf) {
   return false;
 }
 
-// Determinar objetivos
-let targets;
-if (pathArgs.length > 0) {
-  targets = pathArgs.map((p) => resolve(process.cwd(), p));
-} else if (OPT.all) {
-  targets = [ROOT];
-} else {
-  targets = [join(ROOT, 'apps')];
+// --changed-only: lista de archivos modificados contra main/origin/main + working tree.
+// Devuelve null si no puede resolver la base (no inventa).
+function changedFiles() {
+  const run = (a) => spawnSync('git', a, { cwd: ROOT, encoding: 'utf8' });
+  let base = null;
+  if (run(['rev-parse', '--verify', '--quiet', 'main']).status === 0) base = 'main';
+  else if (run(['rev-parse', '--verify', '--quiet', 'origin/main']).status === 0) base = 'origin/main';
+  if (!base) return null;
+  const set = new Set();
+  const d = run(['diff', '--name-only', `${base}...HEAD`]);
+  if (d.status === 0) for (const l of (d.stdout || '').split(/\r?\n/)) if (l.trim()) set.add(l.trim());
+  const st = run(['status', '--porcelain']);
+  if (st.status === 0) {
+    for (const l of (st.stdout || '').split(/\r?\n/)) {
+      if (!l) continue;
+      const p = l.slice(3).replace(/^"|"$/g, '').split(' -> ').pop();
+      if (p) set.add(p);
+    }
+  }
+  return { base, list: [...set] };
 }
 
-const files = [];
-for (const t of targets) {
-  let st;
-  try { st = statSync(t); } catch { console.error(`! ruta no encontrada: ${t}`); continue; }
-  if (st.isDirectory()) walk(t, files);
-  else files.push(t);
+// Determinar objetivos
+let targets;
+let files = [];
+let changedBase = null;
+
+if (OPT.changedOnly) {
+  const ch = changedFiles();
+  if (!ch) {
+    console.log('=== QA check-legacy-strings ===');
+    console.log('✗ --changed-only: no existe main ni origin/main en local; no se puede calcular el delta.');
+    console.log('  Haz fetch de main o corre el modo normal. No se inventa una base.');
+    process.exit(2);
+  }
+  changedBase = ch.base;
+  targets = [];
+  for (const rel of ch.list) {
+    const full = join(ROOT, rel);
+    let st; try { st = statSync(full); } catch { continue; } // borrado → no se escanea
+    if (!st.isFile()) continue;
+    if (BINARY_EXT.has(extname(rel).toLowerCase())) continue;
+    if (isExcludedPath(rel)) continue;
+    files.push(full);
+  }
+} else {
+  if (pathArgs.length > 0) {
+    targets = pathArgs.map((p) => resolve(process.cwd(), p));
+  } else if (OPT.all) {
+    targets = [ROOT];
+  } else {
+    targets = [join(ROOT, 'apps')];
+  }
+  for (const t of targets) {
+    let st;
+    try { st = statSync(t); } catch { console.error(`! ruta no encontrada: ${t}`); continue; }
+    if (st.isDirectory()) walk(t, files);
+    else files.push(t);
+  }
+}
+
+// Rutas de legacy YA CONOCIDO (auditadas y pendientes de limpieza/rebranding).
+// Con --baseline-known-issues los hallazgos aquí se clasifican KNOWN LEGACY (no bloquean).
+const KNOWN_LEGACY_PATHS = [
+  'packages/supabase-client/src/index.ts',
+  'scripts/migrate_alsari_db.py',
+  'services/python/src/alsari/alerts/',
+];
+function isKnownLegacy(rel) {
+  if (KNOWN_LEGACY_PATHS.some((p) => (p.endsWith('/') ? rel.startsWith(p) : rel === p))) return true;
+  if (rel.startsWith('apps/')) return true; // legacy Alsari/Pavier/Armia/Rialsa en apps: pendiente del PR de rebranding
+  return false;
 }
 
 const findings = [];
@@ -146,15 +211,17 @@ for (const f of files) {
   if (looksBinary(buf)) continue;
   const text = buf.toString('utf8');
   const lines = text.split(/\r?\n/);
+  const rel = relative(ROOT, f).replace(/\\/g, '/');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     for (const t of TERMS) {
       if (t.re.test(line)) {
         findings.push({
-          file: relative(ROOT, f).replace(/\\/g, '/'),
+          file: rel,
           line: i + 1,
           term: t.label,
           snippet: line.trim().slice(0, 160),
+          known: OPT.baseline && isKnownLegacy(rel),
         });
         perTerm[t.label]++;
       }
@@ -163,24 +230,37 @@ for (const f of files) {
 }
 
 // Reporte
+const fresh = findings.filter((f) => !f.known);
+const known = findings.filter((f) => f.known);
+
 console.log('=== QA check-legacy-strings ===');
 console.log(`Raíz: ${ROOT}`);
-console.log(`Objetivos: ${targets.map((t) => relative(ROOT, t) || '.').join(', ')}`);
+if (OPT.changedOnly) console.log(`Modo: changed-only (delta contra ${changedBase} + working tree)`);
+else console.log(`Objetivos: ${targets.map((t) => relative(ROOT, t) || '.').join(', ')}`);
+if (OPT.baseline) console.log('Modo: baseline-known-issues (legacy conocido clasificado aparte, no bloquea)');
 console.log(`Archivos escaneados: ${files.length}`);
 console.log('');
 
 if (findings.length === 0) {
   console.log('OK · 0 strings legacy encontradas.');
 } else {
-  for (const fnd of findings) {
-    console.log(`${fnd.file}:${fnd.line}  [${fnd.term}]  ${fnd.snippet}`);
+  if (fresh.length > 0) {
+    console.log(OPT.baseline ? '!! HALLAZGOS NUEVOS (no clasificados como legacy conocido):' : '!! HALLAZGOS:');
+    for (const fnd of fresh) console.log(`  ${fnd.file}:${fnd.line}  [${fnd.term}]  ${fnd.snippet}`);
+    console.log('');
   }
-  console.log('');
+  if (known.length > 0) {
+    console.log(`KNOWN LEGACY (${known.length} hallazgos preexistentes en rutas conocidas — no bloquean, pendientes de rebranding/limpieza):`);
+    const byFile = new Map();
+    for (const k of known) byFile.set(k.file, (byFile.get(k.file) || 0) + 1);
+    for (const [file, n] of byFile) console.log(`  ${file}  (${n})`);
+    console.log('');
+  }
   console.log('--- Resumen por término ---');
   for (const [term, n] of Object.entries(perTerm)) {
     if (n > 0) console.log(`  ${term.padEnd(22)} ${n}`);
   }
-  console.log(`--- TOTAL: ${findings.length} hallazgos en ${new Set(findings.map((f) => f.file)).size} archivos ---`);
+  console.log(`--- TOTAL: ${findings.length} hallazgos (${fresh.length} nuevos · ${known.length} KNOWN LEGACY) en ${new Set(findings.map((f) => f.file)).size} archivos ---`);
 }
 
-process.exit(OPT.soft ? 0 : findings.length > 0 ? 1 : 0);
+process.exit(OPT.soft ? 0 : fresh.length > 0 ? 1 : 0);
