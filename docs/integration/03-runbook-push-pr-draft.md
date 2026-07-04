@@ -1,7 +1,8 @@
 # 03 · Runbook — subir una rama y abrir un PR Draft (paso a paso)
 
 > Plan maestro de integración — Antifrágil OS
-> Autor: Chat 4 (Integration PM documental) · Fecha: 2026-06-30
+> Autor: Chat 4 (Integration PM documental) · Fecha original: 2026-06-30
+> **Actualizado: 2026-07-04 por Chat 5.** Nota: las ramas de los PRs #1–#8 ya están subidas; este runbook aplica a las ramas que aún no tienen PR (`docs/finanzas-modelo-operativo`, `chore/financiero-copy-antifragil`) y a las futuras piezas 5a–5d del demo.
 > Pensado para **alguien no experto**. Copia y pega los comandos **en orden** y lee la salida antes de seguir.
 > Este runbook **solo sube ramas y abre PR Draft**. **No** mergea, **no** rebasa, **no** toca `main`.
 
@@ -103,7 +104,7 @@ Ejemplo:
 ```
 gh pr create --draft --base main --head feat/reservas-agenda-hoy \
   --title "feat(reservas): módulo Agenda Hoy por profesional (canónico)" \
-  --body "Módulo @alsari/reservas. Ver docs/integration/01-orden-prs.md (PR 4)."
+  --body "Módulo @alsari/reservas. Ver docs/integration/01-orden-prs.md (paso 4, PR #5)."
 ```
 
 - `--draft` → el PR queda **en borrador**: visible y revisable, pero **no mergeable** por accidente.

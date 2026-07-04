@@ -1,7 +1,8 @@
 # 02 · Matriz de conflictos y estrategia de resolución
 
 > Plan maestro de integración — Antifrágil OS
-> Autor: Chat 4 (Integration PM documental) · Fecha: 2026-06-30
+> Autor: Chat 4 (Integration PM documental) · Fecha original: 2026-06-30
+> **Actualizado: 2026-07-04 por Chat 5** — numeración alineada con los PRs reales de GitHub (reservas = **PR #5**, demo = **PR #3**, baseline = **PR #4**, clínica = **PR #2**; las piezas del demo se llaman 5a–5d).
 
 ## Principios (no negociables)
 
@@ -13,12 +14,12 @@
 
 | Archivo | Quién lo toca | Severidad | ¿Conflicto real? | Estrategia / orden correcto |
 |---|---|---|---|---|
-| `apps/modules/reservas/src/App.tsx` | Chat1 (43 líneas) vs demo (26 = **ancestro**) | Media | **No**, si orden correcto | Integrar PR 4 (Chat 1) primero; demo no aporta cambios sobre la base → gana Chat 1 |
+| `apps/modules/reservas/src/App.tsx` | Chat1 (43 líneas) vs demo (26 = **ancestro**) | Media | **No**, si orden correcto | Integrar PR #5 (Chat 1) primero; demo no aporta cambios sobre la base → gana Chat 1 |
 | `apps/modules/reservas/src/spike/CalendarioSpike.tsx` | Chat1 (454) vs demo (511 = **ancestro**) | Media | **No**, si orden correcto | Igual que arriba → gana Chat 1 |
 | `apps/modules/reservas/src/clinica/**` (5 ficheros) | solo Chat 1 | Baja | No | Aditivo |
-| `apps/modules/reservas/**` (resto: index.css, mockData, estados, CitaModal, MonthResumen, config) | Chat1 y demo (idénticos al spike o evolucionados por Chat1) | Baja | No | Tomar la versión de PR 4 (Chat 1) |
+| `apps/modules/reservas/**` (resto: index.css, mockData, estados, CitaModal, MonthResumen, config) | Chat1 y demo (idénticos al spike o evolucionados por Chat1) | Baja | No | Tomar la versión de PR #5 (Chat 1) |
 | `pnpm-lock.yaml` | Chat1 (commit `d7ef6e0`) + demo (+75) | **Alta** | **Sí** (lockfile) | **Regenerar** con `pnpm install` (ver §Lockfile). Nunca a mano |
-| `apps/host/package.json` | solo demo (`+@alsari/reservas`) | Baja | No | Requiere que PR 4 ya esté en `main` |
+| `apps/host/package.json` | solo demo (`+@alsari/reservas`) | Baja | No | Requiere que PR #5 ya esté en `main` |
 | `apps/host/next.config.ts` | solo demo (`transpilePackages += reservas`) | Baja | No | Mantener en PR 5a. Nota: ya lista `@alsari/proyectos` (referencia colgante, no existe módulo) |
 | `apps/host/src/app/(app)/page.tsx` | solo demo (reescrito) | Media | No (entre ramas) | Verificar gating anti-producción en PR 5c/5d |
 | `apps/host/src/middleware.ts` | solo demo (guarda demo) | **Alta (producción)** | No (entre ramas) | Revisar a fondo: la guarda retorna antes solo si `ANTIFRAGIL_DEMO_MODE && NODE_ENV≠production` |
@@ -42,8 +43,8 @@
 **Resumen: no hay conflicto de contenido real.** El spike `4d6dc7f` es la merge-base de Chat 1 y de demo, y **demo dejó los ficheros de reservas sin cambios respecto a esa base**. En un three-way merge, git ve que solo Chat 1 modificó esos ficheros → los toma sin pelea.
 
 ### Receta recomendada (orden que evita el conflicto)
-1. **Integrar PR 4 (`feat/reservas-agenda-hoy`) primero.** `main` queda con el módulo canónico (App 43, CalendarioSpike 454, `clinica/` con 5 ficheros).
-2. **Preparar la rama demo sobre el nuevo `main`.** Como el commit spike `4d6dc7f` ya está upstream (es ancestro de PR 4), desaparece de la aportación de demo. Los commits de demo **no tocan reservas**, así que la copia vieja **se va sola**.
+1. **Integrar PR #5 (`feat/reservas-agenda-hoy`) primero.** `main` queda con el módulo canónico (App 43, CalendarioSpike 454, `clinica/` con 5 ficheros).
+2. **Preparar la rama demo sobre el nuevo `main`.** Como el commit spike `4d6dc7f` ya está upstream (es ancestro de PR #5), desaparece de la aportación de demo. Los commits de demo **no tocan reservas**, así que la copia vieja **se va sola**.
 3. **Resultado:** demo deja de transportar `apps/modules/reservas`; lo consume vía `apps/host/package.json` + `next.config.ts` + `ReservasClient.tsx` (PR 5a).
 
 ### Si aparece un marcador de conflicto en `apps/modules/reservas/**`
@@ -73,7 +74,7 @@
 5. Verificar que **no** quedan marcadores `<<<<<<<`/`=======`/`>>>>>>>`.
 
 ### Notas
-- El delta de lockfile de demo es **redundante** una vez PR 4 está en `main` (misma dependencia `@daypilot/daypilot-lite-react`).
+- El delta de lockfile de demo es **redundante** una vez PR #5 está en `main` (misma dependencia `@daypilot/daypilot-lite-react`).
 - Si `pnpm install` propusiera cambios inesperados de versiones, **parar y revisar** (puede indicar un `package.json` mal mergeado).
 - **No** usar `--frozen-lockfile` para regenerar (eso es para CI de verificación, no para resolver).
 
@@ -82,13 +83,16 @@
 ## Orden correcto global para minimizar conflictos
 
 ```
-1. docs (finanzas)                  → sin colisión
-2. chore/financiero-copy            → aislado
-3. feat/reservas-agenda-hoy (PR4)   → canónico, GATE
-4. demo partido (PR5a→5d)           → tras reservas; la copia spike se descarta sola
-5. chore/db-baseline (PR6)          → ruta nueva, additive
-6. clinica tipos (PR7)              → tras baseline; SQL reubicado
-   (rebranding y supabase-client    → diferidos)
+1. governance (PR #7)                → solo docs, marco de proceso
+2. qa smoke suite (PR #6)            → gate de calidad, antes que el código
+3. lessons (PR #8, opcional)         → solo docs
+4. feat/reservas-agenda-hoy (PR #5)  → canónico, GATE de reservas
+5. chore/financiero-copy             → aislado (copy visible)
+6. docs finanzas (modelo + PR #1)    → sin colisión
+7. chore/db-baseline (PR #4)         → ruta nueva, additive, NO APPLY
+8. clinica tipos (PR #2 corregido)   → tras baseline; SQL reubicado
+9. demo partido (piezas 5a→5d)       → tras reservas; la copia spike se descarta sola
+   (rebranding global y supabase-client → diferidos)
 ```
 
 Tras **cada** paso: `pnpm install` (si tocó deps) + lint + type-check + build host (ver `04-checklist-merge.md`).

@@ -1,7 +1,8 @@
 # 04 · Checklist universal antes de cualquier merge
 
 > Plan maestro de integración — Antifrágil OS
-> Autor: Chat 4 (Integration PM documental) · Fecha: 2026-06-30
+> Autor: Chat 4 (Integration PM documental) · Fecha original: 2026-06-30
+> **Actualizado: 2026-07-04 por Chat 5** — referencias alineadas con los PRs reales de GitHub.
 > Aplica a **todo** PR antes de integrarse a `main`. Si **un** ítem falla → **no se mergea**.
 
 ## A. Coordinación (por el `.git` compartido)
@@ -17,8 +18,8 @@
 - [ ] **Sin `.env`** ni `.env.local` (solo se admite `.env.example`).
 - [ ] **Sin claves/secretos** (service_role, anon key hardcodeada, JWT largos, passwords, private keys).
 - [ ] **Sin datos reales** (clientes, IBAN, CIF, nombres reales). Solo mock/demo.
-- [ ] **`packages/supabase-client` NO tocado** (salvo que sea el PR 9 específico, hoy diferido).
-- [ ] **Rebranding `@alsari/*` NO incluido** (salvo PR 8 específico, hoy diferido).
+- [ ] **`packages/supabase-client` NO tocado** (salvo el futuro PR específico del paso 12, hoy diferido).
+- [ ] **Rebranding `@alsari/*` NO incluido** (salvo el futuro PR de rebrand global del paso 11, hoy diferido).
 
 ## C. Calidad (ejecutar y que pasen)
 
@@ -41,7 +42,7 @@
 
 - [ ] **Sin Supabase real** tocado.
 - [ ] **Sin SQL aplicado** (las migraciones/baseline son ficheros versionados, no ejecutados).
-- [ ] Si el PR es el baseline (PR 6): diff solo bajo `services/supabase/baselines/antifragil_os/`; `SECURITY_CHECKLIST.md` revisado.
+- [ ] Si el PR es el baseline (PR #4): diff solo bajo `services/supabase/baselines/antifragil_os/`; `SECURITY_CHECKLIST.md` revisado; marca **NO APPLY** respetada.
 
 ## F. Lockfile
 

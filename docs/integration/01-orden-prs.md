@@ -1,144 +1,122 @@
-# 01 · Plan de PRs accionable
+# 01 · Orden de integración de PRs (accionable)
 
 > Plan maestro de integración — Antifrágil OS
-> Autor: Chat 4 (Integration PM documental) · Fecha: 2026-06-30
-> Todos los PR se abren **contra `main`** y **como Draft** salvo que se indique lo contrario.
-> Ninguna instrucción de este documento autoriza `merge`, `push --force`, `rebase` ni tocar `main` directamente.
+> Autor: Chat 4 (Integration PM documental) · Fecha original: 2026-06-30
+> **Actualizado: 2026-07-04 por Chat 5 (Integration PM)** — renumerado con los **PRs reales de GitHub** y reordenado según el estado verificado de cada rama.
+> Todos los PR van **contra `main`** y **en Draft** hasta cumplir el checklist de `04-checklist-merge.md`. Ninguna instrucción de este documento autoriza `merge`, `push --force`, `rebase` ni tocar `main` directamente.
 
-## Orden lineal exacto (resumen)
+## Orden lineal (resumen ejecutivo)
 
-| # | Rama origen | Destino | Draft | Mergeable | Bloqueado por |
+| Paso | PR / pieza | Rama origen | Estado hoy | Bloqueado por | Por qué en este punto |
 |---|---|---|---|---|---|
-| 1 | `docs/finanzas-modelo-operativo` | `main` | sí | **sí** | — |
-| 2 | `docs/finanzas-facturacion-emitida-design` | `main` | sí | sí | reconciliar con `origin` |
-| 3 | `chore/financiero-copy-antifragil` | `main` | sí | sí | — |
-| 4 | `feat/reservas-agenda-hoy` | `main` | sí | **sí (gate reservas)** | — |
-| 5 | `demo/*` (partido, ver §Demo) | `main` | sí | tras partir | **#4** |
-| 6 | `chore/db-baseline-antifragil-os` | `main` | sí | sí (additive, sin aplicar SQL) | — |
-| 7 | `feat/clinica-fase1-catalogos` (solo tipos) | `main` | sí | tipos sí · SQL no | **#6** |
-| 8 | *Rebranding `@alsari/*`* | `main` | — | **diferido** | decisión |
-| 9 | *`packages/supabase-client` + proyecto Supabase* | `main` | — | **diferido** | decisión |
+| 1 | **PR #7 Governance** | `docs/project-governance-antifragil-os` | Draft, listo para revisión final | — | Define el marco (proceso de PRs, compliance) que gobierna todos los merges posteriores |
+| 2 | **PR #6 QA** | `qa/smoke-suite-antifragil-os` | Draft | #7 (marco) | La suite QA debe estar en `main` **antes** de usarla como gate de los PRs de código |
+| 3 | **PR #8 Lessons** (opcional) | `docs/lessons-governance-session` | Draft | #7 | Documenta la sesión de governance; puede ir en cualquier momento tras #7 |
+| 4 | **PR #5 Reservas** | `feat/reservas-agenda-hoy` | Draft / NO MERGE | #6 (gate QA) | Primer PR de código; versión **canónica** de reservas. Quitar NO MERGE solo tras pasar QA |
+| 5 | **Rebrand visible** | `chore/financiero-copy-antifragil` | sin PR (falta push) | — | 4 líneas de copy, aislado; puede intercalarse en cualquier hueco |
+| 6 | **Finanzas: modelo operativo** | `docs/finanzas-modelo-operativo` | sin PR (falta push) | — | Solo `docs/finanzas/`; base conceptual del doc de facturación |
+| 7 | **PR #1 Facturación emitida** | `docs/finanzas-facturacion-emitida-design` | **OPEN (no Draft)** | conceptualmente #6 del paso anterior | Solo docs; construye sobre el modelo operativo |
+| 8 | **PR #4 DB baseline** | `chore/db-baseline-antifragil-os` | Draft / **NO APPLY** | — | Additive (ruta nueva); se mergean **ficheros**, jamás se aplica SQL en esta fase |
+| 9 | **PR #2 Clínica** (corregido) | `feat/clinica-fase1-catalogos` | Draft, **fuera de patrón** | #4 + corrección de alcance | Solo tipos (`packages/types`); el SQL activo debe salir del PR y reflejarse en el baseline |
+| 10 | **Demo partido (5a→5d)** | subconjuntos de `demo/local-antifragil-os` (PR #3) | Draft / NO MERGE | #5 en `main` | El demo entero NO se mergea; se parte en 4 piezas revisables. PR #3 se cierra sin merge al terminar |
+| 11 | **Rebrand global `@alsari/*`** | (futura) | **DIFERIDO** | decisión + todo lo anterior estable | Transversal a 11 paquetes; un único PR coordinado, nunca a medias |
+| 12 | **`packages/supabase-client` + Supabase nuevo** | (futura) | **DIFERIDO** | baseline aplicado + decisión + rotación anon key | Afecta a todos los módulos; requiere proyecto Supabase nuevo decidido |
 
-> Regla de oro: **un PR integrado a la vez**. Tras cada merge, regenerar lockfile (`pnpm install`) y revalidar (ver `04-checklist-merge.md`).
-
----
-
-## Bloque DOCS
-
-### PR 1 — Finanzas: modelo operativo
-- **Rama origen:** `docs/finanzas-modelo-operativo` → **destino:** `main`
-- **Título:** `docs(finanzas): modelo operativo + backlog + FOP A1 (docs 00–06)`
-- **Descripción:** Documentación de finanzas operativas (auditoría base, modelo conceptual, plan Fase 2, mapa/gaps, backlog, FOP A1 efectivo/banco/arqueo). Solo `docs/finanzas/`.
-- **Draft:** sí · **Mergeable:** sí · **Bloqueos:** ninguno.
-- **Checklist antes de merge:** diff solo bajo `docs/finanzas/`; sin secretos; cerrar `docs/finanzas-contabilidad-antifragil-audit` como subsumida.
-
-### PR 2 — Finanzas: facturación emitida (diseño)
-- **Rama origen:** `docs/finanzas-facturacion-emitida-design` → **destino:** `main`
-- **Título:** `docs(finanzas): diseño de facturación emitida + fiscalidad clínica`
-- **Descripción:** Diseño doc 02 facturación emitida. Solo `docs/finanzas/`.
-- **Draft:** sí · **Mergeable:** sí · **Bloqueos:** ⚠️ **el local (`6767680`) diverge de `origin` (`aa56c90`)** — reconciliar antes de abrir PR (ver `03-matriz-conflictos.md` y `03-runbook`).
-- **Checklist antes de merge:** confirmar qué commit es el bueno; diff solo `docs/finanzas/`.
+> Regla de oro: **un PR integrado a la vez**. Tras cada merge que toque deps, regenerar lockfile (`pnpm install`) y revalidar (ver `04-checklist-merge.md`).
 
 ---
 
-## Bloque RESERVAS
+## Justificación de dependencias
 
-### PR 4 — Módulo reservas canónico (Chat 1)
-- **Rama origen:** `feat/reservas-agenda-hoy` → **destino:** `main`
-- **Título:** `feat(reservas): módulo Agenda Hoy por profesional (versión canónica)`
-- **Descripción:** Módulo `@alsari/reservas`: Agenda Hoy (columnas por profesional), sub-nav Semana/Mes/Pendientes, badges de estado, panel lateral de cita, mock de partners. Es la **versión canónica** del módulo reservas; sustituye al spike.
-- **Draft:** sí · **Mergeable:** **sí — este es el gate**: todo lo de reservas en host depende de que este módulo exista en `main`.
-- **Bloqueos:** ninguno. Archivar `feat/reservas-calendario-semana` tras integrar.
-- **Checklist antes de merge:** `pnpm --filter @alsari/reservas type-check` y `dev` ok; lockfile regenerado; sin tocar host.
-
----
-
-## Bloque DEMO (partido — **NO mergear la rama entera**)
-
-`demo/local-antifragil-os` se integra **partida en piezas** y **después del PR 4**. Excluir **todo** `apps/modules/reservas/**` (viene de PR 4). Ver detalle en §8 de `02-matriz-conflictos.md`.
-
-### PR 5a — Cableado host de reservas
-- **Origen:** subconjunto de `demo/*` · **Destino:** `main` · **Draft:** sí · **Bloqueado por:** PR 4
-- **Título:** `feat(host): montar módulo reservas en el host (ssr:false)`
-- **Archivos:** `apps/host/next.config.ts` (`transpilePackages += @alsari/reservas`), `apps/host/package.json` (dep `@alsari/reservas`), `apps/host/src/app/(app)/reservas/page.tsx` + `error.tsx`, `apps/host/src/components/ReservasClient.tsx`.
-- **Checklist:** ruta `/reservas` monta con `next/dynamic({ssr:false})` sin error de `window`; lockfile regenerado.
-
-### PR 5b — Demo shell + Panel de Dirección + pantallas mock
-- **Origen:** subconjunto de `demo/*` · **Destino:** `main` · **Draft:** sí · **Bloqueado por:** PR 5a
-- **Título:** `feat(demo): cascarón operativo + Panel de Dirección + pantallas mock`
-- **Archivos:** `apps/host/src/components/demo/**` (DemoShell/Sidebar/Topbar/demoNav, panel/*, screens/*, mock/demoData.ts), `apps/host/src/lib/demo.ts`.
-- **Checklist:** todo bajo `components/demo/**` + `lib/demo.ts`; sin datos reales.
-
-### PR 5c — Gating demo (sin romper producción)
-- **Origen:** subconjunto de `demo/*` · **Destino:** `main` · **Draft:** sí · **Bloqueado por:** PR 5b
-- **Título:** `feat(demo): gating ANTIFRAGIL_DEMO_MODE con doble guarda anti-producción`
-- **Archivos:** guarda en `apps/host/src/middleware.ts`, swap en `apps/host/src/app/(app)/layout.tsx`, `BootScreen.tsx`, `LoginForm.tsx`, `EnConstruccion.tsx`, `.env.example` (documentación de la flag).
-- **Checklist crítico:** **sin** `ANTIFRAGIL_DEMO_MODE`, el host se comporta **idéntico a `main`** (auth real intacta); la flag se ignora si `NODE_ENV=production`.
-
-### PR 5d — Rutas secundarias mock (Fase 4)
-- **Origen:** subconjunto de `demo/*` · **Destino:** `main` · **Draft:** sí · **Bloqueado por:** PR 5c
-- **Título:** `feat(demo): rutas secundarias mock del OS`
-- **Archivos:** `apps/host/src/app/(app)/page.tsx`, `configuracion/`, `rentabilidad/`, y los wrappers placeholder de `contabilidad/facturas/financiero/presupuestos`.
-- **Checklist:** todas las rutas devuelven 200 en demo y muestran "DATOS DE DEMOSTRACIÓN"; sin legacy visible.
-
-> **Por qué partido:** demo mezcla (a) copia vieja de reservas — se descarta, (b) cableado host, (c) shell/panel, (d) gating, (e) rutas mock. Partirlo permite revisar el gating anti-producción por separado y evita arrastrar la copia del spike.
+- **#7 antes que todo:** governance define el proceso de merge, el scope de compliance y las reglas de PR. Mergear código antes de acordar el proceso invierte el orden lógico.
+- **#6 antes que cualquier PR de código:** la smoke suite (perfiles + changed-only) es el gate objetivo. Si QA no está en `main`, los gates de los pasos 4, 9 y 10 no son ejecutables desde `main`.
+- **#5 antes que el demo partido:** el demo consume el módulo reservas vía host. Si el demo (o su pieza 5a) entra antes, reintroduce la copia vieja del spike o referencia un paquete inexistente en `main`. Detalle en `02-matriz-conflictos.md`.
+- **#4 antes que #2:** la decisión D4 (baseline curado, no migraciones activas) implica que el esquema clínica vive en el baseline. PR #2 debe reescribir su alcance a solo-tipos y dejar que el baseline absorba los catálogos.
+- **Pasos 5–8 son paralelos entre sí** (docs y copy aislados, rutas disjuntas): el orden relativo entre ellos es de conveniencia, no de dependencia. Se listan en secuencia para mantener la regla "un PR a la vez".
+- **#1 tras el modelo operativo:** no hay dependencia de ficheros (rutas disjuntas dentro de `docs/finanzas/`), pero conceptualmente facturación emitida cita el modelo operativo; revisarlos en ese orden facilita la revisión.
 
 ---
 
-## Bloque BASELINE SUPABASE
+## Detalle por paso
 
-### PR 6 — Baseline curado Antifrágil OS (Chat 3)
-- **Rama origen:** `chore/db-baseline-antifragil-os` → **destino:** `main`
-- **Título:** `chore(db): baseline curado de Supabase para Antifrágil OS (sin aplicar)`
-- **Descripción:** Baseline limpio en `services/supabase/baselines/antifragil_os/`: `00000000000000_baseline_antifragil_os.sql` (26 tablas, RLS), `post_bootstrap_checks.sql`, `APPLY_RUNBOOK.md`, `README.md`, `ROLLBACK_NOTES.md`, `SECURITY_CHECKLIST.md`, `excluded_legacy.md`. **Solo ficheros versionados; NO se aplica SQL.**
-- **Draft:** sí · **Mergeable:** sí (ruta nueva, additive, sin colisión).
-- **Bloqueos:** ninguno para mergear los ficheros. La **aplicación** real del baseline contra un proyecto Supabase es una decisión/operación aparte (ver `04` y `05`).
-- **Checklist antes de merge:** diff solo bajo `services/supabase/baselines/antifragil_os/`; **ningún SQL ejecutado**; `SECURITY_CHECKLIST.md` revisado; sin claves.
+### Paso 1 — PR #7 · Governance
+- **Rama:** `docs/project-governance-antifragil-os` (`53e5330`) · **Estado:** Draft, listo para revisión final.
+- **Contenido:** contexto maestro, proceso de PRs, compliance scope.
+- **Checklist antes de merge:** solo docs/governance; sin código; revisión final de Guille.
 
----
+### Paso 2 — PR #6 · QA smoke suite
+- **Rama:** `qa/smoke-suite-antifragil-os` (`cbf4338`) · **Estado:** Draft.
+- **Contenido:** suite QA no destructiva con perfiles y modo changed-only.
+- **Nota:** sus hallazgos preexistentes (anon key legacy → R5, datos reales en `services/python` → R12) **no bloquean el merge de la suite**, pero sí exigen acciones fuera de este PR.
+- **Checklist:** la suite corre en verde sobre `main` + su propia rama; no toca código productivo.
 
-## Bloque CLÍNICA
+### Paso 3 — PR #8 · Lessons (opcional)
+- **Rama:** `docs/lessons-governance-session` (`beb40d4`) · **Estado:** Draft, opcional.
+- Puede mergearse en cualquier hueco tras #7, o cerrarse si su contenido se consolida en governance.
 
-### PR 7 — Tipos clínica Fase 1 (SQL reubicado al baseline)
-- **Rama origen:** `feat/clinica-fase1-catalogos` → **destino:** `main`
-- **Título:** `feat(types): dominio Clínica/Reservas Fase 1 (catálogos)`
-- **Descripción:** Reexporta el dominio clínica en `packages/types` (`clinica.ts` + barrel). El SQL de catálogos que esta rama puso en `services/supabase/migrations/` **queda fuera de patrón** ahora que la vía oficial es el baseline curado (PR 6).
-- **Draft:** sí · **Mergeable:** **tipos sí · SQL no**.
-- **Bloqueos:** PR 6 (el baseline debe absorber/contener los catálogos clínica). Coordinar con Chat 3 si hay solape de tablas.
-- **Acción recomendada:** abrir PR solo con `packages/types/**` (+ `docs/reservas/05-…md`); **excluir** `services/supabase/migrations/202606261000_clinica_fase1_catalogos.sql` y dejar que Chat 3 lo refleje en el baseline. (Esta reescritura de alcance la hace Chat 1/Chat 3, no este documento.)
+### Paso 4 — PR #5 · Reservas canónico
+- **Rama:** `feat/reservas-agenda-hoy` (`c3ea8ef`) · **Estado:** Draft / **NO MERGE** (marcado por su autor hasta pasar QA).
+- **Contenido:** módulo `@alsari/reservas` Agenda v0.2: estado compartido + CitaPanel embebible. **Versión canónica** (decisión D7).
+- **Este es el gate de reservas:** todo cableado host de reservas (paso 10, pieza 5a) depende de que este módulo exista en `main`.
+- **Riesgo conocido:** bundle DayPilot >500 kB (R13) — aceptado para esta fase, optimización posterior.
+- **Checklist:** QA (#6) en verde; `pnpm --filter @alsari/reservas type-check` y `dev` ok; lockfile regenerado; sin tocar host. Archivar `feat/reservas-calendario-semana` tras integrar.
 
----
+### Paso 5 — Rebrand visible financiero (sin PR aún)
+- **Rama:** `chore/financiero-copy-antifragil` (`42edd4d`, solo local — **falta push + PR Draft**).
+- **Contenido:** 4 líneas de texto visible en `apps/modules/financiero`. **No** toca nombres de paquete (no es el rebrand global, ver paso 11).
 
-## Bloque REBRANDING (diferido)
+### Paso 6 — Finanzas: modelo operativo (sin PR aún)
+- **Rama:** `docs/finanzas-modelo-operativo` (`d429ec6`, solo local — **falta push + PR Draft**).
+- **Contenido:** 6 docs de finanzas operativas (00–06). Solo `docs/finanzas/`.
+- **Al integrar:** cerrar `docs/finanzas-contabilidad-antifragil-audit` como subsumida (sin merge).
 
-### PR 8 — Rebranding global `@alsari/* → @antifragil/*`
-- **Estado:** **DIFERIDO** por decisión (ver `06-decision-log.md`).
-- **Por qué espera:** toca los 11 `package.json`, todos los imports, `vercel.json` (`--filter=@alsari/host`) y la raíz `alsari-capital-os`. Hacerlo a medias rompe imports. Debe ser **un único PR coordinado** con todos los chats pausados.
-- **No mezclar** con ningún otro PR de esta lista.
+### Paso 7 — PR #1 · Facturación emitida (diseño)
+- **Rama:** `docs/finanzas-facturacion-emitida-design` (`6767680`, sincronizada con origin) · **Estado:** **OPEN, único PR fuera de Draft**.
+- **Contenido:** diseño de facturación emitida + decisiones firmes (OS precontable, Clínica sin IVA provisional). Solo `docs/finanzas/`.
+- **Nota:** la divergencia local/origin señalada en la versión anterior de este plan **está resuelta**.
 
-> Excepción ya permitida: el **rebrand visible** (texto en pantalla) de `chore/financiero-copy-antifragil` (PR 3) **no** es el rebranding de paquetes; es solo copy y puede ir antes.
+### Paso 8 — PR #4 · DB baseline (NO APPLY)
+- **Rama:** `chore/db-baseline-antifragil-os` (`27f6392`) · **Estado:** Draft / **NO APPLY**.
+- **Contenido:** baseline curado en `services/supabase/baselines/antifragil_os/` + A1 Tesorería/Caja. **Solo ficheros versionados; NO se aplica SQL** (decisión D11).
+- **Checklist:** diff solo bajo su ruta; ningún SQL ejecutado; `SECURITY_CHECKLIST.md` revisado; sin claves. La **aplicación** real es una operación aparte con autorización expresa.
 
-### PR 3 — Rebrand visible financiero (copy)
-- **Rama origen:** `chore/financiero-copy-antifragil` → **destino:** `main`
-- **Título:** `chore(financiero): renombrar marca visible Alsari Capital → Antifrágil`
-- **Descripción:** 4 líneas de texto visible en `apps/modules/financiero`. No toca nombres de paquete.
-- **Draft:** sí · **Mergeable:** sí · **Bloqueos:** ninguno.
+### Paso 9 — PR #2 · Clínica Fase 1 (requiere corrección de alcance)
+- **Rama:** `feat/clinica-fase1-catalogos` (`d08058d`) · **Estado:** Draft, **fuera de patrón** (R10).
+- **Problema:** incluye una migración SQL activa en `services/supabase/migrations/`, incompatible con la decisión D4 (baseline curado).
+- **Acción requerida antes de merge:** reescribir el alcance a **solo tipos** (`packages/types/clinica.ts` + barrel) y excluir el SQL; los catálogos clínica se reflejan en el baseline (coordinación con la línea DB).
+- **Mergeable:** tipos sí · SQL **no**.
 
----
+### Paso 10 — Demo partido (5a→5d) — **NO mergear PR #3 entero**
+`demo/local-antifragil-os` (PR #3, `7854be1`) se integra **partido en piezas** y **después del paso 4**. Excluir **todo** `apps/modules/reservas/**` (viene del PR #5). Al completar las piezas, cerrar PR #3 sin merge. Detalle de conflictos en `02-matriz-conflictos.md` §Demo.
 
-## Bloque SUPABASE-CLIENT (diferido)
+| Pieza | Contenido | Archivos clave | Bloqueada por |
+|---|---|---|---|
+| **5a** — Cableado host de reservas | montar `@alsari/reservas` en el host con `ssr:false` | `apps/host/next.config.ts`, `apps/host/package.json`, `(app)/reservas/page.tsx` + `error.tsx`, `ReservasClient.tsx` | PR #5 en `main` |
+| **5b** — Shell demo + Panel de Dirección | cascarón operativo + pantallas mock | `apps/host/src/components/demo/**`, `apps/host/src/lib/demo.ts` | 5a |
+| **5c** — Gating anti-producción | flag `ANTIFRAGIL_DEMO_MODE` con doble guarda | `middleware.ts`, `(app)/layout.tsx`, `BootScreen`, `LoginForm`, `EnConstruccion`, `.env.example` | 5b |
+| **5d** — Rutas secundarias mock | rutas mock del OS | `(app)/page.tsx`, `configuracion/`, `rentabilidad/`, wrappers de contabilidad/facturas/financiero/presupuestos | 5c |
 
-### PR 9 — Migrar `packages/supabase-client` + cambio de proyecto
-- **Estado:** **DIFERIDO** por decisión.
+- **Checklist crítico de 5c:** **sin** la flag, el host se comporta **idéntico a `main`** (auth real intacta); la flag se ignora si `NODE_ENV=production`.
+- **Por qué partido:** el demo mezcla (a) copia vieja de reservas — se descarta, (b) cableado host, (c) shell/panel, (d) gating, (e) rutas mock. Partirlo permite revisar el gating anti-producción por separado y evita arrastrar la copia del spike.
+
+### Paso 11 — Rebrand global `@alsari/* → @antifragil/*` (DIFERIDO)
+- **Estado:** **DIFERIDO** por decisión D10.
+- **Por qué espera:** toca los 11 `package.json`, todos los imports, `vercel.json` (`--filter=@alsari/host`) y la raíz `alsari-capital-os`. Hacerlo a medias rompe imports y el build. Debe ser **un único PR coordinado** con todos los chats pausados.
+- **No mezclar** con ningún otro PR de esta lista. El rebrand **visible** (paso 5) no es esto: es solo copy.
+
+### Paso 12 — `packages/supabase-client` + proyecto Supabase nuevo (DIFERIDO)
+- **Estado:** **DIFERIDO** por decisión D9.
 - **Alcance futuro:** retirar `FALLBACK_URL`/`FALLBACK_ANON_KEY` legacy hardcodeados, renombrar el auth-bridge `window.alsariToken`, apuntar a env vars del proyecto Antifrágil. **No tocar** en esta fase.
-- **Bloqueos:** baseline aplicado + decisión de proyecto Supabase + plan de rotación de la anon key legacy.
+- **Bloqueos:** baseline aplicado + decisión de proyecto Supabase + rotación de la anon key legacy (R5, **acción manual urgente fuera del repo, independiente de este paso**).
 
 ---
 
 ## Resumen de qué **no** se mergea todavía
-- ❌ `demo/local-antifragil-os` entera (va partida, tras PR 4).
-- ❌ SQL activo de `feat/clinica-fase1-catalogos` (reubicar al baseline).
-- ❌ Rebranding global `@alsari/*` (PR 8 diferido).
-- ❌ Cambios en `packages/supabase-client` (PR 9 diferido).
-- ❌ Aplicar el baseline contra Supabase real (operación separada y autorizada aparte).
-- 🗄️ Archivar: `feat/reservas-calendario-semana`, `docs/finanzas-contabilidad-antifragil-audit`.
+
+- ❌ **PR #3** (`demo/local-antifragil-os`) entero — va partido en 5a–5d tras el PR #5; el PR #3 se cierra sin merge.
+- ❌ **PR #5** mientras conserve la marca NO MERGE — primero QA (#6) en `main` y en verde.
+- ❌ SQL activo de **PR #2** — reescribir alcance a solo tipos; el SQL se refleja en el baseline.
+- ❌ Rebranding global `@alsari/*` — paso 11, diferido.
+- ❌ Cambios en `packages/supabase-client` — paso 12, diferido.
+- ❌ **Aplicar** el baseline (PR #4) contra Supabase real — operación separada y autorizada aparte.
+- 🗄️ Archivar sin merge: `feat/reservas-calendario-semana`, `docs/finanzas-contabilidad-antifragil-audit`.

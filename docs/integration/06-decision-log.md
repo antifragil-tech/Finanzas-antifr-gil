@@ -1,7 +1,8 @@
 # 06 · Registro de decisiones (decision log)
 
 > Plan maestro de integración — Antifrágil OS
-> Autor: Chat 4 (Integration PM documental) · Fecha: 2026-06-30
+> Autor: Chat 4 (Integration PM documental) · Fecha original: 2026-06-30
+> **Actualizado: 2026-07-04 por Chat 5** — añadidas D12–D14.
 > Cada decisión refleja el acuerdo vigente. Si cambia, **añadir** una entrada nueva (no reescribir la historia).
 
 | ID | Decisión | Estado | Fecha | Implicación operativa |
@@ -17,6 +18,9 @@
 | D9 | **No tocar `packages/supabase-client` todavía** | Vigente | 2026-06-30 | Fallback legacy + auth-bridge se cambian en PR 9 (diferido) |
 | D10 | **No rebranding global `@alsari/*` todavía** | Vigente | 2026-06-30 | Renombrado de paquetes = PR 8 único y coordinado, diferido |
 | D11 | **No SQL real / no Supabase real todavía** | Vigente | 2026-06-30 | Migraciones y baseline son ficheros versionados; aplicar requiere autorización expresa |
+| D12 | **Numeración real de PRs de GitHub como referencia única** + orden de integración actualizado | Vigente | 2026-07-04 | El plan usa #1–#8 reales; orden: Governance #7 → QA #6 → (Lessons #8) → Reservas #5 → rebrand visible → finanzas docs → #1 → DB #4 → Clínica #2 corregido → demo partido 5a–5d → diferidos |
+| D13 | **Rotación de la anon key legacy = acción manual urgente FUERA del repo** | Vigente | 2026-07-04 | No espera al paso 12 ni a ningún PR; se hace en el dashboard de Supabase. El fichero `supabase-client` sigue sin tocarse (D9) |
+| D14 | **PR #2 Clínica debe corregir su alcance antes de merge** | Vigente | 2026-07-04 | Solo tipos (`packages/types`); el SQL activo sale del PR y se refleja en el baseline (consecuencia operativa de D4) |
 
 ---
 
@@ -54,3 +58,12 @@ El renombrado `@alsari/* → @antifragil/*` es transversal (package.json, import
 
 ### D11 · No SQL real / no Supabase real todavía
 En esta fase nadie aplica SQL ni toca proyectos Supabase reales. Las migraciones/baseline se versionan como ficheros. Aplicarlos es una operación separada con autorización expresa y siguiendo el `APPLY_RUNBOOK.md` del baseline.
+
+### D12 · Numeración real de PRs + orden actualizado (2026-07-04)
+La numeración hipotética de la primera versión del plan chocaba con los números reales que GitHub asignó a los PRs #1–#8. Desde esta fecha, **toda referencia del plan usa los números reales**. Además, el orden de integración incorpora las líneas nuevas: **Governance (#7) va primero** porque define el proceso que gobierna el resto; **QA (#6) va antes que cualquier PR de código** para que sus gates sean utilizables desde `main`; Reservas (#5) solo pierde su marca NO MERGE tras pasar QA. Detalle completo en `01-orden-prs.md`.
+
+### D13 · Rotación anon key legacy = acción manual urgente fuera del repo (2026-07-04)
+El hallazgo R5 (anon key legacy hardcodeada en `packages/supabase-client`) se resuelve en dos tiempos: la **rotación de la credencial es inmediata y se ejecuta en el dashboard de Supabase, fuera del repo**, sin esperar a ningún PR; la retirada del fallback en código sigue diferida al paso 12 (D9 intacta). Confundir ambas cosas dejaría la credencial viva mientras "esperamos al PR".
+
+### D14 · PR #2 Clínica corrige alcance antes de merge (2026-07-04)
+Consecuencia operativa de D4 hecha explícita: el PR #2 no es mergeable tal cual porque incluye una migración SQL activa. Debe reducir su diff a `packages/types/**` (+ docs); los catálogos clínica entran al esquema vía baseline curado (PR #4), no como migración suelta.
