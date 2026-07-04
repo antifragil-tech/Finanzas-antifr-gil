@@ -11,7 +11,7 @@ const fecha = (d: string | null) =>
   d ? new Date(`${d}T00:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '—';
 
 // Vista "Clientes": ficha ADMINISTRATIVA mock (nombres y contactos ficticios,
-// sin datos reales). La historia clínica vive fuera (enlace externo mock);
+// sin datos reales). La ficha completa vive en un sistema externo (enlace mock);
 // aquí solo agenda, pagos y bonos.
 export function Clientes() {
   const hoy = DayPilot.Date.today().toString('yyyy-MM-dd');
@@ -42,7 +42,7 @@ export function Clientes() {
   return (
     <Subvista
       titulo="Clientes"
-      subtitulo="Ficha administrativa mock — sin datos reales ni clínicos. Historia clínica: enlace externo."
+      subtitulo="Ficha administrativa mock — sin datos reales. Registro externo: solo enlace."
       acciones={
         <div className="flex flex-wrap items-center gap-2">
           <label className="glass-panel flex items-center gap-2 rounded-lg px-3 py-1.5">
@@ -107,7 +107,7 @@ export function Clientes() {
                       <Icono title="WhatsApp" onClick={() => flash(`WhatsApp a ${cl.nombre} (demo)`)}><MessageCircle size={14} /></Icono>
                       <Icono title="Copiar datos" onClick={() => copiar(cl)}><Copy size={14} /></Icono>
                       <Icono title="Historial de citas" onClick={() => verHistorial(cl)}><History size={14} /></Icono>
-                      <Icono title="Historia clínica externa (mock)" onClick={() => flash(`Abriría ${cl.historia_url} (mock)`)}>
+                      <Icono title="Abrir registro externo (mock)" onClick={() => flash(`Abriría ${cl.registro_externo_url} (mock)`)}>
                         <ExternalLink size={14} />
                       </Icono>
                     </div>
@@ -119,7 +119,7 @@ export function Clientes() {
         </table>
       </div>
       <p className="mt-3 text-2xs text-zinc-600">
-        La historia clínica NO vive en el OS: solo se guarda un enlace externo (Notion/sistema clínico).
+        El registro completo del cliente vive en un sistema externo (Notion): el OS solo guarda el enlace.
       </p>
 
       <CitaPanel
