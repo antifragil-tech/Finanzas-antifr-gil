@@ -292,7 +292,7 @@ function AlsariCapitalFrame({ nodes }: { nodes: MapNode[] }) {
         strokeWidth={1} strokeDasharray="6 4"
       />
       <text x={midX} y={top + 16} textAnchor="middle" fill="#F5F0E1" fillOpacity={0.65} fontSize={11} fontWeight="600" letterSpacing="3">
-        ALSARI CAPITAL
+        ANTIFRÁGIL
       </text>
       <text x={midX} y={top + 27} textAnchor="middle" fill="#71717a" fontSize={8} letterSpacing="1">
         denominación comercial · sin sociedad constituida

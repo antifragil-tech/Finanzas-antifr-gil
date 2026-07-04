@@ -253,7 +253,7 @@ export function NAVSection({ data, selectedSociety, isPrivateMode }: Props) {
   const margenKPI  = tConsolidado.margenPct;
 
   const label = isGroup
-    ? 'Grupo Alsari Capital — valoración bruta AUM'
+    ? 'Grupo Antifrágil — valoración bruta AUM'
     : isHolding
     ? `Cartera ${selectedSociety.nombre} — participación efectiva`
     : hasChildren
