@@ -11,7 +11,7 @@ Valores: `efectivo · tarjeta · transferencia · bizum · domiciliacion · otro
 - En el lado banco (`movimientos_bancarios`) el extracto no trae medio → en `movimiento_tesoreria` el `medio_pago` del banco es `NULL`.
 
 ## 3. El banco operativo reutiliza `movimientos_bancarios`
-No se crea una tabla nueva de movimientos bancarios. `movimiento_tesoreria` **lee** `movimientos_bancarios` (vía vista). Decisión A1-D1 (opción b): dos ledgers (banco existente + caja nuevo) unificados por una vista. Evita romper la importación de extractos y evita doble conteo.
+No se crea una tabla nueva de movimientos bancarios. `movimiento_tesoreria` **lee** `movimientos_bancarios` (vía vista). Decisión A1-D1 (opción b): dos ledgers (banco existente + caja nuevo) unificados por una vista. Evita romper la importación de extractos y evita doble conteo. Para que el join del lado banco no pueda duplicar filas, una `cuenta_bancaria_id` solo puede estar detrás de **una** `cuenta_tesoreria` (índice único parcial `cuenta_tesoreria_cuenta_bancaria_uniq`).
 
 ## 4. La caja tiene ledger propio: `movimiento_caja`
 Tabla nueva, append-only, para entradas/salidas de efectivo. Una caja = una `cuenta_tesoreria` de `tipo='caja'`. El `cuenta_tesoreria_id` de un `movimiento_caja` debe ser de tipo `caja` (lo valida la RPC `registrar_movimiento_caja`).
@@ -42,6 +42,7 @@ A1 deja el modelo listo (`movimiento_caja.origen_tipo='factura_pago'` + `origen_
 
 ### Invariantes verificables (las comprueba `post_a1_checks.sql`)
 - `medio_pago` nunca contiene `banco`.
-- `movimiento_tesoreria` no duplica banco (filas banco = filas de `movimientos_bancarios`).
+- `movimiento_tesoreria` no duplica banco (filas banco = filas de `movimientos_bancarios`; garantizado estructuralmente por el índice único `cuenta_tesoreria_cuenta_bancaria_uniq`).
 - Caja/arqueo append-only (cliente solo SELECT); `anon` sin acceso; RLS on.
 - Seed = una sola `Caja Clínica Playamar`, sin saldo/movimientos/arqueos.
+- Sin rastro clínico en el esquema (compliance v1: sin paciente/diagnóstico/lesión/historia clínica...).

@@ -71,6 +71,17 @@ with checks as (
                where table_schema='public'
                  and (lower(table_name)  ~ 'pavier|armia|rialsa|alsari'
                    or lower(column_name) ~ 'pavier|armia|rialsa|alsari'))
+
+  union all select 14, 'índice único cuenta_bancaria (anti-duplicación banco)',
+    exists(select 1 from pg_indexes
+            where schemaname='public' and tablename='cuenta_tesoreria'
+              and indexname='cuenta_tesoreria_cuenta_bancaria_uniq')
+
+  union all select 15, 'sin rastro clínico en schema (compliance v1)',
+    not exists(select 1 from information_schema.columns
+               where table_schema='public'
+                 and (lower(table_name)  ~ 'paciente|diagnostico|lesion|historia_clinica|anamnesis|patologia|medicacion|antecedente|nota_clinica|evolucion_clinica'
+                   or lower(column_name) ~ 'paciente|diagnostico|lesion|historia_clinica|anamnesis|patologia|medicacion|antecedente|nota_clinica|evolucion_clinica'))
 )
 select 0 as n, 'RESULTADO GLOBAL' as comprobacion,
        case when (select bool_and(ok) from checks) then 'PASS ✅ (A1 correcto)'
@@ -124,3 +135,9 @@ select table_name, column_name from information_schema.columns
 where table_schema='public'
   and (lower(table_name) ~ 'pavier|armia|rialsa|alsari'
     or lower(column_name) ~ 'pavier|armia|rialsa|alsari');
+
+-- D8. Rastro clínico en nombres de tabla/columna (esperado: 0 filas — compliance v1)
+select table_name, column_name from information_schema.columns
+where table_schema='public'
+  and (lower(table_name)  ~ 'paciente|diagnostico|lesion|historia_clinica|anamnesis|patologia|medicacion|antecedente|nota_clinica|evolucion_clinica'
+    or lower(column_name) ~ 'paciente|diagnostico|lesion|historia_clinica|anamnesis|patologia|medicacion|antecedente|nota_clinica|evolucion_clinica');

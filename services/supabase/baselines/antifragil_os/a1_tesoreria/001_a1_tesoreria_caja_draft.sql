@@ -50,6 +50,10 @@ create unique index if not exists cuenta_tesoreria_sociedad_nombre_uniq
   on public.cuenta_tesoreria (sociedad_id_ref, nombre);
 create index if not exists cuenta_tesoreria_tipo_idx     on public.cuenta_tesoreria (tipo);
 create index if not exists cuenta_tesoreria_sociedad_idx on public.cuenta_tesoreria (sociedad_id_ref);
+-- Invariante: una cuenta bancaria solo puede estar detrás de UNA cuenta de tesorería.
+-- Sin esto, el join del lado banco de movimiento_tesoreria duplicaría movimientos.
+create unique index if not exists cuenta_tesoreria_cuenta_bancaria_uniq
+  on public.cuenta_tesoreria (cuenta_bancaria_id) where cuenta_bancaria_id is not null;
 
 -- 1.2 movimiento_caja — ledger APPEND-ONLY de efectivo (cliente: solo SELECT; escritura por RPC)
 create table if not exists public.movimiento_caja (
