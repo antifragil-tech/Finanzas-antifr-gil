@@ -19,7 +19,10 @@
 ## Señales de "modo demo" correcto
 
 - [ ] **Banner/etiqueta de demo visible** (texto tipo "DATOS DE DEMOSTRACIÓN")
+- [ ] **DemoShell visible**: sidebar y topbar del shell demo montan correctamente
+- [ ] **Contexto global** (si existe): el selector/estado global del demo funciona
 - [ ] **Sin datos reales**: ningún cliente, IBAN, CIF ni importe real reconocible
+- [ ] **Sin datos clínicos**: ningún diagnóstico, lesión, tratamiento ni referencia médica en pantalla
 - [ ] **Sin "Alsari" visible** en ninguna pantalla (logo, títulos, footer)
 - [ ] **Sin Pavier / Armia / Rialsa** visibles
 - [ ] **Sin Supabase visible**: no hay errores de red a `*.supabase.co`, ni mención del proyecto; el demo no llama a backend

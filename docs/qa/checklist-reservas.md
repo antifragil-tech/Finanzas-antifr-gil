@@ -24,10 +24,14 @@
 - [ ] **Pendientes** — placeholder "próximamente" (o vista real cuando exista)
 - [ ] **Cobros** — cuando exista: lista/estado de cobros mock
 - [ ] **Vivofácil** — cuando exista: origen partner como filtro/etiqueta mock
+- [ ] **Clientes administrativos** — cuando exista: ficha solo administrativa (contacto, bonos, cobros; NADA clínico)
+- [ ] **Bonos/Programas** — cuando exista: saldo de sesiones y estado del bono/programa mock
+- [ ] **Filtros** — filtros por profesional/estado/origen funcionan y no rompen la vista
 
 ## Datos y origen
 
 - [ ] **Sin datos reales**: nombres de pacientes/clientes son claramente mock
+- [ ] **Sin datos clínicos**: ninguna cita/cliente mock incluye diagnóstico, lesión, motivo clínico ni tratamiento (correr `check-no-clinical-data.mjs` sobre el módulo)
 - [ ] Partners mock (Vivofácil / Lidomare) aparecen **solo como origen de cita**, no como integración real
 - [ ] Sin llamadas a Supabase real (es mock)
 
@@ -35,6 +39,7 @@
 
 - [ ] Embebido en el host monta con `ssr:false` sin error de `window`
 - [ ] Altura flexible: el calendario encaja en el shell sin desbordar
+- [ ] **Responsive básico**: usable en escritorio (~1280px+) y tablet (~768–1024px) sin romper el layout
 - [ ] Sin errores rojos en consola
 
 ## Resultado

@@ -1,7 +1,7 @@
 # Runbook · Smoke tests (Antifrágil OS)
 
 > Cómo correr la suite de QA no destructiva. Sin instalar nada nuevo.
-> Autor: Chat 5 (QA / testing) · Fecha: 2026-06-30
+> Autor: Chat QA · Última actualización: 2026-07-04
 
 ## Requisitos
 
@@ -51,7 +51,21 @@ node scripts/qa/check-no-secrets.mjs                      # escanea la raíz
 node scripts/qa/check-no-secrets.mjs apps packages        # rutas concretas
 ```
 
-### c) Smoke de rutas (servidor levantado)
+### c) Detección de datos clínicos
+```
+node scripts/qa/check-no-clinical-data.mjs --help
+node scripts/qa/check-no-clinical-data.mjs                # todo el repo
+node scripts/qa/check-no-clinical-data.mjs apps packages  # rutas concretas
+```
+
+### d) Scope de la rama actual (antes de abrir PR)
+```
+node scripts/qa/check-pr-scope.mjs --help
+node scripts/qa/check-pr-scope.mjs                        # compara contra main (o origin/main)
+node scripts/qa/check-pr-scope.mjs --base origin/main
+```
+
+### e) Smoke de rutas (servidor levantado)
 ```
 node scripts/qa/smoke-routes.mjs --help
 QA_BASE_URL=http://localhost:3000 node scripts/qa/smoke-routes.mjs --expect-demo
@@ -77,6 +91,17 @@ $env:QA_BASE_URL="http://localhost:3000"; node scripts/qa/smoke-routes.mjs --exp
 - `HIGH` = patrón con valor real (JWT, key con valor, `.env` real). **Valores enmascarados** (`ey…[221]…Q8`). Si es real → **PARAR, no subir, ROTAR la clave**.
 - `INFO` = menciones sin valor (placeholders, rol `service_role` en SQL, prosa). No bloquean.
 
+### check-no-clinical-data
+- `OK · 0 señales` → bien.
+- `FAIL` = término clínico en código/mocks/producto (`apps/`, `packages/`, `services/`, `scripts/`) → **bloqueo salvo triaje**: el script detecta términos, no diagnostica. Un FAIL exige revisión humana: "evolución" en KPIs financieros o "tratamiento" en un email mercantil NO son datos clínicos; un mock de cita con "lesión de rodilla" SÍ lo es y se elimina. Código de salida 1.
+- `REQUIERE REVISIÓN` = mención en documentación (`docs/`, `.claude/`) → permitida si es documental (hablar DE la regla, no un dato de paciente). Revisar a ojo. No bloquea (código 0).
+- En PRs nuevos lo que importa es el **delta**: no introducir hallazgos nuevos respecto a `main`.
+
+### check-pr-scope
+- `OK · no se tocan rutas peligrosas` → bien.
+- `RUTAS PELIGROSAS TOCADAS` = la rama toca `.env*`, `packages/supabase-client`, `services/supabase/migrations`, `pnpm-lock.yaml`, `package.json` raíz, `apps/modules/reservas` o `apps/host` → solo válido si el PR está específicamente autorizado para ello. Código de salida 1.
+- `⚠ Aviso: no existe main…` = no puede comparar (base desactualizada o ausente); no es fallo, pero el diff mostrado puede estar incompleto.
+
 ### smoke-routes
 - `[PASS] /ruta status=200 legacy=no demo=sí` → bien.
 - `legacy=SÍ⚠` → hay texto "Alsari/Pavier/Armia/Rialsa" visible en esa página → revisar.
@@ -97,5 +122,26 @@ $env:QA_BASE_URL="http://localhost:3000"; node scripts/qa/smoke-routes.mjs --exp
 - ❌ No instalar paquetes ni tocar `package.json` / `pnpm-lock.yaml` para correr esto.
 - ❌ No aplicar SQL ni conectar a Supabase real.
 - ❌ No copiar secretos a issues, PRs ni chats (ni siquiera enmascarados "por si acaso").
-- ❌ No hacer push/PR/merge/rebase desde la rama de QA.
-- ❌ No usar datos reales para las pruebas: todo mock/demo.
+- ❌ No hacer merge/rebase/force-push desde la rama de QA.
+- ❌ No usar datos reales ni clínicos para las pruebas: todo mock/demo administrativo.
+
+## 6. Cómo reportar resultados en un PR
+
+En un comentario del PR (o en la descripción), pegar un bloque con:
+
+```md
+### QA smoke suite — <fecha> — <rama>@<commit corto>
+
+| Check | Resultado |
+|---|---|
+| check-legacy-strings | PASS / FAIL (n hallazgos) |
+| check-no-secrets | PASS / FAIL (n HIGH) |
+| check-no-clinical-data | PASS / REVISIÓN (n) / FAIL (n) |
+| check-pr-scope | PASS / rutas peligrosas: … |
+| smoke-routes | n/8 PASS (o "no ejecutado: sin servidor") |
+
+Notas: <hallazgos relevantes, SIN pegar secretos ni datos>
+```
+
+Reglas: nunca pegar valores de secretos (ni enmascarados si no hace falta), nunca pegar
+datos clínicos/reales, y adjuntar la checklist manual correspondiente si se rellenó.

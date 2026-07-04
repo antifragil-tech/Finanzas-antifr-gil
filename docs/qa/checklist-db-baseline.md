@@ -1,4 +1,4 @@
-# Checklist QA · Baseline Supabase (Antifrágil OS)
+# Checklist QA · DB Baseline (Antifrágil OS)
 
 > Rellenar a mano. **NO aplicar SQL** desde esta checklist. Solo verificación documental y, cuando exista un proyecto autorizado, comprobación de estado.
 > Baseline de referencia: `services/supabase/baselines/antifragil_os/` (rama `chore/db-baseline-antifragil-os`).
@@ -20,6 +20,21 @@
 - [ ] Existe `SECURITY_CHECKLIST.md` y está revisado
 - [ ] Existe `excluded_legacy.md` documentando qué del legacy queda fuera
 - [ ] El conteo de tablas del README coincide con el SQL (referencia: 26 tablas)
+- [ ] El baseline vive en su **carpeta de baseline**, NO en `services/supabase/migrations/` (migraciones activas)
+
+## Paquete A1 (Tesorería/Caja) — si el PR lo incluye
+
+- [ ] El SQL de A1 vive en su **carpeta A1** propia, separada del baseline
+- [ ] Existe el **runbook** de aplicación de A1
+- [ ] Existen los **checks** post-aplicación de A1
+- [ ] A1 tampoco se aplica desde QA (solo revisión documental)
+
+## Alcance del PR
+
+- [ ] `packages/supabase-client` **no tocado**
+- [ ] **No SQL aplicado** como parte del PR (solo archivos versionados)
+- [ ] **No datos clínicos** en seeds, ejemplos ni comentarios SQL (correr `check-no-clinical-data.mjs`)
+- [ ] **No datos reales** en seeds (nombres, CIFs, IBANs, importes reconocibles)
 
 ## Estado tras aplicar (SOLO si hay proyecto autorizado y aplicación expresa)
 
