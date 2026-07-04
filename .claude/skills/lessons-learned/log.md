@@ -319,3 +319,24 @@ Plantilla para copiar:
 - [x] Detectado aparte: Rialsa (S-006) tiene un valor negativo heredado del Excel antiguo (no tiene S&S subido)
 
 **Tags:** #kpis #contabilidad #pgc #deuda-socios #sumas-saldos
+
+---
+
+## 2026-07-04 — Escribir governance desde el traspaso sin estudiar el contenido real de las ramas
+
+**Contexto:** Macro-tarea de governance de Antifrágil OS: crear tracker maestro, workstreams y orden de integración. El repo tenía 12+ ramas activas en worktrees, incluida `docs/integration-master-plan` (plan completo del "Chat 4" con orden de PRs, matriz de conflictos, riesgos R1-R11 y decision log D1-D11).
+
+**Error:** Redacté el tracker, los workstreams y el orden de integración basándome en el traspaso del chat y en los MENSAJES de commit de las ramas, sin leer su CONTENIDO. Resultado: el tracker decía "fusionar o descartar" el spike de reservas (en realidad es ancestro común de reservas y demo → se archiva), proponía "push + PR" para la rama de auditoría (en realidad está subsumida byte a byte → se archiva sin merge), describía la integración de Demo como "re-montar sobre Reservas" (el plan real la parte en 4 PRs concretos 5a-5d), colocaba el rebrand visible "después de Reservas/Demo" (el plan lo pone antes, por aislado), e ignoraba el riesgo de seguridad R5 (anon key legacy hardcodeada, rotación pendiente).
+
+**Corrección de Guille:** "deberias tener muy bien estudiado lo que ya hay".
+
+**Causa raíz:** Misma familia que la lección 2026-06-12 (afirmar sin verificar), a escala de proyecto: tratar los títulos de commit y el traspaso como si fueran el contenido. En un repo multi-agente (varios "chats" trabajando en paralelo), cada rama contiene decisiones y planes que NO están en ninguna conversación individual: el repo es la memoria compartida, y hay que leerlo.
+
+**Lección:** Antes de escribir documentación de governance/estado (tracker, workstreams, órdenes de integración) sobre un repo con trabajo de otros agentes/sesiones: (1) listar TODAS las ramas y sus diffs (`git diff --stat main..rama`), (2) LEER los documentos que esas ramas aportan (`git show rama:ruta`), especialmente cualquier plan/decision-log previo, y (3) citar la fuente (rama y doc) en lo que se escriba. Si ya existe un plan (como el del Chat 4), el documento nuevo lo RESUME y REFERENCIA; no lo reinventa de memoria.
+
+**Acciones tomadas:**
+- [x] Estudiadas las 9 ramas de trabajo (integration plan completo, baseline + A1, QA, finanzas 00-06, clínica, rebrand, demo, reservas)
+- [x] Corregidos tracker, workstreams, integration-order y SESSION.md con el contenido real (spike=archivar, audit=subsumida, demo partido 5a-5d, clínica solo-tipos, rebrand visible temprano)
+- [x] Elevado a Guille el riesgo R5 (rotación de anon key legacy pendiente)
+
+**Tags:** #verificacion #governance #integracion #worktrees #multi-agente
