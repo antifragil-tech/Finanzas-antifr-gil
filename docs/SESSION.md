@@ -68,14 +68,14 @@ y [docs/compliance/01-frontera-notion-antifragil-os.md](compliance/01-frontera-n
 | Rama | Último commit | En origin | PR | Worktree |
 |---|---|---|---|---|
 | `main` | `8d0b720` Initial commit | ✅ | — | `Finanzas-antifr-gil` (raíz) |
-| `docs/project-governance-antifragil-os` | (este PR) | ✅ | Draft (este) | `wt-governance` |
+| `docs/project-governance-antifragil-os` | (este PR) | ✅ | **#7 DRAFT** | `wt-governance` |
 | `docs/finanzas-facturacion-emitida-design` | `6767680` Fisioterapia sin subtipo deportivo | ✅ | **#1 OPEN** | `Finanzas-antifr-gil-facturacion` |
 | `feat/clinica-fase1-catalogos` | `d08058d` modelo de datos Clínica F1 | ✅ | **#2 DRAFT** | `wt-clinica-fase1` |
 | `demo/local-antifragil-os` | `7854be1` sincronizar contexto global OS mock | ✅ | **#3 DRAFT / NO MERGE** | `wt-demo-local-antifragil-os` |
-| `feat/reservas-agenda-hoy` | `53c233a` mejorar navegación clínica | ❌ **sin push** | — | `wt-reservas-agenda-hoy` |
+| `feat/reservas-agenda-hoy` | `53c233a`+ ("Agenda v0.2") | ✅ | **#5 DRAFT / NO MERGE** (creado en paralelo 2026-07-04) | `wt-reservas-agenda-hoy` |
 | `feat/reservas-calendario-semana` | `4d6dc7f` spike — **ancestro común** de reservas y demo → **archivar** | ❌ sin push | — | `wt-reservas-calendario` |
-| `chore/db-baseline-antifragil-os` | `6c49503` documentar A1 (modelo, contrato UI, runbook) | ❌ **sin push** | — | `wt-finanzas-baseline` |
-| `qa/smoke-suite-antifragil-os` | `4e4272c` scripts smoke no destructivos | ✅ | — (sin PR) | `wt-qa-smoke-suite` |
+| `chore/db-baseline-antifragil-os` | `6c49503`+ documentar A1 (modelo, contrato UI, runbook) | ✅ | **#4 DRAFT / NO APPLY** (creado en paralelo 2026-07-04) | `wt-finanzas-baseline` |
+| `qa/smoke-suite-antifragil-os` | `4e4272c` scripts smoke no destructivos | ✅ | **#6 DRAFT** (creado en paralelo 2026-07-04) | `wt-qa-smoke-suite` |
 | `docs/integration-master-plan` | `3a7cb4f` plan maestro de integración y PRs | ❌ sin push | — | `wt-integration-master-plan` |
 | `chore/financiero-copy-antifragil` | `42edd4d` renombrar marca visible Alsari→Antifragil | ❌ sin push | — | `wt-finanzas-rename` |
 | `docs/finanzas-contabilidad-antifragil-audit` | `2c455ff` — **subsumida byte a byte** por `docs/finanzas-modelo-operativo` → **archivar sin merge** | ❌ sin push | — | `wt-finanzas-docs` |
@@ -192,16 +192,20 @@ Proceso detallado: [governance/02-pr-draft-process.md](governance/02-pr-draft-pr
 Checklist de revisión: [governance/03-review-checklist.md](governance/03-review-checklist.md) ·
 Plantilla: `.github/PULL_REQUEST_TEMPLATE.md`.
 
-**PRs existentes (✅ verificado 2026-07-04):**
+**PRs existentes (✅ verificado 2026-07-04 ~13:35 — los #4-#6 se crearon en paralelo por otros
+chats durante esta sesión):**
 - **PR #1** — `docs(finanzas): diseño de facturación emitida + decisiones` — **OPEN** (anterior a la regla de Draft).
-- **PR #2** — `feat(db): Clínica Fase 1 — catálogos / modelo de datos` — **DRAFT**.
-- **PR #3** — `demo(local): Antifrágil OS mock shell y contexto global` — **DRAFT / NO MERGE**.
-- **PR de governance** — esta rama (Draft al crearse).
+- **PR #2** — `feat(db): Clínica Fase 1 — catálogos / modelo de datos` — **DRAFT** (alcance a reescribir: solo tipos, R10).
+- **PR #3** — `demo(local): Antifrágil OS mock shell y contexto global` — **DRAFT / NO MERGE** (se integrará partido en 5a-5d).
+- **PR #4** — `db: baseline Supabase Antifrágil OS + A1 Tesorería/Caja` — **DRAFT / NO APPLY**.
+- **PR #5** — `reservas: Agenda v0.2 operativa para recepción` — **DRAFT / NO MERGE** (GATE del bloque).
+- **PR #6** — `qa: smoke suite no destructiva` — **DRAFT**.
+- **PR #7** — `governance: contexto maestro, proceso de PRs y compliance scope` — **DRAFT** (este).
 
-**Ramas prioritarias a convertir en PR Draft:**
-- `feat/reservas-agenda-hoy` (requiere push previo)
-- `chore/db-baseline-antifragil-os` (requiere push previo)
-- `qa/smoke-suite-antifragil-os` (ya en origin; falta PR)
+**Ramas que aún necesitan push + PR Draft:**
+- `docs/integration-master-plan` (plan maestro del Chat 4 — fuente del orden)
+- `docs/finanzas-modelo-operativo` (posición 1 del orden del plan)
+- `chore/financiero-copy-antifragil` (rebrand visible, posición 3)
 
 ---
 
@@ -214,9 +218,9 @@ Plantilla: `.github/PULL_REQUEST_TEMPLATE.md`.
 1. **Governance** — ✅ este PR (revisar; mergear cuando Guille lo apruebe). Compliance incluido
    (pendiente validación legal externa antes de producción).
 2. **Pushes + PR Drafts pendientes** — `docs/integration-master-plan`,
-   `docs/finanzas-modelo-operativo` (PR 1 del orden), `chore/financiero-copy-antifragil` (PR 3),
-   `feat/reservas-agenda-hoy` (PR 4, GATE), `chore/db-baseline-antifragil-os` (PR 6),
-   `qa/smoke-suite-antifragil-os` (PR sobre rama ya subida).
+   `docs/finanzas-modelo-operativo` (posición 1 del orden) y
+   `chore/financiero-copy-antifragil` (posición 3). *(Reservas #5, baseline #4 y QA #6 ya
+   tienen PR Draft, creados en paralelo durante esta sesión.)*
 3. **Demo** — mantener PR #3 en Draft/NO MERGE; preparar su **partición en 5a-5d** para después
    de que Reservas esté en `main`.
 4. **Clínica** — reescribir alcance del PR #2 (solo tipos + doc; SQL al baseline).
