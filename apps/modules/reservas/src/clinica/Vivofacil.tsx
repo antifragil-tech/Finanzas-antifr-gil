@@ -1,10 +1,9 @@
 import { useState, Fragment } from 'react';
-import { DayPilot } from '@daypilot/daypilot-lite-react';
 import { Copy, Building2, CheckCircle2, ChevronDown, ChevronRight } from 'lucide-react';
-import { crearCitasMock, getProfesional, getServicio, VIVOFACIL_VALOR_SESION } from '../spike/mockData';
+import { getProfesional, getServicio, VIVOFACIL_VALOR_SESION } from '../spike/mockData';
 import { Subvista } from './Subvista';
 import { CitaPanel } from './CitaPanel';
-import { useCitas } from './useCitas';
+import { useCitasStore } from './CitasStore';
 
 type EstadoCierre = 'abierto' | 'listo' | 'facturado' | 'cobrado';
 const FLUJO: EstadoCierre[] = ['abierto', 'listo', 'facturado', 'cobrado'];
@@ -34,11 +33,11 @@ const diaCorto = (iso: string) =>
 // Vista "Vivofácil": cierre mensual MOCK de las derivaciones. Cada sesión completada
 // vale 45 €; se factura agrupado a fin de mes → cobro B2B. NO crea facturas reales.
 export function Vivofacil() {
-  const hoy = DayPilot.Date.today().toString('yyyy-MM-dd');
-  const mesLabel = new Date(`${hoy}T00:00:00`).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
-  const c = useCitas(() => crearCitasMock(hoy).filter((x) => x.origen === 'vivofacil'));
-  const completadas = c.citas.filter((x) => x.estado_cita === 'completada');
-  const pendientesValidar = c.citas.filter((x) => x.estado_cita !== 'completada' && x.estado_cita !== 'cancelada');
+  const c = useCitasStore();
+  const mesLabel = new Date(`${c.hoy}T00:00:00`).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  const citasVf = c.citas.filter((x) => x.origen === 'vivofacil');
+  const completadas = citasVf.filter((x) => x.estado_cita === 'completada');
+  const pendientesValidar = citasVf.filter((x) => x.estado_cita !== 'completada' && x.estado_cita !== 'cancelada');
   const total = completadas.length * VIVOFACIL_VALOR_SESION;
 
   const porPaciente = new Map<string, number>();

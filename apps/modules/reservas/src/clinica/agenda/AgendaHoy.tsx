@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { DayPilotCalendar, DayPilot } from '@daypilot/daypilot-lite-react';
+import { DayPilotCalendar } from '@daypilot/daypilot-lite-react';
 import { Plus } from 'lucide-react';
 import { Button } from '@alsari/ui';
 import {
@@ -7,18 +7,13 @@ import {
   PROF_COLOR,
   SERVICIOS,
   ORIGENES,
-  crearCitasMock,
   getServicio,
-  getProfesional,
-  type CitaMock,
-  type EstadoCita,
-  type EstadoPago,
   type OrigenCita,
   type CategoriaServicio,
 } from '../../spike/mockData';
 import { ESTADO_META, PAGO_SIN_ABONAR } from '../../spike/estados';
-import type { AccionCita } from '../../spike/CitaModal';
 import { CitaPanel } from '../CitaPanel';
+import { useCitasStore } from '../CitasStore';
 import { repartirCarriles } from './lanes';
 
 type DPId = string | number;
@@ -47,19 +42,15 @@ interface RenderArgs {
 }
 
 const hhmm = (iso: string) => iso.slice(11, 16);
-const ahora = () => new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-const servicioPorRol = (rol?: string) =>
-  rol === 'Entrenador personal' ? 'sv3' : rol === 'Nutricionista' ? 'sv4' : 'sv1';
 
 // Vista "Hoy" por profesional (Clínica > Agenda > Hoy). Núcleo de recepción:
 // columnas = profesionales, filas = horas, lectura rápida de huecos y citas,
-// línea de "ahora", KPIs del día y clic en hueco para cita rápida.
+// línea de "ahora", KPIs del día y clic en hueco para cita rápida. Las citas
+// viven en el store compartido del módulo (CitasStore); aquí solo se filtra hoy.
 export function AgendaHoy() {
-  const hoy = DayPilot.Date.today().toString('yyyy-MM-dd');
-  const [citas, setCitas] = useState<CitaMock[]>(() =>
-    crearCitasMock(hoy).filter((c) => c.inicio.startsWith(hoy)),
-  );
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const c = useCitasStore();
+  const hoy = c.hoy;
+  const citasHoy = c.citas.filter((x) => x.inicio.startsWith(hoy));
   const [calendar, setCalendar] = useState<
     { clearSelection: () => void; update: (cfg: Record<string, unknown>) => void } | undefined
   >();
@@ -69,89 +60,66 @@ export function AgendaHoy() {
   const [servFiltro, setServFiltro] = useState<CategoriaServicio | 'todos'>('todos');
   const [origenFiltro, setOrigenFiltro] = useState<OrigenCita | 'todos'>('todos');
 
-  const seleccionada = citas.find((c) => c.id === selectedId) ?? null;
   const profsOn = profVisibles.length ? profVisibles : PROFESIONALES.map((p) => p.id);
-  const citasVisibles = citas.filter(
-    (c) =>
-      profsOn.includes(c.profesional_id) &&
-      (servFiltro === 'todos' || getServicio(c.servicio_id)?.categoria === servFiltro) &&
-      (origenFiltro === 'todos' || c.origen === origenFiltro),
+  const citasVisibles = citasHoy.filter(
+    (x) =>
+      profsOn.includes(x.profesional_id) &&
+      (servFiltro === 'todos' || getServicio(x.servicio_id)?.categoria === servFiltro) &&
+      (origenFiltro === 'todos' || x.origen === origenFiltro),
   );
   const columns = PROFESIONALES.filter((p) => profsOn.includes(p.id)).map((p) => ({ name: p.nombre, id: p.id }));
-  const events = citasVisibles.map((c) => ({
-    id: c.id,
-    start: c.inicio,
-    end: c.fin,
-    text: c.cliente_nombre,
-    resource: c.profesional_id,
+  const events = citasVisibles.map((x) => ({
+    id: x.id,
+    start: x.inicio,
+    end: x.fin,
+    text: x.cliente_nombre,
+    resource: x.profesional_id,
   }));
 
   const toggleProf = (id: string) =>
     setProfVisibles((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   // KPIs del día (lo que recepción necesita de un vistazo).
-  const sinConfirmar = citas.filter((c) => c.estado_cita === 'pendiente').length;
-  const noShow = citas.filter((c) => c.estado_cita === 'no_asiste').length;
-  const sinAbonar = citas.filter(
-    (c) =>
-      (c.estado_cita === 'completada' || c.estado_cita === 'no_asiste') &&
-      PAGO_SIN_ABONAR.includes(c.estado_pago),
+  const sinConfirmar = citasHoy.filter((x) => x.estado_cita === 'pendiente').length;
+  const noShow = citasHoy.filter((x) => x.estado_cita === 'no_asiste').length;
+  const sinAbonar = citasHoy.filter(
+    (x) =>
+      (x.estado_cita === 'completada' || x.estado_cita === 'no_asiste') &&
+      PAGO_SIN_ABONAR.includes(x.estado_pago),
   ).length;
   const kpis = [
-    { label: 'Citas hoy', value: citas.length, tone: 'text-zinc-100' },
+    { label: 'Citas hoy', value: citasHoy.length, tone: 'text-zinc-100' },
     { label: 'Sin confirmar', value: sinConfirmar, tone: 'text-amber-300' },
     { label: 'Sin abonar', value: sinAbonar, tone: 'text-amber-300' },
     { label: 'No-show', value: noShow, tone: 'text-rose-300' },
   ];
 
   const onBeforeEventRender = (args: RenderArgs) => {
-    const c = citas.find((x) => x.id === String(args.data.id));
-    if (!c) return;
-    const m = ESTADO_META[c.estado_cita];
-    const serv = getServicio(c.servicio_id);
+    const cita = citasHoy.find((x) => x.id === String(args.data.id));
+    if (!cita) return;
+    const m = ESTADO_META[cita.estado_cita];
+    const serv = getServicio(cita.servicio_id);
     args.data.backColor = 'rgba(255,255,255,0.035)';
     args.data.borderColor = 'rgba(255,255,255,0.10)';
-    args.data.barColor = PROF_COLOR[c.profesional_id] ?? '#71717a';
+    args.data.barColor = PROF_COLOR[cita.profesional_id] ?? '#71717a';
     args.data.fontColor = '#e8e8ea';
     const clases = [`dp-serv-${serv?.categoria ?? 'otro'}`];
-    if (c.estado_cita === 'cancelada') clases.push('dp-cancelada');
+    if (cita.estado_cita === 'cancelada') clases.push('dp-cancelada');
     args.data.cssClass = clases.join(' ');
     args.data.html = `
       <div class="dp-ev">
         <div class="dp-ev-cli">
-          <span><span class="dp-ev-time">${hhmm(c.inicio)}</span> ${c.cliente_nombre}</span>
+          <span><span class="dp-ev-time">${hhmm(cita.inicio)}</span> ${cita.cliente_nombre}</span>
           <i class="dp-ev-estado" style="background:${m.bar}"></i>
         </div>
         <div class="dp-ev-sub">${serv?.nombre ?? ''}</div>
       </div>`;
   };
 
-  const onEventClick = (args: ClickArgs) => setSelectedId(String(args.e.id()));
-
-  const crearCita = (inicio: string, fin: string, resource?: string) => {
-    const profId = resource ?? PROFESIONALES[0]?.id ?? 'p1';
-    const servId = servicioPorRol(getProfesional(profId)?.rol);
-    const esEntreno = getServicio(servId)?.categoria === 'entrenamiento_personal';
-    const nueva: CitaMock = {
-      id: `c${Date.now()}`,
-      cliente_nombre: 'Nuevo cliente',
-      profesional_id: profId,
-      sala_id: esEntreno ? null : 's1',
-      servicio_id: servId,
-      origen: 'directo',
-      inicio,
-      fin,
-      estado_cita: 'pendiente',
-      estado_pago: 'pendiente_pago',
-      precio_previsto: getServicio(servId)?.precio ?? 0,
-      cambios: [{ ts: ahora(), accion: 'creada', detalle: 'Alta demo' }],
-    };
-    setCitas((prev) => [...prev, nueva]);
-    setSelectedId(nueva.id);
-  };
+  const onEventClick = (args: ClickArgs) => c.setSelectedId(String(args.e.id()));
 
   const onTimeRangeSelected = (args: RangeArgs) => {
-    crearCita(
+    c.crearCita(
       args.start.toString(),
       args.end.toString(),
       args.resource != null ? String(args.resource) : undefined,
@@ -159,51 +127,7 @@ export function AgendaHoy() {
     calendar?.clearSelection();
   };
 
-  const onAccion = (accion: AccionCita) => {
-    if (!seleccionada) return;
-    const mapa: Record<AccionCita, EstadoCita> = {
-      confirmar: 'confirmada',
-      completar: 'completada',
-      no_asiste: 'no_asiste',
-      cancelar: 'cancelada',
-    };
-    const nuevoEstado = mapa[accion];
-    setCitas((prev) =>
-      prev.map((c) =>
-        c.id === seleccionada.id
-          ? {
-              ...c,
-              estado_cita: nuevoEstado,
-              cambios: [...c.cambios, { ts: ahora(), accion: nuevoEstado, detalle: 'Cambio de estado (demo)' }],
-            }
-          : c,
-      ),
-    );
-  };
-
-  const onPago = (estado: EstadoPago) => {
-    if (!seleccionada) return;
-    setCitas((prev) =>
-      prev.map((c) =>
-        c.id === seleccionada.id
-          ? { ...c, estado_pago: estado, cambios: [...c.cambios, { ts: ahora(), accion: 'pago', detalle: `Pago → ${estado}` }] }
-          : c,
-      ),
-    );
-  };
-
-  const onOrigen = (origen: OrigenCita) => {
-    if (!seleccionada) return;
-    setCitas((prev) =>
-      prev.map((c) =>
-        c.id === seleccionada.id
-          ? { ...c, origen, cambios: [...c.cambios, { ts: ahora(), accion: 'origen', detalle: `Origen → ${origen}` }] }
-          : c,
-      ),
-    );
-  };
-
-  const nuevaCitaBoton = () => crearCita(`${hoy}T10:00:00`, `${hoy}T10:45:00`);
+  const nuevaCitaBoton = () => c.crearCita(`${hoy}T10:00:00`, `${hoy}T10:45:00`);
 
   // Ancho de columna fijo para que las columnas por profesional no se compriman.
   useEffect(() => {
@@ -329,11 +253,11 @@ export function AgendaHoy() {
       </div>
 
       <CitaPanel
-        cita={seleccionada}
-        onClose={() => setSelectedId(null)}
-        onAccion={onAccion}
-        onPago={onPago}
-        onOrigen={onOrigen}
+        cita={c.seleccionada}
+        onClose={() => c.setSelectedId(null)}
+        onAccion={c.onAccion}
+        onPago={c.onPago}
+        onOrigen={c.onOrigen}
       />
     </div>
   );

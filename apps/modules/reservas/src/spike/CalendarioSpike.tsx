@@ -16,7 +16,6 @@ import {
   PROFESIONALES,
   SALAS,
   PROF_COLOR,
-  crearCitasMock,
   getProfesional,
   getServicio,
   type CitaMock,
@@ -24,9 +23,10 @@ import {
   type CategoriaServicio,
 } from './mockData';
 import { ESTADO_META, PAGO_LABEL, PAGO_SIN_ABONAR } from './estados';
-import { CitaModal, type AccionCita } from './CitaModal';
+import { CitaModal } from './CitaModal';
 import { MonthResumen } from './MonthResumen';
 import { repartirCarriles } from '../clinica/agenda/lanes';
+import { useCitasStore } from '../clinica/CitasStore';
 
 type Vista = 'mes' | 'semana' | 'dia';
 type DimDia = 'profesional' | 'sala';
@@ -74,14 +74,13 @@ const servicioPorRol = (rol?: string) =>
   rol === 'Entrenador personal' ? 'sv3' : rol === 'Nutricionista' ? 'sv4' : 'sv1';
 
 export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vista } = {}) {
-  const hoyStr = DayPilot.Date.today().toString('yyyy-MM-dd');
-  const [startDate, setStartDate] = useState<string>(hoyStr);
-  const [citas, setCitas] = useState<CitaMock[]>(() => crearCitasMock(hoyStr));
+  const store = useCitasStore();
+  const { citas, seleccionada, setSelectedId } = store;
+  const [startDate, setStartDate] = useState<string>(store.hoy);
   const [vista, setVista] = useState<Vista>(vistaInicial);
   const [dimDia, setDimDia] = useState<DimDia>('profesional');
   const [profVisibles, setProfVisibles] = useState<string[]>(PROFESIONALES.map((p) => p.id));
   const [servFiltro, setServFiltro] = useState<ServFiltro>('todos');
-  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [calendar, setCalendar] = useState<
     { clearSelection: () => void; update: (cfg: Record<string, unknown>) => void } | undefined
   >();
@@ -90,7 +89,6 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
   const panelRef = useRef<HTMLDivElement>(null);
   const repartoRaf = useRef<number | null>(null);
 
-  const seleccionada = citas.find((c) => c.id === selectedId) ?? null;
   const profsOn = profVisibles.length ? profVisibles : PROFESIONALES.map((p) => p.id);
 
   const citasVisibles = citas.filter((c) => {
@@ -174,37 +172,23 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
     const ini = args.newStart.toString();
     const fin = args.newEnd.toString();
     const nuevoRec = args.newResource != null ? String(args.newResource) : undefined;
-    setCitas((prev) =>
-      prev.map((c) => {
-        if (c.id !== id) return c;
-        const destino =
-          vista === 'dia' && nuevoRec
-            ? dimDia === 'sala'
-              ? { sala_id: nuevoRec }
-              : { profesional_id: nuevoRec }
-            : {};
-        return {
-          ...c,
-          ...destino,
-          inicio: ini,
-          fin,
-          cambios: [...c.cambios, { ts: ahora(), accion: 'reprogramada', detalle: `Movida a ${ini.slice(0, 16).replace('T', ' ')}` }],
-        };
-      }),
+    const destino =
+      vista === 'dia' && nuevoRec
+        ? dimDia === 'sala'
+          ? { sala_id: nuevoRec }
+          : { profesional_id: nuevoRec }
+        : {};
+    store.patch(
+      id,
+      { ...destino, inicio: ini, fin },
+      'reprogramada',
+      `Movida a ${ini.slice(0, 16).replace('T', ' ')}`,
     );
   };
 
   const onEventResized = (args: MovedArgs) => {
     const id = String(args.e.id());
-    const ini = args.newStart.toString();
-    const fin = args.newEnd.toString();
-    setCitas((prev) =>
-      prev.map((c) =>
-        c.id === id
-          ? { ...c, inicio: ini, fin, cambios: [...c.cambios, { ts: ahora(), accion: 'reprogramada', detalle: 'Duración ajustada' }] }
-          : c,
-      ),
-    );
+    store.patch(id, { inicio: args.newStart.toString(), fin: args.newEnd.toString() }, 'reprogramada', 'Duración ajustada');
   };
 
   const crearCita = (inicio: string, fin: string, resource?: string) => {
@@ -226,8 +210,7 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
       precio_previsto: getServicio(servId)?.precio ?? 0,
       cambios: [{ ts: ahora(), accion: 'creada', detalle: 'Alta demo' }],
     };
-    setCitas((prev) => [...prev, nueva]);
-    setSelectedId(nueva.id);
+    store.agregarCita(nueva);
   };
 
   const onCalRangeSelected = (args: RangeArgs) => {
@@ -238,24 +221,6 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
   const nuevaCitaBoton = () => {
     const inicio = `${startDate}T13:00:00`;
     crearCita(inicio, finDe(inicio, 50));
-  };
-
-  const onAccion = (accion: AccionCita) => {
-    if (!seleccionada) return;
-    const mapa: Record<AccionCita, EstadoCita> = {
-      confirmar: 'confirmada',
-      completar: 'completada',
-      no_asiste: 'no_asiste',
-      cancelar: 'cancelada',
-    };
-    const nuevoEstado = mapa[accion];
-    setCitas((prev) =>
-      prev.map((c) =>
-        c.id === seleccionada.id
-          ? { ...c, estado_cita: nuevoEstado, cambios: [...c.cambios, { ts: ahora(), accion: nuevoEstado, detalle: 'Cambio de estado (demo)' }] }
-          : c,
-      ),
-    );
   };
 
   const shift = (dir: number) => {
@@ -327,7 +292,7 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
       {/* Fila 1: Hoy + navegación + fecha + Crear cita */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1">
-          <Button variant="secondary" size="sm" onClick={() => setStartDate(hoyStr)}>
+          <Button variant="secondary" size="sm" onClick={() => setStartDate(store.hoy)}>
             Hoy
           </Button>
           <Button variant="ghost" size="sm" icon={ChevronLeft} onClick={() => shift(-1)} />
@@ -448,7 +413,7 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
         )}
       </div>
 
-      <CitaModal cita={seleccionada} onClose={() => setSelectedId(null)} onAccion={onAccion} />
+      <CitaModal cita={seleccionada} onClose={() => setSelectedId(null)} onAccion={store.onAccion} />
     </div>
   );
 }

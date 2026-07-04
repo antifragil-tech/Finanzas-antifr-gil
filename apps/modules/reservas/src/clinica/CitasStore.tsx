@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { createContext, useContext, useState, type ReactNode } from 'react';
 import {
+  crearCitasMock,
   getProfesional,
   getServicio,
   type CitaMock,
@@ -9,15 +10,45 @@ import {
 } from '../spike/mockData';
 import type { AccionCita } from '../spike/CitaModal';
 
+const pad = (x: number) => String(x).padStart(2, '0');
+const hoyLocal = () => {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+};
 const ahora = () => new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 const servicioPorRol = (rol?: string) =>
   rol === 'Entrenador personal' ? 'sv3' : rol === 'Nutricionista' ? 'sv4' : 'sv1';
 
-// Estado + acciones de citas compartido por las vistas del módulo (Agenda Hoy,
-// Pendientes, Cobros...). Todo mock/local: cambia el estado en memoria, con
-// histórico; nunca borra (cancelar/no-show/completar son cambios de estado).
-export function useCitas(inicial: () => CitaMock[]) {
-  const [citas, setCitas] = useState<CitaMock[]>(inicial);
+export interface CitasStore {
+  /** Fecha local YYYY-MM-DD sobre la que se generó la semana mock. */
+  hoy: string;
+  /** Semana completa de citas mock: cada vista filtra lo que necesita. */
+  citas: CitaMock[];
+  selectedId: string | null;
+  setSelectedId: (id: string | null) => void;
+  seleccionada: CitaMock | null;
+  patch: (id: string, cambio: Partial<CitaMock>, accion: string, detalle: string) => void;
+  onAccion: (accion: AccionCita) => void;
+  onPago: (estado: EstadoPago) => void;
+  onOrigen: (origen: OrigenCita) => void;
+  confirmar: (id: string) => void;
+  noAsistio: (id: string) => void;
+  registrarPago: (id: string, estado?: EstadoPago) => void;
+  crearCita: (inicio: string, fin: string, profesional_id?: string) => void;
+  /** Alta de una cita ya construida (p. ej. Semana/Día con sala) y la selecciona. */
+  agregarCita: (nueva: CitaMock) => void;
+}
+
+const Ctx = createContext<CitasStore | null>(null);
+
+// Estado mock ÚNICO del módulo Reservas, compartido por todas las vistas
+// (Hoy, Pendientes, Cobros, Vivofácil, Clientes): confirmar una cita en
+// Pendientes se refleja en Hoy, cobrar en Cobros actualiza los KPIs, etc.
+// Todo local/en memoria, sin backend; nunca borra (cancelar/no-show/completar
+// son cambios de estado con histórico).
+export function CitasProvider({ children }: { children: ReactNode }) {
+  const [hoy] = useState(hoyLocal);
+  const [citas, setCitas] = useState<CitaMock[]>(() => crearCitasMock(hoy));
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const seleccionada = citas.find((c) => c.id === selectedId) ?? null;
 
@@ -51,6 +82,11 @@ export function useCitas(inicial: () => CitaMock[]) {
   const registrarPago = (id: string, estado: EstadoPago = 'pagado') =>
     patch(id, { estado_pago: estado }, 'pago', `Pago → ${estado}`);
 
+  const agregarCita = (nueva: CitaMock) => {
+    setCitas((prev) => [...prev, nueva]);
+    setSelectedId(nueva.id);
+  };
+
   const crearCita = (inicio: string, fin: string, profesional_id?: string) => {
     const profId = profesional_id ?? 'p1';
     const servId = servicioPorRol(getProfesional(profId)?.rol);
@@ -69,15 +105,16 @@ export function useCitas(inicial: () => CitaMock[]) {
       precio_previsto: getServicio(servId)?.precio ?? 0,
       cambios: [{ ts: ahora(), accion: 'creada', detalle: 'Alta demo' }],
     };
-    setCitas((prev) => [...prev, nueva]);
-    setSelectedId(nueva.id);
+    agregarCita(nueva);
   };
 
-  return {
+  const store: CitasStore = {
+    hoy,
     citas,
     selectedId,
     setSelectedId,
     seleccionada,
+    patch,
     onAccion,
     onPago,
     onOrigen,
@@ -85,5 +122,14 @@ export function useCitas(inicial: () => CitaMock[]) {
     noAsistio,
     registrarPago,
     crearCita,
+    agregarCita,
   };
+
+  return <Ctx.Provider value={store}>{children}</Ctx.Provider>;
+}
+
+export function useCitasStore(): CitasStore {
+  const ctx = useContext(Ctx);
+  if (!ctx) throw new Error('useCitasStore debe usarse dentro de <CitasProvider>');
+  return ctx;
 }

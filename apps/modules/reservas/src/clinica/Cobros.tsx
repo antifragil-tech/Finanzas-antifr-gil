@@ -1,7 +1,5 @@
 import { useState } from 'react';
-import { DayPilot } from '@daypilot/daypilot-lite-react';
 import {
-  crearCitasMock,
   getServicio,
   getProfesional,
   getOrigen,
@@ -11,7 +9,7 @@ import {
 import { PAGO_SIN_ABONAR } from '../spike/estados';
 import { Subvista } from './Subvista';
 import { CitaPanel } from './CitaPanel';
-import { useCitas } from './useCitas';
+import { useCitasStore } from './CitasStore';
 import { CLIENTES } from './mock/clientes';
 
 const hhmm = (iso: string) => iso.slice(11, 16);
@@ -28,9 +26,8 @@ const bonoDe = (c: CitaMock) => CLIENTES.find((cl) => cl.nombre === c.cliente_no
 // cliente directo de partners (Vivofácil/Oasis/Lidomare/otro). Acción de pago mock.
 // Esta lectura alimentará después Finanzas Operativas / Tesorería (cuando exista).
 export function Cobros() {
-  const hoy = DayPilot.Date.today().toString('yyyy-MM-dd');
-  const hoyMs = new Date(`${hoy}T00:00:00`).getTime();
-  const c = useCitas(() => crearCitasMock(hoy));
+  const c = useCitasStore();
+  const hoyMs = new Date(`${c.hoy}T00:00:00`).getTime();
   const [aviso, setAviso] = useState<string | null>(null);
 
   const pendientes = c.citas.filter(

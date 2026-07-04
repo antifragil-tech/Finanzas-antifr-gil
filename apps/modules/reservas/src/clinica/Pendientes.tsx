@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { DayPilot } from '@daypilot/daypilot-lite-react';
 import {
   CheckCircle2,
   CreditCard,
@@ -12,12 +11,12 @@ import {
   Gift,
   type LucideIcon,
 } from 'lucide-react';
-import { crearCitasMock, getServicio, getProfesional, type CitaMock } from '../spike/mockData';
+import { getServicio, getProfesional, type CitaMock } from '../spike/mockData';
 import { PAGO_SIN_ABONAR } from '../spike/estados';
 import { BONOS, restantes } from './mock/bonos';
 import { Subvista } from './Subvista';
 import { CitaPanel } from './CitaPanel';
-import { useCitas } from './useCitas';
+import { useCitasStore } from './CitasStore';
 
 const hhmm = (iso: string) => iso.slice(11, 16);
 const diaCorto = (iso: string) =>
@@ -41,8 +40,7 @@ interface Grupo {
 // Vista "Pendientes" (Clínica > Agenda > Pendientes): bandeja operativa de la
 // semana. Agrupa lo que recepción debe resolver y permite acciones mock.
 export function Pendientes() {
-  const hoy = DayPilot.Date.today().toString('yyyy-MM-dd');
-  const c = useCitas(() => crearCitasMock(hoy));
+  const c = useCitasStore();
   const { citas } = c;
   const [aviso, setAviso] = useState<string | null>(null);
   const [resueltas, setResueltas] = useState<Set<number>>(new Set());

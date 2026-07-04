@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { DayPilot } from '@daypilot/daypilot-lite-react';
 import { MessageCircle, Copy, User, History, ExternalLink, Search } from 'lucide-react';
 import { CLIENTES, type ClienteMock } from './mock/clientes';
-import { crearCitasMock, getOrigen } from '../spike/mockData';
+import { getOrigen } from '../spike/mockData';
 import { Subvista } from './Subvista';
 import { CitaPanel } from './CitaPanel';
-import { useCitas } from './useCitas';
+import { useCitasStore } from './CitasStore';
 
 const fecha = (d: string | null) =>
   d ? new Date(`${d}T00:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '—';
@@ -14,8 +13,7 @@ const fecha = (d: string | null) =>
 // sin datos reales). La ficha completa vive en un sistema externo (enlace mock);
 // aquí solo agenda, pagos y bonos.
 export function Clientes() {
-  const hoy = DayPilot.Date.today().toString('yyyy-MM-dd');
-  const c = useCitas(() => crearCitasMock(hoy));
+  const c = useCitasStore();
   const [aviso, setAviso] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');
 

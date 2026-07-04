@@ -7,15 +7,33 @@ import { Cobros } from './clinica/Cobros';
 import { Vivofacil } from './clinica/Vivofacil';
 import { Clientes } from './clinica/Clientes';
 import { Bonos } from './clinica/Bonos';
+import { CitasProvider, useCitasStore } from './clinica/CitasStore';
 
 // Raíz del módulo Clínica/Reservas. Clínica > Agenda con sub-navegación:
 // Hoy (vista por profesional, núcleo de recepción) por defecto · Semana · Mes ·
-// Pendientes. Mismo patrón de export que los demás módulos (ver src/index.ts).
+// Pendientes · Gestión. El estado mock de citas vive en CitasProvider, compartido
+// por todas las vistas. Mismo patrón de export que los demás módulos (src/index.ts).
 export function ClinicaDashboard() {
+  return (
+    <CitasProvider>
+      <ClinicaShell />
+    </CitasProvider>
+  );
+}
+
+function ClinicaShell() {
   const [vista, setVista] = useState<VistaAgenda>('hoy');
+  const { setSelectedId } = useCitasStore();
+
+  // Al cambiar de pestaña se cierra el panel de cita para que la selección
+  // no "persiga" al usuario entre vistas.
+  const cambiarVista = (v: VistaAgenda) => {
+    setSelectedId(null);
+    setVista(v);
+  };
 
   return (
-    <div className="flex h-full flex-col overflow-hidden bg-zinc-950 text-zinc-100">
+    <div className="relative flex h-full flex-col overflow-hidden bg-zinc-950 text-zinc-100">
       <header className="glass-header shrink-0 px-6 py-4">
         <p className="text-2xs uppercase tracking-widest text-zinc-500">
           Antifrágil · Clínica Playamar
@@ -27,7 +45,7 @@ export function ClinicaDashboard() {
               recepción
             </span>
           </div>
-          <AgendaNav vista={vista} onVista={setVista} />
+          <AgendaNav vista={vista} onVista={cambiarVista} />
         </div>
       </header>
 
