@@ -38,7 +38,8 @@ Opciones:
 
 Términos detectados:
   Alsari, Pavier, Armia, Rialsa, alsari.net,
-  finanzas_sociedades, proyecto_sociedades, pct_pavier, pct_armia
+  finanzas_sociedades, proyecto_sociedades, pct_pavier, pct_armia,
+  swtyxysvnfcfxziclteq (ref del proyecto Supabase legacy)
 
 No modifica ningún archivo.`);
   process.exit(0);
@@ -62,6 +63,7 @@ const TERMS = [
   { label: 'proyecto_sociedades', re: /proyecto_sociedades/i },
   { label: 'pct_pavier', re: /pct_pavier/i },
   { label: 'pct_armia', re: /pct_armia/i },
+  { label: 'supabase-legacy-ref', re: /swtyxysvnfcfxziclteq/i },
 ];
 
 const EXCLUDE_DIRS = new Set([

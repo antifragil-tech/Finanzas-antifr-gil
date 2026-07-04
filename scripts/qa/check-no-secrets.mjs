@@ -39,7 +39,8 @@ Opciones:
 
 Detecta (enmascarado):
   JWT (eyJ........), service_role + token, SUPABASE_SERVICE(_ROLE)_KEY,
-  DB_PASSWORD/PGPASSWORD con valor, asignaciones SECRET/TOKEN/API_KEY/ANON_KEY con valor,
+  DB_PASSWORD/PGPASSWORD/JWT_SECRET con valor, asignaciones SECRET/TOKEN/API_KEY/ANON_KEY con valor,
+  bloques "BEGIN ... PRIVATE KEY", URLs del Supabase legacy fuera de documentación (WARN),
   y la EXISTENCIA de archivos .env reales (no lee su contenido).
 
 Ignora: .env.example, node_modules, .git, y los propios docs/scripts de QA.
@@ -93,9 +94,10 @@ function walk(dir, acc) {
     const rel = relative(ROOT, full);
     if (e.isDirectory()) {
       if (EXCLUDE_DIRS.has(e.name)) continue;
-      if (isExcludedPath(rel)) continue;
+      if (isExcludedPath(rel + '/')) continue;
       walk(full, acc);
     } else if (e.isFile()) {
+      if (isExcludedPath(rel)) continue;
       acc.push(full);
     }
   }
@@ -110,6 +112,9 @@ function looksBinary(buf) {
 
 // Detectores de línea -> devuelven {type, value} o null.
 const JWT_RE = /eyJ[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{6,}\.[A-Za-z0-9_-]{6,}/;
+const PRIVATE_KEY_RE = /-----BEGIN [A-Z ]*PRIVATE KEY-----/;
+// Ref del proyecto Supabase legacy: no es un secreto per se, pero fuera de docs es señal de conexión legacy.
+const LEGACY_SUPABASE_RE = /swtyxysvnfcfxziclteq/i;
 const ASSIGN_RE = /\b([A-Z0-9_]*(?:SERVICE_ROLE|SERVICE_KEY|SECRET|TOKEN|API_?KEY|ANON_KEY|DB_PASSWORD|PGPASSWORD|PASSWORD)[A-Z0-9_]*)\b\s*[:=]\s*([^\s,;]+)/i;
 const SUPABASE_SERVICE_RE = /SUPABASE_SERVICE(_ROLE)?(_KEY)?/i;
 
@@ -127,10 +132,19 @@ function classifyValue(raw, wasColon) {
   return { sev: 'HIGH', value: v };
 }
 
-function scanLine(line) {
+function scanLine(line, rel) {
   const out = [];
   const jwt = line.match(JWT_RE);
   if (jwt) out.push({ type: 'JWT', sev: 'HIGH', value: jwt[0] });
+
+  if (PRIVATE_KEY_RE.test(line)) {
+    out.push({ type: 'private-key-block', sev: 'HIGH', value: '(bloque PRIVATE KEY)' });
+  }
+
+  // URL/ref Supabase legacy: WARN fuera de documentación (en docs/ es mención documental).
+  if (LEGACY_SUPABASE_RE.test(line) && !rel.startsWith('docs/')) {
+    out.push({ type: 'legacy-supabase-ref', sev: 'WARN', value: '(ref legacy fuera de docs)' });
+  }
 
   const asg = line.match(ASSIGN_RE);
   if (asg) {
@@ -178,7 +192,7 @@ for (const f of files) {
   if (looksBinary(buf)) continue;
   const lines = buf.toString('utf8').split(/\r?\n/);
   for (let i = 0; i < lines.length; i++) {
-    for (const hit of scanLine(lines[i])) {
+    for (const hit of scanLine(lines[i], rel)) {
       findings.push({
         file: rel,
         line: i + 1,
@@ -191,6 +205,7 @@ for (const f of files) {
 }
 
 const highs = findings.filter((f) => f.sev === 'HIGH');
+const warns = findings.filter((f) => f.sev === 'WARN');
 const infos = findings.filter((f) => f.sev === 'INFO');
 
 console.log('=== QA check-no-secrets (valores ENMASCARADOS) ===');
@@ -206,11 +221,16 @@ if (highs.length === 0) {
     console.log(`  ${loc}  [${h.type}]  ${h.masked}`);
   }
 }
+if (warns.length > 0) {
+  console.log('');
+  console.log('⚠ WARN (no bloquea, pero revisar — ref del Supabase legacy fuera de documentación):');
+  for (const w of warns) console.log(`  ${w.file}:${w.line}  [${w.type}]`);
+}
 if (infos.length > 0) {
   console.log('');
   console.log(`(INFO · ${infos.length} menciones sin valor real — placeholders / nombres de rol / prosa)`);
 }
 console.log('');
-console.log(`--- TOTAL HIGH: ${highs.length} · INFO: ${infos.length} ---`);
+console.log(`--- TOTAL HIGH: ${highs.length} · WARN: ${warns.length} · INFO: ${infos.length} ---`);
 
 process.exit(OPT.soft ? 0 : highs.length > 0 ? 1 : 0);
