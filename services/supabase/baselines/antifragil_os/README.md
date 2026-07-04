@@ -87,7 +87,7 @@ Conteo verificado sobre `00000000000000_baseline_antifragil_os.sql` (grep + revi
 | **Filas de seed (propias)** | **6** | 1 sociedad (`ANT`) + 4 proyectos + 1 fila `configuracion_contabilidad` |
 
 - ✅ **Sin datos reales:** los únicos `INSERT` son (a) lógica dentro de RPC, (b) `storage.buckets`, (c) seed propio de Antifrágil. Sociedad con `cif=NULL`, sin cuentas bancarias, sin facturas/movimientos/balances.
-- ✅ **Sin legacy:** 0 ocurrencias de `Alsari/Pavier/Armia/Rialsa/finanzas_sociedades/proyecto_sociedades/pct_pavier/pct_armia` en el `.sql` (verificado por grep). Lista de exclusiones en `excluded_legacy.md`; verificación en producción en `post_bootstrap_checks.sql` (PARTE 1, checks 12–15).
+- ✅ **Sin legacy:** 0 ocurrencias de `Alsari/Pavier/Armia/Rialsa/finanzas_sociedades/proyecto_sociedades/pct_pavier/pct_armia` en el `.sql` (verificado por grep). Lista de exclusiones en `excluded_legacy.md`; verificación en producción en `post_bootstrap_checks.sql` (PARTE 1, checks 13–15; el 17 cubre además la ausencia de rastro clínico).
 
 ## 8. Variables de entorno (FASE POSTERIOR — no forma parte del baseline)
 

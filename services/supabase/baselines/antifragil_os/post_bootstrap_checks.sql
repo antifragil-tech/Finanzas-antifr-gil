@@ -103,6 +103,12 @@ with checks as (
 
   union all select 16, 'bucket_facturas_privado',
     exists(select 1 from storage.buckets where id='facturas' and public=false)
+
+  union all select 17, 'sin_rastro_clinico_en_schema (compliance v1)',
+    not exists(select 1 from information_schema.columns
+               where table_schema='public'
+                 and (lower(table_name)  ~ 'paciente|diagnostico|lesion|historia_clinica|anamnesis|patologia|medicacion|antecedente|nota_clinica|evolucion_clinica'
+                   or lower(column_name) ~ 'paciente|diagnostico|lesion|historia_clinica|anamnesis|patologia|medicacion|antecedente|nota_clinica|evolucion_clinica'))
 )
 select 0 as n, 'RESULTADO GLOBAL' as comprobacion,
        case when (select bool_and(ok) from checks) then 'PASS ✅ (todo correcto)'
@@ -173,7 +179,13 @@ where table_schema='public'
 -- D8. Bucket de storage (esperado: facturas, public = false)
 select id, public from storage.buckets where id='facturas';
 
--- D9. Conteos rápidos (todo 0 salvo seed)
+-- D9. Rastro clínico en nombres de tabla/columna (esperado: 0 filas — compliance v1)
+select table_name, column_name from information_schema.columns
+where table_schema='public'
+  and (lower(table_name)  ~ 'paciente|diagnostico|lesion|historia_clinica|anamnesis|patologia|medicacion|antecedente|nota_clinica|evolucion_clinica'
+    or lower(column_name) ~ 'paciente|diagnostico|lesion|historia_clinica|anamnesis|patologia|medicacion|antecedente|nota_clinica|evolucion_clinica');
+
+-- D10. Conteos rápidos (todo 0 salvo seed)
 select
   (select count(*) from public.sociedades)                 as sociedades,            -- 1
   (select count(*) from public.proyectos)                  as proyectos,             -- 4
