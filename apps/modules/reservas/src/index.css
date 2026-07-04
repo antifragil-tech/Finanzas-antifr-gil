@@ -184,7 +184,8 @@ body,
   border-radius: 9px;
 }
 .dp-quiet .calendar_default_now {
-  border-top: 1px solid rgba(245, 240, 225, 0.5); /* brand cream */
+  border-top: 2px solid rgba(245, 240, 225, 0.9); /* línea de "ahora" más visible */
+  box-shadow: 0 0 6px rgba(245, 240, 225, 0.25);
 }
 
 /* ── Vista MES ────────────────────────────────────────────────────── */

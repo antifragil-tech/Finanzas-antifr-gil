@@ -5,6 +5,8 @@ import { Button } from '@alsari/ui';
 import {
   PROFESIONALES,
   PROF_COLOR,
+  SERVICIOS,
+  ORIGENES,
   crearCitasMock,
   getServicio,
   getProfesional,
@@ -12,6 +14,7 @@ import {
   type EstadoCita,
   type EstadoPago,
   type OrigenCita,
+  type CategoriaServicio,
 } from '../../spike/mockData';
 import { ESTADO_META, PAGO_SIN_ABONAR } from '../../spike/estados';
 import type { AccionCita } from '../../spike/CitaModal';
@@ -62,16 +65,29 @@ export function AgendaHoy() {
   >();
   const panelRef = useRef<HTMLDivElement>(null);
   const repartoRaf = useRef<number | null>(null);
+  const [profVisibles, setProfVisibles] = useState<string[]>(PROFESIONALES.map((p) => p.id));
+  const [servFiltro, setServFiltro] = useState<CategoriaServicio | 'todos'>('todos');
+  const [origenFiltro, setOrigenFiltro] = useState<OrigenCita | 'todos'>('todos');
 
   const seleccionada = citas.find((c) => c.id === selectedId) ?? null;
-  const columns = PROFESIONALES.map((p) => ({ name: p.nombre, id: p.id }));
-  const events = citas.map((c) => ({
+  const profsOn = profVisibles.length ? profVisibles : PROFESIONALES.map((p) => p.id);
+  const citasVisibles = citas.filter(
+    (c) =>
+      profsOn.includes(c.profesional_id) &&
+      (servFiltro === 'todos' || getServicio(c.servicio_id)?.categoria === servFiltro) &&
+      (origenFiltro === 'todos' || c.origen === origenFiltro),
+  );
+  const columns = PROFESIONALES.filter((p) => profsOn.includes(p.id)).map((p) => ({ name: p.nombre, id: p.id }));
+  const events = citasVisibles.map((c) => ({
     id: c.id,
     start: c.inicio,
     end: c.fin,
     text: c.cliente_nombre,
     resource: c.profesional_id,
   }));
+
+  const toggleProf = (id: string) =>
+    setProfVisibles((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
 
   // KPIs del día (lo que recepción necesita de un vistazo).
   const sinConfirmar = citas.filter((c) => c.estado_cita === 'pendiente').length;
@@ -230,6 +246,60 @@ export function AgendaHoy() {
             <span className="text-2xs uppercase tracking-widest text-zinc-500">{k.label}</span>
           </div>
         ))}
+      </div>
+
+      {/* Filtros rápidos (profesional · servicio · origen) */}
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-2xs uppercase tracking-widest text-zinc-600">Prof.</span>
+          {PROFESIONALES.map((p) => {
+            const on = profVisibles.includes(p.id);
+            return (
+              <button
+                key={p.id}
+                onClick={() => toggleProf(p.id)}
+                className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors ${
+                  on ? 'border-white/10 bg-zinc-800 text-zinc-100' : 'border-white/5 text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                <i className="h-2 w-2 rounded-full" style={{ background: on ? PROF_COLOR[p.id] : '#3f3f46' }} />
+                {p.nombre.split(' ')[0]}
+              </button>
+            );
+          })}
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-2xs uppercase tracking-widest text-zinc-600">Servicio</span>
+          <Button variant={servFiltro === 'todos' ? 'secondary' : 'ghost'} size="sm" onClick={() => setServFiltro('todos')}>
+            Todos
+          </Button>
+          {SERVICIOS.map((s) => (
+            <Button
+              key={s.id}
+              variant={servFiltro === s.categoria ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setServFiltro(s.categoria)}
+            >
+              {s.nombre}
+            </Button>
+          ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="text-2xs uppercase tracking-widest text-zinc-600">Origen</span>
+          <Button variant={origenFiltro === 'todos' ? 'secondary' : 'ghost'} size="sm" onClick={() => setOrigenFiltro('todos')}>
+            Todos
+          </Button>
+          {ORIGENES.map((o) => (
+            <Button
+              key={o.id}
+              variant={origenFiltro === o.id ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setOrigenFiltro(o.id)}
+            >
+              {o.label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       <div ref={panelRef} className="dp-quiet glass-panel min-h-0 flex-1 overflow-auto rounded-xl p-1.5">
