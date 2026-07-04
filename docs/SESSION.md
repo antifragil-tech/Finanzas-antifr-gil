@@ -72,17 +72,17 @@ y [docs/compliance/01-frontera-notion-antifragil-os.md](compliance/01-frontera-n
 | `docs/finanzas-facturacion-emitida-design` | `6767680` Fisioterapia sin subtipo deportivo | ✅ | **#1 OPEN** | `Finanzas-antifr-gil-facturacion` |
 | `feat/clinica-fase1-catalogos` | `d08058d` modelo de datos Clínica F1 | ✅ | **#2 DRAFT** | `wt-clinica-fase1` |
 | `demo/local-antifragil-os` | `7854be1` sincronizar contexto global OS mock | ✅ | **#3 DRAFT / NO MERGE** | `wt-demo-local-antifragil-os` |
-| `feat/reservas-agenda-hoy` | `53c233a`+ ("Agenda v0.2") | ✅ | **#5 DRAFT / NO MERGE** (creado en paralelo 2026-07-04) | `wt-reservas-agenda-hoy` |
+| `feat/reservas-agenda-hoy` | `b9860bb` limpiar términos clínicos en mocks (Agenda v0.2) | ✅ | **#5 DRAFT / NO MERGE** (creado en paralelo 2026-07-04) | `wt-reservas-agenda-hoy` |
 | `feat/reservas-calendario-semana` | `4d6dc7f` spike — **ancestro común** de reservas y demo → **archivar** | ❌ sin push | — | `wt-reservas-calendario` |
-| `chore/db-baseline-antifragil-os` | `6c49503`+ documentar A1 (modelo, contrato UI, runbook) | ✅ | **#4 DRAFT / NO APPLY** (creado en paralelo 2026-07-04) | `wt-finanzas-baseline` |
-| `qa/smoke-suite-antifragil-os` | `4e4272c` scripts smoke no destructivos | ✅ | **#6 DRAFT** (creado en paralelo 2026-07-04) | `wt-qa-smoke-suite` |
+| `chore/db-baseline-antifragil-os` | `27f6392` reforzar invariantes A1 (anti-duplicación banco + compliance clínica) | ✅ | **#4 DRAFT / NO APPLY** (creado en paralelo 2026-07-04) | `wt-finanzas-baseline` |
+| `qa/smoke-suite-antifragil-os` | `2ebe938` añadir check-no-clinical-data y check-pr-scope | ✅ | **#6 DRAFT** (creado en paralelo 2026-07-04) | `wt-qa-smoke-suite` |
 | `docs/integration-master-plan` | `3a7cb4f` plan maestro de integración y PRs | ❌ sin push | — | `wt-integration-master-plan` |
 | `chore/financiero-copy-antifragil` | `42edd4d` renombrar marca visible Alsari→Antifragil | ❌ sin push | — | `wt-finanzas-rename` |
 | `docs/finanzas-contabilidad-antifragil-audit` | `2c455ff` — **subsumida byte a byte** por `docs/finanzas-modelo-operativo` → **archivar sin merge** | ❌ sin push | — | `wt-finanzas-docs` |
 | `docs/finanzas-modelo-operativo` | `d429ec6` decisiones A1-D1..D5 en doc 06 | ❌ sin push | — | `wt-finanzas-modelo` |
 
-> Nota del traspaso: la Fase 1 de Reservas se cerró en `f3a66b0` (*ajustar altura flexible para
-> embed en shell*); la rama tiene commits posteriores hasta `53c233a`. ⚠️
+> Nota: la Fase 1 de Reservas se cerró en `f3a66b0`; la rama siguió hasta `b9860bb`
+> (Agenda v0.2 / Fase 2 + mini-hardening de compliance en los mocks).
 
 ### 2.2 Líneas de trabajo activas
 
@@ -93,13 +93,14 @@ Aislado del backend. **No se mergea entera (D8): se integra PARTIDA en 4 PRs tra
 (5a cableado host → 5b shell+panel → 5c gating → 5d rutas mock), **excluyendo** su copia de
 `apps/modules/reservas/**` (spike-ancestro sin modificar, se descarta sola con el orden correcto).
 
-**Reservas / Agenda** — `feat/reservas-agenda-hoy` — **versión CANÓNICA (D7), GATE del bloque**
-Basado en DayPilot. Fase 1 operativa standalone (`pnpm --filter @alsari/reservas dev`): Agenda
-Hoy, columnas por profesional, KPIs, huecos visibles, panel lateral, badges, Vivofácil mock,
-Semana/Mes, height-flexible. **Sin backend; el cableado al host vive en Demo (PR 5a).**
-Pendiente: push + PR Draft. El spike `feat/reservas-calendario-semana` es ancestro común →
-archivar tras integrar. Fase 2 prevista: Pendientes, Cobros pendientes, Vivofácil cierre
-mensual, Clientes administrativos, Bonos/Programas — **sin datos clínicos**.
+**Reservas / Agenda** — `feat/reservas-agenda-hoy` · **PR #5 Draft (NO MERGE)** — **versión
+CANÓNICA (D7), GATE del bloque**
+Basado en DayPilot. Estado: **Agenda v0.2 (Fase 2) + mini-hardening de compliance hecho**
+(mocks limpiados de términos clínicos, `b9860bb`): Agenda Hoy por profesional, KPIs, huecos,
+panel lateral, badges, Vivofácil mock, Semana/Mes, height-flexible, Pendientes/Cobros.
+Standalone (`pnpm --filter @alsari/reservas dev`); **sin backend; el cableado al host vive en
+Demo (PR 5a).** Pendiente: **hardening funcional de estado compartido y CitaPanel embebible.**
+El spike `feat/reservas-calendario-semana` es ancestro común → archivar tras integrar.
 
 **Supabase / DB** — `chore/db-baseline-antifragil-os`
 **Baseline curado** (decisión D4) en `services/supabase/baselines/antifragil_os/`: SQL de
@@ -109,7 +110,8 @@ hasta poner los reales) + runbook de aplicación + checks post-bootstrap + `excl
 Subcarpeta `a1_tesoreria/`: draft A1 efectivo/banco/arqueo (implementa FOP-A1, doc 06 finanzas);
 puente pagos→tesorería diferido a A1b.
 **Nada aplicado: no SQL real, no Supabase real tocado, no claves, no datos reales.**
-Pendiente: push + PR Draft.
+Estado: **PR #4 Draft (NO APPLY)** — cerrado como paquete técnico en `27f6392` (invariantes A1
+reforzados: anti-duplicación banco + compliance clínica); pendiente revisión; **no aplicar SQL**.
 Decisiones firmes (decision log D1-D11 del plan de integración): Supabase **nuevo y limpio**;
 **no** legacy de Alsari (~70 migraciones = histórico no aplicable); **no** Lidomare App;
 **no** tocar `packages/supabase-client` todavía.
@@ -148,9 +150,11 @@ checklist universal de merge, **riesgos R1-R11** y **decision log D1-D11**.
 [governance/04-integration-order.md](governance/04-integration-order.md) lo resume; la rama
 merece su propio push + PR Draft (es la fuente de detalle).
 
-**QA** — `qa/smoke-suite-antifragil-os` (✅ ya existe y está en origin, sin PR) — "Chat 5"
-`scripts/qa/`: `smoke-routes.mjs`, `check-no-secrets.mjs`, `check-legacy-strings.mjs`
-(Node sin dependencias) + `docs/qa/`: runbook y checklists de PR/demo/reservas/baseline.
+**QA** — `qa/smoke-suite-antifragil-os` · **PR #6 Draft** — "Chat 5"
+`scripts/qa/`: `smoke-routes.mjs`, `check-no-secrets.mjs`, `check-legacy-strings.mjs`,
+`check-no-clinical-data.mjs`, `check-pr-scope.mjs` (Node sin dependencias) + `docs/qa/`:
+runbook y checklists de PR/demo/reservas/baseline. Pendiente: **hardening de perfiles**
+(`--profile`, `--changed-only`, `--baseline-known-issues`).
 
 ### 2.3 🔴 Alerta de seguridad pendiente (riesgo R5 del plan de integración)
 
@@ -239,7 +243,7 @@ F4.0 — auditoría de paridad de `facturas_emitidas` — solo cuando Guille lo 
 |---|---|
 | Demo "pendiente PR Draft" | El PR #3 Draft **ya existe** (creado 2026-06-30) |
 | QA era "línea prevista" (rama futura) | `qa/smoke-suite-antifragil-os` **ya existe y está en origin** (Chat 5: 3 scripts + 5 checklists) |
-| Reservas cerró en `f3a66b0` | La rama avanza hasta `53c233a`; el spike `feat/reservas-calendario-semana` es su **ancestro** (archivar, no fusionar) |
+| Reservas cerró en `f3a66b0` | La rama avanzó hasta `b9860bb` (Agenda v0.2 / Fase 2); el spike `feat/reservas-calendario-semana` es su **ancestro** (archivar, no fusionar) |
 | Solo PRs #1 y #2 conocidos | Existen #1, #2 y #3 |
 | Demo "se integra después de Reservas" (sin más detalle) | El plan del Chat 4 la parte en **4 PRs (5a-5d)** excluyendo su copia de reservas |
 | — | Existen 4 ramas más no mencionadas en el traspaso: `docs/integration-master-plan` (plan de integración completo, R1-R11 + D1-D11), `chore/financiero-copy-antifragil`, `docs/finanzas-contabilidad-antifragil-audit` (subsumida), `docs/finanzas-modelo-operativo` |

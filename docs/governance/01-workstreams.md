@@ -15,13 +15,15 @@
 - **Fuera de alcance:** cualquier dato clínico (ver `docs/compliance/00`), backend real
   (hasta que exista el Supabase nuevo), historia clínica, notas de evolución. El **cableado
   al host** tampoco es de esta rama: vive en Demo y se integra como PR 5a.
-- **Rama esperada:** `feat/reservas-agenda-hoy` (F1) — **versión CANÓNICA del módulo (decisión
+- **Rama esperada:** `feat/reservas-agenda-hoy` — **versión CANÓNICA del módulo (decisión
   D7)** y GATE del bloque reservas/demo. Funciona standalone (`pnpm --filter @alsari/reservas dev`).
-  F2 en rama nueva `feat/reservas-fase2-*`. El spike `feat/reservas-calendario-semana` es el
-  **ancestro común** de Reservas y Demo: su contenido ya vive en ambas → **se archiva** tras
-  integrar F1 (no se fusiona, no se mergea).
-- **Criterios de cierre F1:** push + PR Draft + checklist de revisión pasada + demo visual
-  aprobada por Guille + spike archivado. **F2:** ídem + cero campos clínicos verificado.
+  La Fase 2 continuó **en la misma rama** (Agenda v0.2, PR #5 Draft/NO MERGE) con mini-hardening
+  de compliance hecho (mocks sin términos clínicos). El spike `feat/reservas-calendario-semana`
+  es el **ancestro común** de Reservas y Demo: su contenido ya vive en ambas → **se archiva**
+  tras integrar (no se fusiona, no se mergea).
+- **Criterios de cierre:** checklist de revisión pasada + **hardening funcional pendiente
+  (estado compartido y CitaPanel embebible)** + demo visual aprobada por Guille + cero campos
+  clínicos verificado + spike archivado.
 - **Riesgos:** introducir datos clínicos por la puerta de atrás (campos libres); acoplarse a
   DayPilot sin capa de abstracción; crecer sin backend y divergir del modelo de datos del baseline.
 
@@ -105,13 +107,15 @@
 - **Objetivo:** red de seguridad mínima y no destructiva para validar PRs (del "Chat 5").
 - **Alcance:** `scripts/qa/` — `smoke-routes.mjs` (rutas del host contra servidor ya levantado),
   `check-no-secrets.mjs` (claves/JWT/service_role/DB_PASSWORD en diffs),
-  `check-legacy-strings.mjs` (que no aparezca "Alsari"/"Pavier"/"Armia"/"Rialsa" en pantalla);
+  `check-legacy-strings.mjs` (que no aparezca "Alsari"/"Pavier"/"Armia"/"Rialsa" en pantalla),
+  `check-no-clinical-data.mjs` (terminología clínica) y `check-pr-scope.mjs` (diff vs alcance);
   `docs/qa/` — runbook + checklists de PR, demo, reservas y baseline. Node sin dependencias.
 - **Fuera de alcance:** tests funcionales/E2E automatizados (no hay framework aún), verificación
   de lógica de negocio, QA sobre Supabase real (solo checklist), arrancar servidores.
-- **Rama esperada:** `qa/smoke-suite-antifragil-os` (ya en origin, falta PR Draft).
-- **Criterios de cierre:** PR Draft + los checks corren en local documentadamente; integración
-  en CI es evolución posterior.
+- **Rama esperada:** `qa/smoke-suite-antifragil-os` (**PR #6 Draft**).
+- **Criterios de cierre:** revisión del PR #6 + **hardening de perfiles pendiente**
+  (`--profile`, `--changed-only`, `--baseline-known-issues`) + los checks corren en local
+  documentadamente; integración en CI es evolución posterior.
 - **Riesgos:** checks que mutan estado (deben ser read-only); falsa sensación de cobertura
   (`check-no-secrets` es red de seguridad, no auditoría).
 
