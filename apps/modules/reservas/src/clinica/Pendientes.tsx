@@ -8,10 +8,13 @@ import {
   PhoneCall,
   AlertTriangle,
   Copy,
+  CalendarX2,
+  Gift,
   type LucideIcon,
 } from 'lucide-react';
 import { crearCitasMock, getServicio, getProfesional, type CitaMock } from '../spike/mockData';
 import { PAGO_SIN_ABONAR } from '../spike/estados';
+import { BONOS, restantes } from './mock/bonos';
 import { Subvista } from './Subvista';
 import { CitaPanel } from './CitaPanel';
 import { useCitas } from './useCitas';
@@ -63,7 +66,9 @@ export function Pendientes() {
       PAGO_SIN_ABONAR.includes(x.estado_pago),
   );
   const noShow = citas.filter((x) => x.estado_cita === 'no_asiste');
+  const canceladas = citas.filter((x) => x.estado_cita === 'cancelada');
   const vivofacilCerrar = citas.filter((x) => x.origen === 'vivofacil' && x.estado_cita === 'completada');
+  const bonosRenovar = BONOS.filter((b) => b.estado === 'por_renovar' || b.estado === 'agotado');
 
   const grupos: Grupo[] = [
     {
@@ -82,7 +87,22 @@ export function Pendientes() {
       items: sinAbonar,
       accion: { label: 'Registrar pago', run: (x) => { c.registrarPago(x.id); flash('Pago registrado'); } },
     },
-    { key: 'noshow', titulo: 'No asistidos', icon: UserX, tone: 'text-rose-300', items: noShow },
+    {
+      key: 'noshow',
+      titulo: 'No asistidos',
+      icon: UserX,
+      tone: 'text-rose-300',
+      items: noShow,
+      accion: { label: 'Reagendar', run: () => flash('Reagendar (demo)') },
+    },
+    {
+      key: 'cancel',
+      titulo: 'Cancelaciones recientes',
+      icon: CalendarX2,
+      tone: 'text-rose-300',
+      items: canceladas,
+      accion: { label: 'Reagendar', run: () => flash('Reagendar (demo)') },
+    },
     { key: 'vivo', titulo: 'Vivofácil por cerrar', icon: Building2, tone: 'text-teal-300', items: vivofacilCerrar },
     {
       key: 'contacto',
@@ -159,6 +179,39 @@ export function Pendientes() {
             </section>
           );
         })}
+
+        {/* Bonos / programas por renovar (mock) */}
+        <section className="glass-panel flex flex-col rounded-2xl p-4">
+          <div className="mb-3 flex items-center gap-2">
+            <Gift size={16} className="text-violet-300" />
+            <h3 className="text-sm font-semibold text-zinc-200">Bonos por renovar</h3>
+            <span className="ml-auto rounded-full bg-white/5 px-2 py-0.5 text-2xs font-medium text-zinc-400">
+              {bonosRenovar.length}
+            </span>
+          </div>
+          {bonosRenovar.length === 0 ? (
+            <p className="py-3 text-center text-xs text-zinc-600">Nada pendiente</p>
+          ) : (
+            <ul className="space-y-1">
+              {bonosRenovar.map((b) => (
+                <li key={b.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs text-zinc-200">{b.cliente}</p>
+                    <p className="truncate text-2xs text-zinc-500">
+                      {b.nombre} · {restantes(b)} restantes
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => flash(`Renovación de ${b.nombre} anotada (demo)`)}
+                    className="rounded-md border border-white/10 px-2 py-1 text-2xs text-zinc-300 hover:bg-white/5"
+                  >
+                    Renovar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
         {/* Incidencias operativas (mock) */}
         <section className="glass-panel flex flex-col rounded-2xl p-4">
