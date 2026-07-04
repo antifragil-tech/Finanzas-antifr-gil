@@ -13,73 +13,107 @@
   badges, estados de cita, asistencia/no asistencia, Vivofácil (mock → cierre mensual),
   bonos/programas (F2), cobros pendientes (F2), clientes administrativos (F2).
 - **Fuera de alcance:** cualquier dato clínico (ver `docs/compliance/00`), backend real
-  (hasta que exista el Supabase nuevo), historia clínica, notas de evolución.
-- **Rama esperada:** `feat/reservas-agenda-hoy` (F1); F2 en rama nueva `feat/reservas-fase2-*`.
-  Spike `feat/reservas-calendario-semana` pendiente de fusionar o descartar.
+  (hasta que exista el Supabase nuevo), historia clínica, notas de evolución. El **cableado
+  al host** tampoco es de esta rama: vive en Demo y se integra como PR 5a.
+- **Rama esperada:** `feat/reservas-agenda-hoy` (F1) — **versión CANÓNICA del módulo (decisión
+  D7)** y GATE del bloque reservas/demo. Funciona standalone (`pnpm --filter @alsari/reservas dev`).
+  F2 en rama nueva `feat/reservas-fase2-*`. El spike `feat/reservas-calendario-semana` es el
+  **ancestro común** de Reservas y Demo: su contenido ya vive en ambas → **se archiva** tras
+  integrar F1 (no se fusiona, no se mergea).
 - **Criterios de cierre F1:** push + PR Draft + checklist de revisión pasada + demo visual
-  aprobada por Guille. **F2:** ídem + cero campos clínicos verificado.
+  aprobada por Guille + spike archivado. **F2:** ídem + cero campos clínicos verificado.
 - **Riesgos:** introducir datos clínicos por la puerta de atrás (campos libres); acoplarse a
   DayPilot sin capa de abstracción; crecer sin backend y divergir del modelo de datos del baseline.
 
 ## Demo OS
 
 - **Objetivo:** cascarón navegable del OS para enseñar la visión (DemoShell, Sidebar, Topbar,
-  Dashboard, rutas mock, Demo Mode, contexto global Sociedad/Proyecto/Rol/Periodo).
-- **Alcance:** presentación e interacción simulada, aislada del backend.
-- **Fuera de alcance:** datos reales, backend, merge directo a `main`.
+  Panel de Dirección, rutas mock, Demo Mode, contexto global Sociedad/Proyecto/Rol/Periodo).
+- **Alcance:** presentación e interacción simulada, aislada del backend, protegida por
+  `ANTIFRAGIL_DEMO_MODE` con **doble guarda anti-producción** (la flag se ignora si
+  `NODE_ENV=production`; sin la flag, el host se comporta idéntico a `main`).
+- **Fuera de alcance:** datos reales, backend, merge directo a `main`, y **su copia de
+  `apps/modules/reservas/**`** (es el spike-ancestro sin modificar: se descarta al integrar).
 - **Rama esperada:** `demo/local-antifragil-os` (PR #3 Draft, marcado NO MERGE).
-- **Criterios de cierre:** NO se cierra mergeando tal cual — se cierra **re-montando** sus piezas
-  reutilizables (shell, contexto global) sobre el módulo canónico de Reservas ya integrado.
-- **Riesgos:** que el mock se convierta en producto por inercia; fijar contratos de rutas falsos;
-  divergencia creciente con Reservas mientras espera.
+- **Criterios de cierre:** NO se mergea entera (decisión D8) — se integra **partida en 4 PRs**
+  tras Reservas: **5a** cableado host (`/reservas`, `ssr:false`) → **5b** shell + panel + mock →
+  **5c** gating anti-producción (revisión crítica de `middleware.ts`/`layout.tsx`) → **5d** rutas
+  secundarias mock con etiqueta "DATOS DE DEMOSTRACIÓN".
+- **Riesgos:** que el mock se convierta en producto por inercia; reintroducir el spike viejo si
+  se integra antes que Reservas (riesgo R3); que el gating rompa producción (por eso 5c va solo).
 
 ## Baseline Supabase
 
-- **Objetivo:** esquema fundacional del Supabase **nuevo** de Antifrágil OS (baseline curado,
-  hardening, runbook de aplicación).
-- **Alcance:** SQL versionado en repo, decisiones de modelo, contrato UI↔DB, RLS desde el
-  primer día, runbook de aplicación manual.
-- **Fuera de alcance:** aplicar SQL a ningún Supabase real; tocar el Supabase legacy de Alsari;
-  usar Lidomare App; tocar `packages/supabase-client`.
+- **Objetivo:** esquema fundacional del Supabase **nuevo** de Antifrágil OS (baseline curado —
+  decisión D4 — con hardening y runbook de aplicación).
+- **Alcance:** `services/supabase/baselines/antifragil_os/` — SQL consolidado (26 tablas:
+  maestro, contabilidad, banco, facturas, pagos append-only, asientos, presupuestos, tesorería,
+  KPIs + RPCs + vistas + RLS ON en todo + Storage privado), `post_bootstrap_checks.sql`,
+  `APPLY_RUNBOOK.md`, `ROLLBACK_NOTES.md`, `SECURITY_CHECKLIST.md`, `excluded_legacy.md`.
+  Modelo **sociedad única**: seed mínimo con `Antifrágil S.C.` (`ANT`) y proyectos `CLI-PLY`
+  (activo) + `9AM`/`LIDO`/`EVT` (placeholder), emails placeholder.
+- **Fuera de alcance:** aplicar SQL a ningún Supabase real; tocar el Supabase legacy de Alsari
+  (las ~70 migraciones de `services/supabase/migrations/` son histórico NO aplicable);
+  usar Lidomare App (decisión D2); tocar `packages/supabase-client` (decisión D9).
 - **Rama esperada:** `chore/db-baseline-antifragil-os`.
-- **Criterios de cierre:** PR Draft revisado + decisión de Guille sobre cuándo crear el proyecto
+- **Criterios de cierre:** PR Draft revisado (diff solo bajo `baselines/antifragil_os/`,
+  `SECURITY_CHECKLIST.md` revisado) + decisión de Guille sobre cuándo crear el proyecto
   Supabase real; la aplicación del SQL es un acto posterior, autorizado y documentado (runbook).
 - **Riesgos:** drift repo↔BD (riesgo nº1 heredado — lección 2026-06-11: el archivo .sql en el
-  repo NO garantiza que la BD lo refleje); RLS permisiva por prisas; aplicar algo "solo para probar".
+  repo NO garantiza que la BD lo refleje); **modo single-operator** mientras los 3 emails del
+  seed sean placeholder (las RPC no exigen rol — poner emails reales antes de datos reales);
+  roles `guille/javi/alicia` incrustados en las RPC (revisar mapeo para Antifrágil);
+  aplicar algo "solo para probar".
 
 ## A1 Tesorería / Caja
 
-- **Objetivo:** primer dominio funcional sobre el baseline — modelo de tesorería y caja diaria
-  (decisiones de modelo, contrato UI, runbook), como draft dentro del baseline.
-- **Alcance:** diseño de tablas/vistas/contratos; nada aplicado.
-- **Fuera de alcance:** UI final, SQL aplicado, datos reales.
-- **Rama esperada:** viaja con `chore/db-baseline-antifragil-os`; si crece, rama propia `feat/a1-tesoreria-caja`.
+- **Objetivo:** primer dominio funcional sobre el baseline — separar **efectivo vs banco** y
+  añadir **arqueo de caja** (implementa el mini-diseño FOP-A1, doc 06 de finanzas).
+- **Alcance:** `baselines/antifragil_os/a1_tesoreria/` — draft SQL con `cuenta_tesoreria`
+  (caja/banco), `movimiento_caja` (ledger append-only), `arqueo_caja` (teórico vs contado,
+  estados borrador/cerrado/revisado), vista unificada `movimiento_tesoreria`, saldos y resumen,
+  RPCs `registrar_movimiento_caja`/`registrar_arqueo_caja`/`cerrar_arqueo_caja`, seed
+  "Caja Clínica Playamar" (sin saldo). + `MODEL_DECISIONS.md`, `UI_CONTRACT.md`,
+  `APPLY_A1_RUNBOOK.md`, `post_a1_checks.sql`.
+- **Fuera de alcance:** el **puente `factura_pago → movimiento de tesorería`** (diferido a A1b:
+  el modelo lo prepara pero nada lo rellena aún), motor PGC completo, conciliación banco↔factura,
+  UI (solo contrato de datos), SQL aplicado, datos reales.
+- **Rama esperada:** viaja con `chore/db-baseline-antifragil-os`; si crece, rama propia.
 - **Criterios de cierre:** revisado dentro del PR de baseline; Guille valida el modelo de caja.
-- **Riesgos:** mezclar caja (efectivo físico) con banco; no distinguir fecha de cobro vs fecha
-  de servicio (regla de oro de finanzas: emisión ≠ cobro ≠ servicio).
+- **Riesgos:** mezclar caja (efectivo físico) con banco (justo lo que A1 separa); no distinguir
+  fecha de cobro vs fecha de servicio (regla de oro: emisión ≠ cobro ≠ servicio).
 
 ## Integración
 
 - **Objetivo:** que las líneas converjan a `main` en el orden correcto sin romperse entre sí.
-- **Alcance:** orden de integración (ver [04-integration-order.md](04-integration-order.md)),
-  política de lockfile, matriz de dependencias entre PRs.
+- **Alcance:** el plan maestro del "Chat 4" vive en la rama `docs/integration-master-plan`
+  (`docs/integration/00-06`: estado de ramas con genealogía, orden de PRs 1-9, matriz de
+  conflictos por archivo, runbook push/PR para no expertos, checklist universal de merge,
+  riesgos R1-R11, decision log D1-D11). [04-integration-order.md](04-integration-order.md)
+  lo resume dentro de governance.
 - **Fuera de alcance:** ejecutar merges (eso es decisión de Guille, PR a PR).
-- **Rama esperada:** el contenido vive en governance; la rama histórica
-  `docs/integration-master-plan` queda para archivar o reconvertir.
+- **Rama esperada:** `docs/integration-master-plan` → push + PR Draft (sus 7 docs merecen estar
+  en `main`; governance los referencia, no los sustituye). Tras mergear, el decision log de esa
+  carpeta sigue vivo (las decisiones nuevas se AÑADEN, no se reescriben).
 - **Criterios de cierre:** línea permanente (no se cierra); se revisa en cada merge.
-- **Riesgos:** mergear en orden equivocado (Demo antes que Reservas); resolver lockfile a mano.
+- **Riesgos:** mergear en orden equivocado (Demo antes que Reservas → riesgo R3); resolver
+  lockfile a mano (R2); operar git con el `.git` compartido entre 13 worktrees sin pausar al
+  resto (R1); que el plan y el tracker diverjan (actualizar ambos).
 
 ## QA
 
-- **Objetivo:** red de seguridad mínima y no destructiva para validar PRs.
-- **Alcance:** smoke routes (las rutas del host responden), verificación de no-secrets,
-  verificación de no-legacy visible, checklists por tipo de PR (demo/reservas/baseline).
-- **Fuera de alcance:** suite completa de tests unitarios/E2E (fase posterior); QA sobre
-  Supabase real.
+- **Objetivo:** red de seguridad mínima y no destructiva para validar PRs (del "Chat 5").
+- **Alcance:** `scripts/qa/` — `smoke-routes.mjs` (rutas del host contra servidor ya levantado),
+  `check-no-secrets.mjs` (claves/JWT/service_role/DB_PASSWORD en diffs),
+  `check-legacy-strings.mjs` (que no aparezca "Alsari"/"Pavier"/"Armia"/"Rialsa" en pantalla);
+  `docs/qa/` — runbook + checklists de PR, demo, reservas y baseline. Node sin dependencias.
+- **Fuera de alcance:** tests funcionales/E2E automatizados (no hay framework aún), verificación
+  de lógica de negocio, QA sobre Supabase real (solo checklist), arrancar servidores.
 - **Rama esperada:** `qa/smoke-suite-antifragil-os` (ya en origin, falta PR Draft).
 - **Criterios de cierre:** PR Draft + los checks corren en local documentadamente; integración
   en CI es evolución posterior.
-- **Riesgos:** checks que mutan estado (deben ser read-only); falsa sensación de cobertura.
+- **Riesgos:** checks que mutan estado (deben ser read-only); falsa sensación de cobertura
+  (`check-no-secrets` es red de seguridad, no auditoría).
 
 ## Compliance
 
@@ -114,13 +148,20 @@
 
 - **Objetivo:** catálogos/maestros administrativos de la clínica (servicios, tarifas, bonos,
   programas) + tipos compartidos.
-- **Alcance:** modelo de datos y tipos; catálogo comercial (nunca clínico).
+- **Alcance:** tipos `packages/types/src/clinica.ts` (+ barrel) y doc de decisión de esquema
+  (`docs/reservas/05`: tablas con prefijo `clinica_*` en `public`, no schema aparte);
+  catálogo comercial (nunca clínico).
 - **Fuera de alcance:** historia clínica, precios con criterio fiscal definitivo (D2: sin IVA
-  provisional, `exento_provisional` por producto), backend real.
-- **Rama esperada:** `feat/clinica-fase1-catalogos` (PR #2 Draft).
-- **Criterios de cierre:** revisión del modelo contra `docs/compliance/00` + validación de Guille.
-- **Riesgos:** filtrar terminología clínica en nombres de servicios; hardcodear tratamiento
-  fiscal global (prohibido por D3: es por producto/proyecto).
+  provisional, `exento_provisional` por producto), backend real, y **su propio SQL como
+  migración activa**: `202606261000_clinica_fase1_catalogos.sql` quedó **fuera de patrón**
+  (riesgo R10) al decidirse el baseline curado (D4) — se reubica/refleja en el baseline.
+- **Rama esperada:** `feat/clinica-fase1-catalogos` (PR #2 Draft) — **reescribir su alcance**
+  a solo tipos + doc, coordinando con la línea Baseline para absorber los catálogos.
+- **Criterios de cierre:** revisión del modelo contra `docs/compliance/00` + catálogos
+  reflejados en el baseline + validación de Guille.
+- **Riesgos:** dos fuentes de verdad del esquema clínica si el SQL no se reubica (R10);
+  filtrar terminología clínica en nombres de servicios; hardcodear tratamiento fiscal global
+  (prohibido por D3: es por producto/proyecto).
 
 ## Governance (esta línea)
 
@@ -134,11 +175,12 @@
 
 ## Rebrand marca visible (Alsari → Antifrágil)
 
-- **Objetivo:** eliminar "Alsari Capital" de la UI/PDF visibles sin tocar el namespace interno.
-- **Alcance:** strings visibles, logos, títulos.
+- **Objetivo:** eliminar "Alsari Capital" de la UI visible sin tocar el namespace interno.
+- **Alcance actual:** 4 líneas de copy en `apps/modules/financiero` (App, DashboardLayout,
+  FinancialSidebar, MaestroView). Ampliable después a otros módulos/PDF con el mismo criterio.
 - **Fuera de alcance:** rebranding global `@alsari/*`, `window.alsariToken`, nombres de paquetes,
-  lockfile (fase de infraestructura futura).
+  raíz `alsari-capital-os`, `vercel.json`, lockfile (todo eso es el PR 8 diferido, decisión D10).
 - **Rama esperada:** `chore/financiero-copy-antifragil`.
-- **Criterios de cierre:** push + PR Draft + revisión visual; se integra DESPUÉS de Reservas/Demo
-  para no generar conflictos con esas ramas grandes.
-- **Riesgos:** conflictos de merge con ramas activas si se integra antes de tiempo.
+- **Criterios de cierre:** push + PR Draft + revisión visual. Puede integrarse **temprano**
+  (PR 3 del orden): es aislado — ninguna otra rama activa toca `financiero`.
+- **Riesgos:** mínimos; vigilar únicamente que no se cuele nada de nombres de paquete.
