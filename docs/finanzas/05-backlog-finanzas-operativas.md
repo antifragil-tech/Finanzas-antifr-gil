@@ -39,6 +39,8 @@ Se parte en tres lotes: **A1** (efectivo/banco+arqueo), **A2** (CxP/CxC+estados)
 
 ### F-Op A1 — Efectivo vs banco + arqueo de caja  🟢  · 🟦🟩🟨
 
+> **Estado real (2026-07-04):** A1 ya tiene **draft SQL en el PR #4** (`chore/db-baseline-antifragil-os`, head `27f6392`, **Draft / NO APPLY**): cuenta de tesorería (caja/banco), ledger de movimiento de caja, arqueo y vista de tesorería. El puente `factura_pago → movimiento_tesoreria` queda **diferido a A1b**. **Nada aplicado en Supabase.** Detalle en [06 §10](06-fop-a1-efectivo-banco-arqueo.md).
+
 1. **Objetivo:** separar el saldo de **efectivo (caja física)** del saldo de **banco**, y cuadrar la caja con un **arqueo diario**.
 2. **Problema que resuelve:** hoy el PGC mezcla cuentas `570` (caja) y `572` (banco) en un único "caja disponible"; la clínica cobra en efectivo/datáfono/bizum y no hay forma de saber el efectivo real ni de detectar descuadres.
 3. **Reutiliza:** `factura_pagos.metodo_pago` (ya incluye `efectivo`); motor PGC y dashboard de `financiero`; patrón append-only de `factura_pagos`.
@@ -133,7 +135,7 @@ Cubre: comparar ingreso real con previsión · desviaciones · forecast mensual 
 4. **Crear/adaptar:** vínculo ingreso real ↔ partida de ingreso presupuestada; vista de desviación (importe y %); forecast mensual; reglas de alerta (desviación > umbral).
 5. **Archivos candidatos:** vista SQL de comparación presupuesto/real; `apps/modules/presupuestos/` (panel de desviaciones), métricas de proyecto.
 6. **Riesgos:** datos de ingreso real incompletos hasta que la Clínica facture/cobre y la facturación emitida esté lista; alertas ruidosas si la previsión es pobre.
-7. **Dependencias Clínica/Fase 2:** depende de que fluya **ingreso real** (F-Op B y/o línea de **facturación emitida**, doc `02`); el armazón presupuestario ya existe.
+7. **Dependencias Clínica/Fase 2:** depende de que fluya **ingreso real** (F-Op B y/o línea de **facturación emitida** — doc `02`, **PR #1**; recordar que el OS es **precontable** y no emite factura legal oficial todavía); el armazón presupuestario ya existe.
 8. **Tipo:** 🟦 SQL (vista comparativa) · 🟨 UI (panel desviación/forecast). 🟩 tipos si hace falta.
 9. **Hecho cuando:** se ve, por proyecto y mes, ingreso presupuestado vs real con su desviación, un forecast del mes en curso y alertas cuando la desviación supera el umbral.
 
@@ -152,6 +154,20 @@ Cubre: comparar ingreso real con previsión · desviaciones · forecast mensual 
 | D Ingreso real vs ppto | 🟠 | ✔ | (✔) | ✔ | ingreso real (B / facturación emitida) |
 
 **Decisiones de Guille que desbloquean fases:** F-2 (recepción compartida), F-3 (asalariados/nóminas), F-4 (generales: contribución vs prorrateo), F-5 (recurrencia acotada vs indefinida). Recogidas en [04](04-finanzas-operativas-mapa-y-gaps.md) §10.
+
+---
+
+## Riesgos y salvaguardas transversales (actualizado 2026-07-04)
+
+Aplican a **todas** las fases de este backlog mientras no haya autorización expresa en contra:
+
+1. **No aplicar SQL.** El baseline y A1 del PR #4 son **Draft / NO APPLY**; ningún `.sql` de esta línea se ejecuta contra Supabase. No existe (ni se asume) un Supabase real con este esquema.
+2. **No mezclar con legacy.** El esquema heredado de Alsari (y su `anon key` legacy, cuya **rotación sigue pendiente fuera del repo**) no se toca ni se reutiliza como base de datos viva; el baseline nuevo excluye el legacy explícitamente.
+3. **No tocar `packages/supabase-client`.** Cualquier cambio de cliente/exposición de schemas es una línea aparte con su propio diseño y revisión.
+4. **No usar datos reales ni clínicos.** Los docs y drafts trabajan con placeholders (Clínica Playamar, 9AM/Lido Pro como líneas futuras); nada de pacientes, CIFs, IBANs ni importes reales. El baseline v1 verifica ausencia de rastro clínico.
+5. **No confundir factura legal con registro operativo.** El OS es **precontable**: registra la operación (cobro, prefactura, borrador) pero **no emite factura legal oficial**; la emisión fiscal (Veri\*factu) se delega en gestoría/software homologado (decisión F4-D, doc `02` / PR #1).
+6. **A1b diferido.** El puente automático `factura_pago → movimiento_tesoreria` no se implementa hasta abrir A1b en un commit controlado.
+7. **Conexión real a banco diferida.** El lado banco se alimenta de extractos importados; la integración directa con la entidad bancaria no está en alcance.
 
 ---
 

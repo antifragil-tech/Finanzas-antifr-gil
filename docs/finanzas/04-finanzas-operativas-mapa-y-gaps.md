@@ -29,7 +29,7 @@ Este documento **separa tres lentes** que miran el mismo dinero de forma distint
 
 **Dentro de alcance:** tesorería operativa (banco/efectivo/caja, pagos/cobros reales y pendientes, vencimientos, conciliación, arqueo), rentabilidad analítica operativa (margen por servicio/profesional/producto/proyecto, costes directos/compartidos/fijos, devengo de bonos), y precontabilidad (facturas recibidas, pagos, documentos para la gestoría, trazabilidad).
 
-**Fuera de alcance de este documento (líneas propias, no se tocan aquí):** clínica/reservas, facturación **emitida** (doc `02`, otra rama), el rebrand `@alsari/*`, y la lente de **inversión inmobiliaria** (TIR/VAN/cap-rate/valor de salida), que no aplica a un negocio operativo.
+**Fuera de alcance de este documento (líneas propias, no se tocan aquí):** clínica/reservas, facturación **emitida** (doc `02` — **PR #1**, rama `docs/finanzas-facturacion-emitida-design`), el rebrand `@alsari/*`, y la lente de **inversión inmobiliaria** (TIR/VAN/cap-rate/valor de salida), que no aplica a un negocio operativo.
 
 **Principio rector:** la **cita/sesión** es la verdad operativa que en el futuro alimentará las tres lentes (ver [01](01-modelo-conceptual-antifragil.md) §3). Mientras la clínica no esté conectada, este modelo se diseña **multi-proyecto y genérico**, listo para recibir esos datos sin reescribirse.
 
@@ -139,7 +139,7 @@ Más finos que el `pendiente/pagado` contable. **Decisión conceptual** de este 
 
 - **"Factura sí / factura no".** No todo gasto o cobro tiene factura: un ticket sin factura completa, una nómina, un cobro en efectivo sin factura, un pago a un autónomo pendiente de su factura. El modelo debe marcar **si hay documento o no**, qué falta, y permitir el flujo aunque el papel llegue después. Esto conecta tesorería (el dinero se movió) con precontabilidad (el papel puede no estar).
 - **Documentos pendientes.** Lista operativa de "movimientos sin justificante" y "facturas esperadas" (p. ej. el autónomo que aún no ha mandado su factura del mes). Hoy implícito; debe hacerse explícito.
-- **Paquete para gestoría.** Salida periódica trazable: facturas recibidas + clasificación (cuenta/IVA/IRPF/exención) + pagos + extractos conciliados. **Decisión conceptual:** la emisión/cierre fiscal puede **delegarse** en la gestoría (alineado con la línea de facturación emitida, doc `02`); el OS es el **libro operativo** que la alimenta.
+- **Paquete para gestoría.** Salida periódica trazable: facturas recibidas + clasificación (cuenta/IVA/IRPF/exención) + pagos + extractos conciliados. **Decisión ya firme (F4-D, 2026-06-26 — doc `02` / PR #1):** la emisión fiscal oficial y el cierre **se delegan** en la gestoría / software homologado (Veri\*factu fuera del OS por ahora); el OS es el **libro operativo / precontable** que la alimenta y **no emite factura legal oficial todavía**.
 - **Trazabilidad.** Todo cambio relevante (aprobación, pago, conciliación) queda en log append-only con actor y fecha — el patrón `factura_aprobaciones` ya lo hace y se reutiliza.
 
 ### 5.3 Hueco específico de personal (entra por aquí y por la lente 2)
@@ -221,10 +221,10 @@ Lo que hace que las tres lentes cuadren sin contabilidades paralelas es **etique
 ### Decisiones tomadas en este documento (sujetas a validación)
 - **D-op-1.** Tres lentes separadas (tesorería/rentabilidad/precontabilidad) con invariante anti-doble-conteo. La fecha que manda es distinta en cada una.
 - **D-op-2.** Rentabilidad se mide por **devengo** (fecha de prestación); el coste de personas se imputa al **mes del servicio**, no al mes de pago.
-- **D-op-3.** Tesorería distingue `medio = efectivo|banco` (con subtipo) y exige **arqueo de caja** para el efectivo.
+- **D-op-3.** La tesorería separa **efectivo y banco** como **cuentas de tesorería distintas** y exige **arqueo de caja** para el efectivo. *Precisión posterior (PR #4, ver [06 §9](06-fop-a1-efectivo-banco-arqueo.md)): `banco` **no** es un valor de `medio_pago` — el medio (efectivo/tarjeta/transferencia/bizum/domiciliación) describe cómo se mueve el dinero; caja/banco son tipos de cuenta donde vive.*
 - **D-op-4.** Estados de seguimiento operativo CxC/CxP por encima del estado contable (§3.3).
 - **D-op-5.** Las dimensiones finas (servicio/profesional/cliente/producto) viven en `clinica` y **agregan por `proyecto_id_ref`**; la capa global recibe agregados, no pacientes.
-- **D-op-6.** El OS es el **libro operativo / precontabilidad**; el cierre fiscal y la emisión pueden **delegarse en la gestoría** (coherente con doc `02`).
+- **D-op-6.** El OS es el **libro operativo / precontabilidad**; el cierre fiscal y la emisión oficial **se delegan en la gestoría / software homologado** (✅ ya decidido — F4-D, 2026-06-26, doc `02` / PR #1: el OS no emite factura legal oficial todavía; Veri\*factu fuera del OS).
 - **D-op-7.** **Margen de contribución primero** (costes directos por proyecto; generales al resultado global) como punto de partida.
 
 ### Dudas abiertas para Guille

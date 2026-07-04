@@ -138,7 +138,7 @@ La tabla `proyectos` **sirve tal cual** para la Clínica. Lo que **no** se usa e
 | Detección holding "Pavier/Armia", IDs socios, `pct_pavier/pct_armia` | **Adaptar o eliminar** (según DECISIÓN 2) | Fase 2 |
 | PersonaView / patrimonio personal / CorporateMap familiar | **Jubilar** (✅ confirmado 2026-06-26) | Fase 2 |
 | `analisisFinanciero.ts` (lente de inversión) | **No usar** sobre proyectos operativos; mantener solo si hay proyecto inmobiliario real | Fase 2 |
-| Facturación emitida | **Construir** (línea paralela — `02-diseno-facturacion-emitida.md`) | Fase 4 |
+| Facturación emitida | **Construir** (línea paralela — `02-diseno-facturacion-emitida.md`, **PR #1**). Decidido F4-D (2026-06-26): el OS es **precontable** y **no emite factura legal oficial**; Veri\*factu/emisión se delega en gestoría o software homologado. Pendientes F4-A/B/E + criterio gestoría (F4-C). **F4.0 no se abre sin autorización.** | Fase 4 |
 | Rentabilidad analítica operativa | **Crear** capa nueva (devengo + costes directos) | Fase 3 |
 
 ---

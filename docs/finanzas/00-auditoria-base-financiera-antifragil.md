@@ -5,6 +5,7 @@
 > **Fecha:** 2026-06-26
 > **Autor:** Claude (arquitecto técnico-financiero) · **Validación:** Guille
 > **Regla de oro:** no duplicar tablas/contabilidad/facturas/cashflow. Primero mapear lo que hay, luego decidir qué se conserva / renombra (solo UI) / adapta / depreca / migra / crea.
+> **Actualización 2026-07-04:** este documento es la foto de la auditoría (2026-06-26). El estado vivo de las líneas derivadas: **facturación emitida** → doc `02` en **PR #1** (OS precontable, emisión legal delegada); **baseline DB + A1 Tesorería/Caja** → **PR #4** (`chore/db-baseline-antifragil-os`, head `27f6392`, **Draft / NO APPLY** — ningún SQL aplicado); **modelo operativo** → docs 04-06 de esta rama.
 
 ---
 

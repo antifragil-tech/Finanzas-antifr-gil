@@ -6,6 +6,7 @@
 > **Depende de:** [05-backlog...](05-backlog-finanzas-operativas.md) (F-Op A1) · [04-finanzas-operativas...](04-finanzas-operativas-mapa-y-gaps.md) (Lente 1)
 > **Regla:** reutilizar antes de crear. No romper facturas recibidas ni el cashflow actual. Migraciones futuras se aplican a mano por el Dashboard de Supabase (riesgo de drift).
 > **Marcas `✅ DECISIÓN RESUELTA`:** bifurcaciones técnicas ya decididas por Guille (recapituladas en §9).
+> **Sincronización 2026-07-04:** este diseño ya tiene **draft SQL en el PR #4** (`chore/db-baseline-antifragil-os`, head `27f6392`, **Draft / NO APPLY — nada aplicado en Supabase**). Estado real en §10.
 
 ---
 
@@ -54,9 +55,9 @@
 > Conceptual, no esquema final. Nombres y campos son tentativos para decidir; las columnas exactas se fijan en la fase de implementación con su migración.
 
 ### 3.1 `medio_pago` (enum / dimensión)
-Valores: `efectivo · banco · tarjeta · transferencia · bizum · otro`.
-- Amplía el enum actual de `factura_pagos.metodo_pago` (que hoy no tiene `bizum` y usa `domiciliacion`).
-- **Agrupación derivada:** cada medio cae en una **clase de cuenta** → `efectivo` ⇒ caja física; `banco/tarjeta/transferencia/bizum/domiciliacion` ⇒ banco. `tarjeta`/`datáfono` puede llevar subtipo si se quiere medir comisión (futuro, no A1).
+Valores: `efectivo · tarjeta · transferencia · bizum · domiciliacion · otro`. **`banco` NO es un medio de pago** (✅ A1-D6, §9): el *medio* describe **cómo** se mueve el dinero; banco/caja son **tipos de cuenta** (`cuenta_tesoreria.tipo`), es decir, **dónde** vive.
+- Amplía el enum actual de `factura_pagos.metodo_pago` (que hoy no tiene `bizum`).
+- **Agrupación derivada:** cada medio cae en una **clase de cuenta** → `efectivo` ⇒ caja física; `tarjeta/transferencia/bizum/domiciliacion` ⇒ banco. En el lado banco, el extracto importado no trae medio → el `medio_pago` de un movimiento bancario puede ser `NULL`. `tarjeta`/`datáfono` puede llevar subtipo si se quiere medir comisión (futuro, no A1).
 
 ### 3.2 `cuenta_tesoreria` (nueva — la clave del diseño)
 Una cuenta donde "vive" dinero. Generaliza banco + caja:
@@ -150,9 +151,9 @@ arqueo_caja (solo cajas)        cashflow_consolidado (sin doble conteo)
 
 ## 6. Reglas (invariantes del modelo)
 
-1. **Todo pago/cobro debe tener `medio`.** No se registra dinero sin medio.
+1. **Todo pago/cobro registrado en caja debe tener `medio`.** No se registra efectivo sin medio. En el lado banco, el movimiento importado del extracto puede llevar `medio_pago = NULL` (el extracto no lo trae).
 2. **Efectivo requiere una caja.** `medio='efectivo'` ⇒ el movimiento apunta a una `cuenta_tesoreria` de `tipo='caja'`.
-3. **Banco requiere una cuenta bancaria.** `medio ∈ {banco, transferencia, tarjeta, bizum, domiciliacion}` ⇒ `cuenta_tesoreria` de `tipo='banco'` (con su `cuenta_bancaria_id`).
+3. **Banco requiere una cuenta bancaria.** `medio ∈ {transferencia, tarjeta, bizum, domiciliacion}` ⇒ `cuenta_tesoreria` de `tipo='banco'` (con su `cuenta_bancaria_id`; una cuenta bancaria solo puede estar detrás de **una** cuenta de tesorería, para que el lado banco no pueda duplicarse).
 4. **El arqueo no es un movimiento, es un control.** No mueve saldo por sí mismo; si hay descuadre, se materializa con un movimiento de ajuste explícito y trazado.
 5. **No mezclar saldo de banco con caja física.** Son cuentas separadas; el "total" es una suma presentada, nunca un saldo único almacenado.
 6. **Saldos derivados, libro append-only.** El saldo se calcula sumando movimientos; las correcciones se hacen con movimientos nuevos (patrón `factura_pagos`), nunca editando/borrando.
@@ -189,6 +190,19 @@ arqueo_caja (solo cajas)        cashflow_consolidado (sin doble conteo)
 - **✅ A1-D3 — Frecuencia de arqueo → diario con efectivo, semanal si no.** **Arqueo diario** los días con movimientos en efectivo; si no hay efectivo, **mínimo semanal**. (Liga con ⚠️ F-1 del doc 04.)
 - **✅ A1-D4 — Tarjeta/datáfono → en A1 solo el medio `tarjeta`.** Las **comisiones del datáfono quedan fuera de A1** y se tratarán más adelante como **gasto financiero/operativo** (no se separa el subtipo ni la comisión en este lote).
 - **✅ A1-D5 — Saldo de banco → dos saldos etiquetados.** Para **gestión diaria manda el saldo operativo** (suma de `movimientos_bancarios`); para **cierre/gestoría manda el saldo contable/conciliado** (PGC 572). **Ambos pueden coexistir, pero deben mostrarse etiquetados de forma distinta** (no presentarse como una única cifra).
+- **✅ A1-D6 — `medio_pago` SIN `banco` (fijado en el draft SQL del PR #4).** `banco` no es un valor de `medio_pago`; banco y caja son **tipos** de `cuenta_tesoreria`. El medio describe *cómo* se mueve el dinero (efectivo/tarjeta/transferencia/bizum/domiciliación/otro); el tipo de cuenta, *dónde* vive. §3.1 y §6 de este documento quedan alineados con esa decisión.
+
+---
+
+## 10. Estado de implementación (sincronizado 2026-07-04)
+
+Este mini-diseño ya tiene **implementación draft en SQL** en el **PR #4** — `DRAFT / NO APPLY — db: baseline Supabase Antifrágil OS + A1 Tesorería/Caja` (rama `chore/db-baseline-antifragil-os`, head `27f6392`):
+
+- El draft `services/supabase/baselines/antifragil_os/a1_tesoreria/001_a1_tesoreria_caja_draft.sql` crea: **`cuenta_tesoreria`** (tipos `caja`/`banco`), **`movimiento_caja`** (ledger de efectivo, append-only, escritura solo por RPC), **`arqueo_caja`** (estados `borrador → cerrado → revisado`, con ajuste materializable opcional), y las vistas **`movimiento_tesoreria`**, **`saldo_tesoreria`** y **`tesoreria`**.
+- Respeta la decisión **A1-D1 opción (b)**: `movimientos_bancarios` se conserva como ledger de banco y la vista unifica ambos lados sin doble conteo (índice único: una cuenta bancaria ↔ una cuenta de tesorería).
+- **El puente `factura_pago → movimiento_tesoreria` queda DIFERIDO a A1b.** El modelo lo deja preparado (`origen_tipo='factura_pago'` + `origen_id`) pero no hay automatismo y **no se toca la firma de `registrar_pago_factura`**.
+- **Nada está aplicado.** El PR #4 es **Draft / NO APPLY**: el SQL no se ha ejecutado y no existe un Supabase real con este esquema. Este documento no describe estado de producción, describe un diseño con draft SQL revisable.
+- La **conexión real a banco** (importación automática desde la entidad bancaria) también queda **diferida**; el lado banco parte de extractos importados.
 
 ---
 
