@@ -32,11 +32,17 @@ interface Props {
   onAccion: (accion: AccionCita) => void;
   onPago: (estado: EstadoPago) => void;
   onOrigen: (origen: OrigenCita) => void;
+  /**
+   * 'fixed' (default): overlay sobre el viewport completo — módulo standalone.
+   * 'contained': overlay limitado al contenedor posicionado (relative) más
+   * cercano, para embeber el módulo en el host/demo sin tapar toda la app.
+   */
+  mode?: 'fixed' | 'contained';
 }
 
 // Panel lateral (slide-over) de una cita. Acciones mock/local, sin backend.
 // Sin borrado físico: cancelar / no-show / completar son cambios de estado.
-export function CitaPanel({ cita, onClose, onAccion, onPago, onOrigen }: Props) {
+export function CitaPanel({ cita, onClose, onAccion, onPago, onOrigen, mode = 'fixed' }: Props) {
   const [aviso, setAviso] = useState<string | null>(null);
   if (!cita) return null;
 
@@ -58,7 +64,7 @@ export function CitaPanel({ cita, onClose, onAccion, onPago, onOrigen }: Props) 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div className={`${mode === 'fixed' ? 'fixed' : 'absolute'} inset-0 z-50 flex justify-end`}>
       <button
         aria-label="Cerrar"
         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
