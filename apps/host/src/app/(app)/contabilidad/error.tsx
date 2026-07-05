@@ -8,14 +8,16 @@ export default function ContabilidadError({
   reset: () => void;
 }) {
   return (
-    <div className="flex-1 flex items-center justify-center p-8">
-      <div className="glass-panel rounded-2xl p-8 max-w-md text-center">
-        <p className="text-zinc-400 text-xs uppercase tracking-widest font-medium mb-2">Contabilidad</p>
-        <p className="text-white font-medium mb-1">El módulo no ha podido cargar</p>
-        <p className="text-zinc-500 text-sm mb-6">{error.message}</p>
+    <div className="flex flex-1 items-center justify-center p-8">
+      <div className="glass-panel max-w-md rounded-2xl p-8 text-center">
+        <p className="mb-2 text-xs font-medium uppercase tracking-widest text-zinc-400">
+          Contabilidad
+        </p>
+        <p className="mb-1 font-medium text-white">El módulo no ha podido cargar</p>
+        <p className="mb-6 text-sm text-zinc-500">{error.message}</p>
         <button
           onClick={reset}
-          className="px-4 py-2 text-xs font-medium uppercase tracking-widest border border-white/10 rounded-xl text-zinc-400 hover:text-white hover:border-white/20 transition-all"
+          className="rounded-xl border border-white/10 px-4 py-2 text-xs font-medium uppercase tracking-widest text-zinc-400 transition-all hover:border-white/20 hover:text-white"
         >
           Reintentar
         </button>

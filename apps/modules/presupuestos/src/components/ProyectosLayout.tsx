@@ -17,11 +17,19 @@ type Props = {
 };
 
 export function ProyectosLayout({
-  children, selectedView, selectedProyectoId, selectedTab,
-  proyectos, isPrivateMode, onViewChange, onSelectProyecto, onTabChange, onTogglePrivacy,
+  children,
+  selectedView,
+  selectedProyectoId,
+  selectedTab,
+  proyectos,
+  isPrivateMode,
+  onViewChange,
+  onSelectProyecto,
+  onTabChange,
+  onTogglePrivacy,
 }: Props) {
   return (
-    <div className="flex h-screen bg-zinc-950 overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-zinc-950">
       <ProyectosSidebar
         selectedView={selectedView}
         selectedProyectoId={selectedProyectoId}
@@ -32,12 +40,12 @@ export function ProyectosLayout({
         onTabChange={onTabChange}
       />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden">
         {/* Topbar */}
-        <div className="h-12 border-b border-white/[0.06] flex items-center justify-end px-6 gap-3 shrink-0">
+        <div className="flex h-12 shrink-0 items-center justify-end gap-3 border-b border-white/[0.06] px-6">
           <button
             onClick={onTogglePrivacy}
-            className="flex items-center gap-1.5 text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
+            className="flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
           >
             {isPrivateMode ? <EyeOff size={13} /> : <Eye size={13} />}
             {isPrivateMode ? 'Privado' : 'Visible'}
@@ -45,9 +53,7 @@ export function ProyectosLayout({
         </div>
 
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          {children}
-        </main>
+        <main className="flex-1 overflow-y-auto p-6">{children}</main>
       </div>
     </div>
   );
