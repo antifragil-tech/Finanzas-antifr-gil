@@ -11,9 +11,9 @@ export function OSKpiCard({
 }: {
   label: string;
   valor: string;
-  hint?: string;
-  icon?: LucideIcon;
-  tone?: 'neutral' | 'ok' | 'warn' | 'info';
+  hint?: string | undefined;
+  icon?: LucideIcon | undefined;
+  tone?: 'neutral' | 'ok' | 'warn' | 'info' | undefined;
 }) {
   const tones: Record<string, string> = {
     neutral: 'text-zinc-100',

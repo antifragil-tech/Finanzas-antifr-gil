@@ -4,9 +4,9 @@
 export type OSDataListItem = {
   id: string;
   principal: string;
-  secundario?: string;
-  meta?: string;
-  badge?: React.ReactNode;
+  secundario?: string | undefined;
+  meta?: string | undefined;
+  badge?: React.ReactNode | undefined;
 };
 
 export function OSDataList({ items, vacio }: { items: OSDataListItem[]; vacio?: string }) {
