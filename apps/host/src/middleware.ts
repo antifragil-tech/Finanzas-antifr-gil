@@ -5,6 +5,16 @@ import { getSupabaseEnv } from '@/lib/env/supabaseEnv';
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
 
+  // Modo preview de desarrollo (decisión del cockpit 2026-07-05): navegar el
+  // OS sin login mientras no existan las cuentas definitivas por rol.
+  // Triple candado: (1) solo con `next dev` (NODE_ENV=development — en un
+  // build de producción esta rama es código muerto), (2) flag explícita en
+  // .env.local (gitignorado), (3) el fail-closed de abajo queda intacto para
+  // cualquier otro entorno.
+  const previewSinLogin =
+    process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_OS_PREVIEW === 'true';
+  if (previewSinLogin) return supabaseResponse;
+
   // Fail-closed: sin entorno Supabase no puede existir sesión, así que todo
   // lo que no sea /login se redirige a /login (nunca se sirve la app sin auth)
   const env = getSupabaseEnv();
