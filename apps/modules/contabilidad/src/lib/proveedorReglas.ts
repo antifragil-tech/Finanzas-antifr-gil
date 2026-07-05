@@ -7,7 +7,11 @@
 //   · v1 = solo sugerencias: `auto_validar` es inerte; `requiere_aprobacion_javi`
 //     es solo aviso (no fuerza routing).
 import type {
-  ProveedorRegla, FacturaRecibida, FacturaPago, MetodoPago, TipoOperacion,
+  ProveedorRegla,
+  FacturaRecibida,
+  FacturaPago,
+  MetodoPago,
+  TipoOperacion,
   EstadoOperativoDomiciliada,
 } from '@alsari/types';
 import { normalizeNif } from './sociedadMatch';
@@ -20,24 +24,28 @@ export function seleccionarRegla(
   sociedadValidada: boolean,
 ): ProveedorRegla | null {
   if (!contactoId) return null;
-  const activas = reglas.filter(r => r.activa && r.contacto_id === contactoId);
-  const global = activas.find(r => r.sociedad_id_ref === null) ?? null;
+  const activas = reglas.filter((r) => r.activa && r.contacto_id === contactoId);
+  const global = activas.find((r) => r.sociedad_id_ref === null) ?? null;
   // Sociedad pendiente → solo global (no se asume una sociedad concreta).
   if (!sociedadValidada || !sociedadIdRef) return global;
-  const especifica = activas.find(r => r.sociedad_id_ref === sociedadIdRef) ?? null;
+  const especifica = activas.find((r) => r.sociedad_id_ref === sociedadIdRef) ?? null;
   return especifica ?? global;
 }
 
 // ── Análisis de la regla contra una factura ───────────────────────────────────
 export type CampoSugerido =
-  | 'cuenta_gasto' | 'tipo_operacion' | 'tipo_iva' | 'retencion_pct'
-  | 'concepto' | 'es_domiciliada';
+  | 'cuenta_gasto'
+  | 'tipo_operacion'
+  | 'tipo_iva'
+  | 'retencion_pct'
+  | 'concepto'
+  | 'es_domiciliada';
 
 export type Sugerencia = {
   campo: CampoSugerido;
   label: string;
   valor: string | number | boolean;
-  yaAplicado: boolean;   // la factura ya tiene ese valor → no hace falta aplicar
+  yaAplicado: boolean; // la factura ya tiene ese valor → no hace falta aplicar
 };
 
 export type ImporteFueraRango = {
@@ -50,7 +58,7 @@ export type ImporteFueraRango = {
 export type AnalisisRegla = {
   sugerencias: Sugerencia[];
   requiereJavi: boolean;
-  domiciliada: boolean;                          // la regla marca el proveedor como domiciliado
+  domiciliada: boolean; // la regla marca el proveedor como domiciliado
   importeFueraRango: ImporteFueraRango | null;
   partidaSugerida: { presupuesto_id: string | null; partida_id: string } | null;
   proyectoSugerido: string | null;
@@ -68,37 +76,49 @@ export function analizarRegla(regla: ProveedorRegla, factura: FacturaRecibida): 
 
   if (regla.cuenta_contable_default) {
     sugerencias.push({
-      campo: 'cuenta_gasto', label: 'Cuenta contable', valor: regla.cuenta_contable_default,
+      campo: 'cuenta_gasto',
+      label: 'Cuenta contable',
+      valor: regla.cuenta_contable_default,
       yaAplicado: factura.cuenta_gasto === regla.cuenta_contable_default,
     });
   }
   if (regla.tipo_operacion_default) {
     sugerencias.push({
-      campo: 'tipo_operacion', label: 'Tipo de operación', valor: regla.tipo_operacion_default,
+      campo: 'tipo_operacion',
+      label: 'Tipo de operación',
+      valor: regla.tipo_operacion_default,
       yaAplicado: factura.tipo_operacion === regla.tipo_operacion_default,
     });
   }
   if (num(regla.iva_default) !== null) {
     sugerencias.push({
-      campo: 'tipo_iva', label: 'IVA %', valor: regla.iva_default as number,
+      campo: 'tipo_iva',
+      label: 'IVA %',
+      valor: regla.iva_default as number,
       yaAplicado: factura.tipo_iva === regla.iva_default,
     });
   }
   if (num(regla.retencion_pct_default) !== null) {
     sugerencias.push({
-      campo: 'retencion_pct', label: 'Retención %', valor: regla.retencion_pct_default as number,
+      campo: 'retencion_pct',
+      label: 'Retención %',
+      valor: regla.retencion_pct_default as number,
       yaAplicado: factura.retencion_pct === regla.retencion_pct_default,
     });
   }
   if (regla.concepto_recurrente) {
     sugerencias.push({
-      campo: 'concepto', label: 'Concepto', valor: regla.concepto_recurrente,
+      campo: 'concepto',
+      label: 'Concepto',
+      valor: regla.concepto_recurrente,
       yaAplicado: factura.concepto === regla.concepto_recurrente,
     });
   }
   if (regla.es_domiciliada) {
     sugerencias.push({
-      campo: 'es_domiciliada', label: 'Domiciliada', valor: true,
+      campo: 'es_domiciliada',
+      label: 'Domiciliada',
+      valor: true,
       yaAplicado: factura.es_domiciliada === true,
     });
   }
@@ -108,11 +128,13 @@ export function analizarRegla(regla: ProveedorRegla, factura: FacturaRecibida): 
   const hab = num(regla.importe_habitual);
   const tol = num(regla.tolerancia_importe_pct);
   if (hab !== null && hab > 0 && tol !== null) {
-    const desviacionPct = Math.abs(factura.total - hab) / hab * 100;
+    const desviacionPct = (Math.abs(factura.total - hab) / hab) * 100;
     if (desviacionPct > tol) {
       importeFueraRango = {
-        habitual: hab, toleranciaPct: tol,
-        desviacionPct: Math.round(desviacionPct * 10) / 10, actual: factura.total,
+        habitual: hab,
+        toleranciaPct: tol,
+        desviacionPct: Math.round(desviacionPct * 10) / 10,
+        actual: factura.total,
       };
     }
   }
@@ -122,7 +144,9 @@ export function analizarRegla(regla: ProveedorRegla, factura: FacturaRecibida): 
     requiereJavi: regla.requiere_aprobacion_javi,
     domiciliada: regla.es_domiciliada,
     importeFueraRango,
-    partidaSugerida: regla.partida_id ? { presupuesto_id: regla.presupuesto_id, partida_id: regla.partida_id } : null,
+    partidaSugerida: regla.partida_id
+      ? { presupuesto_id: regla.presupuesto_id, partida_id: regla.partida_id }
+      : null,
     proyectoSugerido: regla.proyecto_id_ref,
     metodoPagoDefault: regla.metodo_pago_default,
     requiereFactura: regla.requiere_factura,
@@ -132,7 +156,7 @@ export function analizarRegla(regla: ProveedorRegla, factura: FacturaRecibida): 
 
 // ¿La regla aporta algo aún no aplicado (sugerencias pendientes o avisos)?
 export function tieneSugerenciasPendientes(a: AnalisisRegla): boolean {
-  return a.sugerencias.some(s => !s.yaAplicado) || !!a.importeFueraRango || !!a.partidaSugerida;
+  return a.sugerencias.some((s) => !s.yaAplicado) || !!a.importeFueraRango || !!a.partidaSugerida;
 }
 
 // ── Borrador de regla a partir de una factura existente ───────────────────────
@@ -174,6 +198,6 @@ export function estadoOperativoFactura(
   if (!factura.es_domiciliada) return null;
   if (factura.estado === 'pagada') return 'pagada';
   if (factura.estado !== 'pendiente_pago') return null; // borrador/revisión/rechazada: aún no aplica
-  if (pagos.some(p => !p.justificante_storage_path)) return 'cargada_sin_justificante';
+  if (pagos.some((p) => !p.justificante_storage_path)) return 'cargada_sin_justificante';
   return 'pendiente_cargo';
 }

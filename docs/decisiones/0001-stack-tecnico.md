@@ -32,10 +32,12 @@ mantiene.
 Adoptamos el siguiente stack como base de Alsari Capital OS:
 
 ### Monorepo
+
 - **pnpm workspaces** para gestión de paquetes.
 - **Turborepo** como sistema de build con caché incremental.
 
 ### Host OS
+
 - **Next.js 15** con App Router.
 - **React 19** + **TypeScript estricto**.
 - **Tailwind CSS 3** + **shadcn/ui** para componentes base.
@@ -43,6 +45,7 @@ Adoptamos el siguiente stack como base de Alsari Capital OS:
 - **React Error Boundary** para aislar fallos de módulos.
 
 ### Módulos
+
 - **Vite 5** como bundler.
 - **React 19** + **TypeScript estricto**.
 - **Tailwind CSS 3** + design system propio (`@alsari/ui`).
@@ -51,20 +54,24 @@ Adoptamos el siguiente stack como base de Alsari Capital OS:
 - **React Router** para rutas internas del módulo.
 
 ### Backend
+
 - **Supabase** (Postgres + Auth + Storage + Edge Functions).
 - **Row Level Security** obligatorio en todas las tablas.
 - **Migraciones SQL versionadas** en `services/supabase/migrations/`.
 
 ### Calidad
+
 - **Vitest** + **Testing Library** para tests unit y de componente.
 - **Playwright** para E2E.
 - **ESLint** + **Prettier** + **prettier-plugin-tailwindcss**.
 - **GitHub Actions** para CI (type-check, lint, format, test, build).
 
 ### Iconografía
+
 - **Lucide React** como única librería de iconos.
 
 ### Desarrollo
+
 - **Antigravity** como IDE.
 - **Claude Code** como copiloto técnico con skills locales (`.claude/skills/*`).
 
@@ -159,6 +166,7 @@ de tipo Redux, lo evaluamos en una ADR específica de ese módulo.
 ## Revisión
 
 Este ADR se revisará si:
+
 - Alguna versión mayor del stack (React 20, Next 16, Tailwind 4) introduce cambios
   incompatibles importantes.
 - Aparece una alternativa significativamente mejor que el coste de migración

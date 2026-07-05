@@ -9,7 +9,8 @@
 // colapsa espacios. Mantiene espacios (para nombres de sociedad legibles).
 export function clean(s: string): string {
   return (s || '')
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/[\\/:*?"<>|]/g, '-')
     .replace(/\s+/g, ' ')
     .trim();

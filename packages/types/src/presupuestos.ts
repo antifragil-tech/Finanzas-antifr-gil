@@ -1,8 +1,8 @@
-export type PresupuestoEstado    = 'borrador' | 'activo' | 'cerrado';
-export type PresupuestoTipo      = 'obra' | 'explotacion' | 'capex' | 'corporativo' | 'tesoreria';
+export type PresupuestoEstado = 'borrador' | 'activo' | 'cerrado';
+export type PresupuestoTipo = 'obra' | 'explotacion' | 'capex' | 'corporativo' | 'tesoreria';
 export type PresupuestoCategoria = 'gasto' | 'ingreso';
-export type PagoEstado           = 'pendiente' | 'pagado' | 'cancelado';
-export type PagoTipoFlujo        = 'gasto' | 'ingreso';
+export type PagoEstado = 'pendiente' | 'pagado' | 'cancelado';
+export type PagoTipoFlujo = 'gasto' | 'ingreso';
 
 export type Presupuesto = {
   id: string;
@@ -84,7 +84,7 @@ export type PresupuestoPago = {
   estado: PagoEstado;
   tipo_flujo: PagoTipoFlujo;
   factura_recibida_id: string | null;
-  factura_emitida_id:  string | null;
+  factura_emitida_id: string | null;
   notas: string | null;
   created_at: string;
   partida_descripcion?: string;
@@ -96,10 +96,16 @@ export type PresupuestoPago = {
 // ── Módulo Proyectos ──────────────────────────────────────────
 
 export type ProyectoEstadoKanban = 'activo' | 'pausado' | 'cerrado';
-export type TareaColumna    = 'backlog' | 'todo' | 'doing' | 'on_hold' | 'done';
-export type TareaCategoria  = 'general' | 'obra' | 'legal' | 'financiero';
-export type TareaRecurrencia = 'diaria' | 'semanal' | 'quincenal' | 'mensual' | 'trimestral' | 'anual';
-export type KRUnidad      = 'porcentaje' | 'euros' | 'numero' | 'fecha' | 'booleano';
+export type TareaColumna = 'backlog' | 'todo' | 'doing' | 'on_hold' | 'done';
+export type TareaCategoria = 'general' | 'obra' | 'legal' | 'financiero';
+export type TareaRecurrencia =
+  | 'diaria'
+  | 'semanal'
+  | 'quincenal'
+  | 'mensual'
+  | 'trimestral'
+  | 'anual';
+export type KRUnidad = 'porcentaje' | 'euros' | 'numero' | 'fecha' | 'booleano';
 export type ObjetivoEstado = 'activo' | 'completado' | 'cancelado';
 
 export type ProyectoObjetivo = {

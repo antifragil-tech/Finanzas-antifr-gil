@@ -7,11 +7,11 @@
 
 ## 📂 Estructura
 
-| Carpeta | Propósito |
-|---------|-----------|
+| Carpeta                | Propósito                                                    |
+| ---------------------- | ------------------------------------------------------------ |
 | `supabase/migrations/` | Migraciones SQL versionadas (`YYYYMMDDHHmm_descripcion.sql`) |
-| `supabase/functions/` | Edge Functions (TypeScript, Deno runtime) |
-| `integrations/` | MCPs, conectores externos (Gmail, Drive, …) |
+| `supabase/functions/`  | Edge Functions (TypeScript, Deno runtime)                    |
+| `integrations/`        | MCPs, conectores externos (Gmail, Drive, …)                  |
 
 ---
 
@@ -22,11 +22,13 @@
 **Nombrado:** `YYYYMMDDHHmm_descripcion-corta.sql`
 
 Ejemplos:
+
 - `202605141030_crear-schema-financiero.sql`
 - `202605141500_anadir-tabla-facturas.sql`
 - `202605160900_rls-policies-entidades.sql`
 
 **Reglas:**
+
 - Cada migración es **irreversible** en producción. Si te equivocas, escribes
   otra migración que corrige.
 - Cada migración debe ser **idempotente** cuando es posible (`IF NOT EXISTS`).
@@ -35,6 +37,7 @@ Ejemplos:
 ### Edge Functions
 
 **Nombrado:** kebab-case por carpeta:
+
 ```
 supabase/functions/
 ├── crear-factura/
@@ -44,6 +47,7 @@ supabase/functions/
 ```
 
 **Reglas:**
+
 - Validación de input con Zod (importado desde `@alsari/types` si aplica).
 - Manejo de errores explícito (devolver status correctos).
 - CORS configurado estrictamente al dominio del Host OS.
@@ -54,6 +58,7 @@ supabase/functions/
 ## 🔌 Integraciones
 
 Aquí vivirán los MCPs y conectores externos cuando se construyan:
+
 - Conector Gmail (clasificación de facturas en correos).
 - Conector Google Drive (sincronización de documentos).
 - Conector AEAT (largo plazo).

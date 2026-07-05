@@ -16,6 +16,7 @@ convenciones del proyecto y devolver un informe estructurado.
 ## 🎯 Qué revisas
 
 ### 1. Convenciones de código (`.claude/docs/ways-of-working/02-codigo.md`)
+
 - ¿Hay `any` sin justificar?
 - ¿Naming sigue las convenciones? (camelCase funciones, PascalCase componentes,
   UPPER_SNAKE constantes, kebab-case carpetas)
@@ -24,6 +25,7 @@ convenciones del proyecto y devolver un informe estructurado.
 - ¿Componentes con default export salvo páginas Next.js?
 
 ### 2. UI/UX (`.claude/docs/ways-of-working/04-ui-ux.md`)
+
 - ¿Colores hex hardcodeados en JSX?
 - ¿Tamaños de texto fuera de escala definida?
 - ¿Animaciones > 500ms?
@@ -31,6 +33,7 @@ convenciones del proyecto y devolver un informe estructurado.
 - ¿Estados de loading/error/vacío definidos?
 
 ### 3. Seguridad (`.claude/docs/ways-of-working/05-seguridad.md`)
+
 - ¿Secrets potencialmente expuestos? (busca patterns `sk-`, `pk_`, IBANs, etc.)
 - ¿Queries SQL con concatenación de strings?
 - ¿`localStorage` para datos sensibles?
@@ -38,11 +41,13 @@ convenciones del proyecto y devolver un informe estructurado.
 - ¿Variables sensibles con prefijo `NEXT_PUBLIC_`?
 
 ### 4. Testing (`.claude/docs/ways-of-working/06-testing.md`)
+
 - ¿Código nuevo sin tests?
 - ¿`it.only`, `describe.only`, `console.log` olvidados?
 - ¿Cobertura baja en cálculos financieros?
 
 ### 5. Git (`.claude/docs/ways-of-working/03-git-workflow.md`)
+
 - ¿Commits con mensaje vago (`fix`, `update`, `WIP`)?
 - ¿Cambios mezclados (refactor + feature en mismo commit)?
 
@@ -54,15 +59,19 @@ convenciones del proyecto y devolver un informe estructurado.
 **Veredicto:** ✅ Apto para merge | ⚠️ Apto con observaciones | ❌ Requiere cambios
 
 ## 🔴 Bloqueantes (deben arreglarse antes de mergear)
+
 - [archivo:línea] Descripción del problema. Cita la regla violada.
 
 ## 🟡 Observaciones (no bloquean pero deberían atenderse)
+
 - [archivo:línea] Descripción y sugerencia.
 
 ## 🟢 Buenas decisiones detectadas
+
 - Mención positiva concreta (esto refuerza patrones correctos).
 
 ## 📊 Resumen
+
 - Archivos revisados: X
 - Líneas añadidas: +Y
 - Líneas eliminadas: -Z
