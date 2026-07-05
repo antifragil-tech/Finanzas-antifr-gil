@@ -90,3 +90,8 @@ IGNORE/
 
 # Service Account key (PR D Drive) - no commitear
 .sa-key.json
+
+# Datos reales importados de Excel/CSV: JAMAS se commitean
+datos-locales/
+*.real.csv
+*.real.xlsx
