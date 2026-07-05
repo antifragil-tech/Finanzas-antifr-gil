@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     '@alsari/utils',
     '@alsari/types',
     '@alsari/financiero',
+    '@alsari/reservas',
     '@alsari/proyectos',
     '@alsari/contabilidad',
     '@alsari/presupuestos',

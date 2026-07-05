@@ -37,7 +37,7 @@ export const OS_NAV: OSNavGroup[] = [
     items: [
       { href: '/', label: 'Inicio', icon: Home, exact: true },
       { href: '/dashboard', label: 'Panel', icon: LayoutDashboard, placeholder: true },
-      { href: '/reservas', label: 'Reservas', icon: CalendarDays, placeholder: true },
+      { href: '/reservas', label: 'Reservas', icon: CalendarDays },
       { href: '/financiero', label: 'Finanzas', icon: BarChart2 },
       { href: '/facturas', label: 'Facturación', icon: FileText },
       { href: '/tesoreria', label: 'Tesorería', icon: Wallet, placeholder: true },
