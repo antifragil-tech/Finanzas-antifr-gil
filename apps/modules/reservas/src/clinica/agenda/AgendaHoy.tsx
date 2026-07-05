@@ -67,7 +67,10 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
       (servFiltro === 'todos' || getServicio(x.servicio_id)?.categoria === servFiltro) &&
       (origenFiltro === 'todos' || x.origen === origenFiltro),
   );
-  const columns = PROFESIONALES.filter((p) => profsOn.includes(p.id)).map((p) => ({ name: p.nombre, id: p.id }));
+  const columns = PROFESIONALES.filter((p) => profsOn.includes(p.id)).map((p) => ({
+    name: p.nombre,
+    id: p.id,
+  }));
   const events = citasVisibles.map((x) => ({
     id: x.id,
     start: x.inicio,
@@ -143,9 +146,12 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
       repartirCarriles(panelRef.current);
     });
   };
-  useEffect(() => () => {
-    if (repartoRaf.current != null) cancelAnimationFrame(repartoRaf.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (repartoRaf.current != null) cancelAnimationFrame(repartoRaf.current);
+    },
+    [],
+  );
 
   const fechaLabel = new Date(`${hoy}T00:00:00`).toLocaleDateString('es-ES', {
     weekday: 'long',
@@ -165,7 +171,10 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
       {/* KPIs del día */}
       <div className="flex flex-wrap gap-2">
         {kpis.map((k) => (
-          <div key={k.label} className="glass-panel flex items-baseline gap-2 rounded-lg px-3 py-1.5">
+          <div
+            key={k.label}
+            className="glass-panel flex items-baseline gap-2 rounded-lg px-3 py-1.5"
+          >
             <span className={`text-base font-semibold ${k.tone}`}>{k.value}</span>
             <span className="text-2xs uppercase tracking-widest text-zinc-500">{k.label}</span>
           </div>
@@ -175,7 +184,7 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
       {/* Filtros rápidos (profesional · servicio · origen) */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-2xs uppercase tracking-widest text-zinc-600">Prof.</span>
+          <span className="text-2xs uppercase tracking-widest text-zinc-500">Prof.</span>
           {PROFESIONALES.map((p) => {
             const on = profVisibles.includes(p.id);
             return (
@@ -183,18 +192,27 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
                 key={p.id}
                 onClick={() => toggleProf(p.id)}
                 className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors ${
-                  on ? 'border-white/10 bg-zinc-800 text-zinc-100' : 'border-white/5 text-zinc-500 hover:text-zinc-300'
+                  on
+                    ? 'border-white/10 bg-zinc-800 text-zinc-100'
+                    : 'border-white/5 text-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                <i className="h-2 w-2 rounded-full" style={{ background: on ? PROF_COLOR[p.id] : '#3f3f46' }} />
+                <i
+                  className="h-2 w-2 rounded-full"
+                  style={{ background: on ? PROF_COLOR[p.id] : '#3f3f46' }}
+                />
                 {p.nombre.split(' ')[0]}
               </button>
             );
           })}
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-2xs uppercase tracking-widest text-zinc-600">Servicio</span>
-          <Button variant={servFiltro === 'todos' ? 'secondary' : 'ghost'} size="sm" onClick={() => setServFiltro('todos')}>
+          <span className="text-2xs uppercase tracking-widest text-zinc-500">Servicio</span>
+          <Button
+            variant={servFiltro === 'todos' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setServFiltro('todos')}
+          >
             Todos
           </Button>
           {SERVICIOS.map((s) => (
@@ -209,8 +227,12 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
           ))}
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-2xs uppercase tracking-widest text-zinc-600">Origen</span>
-          <Button variant={origenFiltro === 'todos' ? 'secondary' : 'ghost'} size="sm" onClick={() => setOrigenFiltro('todos')}>
+          <span className="text-2xs uppercase tracking-widest text-zinc-500">Origen</span>
+          <Button
+            variant={origenFiltro === 'todos' ? 'secondary' : 'ghost'}
+            size="sm"
+            onClick={() => setOrigenFiltro('todos')}
+          >
             Todos
           </Button>
           {ORIGENES.map((o) => (
@@ -226,7 +248,10 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
         </div>
       </div>
 
-      <div ref={panelRef} className="dp-quiet glass-panel min-h-0 flex-1 overflow-auto rounded-xl p-1.5">
+      <div
+        ref={panelRef}
+        className="dp-quiet glass-panel min-h-0 flex-1 overflow-auto rounded-xl p-1.5"
+      >
         <div style={{ minWidth: `${PROFESIONALES.length * 200 + 64}px` }}>
           <DayPilotCalendar
             startDate={hoy}

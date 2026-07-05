@@ -7,7 +7,9 @@ import { CitaPanel, type CitaPanelMode } from './CitaPanel';
 import { useCitasStore } from './CitasStore';
 
 const fecha = (d: string | null) =>
-  d ? new Date(`${d}T00:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' }) : '—';
+  d
+    ? new Date(`${d}T00:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })
+    : '—';
 
 // Vista "Clientes": ficha ADMINISTRATIVA mock (nombres y contactos ficticios,
 // sin datos reales). La ficha completa vive en un sistema externo (enlace mock);
@@ -43,13 +45,13 @@ export function Clientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } 
       subtitulo="Ficha administrativa mock — sin datos reales. Registro externo: solo enlace."
       acciones={
         <div className="flex flex-wrap items-center gap-2">
-          <label className="glass-panel flex items-center gap-2 rounded-lg px-3 py-1.5">
+          <label className="glass-panel flex items-center gap-2 rounded-lg border border-transparent px-3 py-1.5 focus-within:border-blue-500/50">
             <Search size={13} className="text-zinc-500" />
             <input
               value={busqueda}
               onChange={(e) => setBusqueda(e.target.value)}
               placeholder="Buscar cliente…"
-              className="w-36 bg-transparent text-xs text-zinc-200 placeholder:text-zinc-600 focus:outline-none"
+              className="w-36 bg-transparent text-xs text-zinc-200 placeholder:text-zinc-500 focus:outline-none"
             />
           </label>
           <div className="glass-panel flex items-baseline gap-2 rounded-lg px-3 py-1.5">
@@ -67,26 +69,47 @@ export function Clientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } 
 
       <div className="glass-panel overflow-x-auto rounded-2xl">
         <table className="w-full min-w-[980px] text-left text-xs">
-          <thead className="border-b border-white/5 text-2xs uppercase tracking-widest text-zinc-600">
+          <thead className="text-2xs border-b border-white/5 uppercase tracking-widest text-zinc-500">
             <tr>
-              {['Cliente', 'Contacto', 'Origen', 'Servicio', 'Última', 'Próxima', 'Pago', 'Bono / Programa', ''].map((h) => (
-                <th key={h} className="px-4 py-3 font-medium">{h}</th>
+              {[
+                'Cliente',
+                'Contacto',
+                'Origen',
+                'Servicio',
+                'Última',
+                'Próxima',
+                'Pago',
+                'Bono / Programa',
+                '',
+              ].map((h) => (
+                <th key={h} className="px-4 py-3 font-medium">
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
           <tbody>
             {visibles.length === 0 ? (
-              <tr><td colSpan={9} className="px-4 py-6 text-center text-zinc-600">Sin resultados para «{busqueda}»</td></tr>
+              <tr>
+                <td colSpan={9} className="px-4 py-6 text-center text-zinc-500">
+                  Sin resultados para «{busqueda}»
+                </td>
+              </tr>
             ) : (
               visibles.map((cl) => (
-                <tr key={cl.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]">
+                <tr
+                  key={cl.id}
+                  className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
+                >
                   <td className="px-4 py-2.5 text-zinc-200">{cl.nombre}</td>
                   <td className="px-4 py-2.5 text-zinc-500">
                     <div>{cl.telefono}</div>
-                    <div className="text-2xs text-zinc-600">{cl.email}</div>
+                    <div className="text-2xs text-zinc-500">{cl.email}</div>
                   </td>
                   <td className="px-4 py-2.5">
-                    <span className={`rounded-full border px-2 py-0.5 text-2xs uppercase tracking-wide ${cl.origen !== 'directo' ? 'border-teal-500/30 bg-teal-500/10 text-teal-300' : 'border-white/10 bg-white/5 text-zinc-400'}`}>
+                    <span
+                      className={`text-2xs rounded-full border px-2 py-0.5 uppercase tracking-wide ${cl.origen !== 'directo' ? 'border-teal-500/30 bg-teal-500/10 text-teal-300' : 'border-white/10 bg-white/5 text-zinc-400'}`}
+                    >
                       {getOrigen(cl.origen)?.label ?? cl.origen}
                     </span>
                   </td>
@@ -94,18 +117,39 @@ export function Clientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } 
                   <td className="px-4 py-2.5 text-zinc-400">{fecha(cl.ultima_cita)}</td>
                   <td className="px-4 py-2.5 text-zinc-400">{fecha(cl.proxima_cita)}</td>
                   <td className="px-4 py-2.5">
-                    <span className={cl.estado_pago === 'pendiente' ? 'text-amber-300' : 'text-emerald-300'}>
+                    <span
+                      className={
+                        cl.estado_pago === 'pendiente' ? 'text-amber-300' : 'text-emerald-300'
+                      }
+                    >
                       {cl.estado_pago === 'pendiente' ? 'Pendiente' : 'Al día'}
                     </span>
                   </td>
                   <td className="px-4 py-2.5 text-zinc-400">{cl.bono ?? '—'}</td>
                   <td className="px-4 py-2.5">
                     <div className="flex justify-end gap-1">
-                      <Icono title="Ver ficha" onClick={() => flash(`Ficha de ${cl.nombre} (demo)`)}><User size={14} /></Icono>
-                      <Icono title="WhatsApp" onClick={() => flash(`WhatsApp a ${cl.nombre} (demo)`)}><MessageCircle size={14} /></Icono>
-                      <Icono title="Copiar datos" onClick={() => copiar(cl)}><Copy size={14} /></Icono>
-                      <Icono title="Historial de citas" onClick={() => verHistorial(cl)}><History size={14} /></Icono>
-                      <Icono title="Abrir registro externo (mock)" onClick={() => flash(`Abriría ${cl.registro_externo_url} (mock)`)}>
+                      <Icono
+                        title="Ver ficha"
+                        onClick={() => flash(`Ficha de ${cl.nombre} (demo)`)}
+                      >
+                        <User size={14} />
+                      </Icono>
+                      <Icono
+                        title="WhatsApp"
+                        onClick={() => flash(`WhatsApp a ${cl.nombre} (demo)`)}
+                      >
+                        <MessageCircle size={14} />
+                      </Icono>
+                      <Icono title="Copiar datos" onClick={() => copiar(cl)}>
+                        <Copy size={14} />
+                      </Icono>
+                      <Icono title="Historial de citas" onClick={() => verHistorial(cl)}>
+                        <History size={14} />
+                      </Icono>
+                      <Icono
+                        title="Abrir registro externo (mock)"
+                        onClick={() => flash(`Abriría ${cl.registro_externo_url} (mock)`)}
+                      >
                         <ExternalLink size={14} />
                       </Icono>
                     </div>
@@ -116,8 +160,9 @@ export function Clientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } 
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-2xs text-zinc-600">
-        El registro completo del cliente vive en un sistema externo (Notion): el OS solo guarda el enlace.
+      <p className="text-2xs mt-3 text-zinc-500">
+        El registro completo del cliente vive en un sistema externo (Notion): el OS solo guarda el
+        enlace.
       </p>
 
       <CitaPanel
@@ -132,9 +177,21 @@ export function Clientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } 
   );
 }
 
-function Icono({ title, onClick, children }: { title: string; onClick: () => void; children: React.ReactNode }) {
+function Icono({
+  title,
+  onClick,
+  children,
+}: {
+  title: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
-    <button title={title} onClick={onClick} className="rounded-md p-1.5 text-zinc-500 hover:bg-white/5 hover:text-zinc-200">
+    <button
+      title={title}
+      onClick={onClick}
+      className="rounded-md p-1.5 text-zinc-500 hover:bg-white/5 hover:text-zinc-200"
+    >
       {children}
     </button>
   );

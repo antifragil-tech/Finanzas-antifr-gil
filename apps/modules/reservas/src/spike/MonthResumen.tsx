@@ -26,7 +26,9 @@ export function MonthResumen({ citas, startDate, onDayClick }: Props) {
   while (celdas.length % 7 !== 0) celdas.push(null);
 
   const resumenDia = (dia: string) => {
-    const delDia = citas.filter((c) => c.inicio.slice(0, 10) === dia && c.estado_cita !== 'cancelada');
+    const delDia = citas.filter(
+      (c) => c.inicio.slice(0, 10) === dia && c.estado_cita !== 'cancelada',
+    );
     const porProf = new Map<string, number>();
     for (const c of delDia) porProf.set(c.profesional_id, (porProf.get(c.profesional_id) ?? 0) + 1);
     return { total: delDia.length, porProf };
@@ -36,7 +38,7 @@ export function MonthResumen({ citas, startDate, onDayClick }: Props) {
     <div className="p-1">
       <div className="grid grid-cols-7 gap-px">
         {DIAS.map((d) => (
-          <div key={d} className="px-2 py-1.5 text-2xs uppercase tracking-widest text-zinc-500">
+          <div key={d} className="text-2xs px-2 py-1.5 uppercase tracking-widest text-zinc-500">
             {d}
           </div>
         ))}
@@ -54,20 +56,27 @@ export function MonthResumen({ citas, startDate, onDayClick }: Props) {
               }`}
             >
               <div className="mb-1 flex items-center justify-between">
-                <span className={`text-xs ${esHoy ? 'font-semibold text-brand' : 'text-zinc-400'}`}>{num}</span>
+                <span className={`text-xs ${esHoy ? 'text-brand font-semibold' : 'text-zinc-400'}`}>
+                  {num}
+                </span>
                 {total > 0 && (
-                  <span className="rounded-full bg-zinc-800 px-1.5 text-2xs text-zinc-300">{total}</span>
+                  <span className="text-2xs rounded-full bg-zinc-800 px-1.5 text-zinc-300">
+                    {total}
+                  </span>
                 )}
               </div>
               <div className="space-y-0.5">
                 {[...porProf.entries()].map(([pid, n]) => (
-                  <div key={pid} className="flex items-center gap-1.5 truncate text-2xs text-zinc-300">
+                  <div
+                    key={pid}
+                    className="text-2xs flex items-center gap-1.5 truncate text-zinc-300"
+                  >
                     <i
                       className="h-2 w-2 shrink-0 rounded-full"
                       style={{ background: PROF_COLOR[pid] ?? '#71717a' }}
                     />
                     {getProfesional(pid)?.nombre.split(' ')[0]}
-                    <span className="text-zinc-600">·{n}</span>
+                    <span className="text-zinc-500">·{n}</span>
                   </div>
                 ))}
               </div>

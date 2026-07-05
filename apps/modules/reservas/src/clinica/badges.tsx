@@ -27,10 +27,18 @@ const TONE: Record<ChipTone, string> = {
   zinc: 'border-white/10 bg-white/5 text-zinc-400',
 };
 
-function Chip({ icon: Icon, tone, children }: { icon: LucideIcon; tone: ChipTone; children: ReactNode }) {
+function Chip({
+  icon: Icon,
+  tone,
+  children,
+}: {
+  icon: LucideIcon;
+  tone: ChipTone;
+  children: ReactNode;
+}) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-2xs font-medium uppercase tracking-wide ${TONE[tone]}`}
+      className={`text-2xs inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 font-medium uppercase tracking-wide ${TONE[tone]}`}
     >
       <Icon size={11} className="shrink-0" />
       {children}

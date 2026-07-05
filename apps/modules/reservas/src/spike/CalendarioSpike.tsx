@@ -103,7 +103,10 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
     vista !== 'dia'
       ? []
       : dimDia === 'profesional'
-        ? PROFESIONALES.filter((p) => profsOn.includes(p.id)).map((p) => ({ name: p.nombre, id: p.id }))
+        ? PROFESIONALES.filter((p) => profsOn.includes(p.id)).map((p) => ({
+            name: p.nombre,
+            id: p.id,
+          }))
         : SALAS.map((s) => ({ name: s.nombre, id: s.id }));
 
   const events = citasVisibles.map((c) => {
@@ -188,11 +191,17 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
 
   const onEventResized = (args: MovedArgs) => {
     const id = String(args.e.id());
-    store.patch(id, { inicio: args.newStart.toString(), fin: args.newEnd.toString() }, 'reprogramada', 'Duración ajustada');
+    store.patch(
+      id,
+      { inicio: args.newStart.toString(), fin: args.newEnd.toString() },
+      'reprogramada',
+      'Duración ajustada',
+    );
   };
 
   const crearCita = (inicio: string, fin: string, resource?: string) => {
-    const profId = vista === 'dia' && dimDia === 'profesional' && resource ? resource : profsOn[0] ?? 'p1';
+    const profId =
+      vista === 'dia' && dimDia === 'profesional' && resource ? resource : (profsOn[0] ?? 'p1');
     const salaResource = vista === 'dia' && dimDia === 'sala' && resource ? resource : 's1';
     const servId = servicioPorRol(getProfesional(profId)?.rol);
     const esEntreno = getServicio(servId)?.categoria === 'entrenamiento_personal';
@@ -214,7 +223,11 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
   };
 
   const onCalRangeSelected = (args: RangeArgs) => {
-    crearCita(args.start.toString(), args.end.toString(), args.resource != null ? String(args.resource) : undefined);
+    crearCita(
+      args.start.toString(),
+      args.end.toString(),
+      args.resource != null ? String(args.resource) : undefined,
+    );
     calendar?.clearSelection();
   };
 
@@ -225,7 +238,8 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
 
   const shift = (dir: number) => {
     const d = new DayPilot.Date(startDate);
-    const nd = vista === 'mes' ? d.addMonths(dir) : vista === 'semana' ? d.addDays(7 * dir) : d.addDays(dir);
+    const nd =
+      vista === 'mes' ? d.addMonths(dir) : vista === 'semana' ? d.addDays(7 * dir) : d.addDays(dir);
     setStartDate(nd.toString('yyyy-MM-dd'));
   };
 
@@ -251,9 +265,22 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
     { id: 'entrenamiento_personal', label: 'Entreno' },
     { id: 'nutricion', label: 'Nutrición' },
   ];
-  const estadosLeyenda: EstadoCita[] = ['pendiente', 'confirmada', 'completada', 'no_asiste', 'cancelada'];
+  const estadosLeyenda: EstadoCita[] = [
+    'pendiente',
+    'confirmada',
+    'completada',
+    'no_asiste',
+    'cancelada',
+  ];
 
-  const commonCal = { startDate, events, locale: 'es-es', onBeforeEventRender, onEventClick, onEventMoved };
+  const commonCal = {
+    startDate,
+    events,
+    locale: 'es-es',
+    onBeforeEventRender,
+    onEventClick,
+    onEventMoved,
+  };
 
   // En la vista Día fijamos el ANCHO de columna (cellWidth) imperativamente: DayPilot
   // renderiza más ancho que el panel y este hace scroll horizontal. Evita que las
@@ -265,9 +292,7 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
     calendar.update({
       dayBeginsHour: 7,
       dayEndsHour: 22,
-      ...(vista === 'dia'
-        ? { cellWidthSpec: 'Fixed', cellWidth: 210 }
-        : { cellWidthSpec: 'Auto' }),
+      ...(vista === 'dia' ? { cellWidthSpec: 'Fixed', cellWidth: 210 } : { cellWidthSpec: 'Auto' }),
     });
   }, [calendar, vista, dimDia, profVisibles, columns.length]);
 
@@ -283,9 +308,12 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
     });
   };
 
-  useEffect(() => () => {
-    if (repartoRaf.current != null) cancelAnimationFrame(repartoRaf.current);
-  }, []);
+  useEffect(
+    () => () => {
+      if (repartoRaf.current != null) cancelAnimationFrame(repartoRaf.current);
+    },
+    [],
+  );
 
   return (
     <div className="flex h-full flex-col gap-3">
@@ -308,17 +336,33 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex gap-1">
           {vistas.map((v) => (
-            <Button key={v.id} variant={vista === v.id ? 'primary' : 'ghost'} size="sm" icon={v.icon} onClick={() => setVista(v.id)}>
+            <Button
+              key={v.id}
+              variant={vista === v.id ? 'primary' : 'ghost'}
+              size="sm"
+              icon={v.icon}
+              onClick={() => setVista(v.id)}
+            >
               {v.label}
             </Button>
           ))}
         </div>
         {vista === 'dia' && (
           <div className="flex items-center gap-1">
-            <Button variant={dimDia === 'profesional' ? 'secondary' : 'ghost'} size="sm" icon={Users} onClick={() => setDimDia('profesional')}>
+            <Button
+              variant={dimDia === 'profesional' ? 'secondary' : 'ghost'}
+              size="sm"
+              icon={Users}
+              onClick={() => setDimDia('profesional')}
+            >
               Profesionales
             </Button>
-            <Button variant={dimDia === 'sala' ? 'secondary' : 'ghost'} size="sm" icon={DoorOpen} onClick={() => setDimDia('sala')}>
+            <Button
+              variant={dimDia === 'sala' ? 'secondary' : 'ghost'}
+              size="sm"
+              icon={DoorOpen}
+              onClick={() => setDimDia('sala')}
+            >
               Salas
             </Button>
           </div>
@@ -328,7 +372,7 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
       {/* Fila 3: filtro de profesionales ("Mostrar todos") + servicio */}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-2xs uppercase tracking-widest text-zinc-600">Profesionales</span>
+          <span className="text-2xs uppercase tracking-widest text-zinc-500">Profesionales</span>
           {PROFESIONALES.map((p) => {
             const on = profVisibles.includes(p.id);
             return (
@@ -336,19 +380,29 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
                 key={p.id}
                 onClick={() => toggleProf(p.id)}
                 className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs transition-colors ${
-                  on ? 'border-white/10 bg-zinc-800 text-zinc-100' : 'border-white/5 text-zinc-500 hover:text-zinc-300'
+                  on
+                    ? 'border-white/10 bg-zinc-800 text-zinc-100'
+                    : 'border-white/5 text-zinc-500 hover:text-zinc-300'
                 }`}
               >
-                <i className="h-2 w-2 rounded-full" style={{ background: on ? PROF_COLOR[p.id] : '#3f3f46' }} />
+                <i
+                  className="h-2 w-2 rounded-full"
+                  style={{ background: on ? PROF_COLOR[p.id] : '#3f3f46' }}
+                />
                 {p.nombre.split(' ')[0]}
               </button>
             );
           })}
         </div>
         <div className="flex flex-wrap items-center gap-1.5">
-          <span className="text-2xs uppercase tracking-widest text-zinc-600">Servicio</span>
+          <span className="text-2xs uppercase tracking-widest text-zinc-500">Servicio</span>
           {filtrosServicio.map((f) => (
-            <Button key={f.id} variant={servFiltro === f.id ? 'secondary' : 'ghost'} size="sm" onClick={() => setServFiltro(f.id)}>
+            <Button
+              key={f.id}
+              variant={servFiltro === f.id ? 'secondary' : 'ghost'}
+              size="sm"
+              onClick={() => setServFiltro(f.id)}
+            >
               {f.label}
             </Button>
           ))}
@@ -360,7 +414,9 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
           <AlertTriangle size={15} className="shrink-0" />
           <span>
             <strong>{sinAbonar.length}</strong> cita{sinAbonar.length > 1 ? 's' : ''} sin abonar:{' '}
-            <span className="text-amber-300/80">{sinAbonar.map((c) => c.cliente_nombre).join(', ')}</span>
+            <span className="text-amber-300/80">
+              {sinAbonar.map((c) => c.cliente_nombre).join(', ')}
+            </span>
           </span>
         </div>
       )}
@@ -373,7 +429,10 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
         ))}
       </div>
 
-      <div ref={panelRef} className="dp-quiet glass-panel min-h-0 flex-1 overflow-auto rounded-xl p-1.5">
+      <div
+        ref={panelRef}
+        className="dp-quiet glass-panel min-h-0 flex-1 overflow-auto rounded-xl p-1.5"
+      >
         {vista === 'mes' ? (
           <MonthResumen
             citas={citasVisibles}
@@ -386,8 +445,7 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
         ) : (
           <div
             style={{
-              minWidth:
-                vista === 'dia' ? `${Math.max(columns.length, 1) * 200 + 64}px` : '1180px',
+              minWidth: vista === 'dia' ? `${Math.max(columns.length, 1) * 200 + 64}px` : '1180px',
             }}
           >
             <DayPilotCalendar
@@ -413,7 +471,11 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
         )}
       </div>
 
-      <CitaModal cita={seleccionada} onClose={() => setSelectedId(null)} onAccion={store.onAccion} />
+      <CitaModal
+        cita={seleccionada}
+        onClose={() => setSelectedId(null)}
+        onAccion={store.onAccion}
+      />
     </div>
   );
 }

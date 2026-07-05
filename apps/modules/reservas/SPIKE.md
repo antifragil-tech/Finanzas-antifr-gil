@@ -51,7 +51,7 @@ Las columnas por recurso son gratis (en FullCalendar y Schedule-X son de pago).
 
 1. **Semana + columnas por profesional a la vez NO existe en Lite.** "Resources"
    (columnas por recurso) es de **un día**. Para la clínica el patrón natural es
-   *día · por profesional*; la semana es vista complementaria (por profesional único o
+   _día · por profesional_; la semana es vista complementaria (por profesional único o
    todas las citas juntas). Una rejilla semana×profesional simultánea requeriría
    DayPilot Pro o una composición propia.
 2. **El wrapper React tipa un subconjunto de props.** Ej.: `showNonBusiness` no está
@@ -63,7 +63,7 @@ Las columnas por recurso son gratis (en FullCalendar y Schedule-X son de pago).
 4. **Ids `string | number`.** DayPilot usa `EventId`/`ResourceId` = `string | number`;
    normalizamos a `string` con `String()` al leerlos.
 5. **Bundle:** ~619 kB (170 kB gzip) por DayPilot + React. Aceptable; al integrar en el
-   host se puede *code-split* el módulo.
+   host se puede _code-split_ el módulo.
 6. **El spike NO valida solapes.** Permite mover libremente. La prevención real
    (profesional/sala, horario, bloqueos) vivirá en Supabase (constraints `EXCLUDE` +
    RPC), no en la UI.

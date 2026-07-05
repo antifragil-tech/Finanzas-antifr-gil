@@ -58,7 +58,7 @@ export function AgendaNav({
       {GRUPOS.map((g, gi) => (
         <div key={g.grupo} className="flex items-center gap-2">
           {gi > 0 ? <span className="hidden h-4 w-px bg-white/10 sm:block" /> : null}
-          <span className="hidden text-2xs uppercase tracking-widest text-zinc-600 lg:inline">
+          <span className="text-2xs hidden uppercase tracking-widest text-zinc-500 lg:inline">
             {g.grupo}
           </span>
           <div className="flex flex-wrap gap-1">

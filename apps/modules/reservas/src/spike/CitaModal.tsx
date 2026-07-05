@@ -1,4 +1,5 @@
 import { Modal, Button } from '@alsari/ui';
+import { formatCurrency } from '@alsari/utils';
 import { Check, CheckCheck, UserX, XCircle, Clock, MapPin, User, Euro } from 'lucide-react';
 import type { CitaMock } from './mockData';
 import { getProfesional, getSala, getServicio } from './mockData';
@@ -50,7 +51,7 @@ export function CitaModal({ cita, onClose, onAccion }: Props) {
             <span className="text-zinc-500">({prof?.rol})</span>
           </Fila>
           <Fila icon={MapPin}>{sala?.nombre ?? 'Sin sala (no requiere)'}</Fila>
-          <Fila icon={Euro}>{cita.precio_previsto.toFixed(0)} € (previsto)</Fila>
+          <Fila icon={Euro}>{formatCurrency(cita.precio_previsto)} (previsto)</Fila>
         </div>
 
         {cita.notas_internas && (
@@ -60,13 +61,13 @@ export function CitaModal({ cita, onClose, onAccion }: Props) {
         )}
 
         <div>
-          <p className="mb-1.5 text-2xs uppercase tracking-widest text-zinc-500">
+          <p className="text-2xs mb-1.5 uppercase tracking-widest text-zinc-500">
             Histórico de cambios
           </p>
           <ul className="space-y-1">
             {cita.cambios.map((c, i) => (
               <li key={i} className="flex gap-2 text-xs text-zinc-400">
-                <span className="font-mono text-zinc-600">{c.ts}</span>
+                <span className="font-mono text-zinc-500">{c.ts}</span>
                 <span className="text-zinc-300">{c.accion}</span>
                 <span className="text-zinc-500">— {c.detalle}</span>
               </li>
@@ -82,17 +83,37 @@ export function CitaModal({ cita, onClose, onAccion }: Props) {
           ) : (
             <>
               {cita.estado_cita === 'pendiente' && (
-                <Button variant="primary" size="sm" icon={Check} onClick={() => onAccion('confirmar')}>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={Check}
+                  onClick={() => onAccion('confirmar')}
+                >
                   Confirmar
                 </Button>
               )}
-              <Button variant="primary" size="sm" icon={CheckCheck} onClick={() => onAccion('completar')}>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={CheckCheck}
+                onClick={() => onAccion('completar')}
+              >
                 Completar
               </Button>
-              <Button variant="secondary" size="sm" icon={UserX} onClick={() => onAccion('no_asiste')}>
+              <Button
+                variant="secondary"
+                size="sm"
+                icon={UserX}
+                onClick={() => onAccion('no_asiste')}
+              >
                 No-show
               </Button>
-              <Button variant="danger" size="sm" icon={XCircle} onClick={() => onAccion('cancelar')}>
+              <Button
+                variant="danger"
+                size="sm"
+                icon={XCircle}
+                onClick={() => onAccion('cancelar')}
+              >
                 Cancelar
               </Button>
             </>

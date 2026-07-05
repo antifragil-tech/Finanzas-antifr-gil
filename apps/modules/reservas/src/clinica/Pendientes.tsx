@@ -20,7 +20,10 @@ import { useCitasStore } from './CitasStore';
 
 const hhmm = (iso: string) => iso.slice(11, 16);
 const diaCorto = (iso: string) =>
-  new Date(`${iso.slice(0, 10)}T00:00:00`).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+  new Date(`${iso.slice(0, 10)}T00:00:00`).toLocaleDateString('es-ES', {
+    weekday: 'short',
+    day: 'numeric',
+  });
 
 const INCIDENCIAS_MOCK = [
   'Datáfono sin papel — reponer rollo',
@@ -65,7 +68,9 @@ export function Pendientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode 
   );
   const noShow = citas.filter((x) => x.estado_cita === 'no_asiste');
   const canceladas = citas.filter((x) => x.estado_cita === 'cancelada');
-  const vivofacilCerrar = citas.filter((x) => x.origen === 'vivofacil' && x.estado_cita === 'completada');
+  const vivofacilCerrar = citas.filter(
+    (x) => x.origen === 'vivofacil' && x.estado_cita === 'completada',
+  );
   const bonosRenovar = BONOS.filter((b) => b.estado === 'por_renovar' || b.estado === 'agotado');
 
   const grupos: Grupo[] = [
@@ -75,7 +80,13 @@ export function Pendientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode 
       icon: CheckCircle2,
       tone: 'text-blue-300',
       items: sinConfirmar,
-      accion: { label: 'Confirmar', run: (x) => { c.confirmar(x.id); flash('Cita confirmada'); } },
+      accion: {
+        label: 'Confirmar',
+        run: (x) => {
+          c.confirmar(x.id);
+          flash('Cita confirmada');
+        },
+      },
     },
     {
       key: 'abonar',
@@ -83,7 +94,13 @@ export function Pendientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode 
       icon: CreditCard,
       tone: 'text-amber-300',
       items: sinAbonar,
-      accion: { label: 'Registrar pago', run: (x) => { c.registrarPago(x.id); flash('Pago registrado'); } },
+      accion: {
+        label: 'Registrar pago',
+        run: (x) => {
+          c.registrarPago(x.id);
+          flash('Pago registrado');
+        },
+      },
     },
     {
       key: 'noshow',
@@ -101,7 +118,13 @@ export function Pendientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode 
       items: canceladas,
       accion: { label: 'Reagendar', run: () => flash('Reagendar (demo)') },
     },
-    { key: 'vivo', titulo: 'Vivofácil por cerrar', icon: Building2, tone: 'text-teal-300', items: vivofacilCerrar },
+    {
+      key: 'vivo',
+      titulo: 'Vivofácil por cerrar',
+      icon: Building2,
+      tone: 'text-teal-300',
+      items: vivofacilCerrar,
+    },
     {
       key: 'contacto',
       titulo: 'Contactos pendientes',
@@ -131,38 +154,45 @@ export function Pendientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode 
               <div className="mb-3 flex items-center gap-2">
                 <g.icon size={16} className={g.tone} />
                 <h3 className="text-sm font-semibold text-zinc-200">{g.titulo}</h3>
-                <span className="ml-auto rounded-full bg-white/5 px-2 py-0.5 text-2xs font-medium text-zinc-400">
+                <span className="text-2xs ml-auto rounded-full bg-white/5 px-2 py-0.5 font-medium text-zinc-400">
                   {g.items.length}
                 </span>
               </div>
               {g.items.length === 0 ? (
-                <p className="py-3 text-center text-xs text-zinc-600">Nada pendiente</p>
+                <p className="py-3 text-center text-xs text-zinc-500">Nada pendiente</p>
               ) : (
                 <ul className="space-y-1">
                   {g.items.slice(0, 6).map((x) => (
-                    <li key={x.id} className="group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5">
-                      <button onClick={() => c.setSelectedId(x.id)} className="min-w-0 flex-1 text-left">
+                    <li
+                      key={x.id}
+                      className="group flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5"
+                    >
+                      <button
+                        onClick={() => c.setSelectedId(x.id)}
+                        className="min-w-0 flex-1 text-left"
+                      >
                         <p className="truncate text-xs text-zinc-200">
                           <span className="text-zinc-500">
                             {diaCorto(x.inicio)} {hhmm(x.inicio)}
                           </span>{' '}
                           · {x.cliente_nombre}
                         </p>
-                        <p className="truncate text-2xs text-zinc-500">
-                          {getServicio(x.servicio_id)?.nombre} · {getProfesional(x.profesional_id)?.nombre.split(' ')[0]}
+                        <p className="text-2xs truncate text-zinc-500">
+                          {getServicio(x.servicio_id)?.nombre} ·{' '}
+                          {getProfesional(x.profesional_id)?.nombre.split(' ')[0]}
                         </p>
                       </button>
                       <button
                         onClick={() => copiar(x)}
                         title="Copiar datos"
-                        className="rounded p-1 text-zinc-600 opacity-0 transition-opacity hover:text-zinc-300 group-hover:opacity-100"
+                        className="rounded p-1 text-zinc-500 opacity-0 transition-opacity hover:text-zinc-300 group-hover:opacity-100"
                       >
                         <Copy size={13} />
                       </button>
                       {accion ? (
                         <button
                           onClick={() => accion.run(x)}
-                          className="rounded-md border border-white/10 px-2 py-1 text-2xs text-zinc-300 hover:bg-white/5"
+                          className="text-2xs rounded-md border border-white/10 px-2 py-1 text-zinc-300 hover:bg-white/5"
                         >
                           {accion.label}
                         </button>
@@ -170,7 +200,7 @@ export function Pendientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode 
                     </li>
                   ))}
                   {g.items.length > 6 ? (
-                    <li className="px-2 pt-1 text-2xs text-zinc-600">+{g.items.length - 6} más…</li>
+                    <li className="text-2xs px-2 pt-1 text-zinc-500">+{g.items.length - 6} más…</li>
                   ) : null}
                 </ul>
               )}
@@ -183,25 +213,28 @@ export function Pendientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode 
           <div className="mb-3 flex items-center gap-2">
             <Gift size={16} className="text-violet-300" />
             <h3 className="text-sm font-semibold text-zinc-200">Bonos por renovar</h3>
-            <span className="ml-auto rounded-full bg-white/5 px-2 py-0.5 text-2xs font-medium text-zinc-400">
+            <span className="text-2xs ml-auto rounded-full bg-white/5 px-2 py-0.5 font-medium text-zinc-400">
               {bonosRenovar.length}
             </span>
           </div>
           {bonosRenovar.length === 0 ? (
-            <p className="py-3 text-center text-xs text-zinc-600">Nada pendiente</p>
+            <p className="py-3 text-center text-xs text-zinc-500">Nada pendiente</p>
           ) : (
             <ul className="space-y-1">
               {bonosRenovar.map((b) => (
-                <li key={b.id} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5">
+                <li
+                  key={b.id}
+                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5"
+                >
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-xs text-zinc-200">{b.cliente}</p>
-                    <p className="truncate text-2xs text-zinc-500">
+                    <p className="text-2xs truncate text-zinc-500">
                       {b.nombre} · {restantes(b)} restantes
                     </p>
                   </div>
                   <button
                     onClick={() => flash(`Renovación de ${b.nombre} anotada (demo)`)}
-                    className="rounded-md border border-white/10 px-2 py-1 text-2xs text-zinc-300 hover:bg-white/5"
+                    className="text-2xs rounded-md border border-white/10 px-2 py-1 text-zinc-300 hover:bg-white/5"
                   >
                     Renovar
                   </button>
@@ -216,21 +249,24 @@ export function Pendientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode 
           <div className="mb-3 flex items-center gap-2">
             <AlertTriangle size={16} className="text-amber-300" />
             <h3 className="text-sm font-semibold text-zinc-200">Incidencias</h3>
-            <span className="ml-auto rounded-full bg-white/5 px-2 py-0.5 text-2xs font-medium text-zinc-400">
+            <span className="text-2xs ml-auto rounded-full bg-white/5 px-2 py-0.5 font-medium text-zinc-400">
               {INCIDENCIAS_MOCK.length - resueltas.size}
             </span>
           </div>
           {resueltas.size === INCIDENCIAS_MOCK.length ? (
-            <p className="py-3 text-center text-xs text-zinc-600">Sin incidencias</p>
+            <p className="py-3 text-center text-xs text-zinc-500">Sin incidencias</p>
           ) : (
             <ul className="space-y-1">
               {INCIDENCIAS_MOCK.map((t, i) =>
                 resueltas.has(i) ? null : (
-                  <li key={i} className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5">
+                  <li
+                    key={i}
+                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 hover:bg-white/5"
+                  >
                     <span className="min-w-0 flex-1 text-xs text-zinc-300">{t}</span>
                     <button
                       onClick={() => setResueltas((p) => new Set(p).add(i))}
-                      className="rounded-md border border-white/10 px-2 py-1 text-2xs text-zinc-300 hover:bg-white/5"
+                      className="text-2xs rounded-md border border-white/10 px-2 py-1 text-zinc-300 hover:bg-white/5"
                     >
                       Resolver
                     </button>

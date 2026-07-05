@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./styles": "./src/index.css"
   },
   "scripts": {
     "dev": "vite",
@@ -16,6 +17,7 @@
   },
   "dependencies": {
     "@alsari/ui": "workspace:*",
+    "@alsari/utils": "workspace:*",
     "@daypilot/daypilot-lite-react": "^5.9.0",
     "lucide-react": "^0.563.0",
     "react": "^19.0.0",

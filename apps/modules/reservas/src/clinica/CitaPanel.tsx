@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { formatCurrency } from '@alsari/utils';
 import type { ReactNode } from 'react';
 import {
   X,
@@ -69,7 +70,7 @@ export function CitaPanel({ cita, onClose, onAccion, onPago, onOrigen, mode = 'f
     <div className={`${mode === 'fixed' ? 'fixed' : 'absolute'} inset-0 z-50 flex justify-end`}>
       <button
         aria-label="Cerrar"
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
         onClick={onClose}
       />
       <aside className="relative flex h-full w-full max-w-sm flex-col gap-4 overflow-auto border-l border-white/10 bg-zinc-950 p-5 shadow-2xl">
@@ -78,7 +79,9 @@ export function CitaPanel({ cita, onClose, onAccion, onPago, onOrigen, mode = 'f
             <p className="text-2xs uppercase tracking-widest text-zinc-500">
               {hhmm(cita.inicio)}–{hhmm(cita.fin)}
             </p>
-            <h2 className="text-lg font-semibold tracking-tight text-zinc-100">{cita.cliente_nombre}</h2>
+            <h2 className="text-lg font-semibold tracking-tight text-zinc-100">
+              {cita.cliente_nombre}
+            </h2>
           </div>
           <button onClick={onClose} className="rounded-lg p-1 text-zinc-500 hover:text-zinc-200">
             <X size={18} />
@@ -93,7 +96,7 @@ export function CitaPanel({ cita, onClose, onAccion, onPago, onOrigen, mode = 'f
             {cita.etiqueta ? ` · ${cita.etiqueta}` : ''} · {prof?.nombre}
           </Fila>
           <Fila icon={MapPin}>{sala?.nombre ?? 'Sin sala (no requiere)'}</Fila>
-          <Fila icon={Euro}>{cita.precio_previsto.toFixed(0)} € (previsto)</Fila>
+          <Fila icon={Euro}>{formatCurrency(cita.precio_previsto)} (previsto)</Fila>
         </div>
 
         {aviso && (
@@ -201,11 +204,11 @@ export function CitaPanel({ cita, onClose, onAccion, onPago, onOrigen, mode = 'f
         </Seccion>
 
         <div>
-          <p className="mb-1.5 text-2xs uppercase tracking-widest text-zinc-500">Histórico</p>
+          <p className="text-2xs mb-1.5 uppercase tracking-widest text-zinc-500">Histórico</p>
           <ul className="space-y-1">
             {cita.cambios.map((c, i) => (
               <li key={i} className="flex gap-2 text-xs text-zinc-400">
-                <span className="font-mono text-zinc-600">{c.ts}</span>
+                <span className="font-mono text-zinc-500">{c.ts}</span>
                 <span className="text-zinc-300">{c.accion}</span>
                 <span className="text-zinc-500">— {c.detalle}</span>
               </li>
@@ -229,7 +232,7 @@ function Fila({ icon: Icon, children }: { icon: LucideIcon; children: ReactNode 
 function Seccion({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
     <div>
-      <p className="mb-2 text-2xs uppercase tracking-widest text-zinc-600">{titulo}</p>
+      <p className="text-2xs mb-2 uppercase tracking-widest text-zinc-500">{titulo}</p>
       <div className="grid grid-cols-2 gap-1.5">{children}</div>
     </div>
   );
@@ -250,7 +253,9 @@ function Accion({
     <button
       onClick={onClick}
       className={`flex items-center gap-2 rounded-lg border px-2.5 py-2 text-xs transition-colors ${
-        danger ? 'border-rose-500/20 text-rose-300 hover:bg-rose-500/10' : 'border-white/10 text-zinc-300 hover:bg-white/5'
+        danger
+          ? 'border-rose-500/20 text-rose-300 hover:bg-rose-500/10'
+          : 'border-white/10 text-zinc-300 hover:bg-white/5'
       }`}
     >
       <Icon size={14} className="shrink-0" />

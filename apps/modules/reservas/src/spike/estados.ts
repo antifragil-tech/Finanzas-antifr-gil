@@ -113,4 +113,8 @@ export const PAGO_DOT: Record<EstadoPago, string> = {
 };
 
 // Citas "completadas pero sin abonar" → alerta operativa.
-export const PAGO_SIN_ABONAR: EstadoPago[] = ['pendiente_pago', 'pendiente_revision', 'pago_parcial'];
+export const PAGO_SIN_ABONAR: EstadoPago[] = [
+  'pendiente_pago',
+  'pendiente_revision',
+  'pago_parcial',
+];

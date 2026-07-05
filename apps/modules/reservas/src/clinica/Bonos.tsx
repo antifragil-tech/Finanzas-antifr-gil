@@ -4,7 +4,12 @@ import { BONOS, restantes, type BonoMock, type EstadoBono } from './mock/bonos';
 import { getCliente } from './mock/clientes';
 import { Subvista } from './Subvista';
 
-const fecha = (d: string) => new Date(`${d}T00:00:00`).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: '2-digit' });
+const fecha = (d: string) =>
+  new Date(`${d}T00:00:00`).toLocaleDateString('es-ES', {
+    day: 'numeric',
+    month: 'short',
+    year: '2-digit',
+  });
 
 const ESTADO_TONE: Record<EstadoBono, string> = {
   activo: 'text-emerald-300',
@@ -73,10 +78,23 @@ export function Bonos() {
 
       <div className="glass-panel overflow-x-auto rounded-2xl">
         <table className="w-full min-w-[980px] text-left text-xs">
-          <thead className="border-b border-white/5 text-2xs uppercase tracking-widest text-zinc-600">
+          <thead className="text-2xs border-b border-white/5 uppercase tracking-widest text-zinc-500">
             <tr>
-              {['Cliente', 'Tipo', 'Nombre', 'Usadas', 'Restantes', 'Inicio', 'Caducidad', 'Estado', 'Cobro', ''].map((h) => (
-                <th key={h} className="px-4 py-3 font-medium">{h}</th>
+              {[
+                'Cliente',
+                'Tipo',
+                'Nombre',
+                'Usadas',
+                'Restantes',
+                'Inicio',
+                'Caducidad',
+                'Estado',
+                'Cobro',
+                '',
+              ].map((h) => (
+                <th key={h} className="px-4 py-3 font-medium">
+                  {h}
+                </th>
               ))}
             </tr>
           </thead>
@@ -85,44 +103,62 @@ export function Bonos() {
               const rest = restantes(b);
               const pct = Math.round((b.sesiones_usadas / b.sesiones_contratadas) * 100);
               return (
-                <tr key={b.id} className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]">
+                <tr
+                  key={b.id}
+                  className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
+                >
                   <td className="px-4 py-2.5 text-zinc-200">{b.cliente}</td>
                   <td className="px-4 py-2.5">
-                    <span className="rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-2xs uppercase tracking-wide text-violet-300">
+                    <span className="text-2xs rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 uppercase tracking-wide text-violet-300">
                       {b.tipo === 'bono' ? 'Bono' : 'Programa'}
                     </span>
                   </td>
                   <td className="px-4 py-2.5 text-zinc-400">{b.nombre}</td>
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2">
-                      <span className="text-zinc-300">{b.sesiones_usadas}/{b.sesiones_contratadas}</span>
+                      <span className="text-zinc-300">
+                        {b.sesiones_usadas}/{b.sesiones_contratadas}
+                      </span>
                       <span className="h-1.5 w-16 overflow-hidden rounded-full bg-white/5">
-                        <span className="block h-full rounded-full bg-zinc-400" style={{ width: `${pct}%` }} />
+                        <span
+                          className="block h-full rounded-full bg-zinc-400"
+                          style={{ width: `${pct}%` }}
+                        />
                       </span>
                     </div>
                   </td>
                   <td className="px-4 py-2.5 font-medium text-zinc-200">{rest}</td>
                   <td className="px-4 py-2.5 text-zinc-500">{fecha(b.inicio)}</td>
                   <td className="px-4 py-2.5 text-zinc-400">{fecha(b.caducidad)}</td>
-                  <td className={`px-4 py-2.5 ${ESTADO_TONE[b.estado]}`}>{ESTADO_LABEL[b.estado]}</td>
-                  <td className="px-4 py-2.5 text-2xs">
+                  <td className={`px-4 py-2.5 ${ESTADO_TONE[b.estado]}`}>
+                    {ESTADO_LABEL[b.estado]}
+                  </td>
+                  <td className="text-2xs px-4 py-2.5">
                     {b.estado === 'por_renovar' || b.estado === 'agotado' ? (
                       <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 uppercase tracking-wide text-amber-300">
                         Renovación pendiente
                       </span>
                     ) : (
-                      <span className="text-zinc-600">—</span>
+                      <span className="text-zinc-500">—</span>
                     )}
                   </td>
                   <td className="px-4 py-2.5">
                     <div className="flex justify-end gap-1">
-                      <Icono title="Registrar uso de sesión" onClick={() => registrarUso(b)} disabled={b.estado !== 'activo'}>
+                      <Icono
+                        title="Registrar uso de sesión"
+                        onClick={() => registrarUso(b)}
+                        disabled={b.estado !== 'activo'}
+                      >
                         <MinusCircle size={14} />
                       </Icono>
                       <Icono title="Renovar" onClick={() => renovar(b)}>
                         <RefreshCw size={14} />
                       </Icono>
-                      <Icono title="Marcar agotado" onClick={() => marcarAgotado(b)} disabled={b.estado === 'agotado'}>
+                      <Icono
+                        title="Marcar agotado"
+                        onClick={() => marcarAgotado(b)}
+                        disabled={b.estado === 'agotado'}
+                      >
                         <Ban size={14} />
                       </Icono>
                       <Icono title="Abrir cliente" onClick={() => abrirCliente(b)}>
@@ -136,14 +172,23 @@ export function Bonos() {
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-2xs text-zinc-600">
-        Acciones mock/local — la renovación real generará un cobro en la pestaña Cobros cuando haya backend.
+      <p className="text-2xs mt-3 text-zinc-500">
+        Acciones mock/local — la renovación real generará un cobro en la pestaña Cobros cuando haya
+        backend.
       </p>
     </Subvista>
   );
 }
 
-function Kpi({ label, value, tone = 'text-zinc-100' }: { label: string; value: string; tone?: string }) {
+function Kpi({
+  label,
+  value,
+  tone = 'text-zinc-100',
+}: {
+  label: string;
+  value: string;
+  tone?: string;
+}) {
   return (
     <div className="glass-panel flex items-baseline gap-2 rounded-lg px-3 py-1.5">
       <span className={`text-sm font-semibold ${tone}`}>{value}</span>

@@ -3,16 +3,10 @@
  * Re-viste el tema por defecto para que el calendario se sienta parte del OS:
  * fondos zinc/negro, bordes muy suaves, cabeceras oscuras (nada blanco), y
  * eventos con info operativa. Todo scopeado bajo .dp-quiet.
+ *
+ * Este archivo es importable por el host (export "./styles"): SOLO reglas
+ * scopeadas. La altura del viewport standalone vive en standalone.css.
  */
-
-/* El módulo ocupa la altura de su contenedor: standalone = viewport (html/body/
-   #root al 100%); embebido en el OS = área del DemoShell. Por eso ClinicaDashboard
-   usa h-full (no h-screen) y así no desborda dentro del shell. */
-html,
-body,
-#root {
-  height: 100%;
-}
 
 .dp-quiet,
 .dp-quiet .calendar_default_main,

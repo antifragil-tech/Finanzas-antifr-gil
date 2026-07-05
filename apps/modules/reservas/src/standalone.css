@@ -1,0 +1,8 @@
+/* Solo para el arranque standalone (main.tsx / index.html de Vite).
+   NUNCA debe importarlo el host: reescribe html/body y en Next no existe #root.
+   Embebido en el OS, ClinicaDashboard usa h-full y hereda la altura del shell. */
+html,
+body,
+#root {
+  height: 100%;
+}

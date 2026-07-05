@@ -1,4 +1,5 @@
 import { useState, Fragment } from 'react';
+import { formatCurrency } from '@alsari/utils';
 import { Copy, Building2, CheckCircle2, ChevronDown, ChevronRight } from 'lucide-react';
 import { getProfesional, getServicio, VIVOFACIL_VALOR_SESION } from '../spike/mockData';
 import { Subvista } from './Subvista';
@@ -28,20 +29,30 @@ const TONE: Record<EstadoCierre, string> = {
 
 const hhmm = (iso: string) => iso.slice(11, 16);
 const diaCorto = (iso: string) =>
-  new Date(`${iso.slice(0, 10)}T00:00:00`).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' });
+  new Date(`${iso.slice(0, 10)}T00:00:00`).toLocaleDateString('es-ES', {
+    weekday: 'short',
+    day: 'numeric',
+  });
 
 // Vista "Vivofácil": cierre mensual MOCK de las derivaciones. Cada sesión completada
 // vale 45 €; se factura agrupado a fin de mes → cobro B2B. NO crea facturas reales.
 export function Vivofacil({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
   const c = useCitasStore();
-  const mesLabel = new Date(`${c.hoy}T00:00:00`).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
+  const mesLabel = new Date(`${c.hoy}T00:00:00`).toLocaleDateString('es-ES', {
+    month: 'long',
+    year: 'numeric',
+  });
   const citasVf = c.citas.filter((x) => x.origen === 'vivofacil');
   const completadas = citasVf.filter((x) => x.estado_cita === 'completada');
-  const pendientesValidar = citasVf.filter((x) => x.estado_cita !== 'completada' && x.estado_cita !== 'cancelada');
+  const pendientesValidar = citasVf.filter(
+    (x) => x.estado_cita !== 'completada' && x.estado_cita !== 'cancelada',
+  );
   const total = completadas.length * VIVOFACIL_VALOR_SESION;
 
   const porPaciente = new Map<string, number>();
-  completadas.forEach((x) => porPaciente.set(x.cliente_nombre, (porPaciente.get(x.cliente_nombre) ?? 0) + 1));
+  completadas.forEach((x) =>
+    porPaciente.set(x.cliente_nombre, (porPaciente.get(x.cliente_nombre) ?? 0) + 1),
+  );
   const pacientes = [...porPaciente.entries()]
     .map(([nombre, sesiones]) => ({ nombre, sesiones, importe: sesiones * VIVOFACIL_VALOR_SESION }))
     .sort((a, b) => b.importe - a.importe);
@@ -58,9 +69,14 @@ export function Vivofacil({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
     if (next) setCierre(next);
   };
   const copiarResumen = () => {
-    const lineas = pacientes.map((p) => `${p.nombre}: ${p.sesiones} ses · ${p.importe} €`).join('\n');
-    const txt = `Cierre Vivofácil — ${mesLabel}\n${completadas.length} sesiones × ${VIVOFACIL_VALOR_SESION} € = ${total} €\n${lineas}`;
-    navigator.clipboard?.writeText(txt).then(() => flash('Resumen copiado'), () => flash('Resumen copiado'));
+    const lineas = pacientes
+      .map((p) => `${p.nombre}: ${p.sesiones} ses · ${formatCurrency(p.importe)}`)
+      .join('\n');
+    const txt = `Cierre Vivofácil — ${mesLabel}\n${completadas.length} sesiones × ${formatCurrency(VIVOFACIL_VALOR_SESION)} = ${formatCurrency(total)}\n${lineas}`;
+    navigator.clipboard?.writeText(txt).then(
+      () => flash('Resumen copiado'),
+      () => flash('Resumen copiado'),
+    );
   };
 
   return (
@@ -72,7 +88,7 @@ export function Vivofacil({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
           <Kpi label="Pacientes" value={String(pacientes.length)} />
           <Kpi label="Sesiones" value={String(completadas.length)} />
           <Kpi label="Por validar" value={String(pendientesValidar.length)} tone="text-amber-300" />
-          <Kpi label="A facturar" value={`${total} €`} tone="text-teal-300" />
+          <Kpi label="A facturar" value={formatCurrency(total)} tone="text-teal-300" />
         </div>
       }
     >
@@ -86,19 +102,30 @@ export function Vivofacil({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
       <div className="glass-panel mb-4 flex flex-wrap items-center gap-3 rounded-2xl p-4">
         <Building2 size={16} className="text-teal-300" />
         <span className="text-sm text-zinc-300">Estado del cierre</span>
-        <span className={`rounded-full border px-2.5 py-0.5 text-2xs uppercase tracking-wide ${TONE[cierre]}`}>
+        <span
+          className={`text-2xs rounded-full border px-2.5 py-0.5 uppercase tracking-wide ${TONE[cierre]}`}
+        >
           {LABEL[cierre]}
         </span>
         <div className="ml-auto flex flex-wrap gap-2">
           {cierre !== 'cobrado' ? (
-            <button onClick={avanzar} className="rounded-md border border-white/10 px-3 py-1.5 text-xs text-zinc-200 hover:bg-white/5">
+            <button
+              onClick={avanzar}
+              className="rounded-md border border-white/10 px-3 py-1.5 text-xs text-zinc-200 hover:bg-white/5"
+            >
               {ACCION_SIGUIENTE[cierre]}
             </button>
           ) : null}
-          <button onClick={() => flash('Cierre marcado como revisado')} className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/5">
+          <button
+            onClick={() => flash('Cierre marcado como revisado')}
+            className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/5"
+          >
             <CheckCircle2 size={13} /> Marcar revisado
           </button>
-          <button onClick={copiarResumen} className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/5">
+          <button
+            onClick={copiarResumen}
+            className="flex items-center gap-1.5 rounded-md border border-white/10 px-3 py-1.5 text-xs text-zinc-300 hover:bg-white/5"
+          >
             <Copy size={13} /> Copiar resumen
           </button>
         </div>
@@ -107,30 +134,42 @@ export function Vivofacil({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
       {/* Resumen por paciente, con detalle de sesiones desplegable */}
       <div className="glass-panel overflow-x-auto rounded-2xl">
         <table className="w-full min-w-[560px] text-left text-xs">
-          <thead className="border-b border-white/5 text-2xs uppercase tracking-widest text-zinc-600">
+          <thead className="text-2xs border-b border-white/5 uppercase tracking-widest text-zinc-500">
             <tr>
               <th className="px-4 py-3 font-medium">Paciente</th>
               <th className="px-4 py-3 font-medium">Sesiones completadas</th>
-              <th className="px-4 py-3 font-medium">Importe ({VIVOFACIL_VALOR_SESION} €/sesión)</th>
+              <th className="px-4 py-3 font-medium">
+                Importe ({formatCurrency(VIVOFACIL_VALOR_SESION)}/sesión)
+              </th>
               <th className="px-4 py-3" />
             </tr>
           </thead>
           <tbody>
             {pacientes.length === 0 ? (
-              <tr><td colSpan={4} className="px-4 py-6 text-center text-zinc-600">Sin sesiones Vivofácil este mes</td></tr>
+              <tr>
+                <td colSpan={4} className="px-4 py-6 text-center text-zinc-500">
+                  Sin sesiones Vivofácil este mes
+                </td>
+              </tr>
             ) : (
               pacientes.map((p) => (
                 <Fragment key={p.nombre}>
                   <tr className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]">
                     <td className="px-4 py-2.5 text-zinc-200">{p.nombre}</td>
                     <td className="px-4 py-2.5 text-zinc-400">{p.sesiones}</td>
-                    <td className="px-4 py-2.5 font-medium text-zinc-200">{p.importe} €</td>
+                    <td className="px-4 py-2.5 font-medium text-zinc-200">
+                      {formatCurrency(p.importe)}
+                    </td>
                     <td className="px-4 py-2.5 text-right">
                       <button
                         onClick={() => setDetalle((d) => (d === p.nombre ? null : p.nombre))}
-                        className="inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-2xs text-zinc-300 hover:bg-white/5"
+                        className="text-2xs inline-flex items-center gap-1 rounded-md border border-white/10 px-2 py-1 text-zinc-300 hover:bg-white/5"
                       >
-                        {detalle === p.nombre ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                        {detalle === p.nombre ? (
+                          <ChevronDown size={12} />
+                        ) : (
+                          <ChevronRight size={12} />
+                        )}
                         Ver detalle
                       </button>
                     </td>
@@ -145,14 +184,18 @@ export function Vivofacil({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
                               <li key={x.id}>
                                 <button
                                   onClick={() => c.setSelectedId(x.id)}
-                                  className="flex w-full items-center gap-3 rounded-lg px-2 py-1 text-left text-2xs text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
+                                  className="text-2xs flex w-full items-center gap-3 rounded-lg px-2 py-1 text-left text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
                                 >
                                   <span className="font-mono text-zinc-500">
                                     {diaCorto(x.inicio)} {hhmm(x.inicio)}
                                   </span>
                                   <span>{getServicio(x.servicio_id)?.nombre}</span>
-                                  <span className="text-zinc-600">{getProfesional(x.profesional_id)?.nombre}</span>
-                                  <span className="ml-auto text-zinc-500">{VIVOFACIL_VALOR_SESION} €</span>
+                                  <span className="text-zinc-500">
+                                    {getProfesional(x.profesional_id)?.nombre}
+                                  </span>
+                                  <span className="ml-auto text-zinc-500">
+                                    {formatCurrency(VIVOFACIL_VALOR_SESION)}
+                                  </span>
                                 </button>
                               </li>
                             ))}
@@ -167,16 +210,20 @@ export function Vivofacil({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
           {pacientes.length > 0 ? (
             <tfoot>
               <tr className="border-t border-white/10">
-                <td className="px-4 py-2.5 text-2xs uppercase tracking-widest text-zinc-500">Total a facturar</td>
+                <td className="text-2xs px-4 py-2.5 uppercase tracking-widest text-zinc-500">
+                  Total a facturar
+                </td>
                 <td className="px-4 py-2.5 text-zinc-400">{completadas.length}</td>
-                <td className="px-4 py-2.5 font-semibold text-teal-300">{total} €</td>
+                <td className="px-4 py-2.5 font-semibold text-teal-300">{formatCurrency(total)}</td>
                 <td />
               </tr>
             </tfoot>
           ) : null}
         </table>
       </div>
-      <p className="mt-3 text-2xs text-zinc-600">Mock — no genera factura ni documento fiscal real.</p>
+      <p className="text-2xs mt-3 text-zinc-500">
+        Mock — no genera factura ni documento fiscal real.
+      </p>
 
       <CitaPanel
         cita={c.seleccionada}
@@ -190,7 +237,15 @@ export function Vivofacil({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
   );
 }
 
-function Kpi({ label, value, tone = 'text-zinc-100' }: { label: string; value: string; tone?: string }) {
+function Kpi({
+  label,
+  value,
+  tone = 'text-zinc-100',
+}: {
+  label: string;
+  value: string;
+  tone?: string;
+}) {
   return (
     <div className="glass-panel flex items-baseline gap-2 rounded-lg px-3 py-1.5">
       <span className={`text-sm font-semibold ${tone}`}>{value}</span>

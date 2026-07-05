@@ -93,8 +93,20 @@ export const SALAS: Sala[] = [
 // Duraciones reales: fisio 45', nutrición 30', entrenamiento 60'. Precio = tarifa
 // estándar (las tarifas Founder/VIP/especial se aplican por cliente/producto).
 export const SERVICIOS: Servicio[] = [
-  { id: 'sv1', nombre: 'Fisioterapia', categoria: 'fisioterapia', duracion_minutos: 45, precio: 55 },
-  { id: 'sv3', nombre: 'Entrenamiento', categoria: 'entrenamiento_personal', duracion_minutos: 60, precio: 40 },
+  {
+    id: 'sv1',
+    nombre: 'Fisioterapia',
+    categoria: 'fisioterapia',
+    duracion_minutos: 45,
+    precio: 55,
+  },
+  {
+    id: 'sv3',
+    nombre: 'Entrenamiento',
+    categoria: 'entrenamiento_personal',
+    duracion_minutos: 60,
+    precio: 40,
+  },
   { id: 'sv4', nombre: 'Nutrición', categoria: 'nutricion', duracion_minutos: 30, precio: 45 },
 ];
 
@@ -144,11 +156,31 @@ export function crearCitasMock(hoy: string): CitaMock[] {
   };
 
   const nombres = [
-    'María López', 'Carlos Vega', 'Hugo Santos', 'Marta Crespo', 'Inés Vega',
-    'Lola Prieto', 'Sergio Mora', 'Diego Gallardo', 'Nuria Cano', 'Aitor Niño',
-    'Andrea Soler', 'Elena Ríos', 'Javier Morán', 'Pablo Reyes', 'Toni Salas',
-    'Rocío Peña', 'Clara Ortiz', 'Marcos Ferri', 'Sofía Cruz', 'Laura Padial',
-    'Ana Belén Torres', 'Rafa Galindo', 'Luis García', 'Bea Romero', 'Paco Reyes',
+    'María López',
+    'Carlos Vega',
+    'Hugo Santos',
+    'Marta Crespo',
+    'Inés Vega',
+    'Lola Prieto',
+    'Sergio Mora',
+    'Diego Gallardo',
+    'Nuria Cano',
+    'Aitor Niño',
+    'Andrea Soler',
+    'Elena Ríos',
+    'Javier Morán',
+    'Pablo Reyes',
+    'Toni Salas',
+    'Rocío Peña',
+    'Clara Ortiz',
+    'Marcos Ferri',
+    'Sofía Cruz',
+    'Laura Padial',
+    'Ana Belén Torres',
+    'Rafa Galindo',
+    'Luis García',
+    'Bea Romero',
+    'Paco Reyes',
   ];
 
   // Plantilla de un día: [hora, min, profesional, sala, servicio, etiqueta?]
@@ -166,16 +198,38 @@ export function crearCitasMock(hoy: string): CitaMock[] {
     [18, 30, 'p3', 's1', 'sv1'],
   ];
   const estados: EstadoCita[] = [
-    'confirmada', 'confirmada', 'completada', 'pendiente', 'confirmada',
-    'no_asiste', 'confirmada', 'pendiente', 'cancelada',
+    'confirmada',
+    'confirmada',
+    'completada',
+    'pendiente',
+    'confirmada',
+    'no_asiste',
+    'confirmada',
+    'pendiente',
+    'cancelada',
   ];
   const pagos: EstadoPago[] = [
-    'incluido_bono', 'pagado', 'pendiente_pago', 'pendiente_pago', 'pagado',
-    'pendiente_pago', 'pagado', 'incluido_bono', 'devuelto',
+    'incluido_bono',
+    'pagado',
+    'pendiente_pago',
+    'pendiente_pago',
+    'pagado',
+    'pendiente_pago',
+    'pagado',
+    'incluido_bono',
+    'devuelto',
   ];
   const origenes: OrigenCita[] = [
-    'directo', 'vivofacil', 'directo', 'oasis', 'vivofacil',
-    'directo', 'lidomare', 'vivofacil', 'directo', 'otro',
+    'directo',
+    'vivofacil',
+    'directo',
+    'oasis',
+    'vivofacil',
+    'directo',
+    'lidomare',
+    'vivofacil',
+    'directo',
+    'otro',
   ];
 
   const out: CitaMock[] = [];
@@ -184,7 +238,9 @@ export function crearCitasMock(hoy: string): CitaMock[] {
     const dia = fechaOffset(off);
     tpl.forEach(([h, m, prof, sala, serv, etiqueta], i) => {
       const s = getServicio(serv)!;
-      const fin = new Date(new Date(`${dia}T${pad(h)}:${pad(m)}:00`).getTime() + s.duracion_minutos * 60000);
+      const fin = new Date(
+        new Date(`${dia}T${pad(h)}:${pad(m)}:00`).getTime() + s.duracion_minutos * 60000,
+      );
       n += 1;
       out.push({
         id: `c${n}`,

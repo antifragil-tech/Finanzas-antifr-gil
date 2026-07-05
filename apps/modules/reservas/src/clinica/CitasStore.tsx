@@ -55,7 +55,9 @@ export function CitasProvider({ children }: { children: ReactNode }) {
   const patch = (id: string, cambio: Partial<CitaMock>, accion: string, detalle: string) =>
     setCitas((prev) =>
       prev.map((c) =>
-        c.id === id ? { ...c, ...cambio, cambios: [...c.cambios, { ts: ahora(), accion, detalle }] } : c,
+        c.id === id
+          ? { ...c, ...cambio, cambios: [...c.cambios, { ts: ahora(), accion, detalle }] }
+          : c,
       ),
     );
 
@@ -77,8 +79,10 @@ export function CitasProvider({ children }: { children: ReactNode }) {
   };
 
   // Acciones por id (para listas, sin abrir panel).
-  const confirmar = (id: string) => patch(id, { estado_cita: 'confirmada' }, 'confirmada', 'Confirmada (demo)');
-  const noAsistio = (id: string) => patch(id, { estado_cita: 'no_asiste' }, 'no_asiste', 'No asistió (demo)');
+  const confirmar = (id: string) =>
+    patch(id, { estado_cita: 'confirmada' }, 'confirmada', 'Confirmada (demo)');
+  const noAsistio = (id: string) =>
+    patch(id, { estado_cita: 'no_asiste' }, 'no_asiste', 'No asistió (demo)');
   const registrarPago = (id: string, estado: EstadoPago = 'pagado') =>
     patch(id, { estado_pago: estado }, 'pago', `Pago → ${estado}`);
 
