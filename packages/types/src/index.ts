@@ -115,3 +115,28 @@ export type {
   PagoTipoIva,
   RecurrenciaPartida,
 } from './presupuestos';
+
+// Dominio Clínica/Reservas (Fase 1 — catálogos/maestros)
+export type {
+  RolClinica,
+  ModoAgenda,
+  RecursoRequerido,
+  CategoriaServicio,
+  TipoProfesional,
+  TipoProducto,
+  CondicionEspecial,
+  CondicionCliente,
+  TipoExcepcionDisponibilidad,
+  TipoBloqueo,
+  UsuarioClinica,
+  Ubicacion,
+  Recurso,
+  Profesional,
+  Servicio,
+  ProfesionalServicio,
+  Producto,
+  Cliente,
+  HorarioProfesional,
+  DisponibilidadExcepcional,
+  BloqueoAgenda,
+} from './clinica';
