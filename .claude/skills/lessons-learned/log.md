@@ -373,3 +373,23 @@ Plantilla para copiar:
 - [x] Re-sincronizado el tracker tras la revisión de PR #7 con los HEADs exactos (#4 `27f6392`, #5 `b9860bb`, #6 `2ebe938`)
 
 **Tags:** #verificacion #governance #integracion #worktrees #multi-agente
+
+---
+
+## 2026-07-05 — Descartar un diff real como "ruido CRLF" y mergear un doc sin formatear
+
+**Contexto:** Integración masiva de PRs (sesión Claude Master). Tras formatear `docs/host/02-reservas-canonical-integration.md` con Prettier en el worktree del PR #28, `git status` mostraba el archivo como modificado. En Windows con `core.autocrlf=true` casi todos los "modified" tras Prettier son ruido de finales de línea, así que asumí que este también lo era y pusheé sin commitear el cambio.
+
+**Error:** El diff era REAL (re-alineado de tablas markdown, no finales de línea). El PR #28 se mergeó con el doc sin formatear y el gate `format:check` de main pasó a fallar para TODOS los PRs siguientes (5 ramas de finanzas en rojo de golpe).
+
+**Causa raíz:** Generalizar un patrón ("en esta máquina los M tras prettier son CRLF") sin verificar el caso concreto. La verificación costaba 2 segundos: `git diff <archivo>` distingue ruido eol (diff vacío o solo ^M) de cambios de contenido.
+
+**Lección:** En Windows con `autocrlf=true`, antes de descartar un archivo "modified" tras una pasada de formateo: `git diff -- <archivo>`. Si el diff muestra contenido (tablas, espacios, texto), se commitea; solo se descarta si el diff real es vacío. Regla complementaria: el veredicto de formato lo da `git add` + `git diff --cached` (git normaliza eol al indexar), nunca el working tree.
+
+**Acciones tomadas:**
+
+- [x] PR de fix inmediato con el doc formateado (`fix/format-doc-host-reservas`)
+- [x] Verificado que el resto de docs mergeados hoy pasan `format:check` en CI
+- [x] Lección registrada antes de continuar la integración
+
+**Tags:** #windows #crlf #prettier #format-gate #verificacion
