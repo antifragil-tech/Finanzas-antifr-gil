@@ -37,6 +37,7 @@
 Desde la **raíz del repo**:
 
 ### a) Detección de legacy
+
 ```
 node scripts/qa/check-legacy-strings.mjs --help          # ayuda
 node scripts/qa/check-legacy-strings.mjs                  # escanea apps/ (por defecto)
@@ -45,6 +46,7 @@ node scripts/qa/check-legacy-strings.mjs --all --soft     # todo el repo, sin ro
 ```
 
 ### b) Detección de secretos (enmascara)
+
 ```
 node scripts/qa/check-no-secrets.mjs --help
 node scripts/qa/check-no-secrets.mjs                      # escanea la raíz
@@ -52,6 +54,7 @@ node scripts/qa/check-no-secrets.mjs apps packages        # rutas concretas
 ```
 
 ### c) Detección de datos clínicos
+
 ```
 node scripts/qa/check-no-clinical-data.mjs --help
 node scripts/qa/check-no-clinical-data.mjs                # todo el repo
@@ -59,6 +62,7 @@ node scripts/qa/check-no-clinical-data.mjs apps packages  # rutas concretas
 ```
 
 ### d) Scope de la rama actual (antes de abrir PR)
+
 ```
 node scripts/qa/check-pr-scope.mjs --help
 node scripts/qa/check-pr-scope.mjs                        # perfil default (conservador)
@@ -67,6 +71,7 @@ node scripts/qa/check-pr-scope.mjs --base origin/main
 ```
 
 ### e) Smoke de rutas (servidor levantado)
+
 ```
 node scripts/qa/smoke-routes.mjs --help
 QA_BASE_URL=http://localhost:3000 node scripts/qa/smoke-routes.mjs --expect-demo
@@ -74,6 +79,7 @@ node scripts/qa/smoke-routes.mjs --base http://localhost:3000
 ```
 
 En PowerShell, para fijar la variable en la misma línea:
+
 ```
 $env:QA_BASE_URL="http://localhost:3000"; node scripts/qa/smoke-routes.mjs --expect-demo
 ```
@@ -94,6 +100,7 @@ Los detectores tienen dos modos que separan **ruido heredado** de **hallazgos de
 Y `check-pr-scope.mjs --profile <tipo>` valida que el diff encaja en el perfil del PR.
 
 **PR de Reservas:**
+
 ```
 node scripts/qa/check-pr-scope.mjs --profile reservas
 node scripts/qa/check-no-secrets.mjs --changed-only
@@ -101,6 +108,7 @@ node scripts/qa/check-no-clinical-data.mjs --changed-only
 ```
 
 **PR de DB (baseline/A1):**
+
 ```
 node scripts/qa/check-pr-scope.mjs --profile db
 node scripts/qa/check-no-secrets.mjs --changed-only
@@ -108,12 +116,14 @@ node scripts/qa/check-legacy-strings.mjs --changed-only
 ```
 
 **PR de docs:**
+
 ```
 node scripts/qa/check-pr-scope.mjs --profile docs
 node scripts/qa/check-no-secrets.mjs --changed-only
 ```
 
 **PR de demo (host/shell):**
+
 ```
 node scripts/qa/check-pr-scope.mjs --profile demo
 node scripts/qa/check-no-secrets.mjs --changed-only
@@ -121,11 +131,13 @@ node scripts/qa/check-no-clinical-data.mjs --changed-only
 ```
 
 **PR de QA (esta suite):**
+
 ```
 node scripts/qa/check-pr-scope.mjs --profile qa
 ```
 
 **Auditoría global del repo (informativa, sin bloquear por legacy conocido):**
+
 ```
 node scripts/qa/check-no-secrets.mjs --baseline-known-issues
 node scripts/qa/check-legacy-strings.mjs --baseline-known-issues
@@ -134,22 +146,26 @@ node scripts/qa/check-legacy-strings.mjs --baseline-known-issues
 ## 3. Cómo interpretar los resultados
 
 ### check-legacy-strings
+
 - `OK · 0 strings legacy` → bien.
 - Lista `archivo:línea [término] snippet` + resumen por término. **Importa el legacy VISIBLE** (texto que llega a pantalla). Mucho legacy en `services/`, `docs/` o comentarios es esperado en el repo reciclado; el bloqueo de PR es legacy **visible** en `apps/host` / `apps/modules`.
 - Código de salida 1 = hubo hallazgos (usa `--soft` para no romper un pipeline informativo).
 
 ### check-no-secrets
+
 - `OK · 0 hallazgos HIGH` → bien.
 - `HIGH` = patrón con valor real (JWT, key con valor, `.env` real). **Valores enmascarados** (`ey…[221]…Q8`). Si es real → **PARAR, no subir, ROTAR la clave**.
 - `INFO` = menciones sin valor (placeholders, rol `service_role` en SQL, prosa). No bloquean.
 
 ### check-no-clinical-data
+
 - `OK · 0 señales` → bien.
 - `FAIL` = término clínico en código/mocks/producto (`apps/`, `packages/`, `services/`, `scripts/`) → **bloqueo salvo triaje**: el script detecta términos, no diagnostica. Un FAIL exige revisión humana: "evolución" en KPIs financieros o "tratamiento" en un email mercantil NO son datos clínicos; un mock de cita con "lesión de rodilla" SÍ lo es y se elimina. Código de salida 1.
 - `REQUIERE REVISIÓN` = mención en documentación (`docs/`, `.claude/`) → permitida si es documental (hablar DE la regla, no un dato de paciente). Revisar a ojo. No bloquea (código 0).
 - En PRs nuevos lo que importa es el **delta**: no introducir hallazgos nuevos respecto a `main`.
 
 ### check-pr-scope
+
 - `OK · sin rutas bloqueadas para el perfil` → bien.
 - `BLOQUEADO` = la rama toca rutas fuera de lo permitido por el perfil (`--profile docs|reservas|demo|db|qa|default`), o un bloqueo universal (`.env*`, `packages/supabase-client`, `services/supabase/migrations`, `package.json` raíz — estos no los levanta ningún perfil ni `--allow`). Código de salida 1.
 - `WARN` = archivo fuera del perfil pero no bloqueado (p. ej. `pnpm-lock.yaml` en perfil reservas): revisar a ojo, no bloquea.
@@ -157,6 +173,7 @@ node scripts/qa/check-legacy-strings.mjs --baseline-known-issues
 - `⚠ Aviso: no existe main…` = no puede comparar (base desactualizada o ausente); no es fallo, pero el diff mostrado puede estar incompleto.
 
 ### smoke-routes
+
 - `[PASS] /ruta status=200 legacy=no demo=sí` → bien.
 - `legacy=SÍ⚠` → hay texto "Alsari/Pavier/Armia/Rialsa" visible en esa página → revisar.
 - `demo=no` con `--expect-demo` → falta el banner de demostración → revisar gating.
@@ -186,13 +203,13 @@ En un comentario del PR (o en la descripción), pegar un bloque con:
 ```md
 ### QA smoke suite — <fecha> — <rama>@<commit corto>
 
-| Check | Resultado |
-|---|---|
-| check-legacy-strings | PASS / FAIL (n hallazgos) |
-| check-no-secrets | PASS / FAIL (n HIGH) |
-| check-no-clinical-data | PASS / REVISIÓN (n) / FAIL (n) |
-| check-pr-scope | PASS / rutas peligrosas: … |
-| smoke-routes | n/8 PASS (o "no ejecutado: sin servidor") |
+| Check                  | Resultado                                 |
+| ---------------------- | ----------------------------------------- |
+| check-legacy-strings   | PASS / FAIL (n hallazgos)                 |
+| check-no-secrets       | PASS / FAIL (n HIGH)                      |
+| check-no-clinical-data | PASS / REVISIÓN (n) / FAIL (n)            |
+| check-pr-scope         | PASS / rutas peligrosas: …                |
+| smoke-routes           | n/8 PASS (o "no ejecutado: sin servidor") |
 
 Notas: <hallazgos relevantes, SIN pegar secretos ni datos>
 ```

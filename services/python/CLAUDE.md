@@ -23,13 +23,13 @@ All runs on the Windows PC
 
 ## Tech Stack
 
-| Layer | Service | Plan |
-|-------|---------|------|
-| Database + vectors | Supabase Free | 500 MB + pgvector |
-| Embeddings | Voyage AI (`voyage-3.5`, 1024-d) | Free 200M tokens |
-| LLM (classify + Q&A) | Anthropic API (**Claude Sonnet 4.6**) | Pay-per-use |
-| Cron | **Windows Task Scheduler** (local) | Free |
-| Query interface | MCP server (local, stdio) | Free |
+| Layer                | Service                               | Plan              |
+| -------------------- | ------------------------------------- | ----------------- |
+| Database + vectors   | Supabase Free                         | 500 MB + pgvector |
+| Embeddings           | Voyage AI (`voyage-3.5`, 1024-d)      | Free 200M tokens  |
+| LLM (classify + Q&A) | Anthropic API (**Claude Sonnet 4.6**) | Pay-per-use       |
+| Cron                 | **Windows Task Scheduler** (local)    | Free              |
+| Query interface      | MCP server (local, stdio)             | Free              |
 
 Target cost: 1–3 €/month (Anthropic API only).
 
@@ -92,25 +92,25 @@ Additional planned: `alsari_hitos` (deadline alerts, Phase 6), `alsari_ingest_lo
 
 ## Supported File Formats
 
-| Type | MIME | Extractor |
-|------|------|-----------|
-| PDF | `application/pdf` | `pdf.py` |
-| Word | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` | `docx.py` |
-| Google Docs | `application/vnd.google-apps.document` | `gdocs.py` (export text/plain) |
-| Excel | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | `xlsx.py` |
-| Google Sheets | `application/vnd.google-apps.spreadsheet` | `xlsx.py` (export csv) |
+| Type          | MIME                                                                      | Extractor                      |
+| ------------- | ------------------------------------------------------------------------- | ------------------------------ |
+| PDF           | `application/pdf`                                                         | `pdf.py`                       |
+| Word          | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` | `docx.py`                      |
+| Google Docs   | `application/vnd.google-apps.document`                                    | `gdocs.py` (export text/plain) |
+| Excel         | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`       | `xlsx.py`                      |
+| Google Sheets | `application/vnd.google-apps.spreadsheet`                                 | `xlsx.py` (export csv)         |
 
 ## Delivery Phases
 
-| Phase | Scope | Status |
-|-------|-------|--------|
-| 0–2 | Architecture, Supabase schema, Voyage AI | ✅ Done |
-| 3a | Core Python (config, db, extract, pipeline) | ✅ Done |
-| 3b | `scripts/ingest_manual.py` | Next |
-| 4 | `scripts/ingest_bulk.py` (60 docs) | Pending |
-| 5 | Incremental daily sync + Gmail threads + Task Scheduler | Pending |
-| 6 | Deadline alerts | Pending |
-| 7 | MCP server | Pending |
+| Phase | Scope                                                   | Status  |
+| ----- | ------------------------------------------------------- | ------- |
+| 0–2   | Architecture, Supabase schema, Voyage AI                | ✅ Done |
+| 3a    | Core Python (config, db, extract, pipeline)             | ✅ Done |
+| 3b    | `scripts/ingest_manual.py`                              | Next    |
+| 4     | `scripts/ingest_bulk.py` (60 docs)                      | Pending |
+| 5     | Incremental daily sync + Gmail threads + Task Scheduler | Pending |
+| 6     | Deadline alerts                                         | Pending |
+| 7     | MCP server                                              | Pending |
 
 ## Phase 5 — Incremental Sync Design
 

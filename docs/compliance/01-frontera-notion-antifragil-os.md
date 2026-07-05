@@ -10,10 +10,10 @@
 
 ## 1. El reparto
 
-| Sistema | Guarda | No guarda |
-|---|---|---|
+| Sistema                                                          | Guarda                                                                                                                                 | No guarda                                              |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
 | **Notion** (hoy; mañana quizá Salonized u otro software clínico) | Historia clínica y datos clínicos relevantes: valoraciones, diagnóstico, evolución, tratamiento, informes, pruebas, multimedia clínico | Operativa administrativa (agenda, cobros, facturación) |
-| **Antifrágil OS** | Todo lo administrativo-operativo (ver compliance 00 §2) + **una referencia externa** a la ficha clínica | Cualquier contenido clínico (compliance 00 §3) |
+| **Antifrágil OS**                                                | Todo lo administrativo-operativo (ver compliance 00 §2) + **una referencia externa** a la ficha clínica                                | Cualquier contenido clínico (compliance 00 §3)         |
 
 ## 2. La referencia externa (lo ÚNICO que cruza)
 
@@ -69,6 +69,6 @@ del diseño de referencia opaca.
 
 ---
 
-*Regla final: si alguien duda de en qué sistema va un dato, la respuesta corta es —
+_Regla final: si alguien duda de en qué sistema va un dato, la respuesta corta es —
 ¿es sobre la salud de la persona? → sistema clínico. ¿Es sobre la gestión del negocio? → OS.
-Si sigue habiendo duda, se pregunta a Guille ANTES de escribirlo en el OS.*
+Si sigue habiendo duda, se pregunta a Guille ANTES de escribirlo en el OS._

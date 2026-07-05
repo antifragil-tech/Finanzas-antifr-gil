@@ -8,19 +8,20 @@
 
 ## 📦 Packages disponibles
 
-| Package | Propósito | Estado |
-|---------|-----------|--------|
-| `@alsari/ui` | Design System: componentes Quiet Luxury | 🚧 Pendiente |
-| `@alsari/utils` | Utilidades puras (formatCurrency, cn, helpers) | 🚧 Pendiente |
-| `@alsari/types` | Tipos y schemas Zod canónicos | 🚧 Pendiente |
-| `@alsari/config` | Configs compartidas (TS, ESLint, Tailwind) | 🚧 Pendiente |
-| `@alsari/supabase-client` | Cliente Supabase tipado | 🚧 Pendiente |
+| Package                   | Propósito                                      | Estado       |
+| ------------------------- | ---------------------------------------------- | ------------ |
+| `@alsari/ui`              | Design System: componentes Quiet Luxury        | 🚧 Pendiente |
+| `@alsari/utils`           | Utilidades puras (formatCurrency, cn, helpers) | 🚧 Pendiente |
+| `@alsari/types`           | Tipos y schemas Zod canónicos                  | 🚧 Pendiente |
+| `@alsari/config`          | Configs compartidas (TS, ESLint, Tailwind)     | 🚧 Pendiente |
+| `@alsari/supabase-client` | Cliente Supabase tipado                        | 🚧 Pendiente |
 
 ---
 
 ## 🛠️ Cómo crear un nuevo package
 
 Reglas:
+
 1. El nombre va siempre con scope `@alsari/...`.
 2. `package.json` con `"private": true` y `"type": "module"`.
 3. `tsconfig.json` que extiende del raíz.

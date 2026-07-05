@@ -64,15 +64,15 @@ Dar un conjunto **mínimo y reproducible** de comprobaciones para usar **antes d
 
 ## Índice
 
-| Archivo | Tipo | Uso |
-|---|---|---|
-| `docs/qa/checklist-demo.md` | manual | revisar el demo |
-| `docs/qa/checklist-reservas.md` | manual | revisar reservas |
-| `docs/qa/checklist-db-baseline.md` | manual | revisar DB baseline (sin aplicar SQL) |
-| `docs/qa/checklist-pr.md` | manual | revisar un PR |
-| `docs/qa/runbook-smoke-tests.md` | guía | cómo correr los scripts |
-| `scripts/qa/check-legacy-strings.mjs` | script | detectar strings legacy |
-| `scripts/qa/check-no-secrets.mjs` | script | detectar secretos (enmascara) |
-| `scripts/qa/check-no-clinical-data.mjs` | script | detectar datos clínicos prohibidos |
-| `scripts/qa/check-pr-scope.mjs` | script | revisar scope de la rama actual |
-| `scripts/qa/smoke-routes.mjs` | script | GET a rutas locales |
+| Archivo                                 | Tipo   | Uso                                   |
+| --------------------------------------- | ------ | ------------------------------------- |
+| `docs/qa/checklist-demo.md`             | manual | revisar el demo                       |
+| `docs/qa/checklist-reservas.md`         | manual | revisar reservas                      |
+| `docs/qa/checklist-db-baseline.md`      | manual | revisar DB baseline (sin aplicar SQL) |
+| `docs/qa/checklist-pr.md`               | manual | revisar un PR                         |
+| `docs/qa/runbook-smoke-tests.md`        | guía   | cómo correr los scripts               |
+| `scripts/qa/check-legacy-strings.mjs`   | script | detectar strings legacy               |
+| `scripts/qa/check-no-secrets.mjs`       | script | detectar secretos (enmascara)         |
+| `scripts/qa/check-no-clinical-data.mjs` | script | detectar datos clínicos prohibidos    |
+| `scripts/qa/check-pr-scope.mjs`         | script | revisar scope de la rama actual       |
+| `scripts/qa/smoke-routes.mjs`           | script | GET a rutas locales                   |

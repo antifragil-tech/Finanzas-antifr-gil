@@ -62,16 +62,16 @@ git push -u origin <rama>
 
 ## Reglas duras del proceso
 
-| Regla | Detalle |
-|---|---|
-| **PR Draft primero** | Ningún PR nace "ready for review". Se marca ready tras pasar revisión + QA. |
-| **Nada de `main`** | Ni commits directos, ni push, ni "arreglitos rápidos". |
-| **Nada de rebase / force push** | La historia de las ramas compartidas no se reescribe. Si una rama se ensucia, se abre una limpia. |
-| **Nada de SQL real** | Ningún PR aplica SQL a ningún Supabase. El SQL viaja como archivos + runbook; la aplicación es un acto separado y autorizado. |
-| **Nada de datos reales** | Fixtures y mocks siempre sintéticos. Ni nombres reales de pacientes/clientes, ni CIFs, ni IBANs, ni emails personales. |
-| **Nada de historia clínica** | Ver `docs/compliance/00`. Un campo clínico en un PR es motivo de rechazo inmediato. |
-| **Lockfile** | `pnpm-lock.yaml` nunca se edita ni se resuelve a mano: se regenera con `pnpm install`. |
-| **`packages/supabase-client`** | Intocable hasta la fase de infraestructura del Supabase nuevo. |
+| Regla                           | Detalle                                                                                                                       |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **PR Draft primero**            | Ningún PR nace "ready for review". Se marca ready tras pasar revisión + QA.                                                   |
+| **Nada de `main`**              | Ni commits directos, ni push, ni "arreglitos rápidos".                                                                        |
+| **Nada de rebase / force push** | La historia de las ramas compartidas no se reescribe. Si una rama se ensucia, se abre una limpia.                             |
+| **Nada de SQL real**            | Ningún PR aplica SQL a ningún Supabase. El SQL viaja como archivos + runbook; la aplicación es un acto separado y autorizado. |
+| **Nada de datos reales**        | Fixtures y mocks siempre sintéticos. Ni nombres reales de pacientes/clientes, ni CIFs, ni IBANs, ni emails personales.        |
+| **Nada de historia clínica**    | Ver `docs/compliance/00`. Un campo clínico en un PR es motivo de rechazo inmediato.                                           |
+| **Lockfile**                    | `pnpm-lock.yaml` nunca se edita ni se resuelve a mano: se regenera con `pnpm install`.                                        |
+| **`packages/supabase-client`**  | Intocable hasta la fase de infraestructura del Supabase nuevo.                                                                |
 
 ---
 

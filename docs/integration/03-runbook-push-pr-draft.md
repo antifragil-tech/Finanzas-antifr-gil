@@ -36,6 +36,7 @@ git status
 ```
 
 Lee con calma:
+
 - ✅ "nothing to commit, working tree clean" → perfecto, puedes subir.
 - ⚠️ Hay archivos "modified"/"untracked" que **son tuyos y esperados** → commitéalos primero (Paso 3).
 - ❌ Aparecen archivos que **no reconoces**, o `.env`, o claves → **PARA**. No los subas.
@@ -118,6 +119,7 @@ gh pr view --web
 ```
 
 Comprueba en la web:
+
 - El PR es **Draft**.
 - El diff contiene **solo** tus archivos.
 - No hay `.env` ni claves en "Files changed".
@@ -126,13 +128,13 @@ Comprueba en la web:
 
 ## ✅ Comandos seguros (resumen)
 
-| Acción | Comando |
-|---|---|
-| Ver rama actual | `git branch --show-current` |
-| Ver estado | `git status` |
-| Ver qué subes | `git log --oneline main..HEAD` · `git diff --stat main..HEAD` |
-| Subir rama | `git push -u origin HEAD` |
-| Abrir PR draft | `gh pr create --draft --base main --head <rama> ...` |
+| Acción          | Comando                                                       |
+| --------------- | ------------------------------------------------------------- |
+| Ver rama actual | `git branch --show-current`                                   |
+| Ver estado      | `git status`                                                  |
+| Ver qué subes   | `git log --oneline main..HEAD` · `git diff --stat main..HEAD` |
+| Subir rama      | `git push -u origin HEAD`                                     |
+| Abrir PR draft  | `gh pr create --draft --base main --head <rama> ...`          |
 
 ## ⛔ Qué NO hacer (nunca)
 
@@ -146,5 +148,6 @@ Comprueba en la web:
 - ❌ **No** resolver conflictos de `pnpm-lock.yaml` a mano (se regenera, ver `02-matriz-conflictos.md`).
 
 ## Si algo falla
+
 - Cualquier mensaje con "merge conflict", "rejected", "non-fast-forward", "force" → **PARA** y reporta. No fuerces.
 - Ver `05-registro-riesgos.md` para el contexto de por qué somos tan estrictos con git.

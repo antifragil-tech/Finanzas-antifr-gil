@@ -4,14 +4,14 @@ import { ContabilidadSidebar } from './ContabilidadSidebar';
 import type { ContabilidadView } from './ContabilidadSidebar';
 
 const VIEW_NAMES: Record<ContabilidadView, string> = {
-  dashboard:          'Dashboard',
-  movimientos:        'Movimientos Bancarios',
-  facturas:           'Facturas Recibidas',
-  facturas_emitidas:  'Facturas Emitidas',
-  contactos:          'Contactos',
-  diario:             'Diario Borrador',
-  reconciliacion:     'Reconciliación',
-  mis_empresas:       'Mis Empresas',
+  dashboard: 'Dashboard',
+  movimientos: 'Movimientos Bancarios',
+  facturas: 'Facturas Recibidas',
+  facturas_emitidas: 'Facturas Emitidas',
+  contactos: 'Contactos',
+  diario: 'Diario Borrador',
+  reconciliacion: 'Reconciliación',
+  mis_empresas: 'Mis Empresas',
 };
 
 type Props = {
@@ -23,19 +23,23 @@ type Props = {
 };
 
 export function ContabilidadLayout({
-  selectedView, isPrivateMode, onViewChange, onTogglePrivacy, children,
+  selectedView,
+  isPrivateMode,
+  onViewChange,
+  onTogglePrivacy,
+  children,
 }: Props) {
   return (
-    <div className="flex h-screen overflow-hidden bg-zinc-900 text-zinc-100 font-sans">
+    <div className="flex h-screen overflow-hidden bg-zinc-900 font-sans text-zinc-100">
       <ContabilidadSidebar
         selectedView={selectedView}
         isPrivateMode={isPrivateMode}
         onViewChange={onViewChange}
         onTogglePrivacy={onTogglePrivacy}
       />
-      <main className="flex-1 ml-64 h-full overflow-y-auto relative bg-zinc-900">
-        <header className="sticky top-0 z-40 bg-zinc-900/80 backdrop-blur-xl border-b border-white/[0.08] px-10 py-6">
-          <div className="flex items-center gap-2 text-2xs text-zinc-500 font-medium uppercase tracking-widest mb-1.5">
+      <main className="relative ml-64 h-full flex-1 overflow-y-auto bg-zinc-900">
+        <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-zinc-900/80 px-10 py-6 backdrop-blur-xl">
+          <div className="text-2xs mb-1.5 flex items-center gap-2 font-medium uppercase tracking-widest text-zinc-500">
             <span>ALSARI CAPITAL</span>
             <ChevronRight size={10} className="text-zinc-700" />
             <span className="text-zinc-400">Contabilidad</span>

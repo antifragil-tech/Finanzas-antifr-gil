@@ -28,20 +28,20 @@ contenido clínico**. Detalle completo y ejemplos en
 [docs/compliance/00-alcance-administrativo-operativo.md](compliance/00-alcance-administrativo-operativo.md)
 y [docs/compliance/01-frontera-notion-antifragil-os.md](compliance/01-frontera-notion-antifragil-os.md).
 
-| ✅ Permitido en Antifrágil OS v1 | ❌ Prohibido en Antifrágil OS v1 |
-|---|---|
-| Agenda, calendario, citas, estados de cita | Historia clínica |
-| Asistencia / no asistencia | Diagnósticos |
-| Profesionales | Lesiones |
-| Clientes administrativos | Motivo clínico concreto |
-| Servicios generales | Evolución, antecedentes |
-| Cobros, bonos, programas | Medicación, tratamientos |
-| Origen del paciente, derivadores | Informes, pruebas |
-| Vivofácil, Oasis, Lidomare | Notas clínicas |
-| Facturación / cierres | Audios clínicos, imágenes clínicas |
-| Tesorería, caja, banco | Documentos sanitarios |
-| Rentabilidad, KPIs, proyectos, finanzas | |
-| Enlace externo a Notion/Salonized/sistema clínico | |
+| ✅ Permitido en Antifrágil OS v1                  | ❌ Prohibido en Antifrágil OS v1   |
+| ------------------------------------------------- | ---------------------------------- |
+| Agenda, calendario, citas, estados de cita        | Historia clínica                   |
+| Asistencia / no asistencia                        | Diagnósticos                       |
+| Profesionales                                     | Lesiones                           |
+| Clientes administrativos                          | Motivo clínico concreto            |
+| Servicios generales                               | Evolución, antecedentes            |
+| Cobros, bonos, programas                          | Medicación, tratamientos           |
+| Origen del paciente, derivadores                  | Informes, pruebas                  |
+| Vivofácil, Oasis, Lidomare                        | Notas clínicas                     |
+| Facturación / cierres                             | Audios clínicos, imágenes clínicas |
+| Tesorería, caja, banco                            | Documentos sanitarios              |
+| Rentabilidad, KPIs, proyectos, finanzas           |                                    |
+| Enlace externo a Notion/Salonized/sistema clínico |                                    |
 
 ### 1.2 Identidad y rebrand
 
@@ -65,21 +65,21 @@ y [docs/compliance/01-frontera-notion-antifragil-os.md](compliance/01-frontera-n
 
 ### 2.1 Mapa de ramas y worktrees (✅ verificado)
 
-| Rama | Último commit | En origin | PR | Worktree |
-|---|---|---|---|---|
-| `main` | `8d0b720` Initial commit | ✅ | — | `Finanzas-antifr-gil` (raíz) |
-| `docs/project-governance-antifragil-os` | (este PR) | ✅ | **#7 DRAFT** | `wt-governance` |
-| `docs/finanzas-facturacion-emitida-design` | `6767680` Fisioterapia sin subtipo deportivo | ✅ | **#1 OPEN** | `Finanzas-antifr-gil-facturacion` |
-| `feat/clinica-fase1-catalogos` | `d08058d` modelo de datos Clínica F1 | ✅ | **#2 DRAFT** | `wt-clinica-fase1` |
-| `demo/local-antifragil-os` | `7854be1` sincronizar contexto global OS mock | ✅ | **#3 DRAFT / NO MERGE** | `wt-demo-local-antifragil-os` |
-| `feat/reservas-agenda-hoy` | `b9860bb` limpiar términos clínicos en mocks (Agenda v0.2) | ✅ | **#5 DRAFT / NO MERGE** (creado en paralelo 2026-07-04) | `wt-reservas-agenda-hoy` |
-| `feat/reservas-calendario-semana` | `4d6dc7f` spike — **ancestro común** de reservas y demo → **archivar** | ❌ sin push | — | `wt-reservas-calendario` |
-| `chore/db-baseline-antifragil-os` | `27f6392` reforzar invariantes A1 (anti-duplicación banco + compliance clínica) | ✅ | **#4 DRAFT / NO APPLY** (creado en paralelo 2026-07-04) | `wt-finanzas-baseline` |
-| `qa/smoke-suite-antifragil-os` | `2ebe938` añadir check-no-clinical-data y check-pr-scope | ✅ | **#6 DRAFT** (creado en paralelo 2026-07-04) | `wt-qa-smoke-suite` |
-| `docs/integration-master-plan` | `3a7cb4f` plan maestro de integración y PRs | ❌ sin push | — | `wt-integration-master-plan` |
-| `chore/financiero-copy-antifragil` | `42edd4d` renombrar marca visible Alsari→Antifragil | ❌ sin push | — | `wt-finanzas-rename` |
-| `docs/finanzas-contabilidad-antifragil-audit` | `2c455ff` — **subsumida byte a byte** por `docs/finanzas-modelo-operativo` → **archivar sin merge** | ❌ sin push | — | `wt-finanzas-docs` |
-| `docs/finanzas-modelo-operativo` | `d429ec6` decisiones A1-D1..D5 en doc 06 | ❌ sin push | — | `wt-finanzas-modelo` |
+| Rama                                          | Último commit                                                                                       | En origin   | PR                                                      | Worktree                          |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------- | ----------- | ------------------------------------------------------- | --------------------------------- |
+| `main`                                        | `8d0b720` Initial commit                                                                            | ✅          | —                                                       | `Finanzas-antifr-gil` (raíz)      |
+| `docs/project-governance-antifragil-os`       | (este PR)                                                                                           | ✅          | **#7 DRAFT**                                            | `wt-governance`                   |
+| `docs/finanzas-facturacion-emitida-design`    | `6767680` Fisioterapia sin subtipo deportivo                                                        | ✅          | **#1 OPEN**                                             | `Finanzas-antifr-gil-facturacion` |
+| `feat/clinica-fase1-catalogos`                | `d08058d` modelo de datos Clínica F1                                                                | ✅          | **#2 DRAFT**                                            | `wt-clinica-fase1`                |
+| `demo/local-antifragil-os`                    | `7854be1` sincronizar contexto global OS mock                                                       | ✅          | **#3 DRAFT / NO MERGE**                                 | `wt-demo-local-antifragil-os`     |
+| `feat/reservas-agenda-hoy`                    | `b9860bb` limpiar términos clínicos en mocks (Agenda v0.2)                                          | ✅          | **#5 DRAFT / NO MERGE** (creado en paralelo 2026-07-04) | `wt-reservas-agenda-hoy`          |
+| `feat/reservas-calendario-semana`             | `4d6dc7f` spike — **ancestro común** de reservas y demo → **archivar**                              | ❌ sin push | —                                                       | `wt-reservas-calendario`          |
+| `chore/db-baseline-antifragil-os`             | `27f6392` reforzar invariantes A1 (anti-duplicación banco + compliance clínica)                     | ✅          | **#4 DRAFT / NO APPLY** (creado en paralelo 2026-07-04) | `wt-finanzas-baseline`            |
+| `qa/smoke-suite-antifragil-os`                | `2ebe938` añadir check-no-clinical-data y check-pr-scope                                            | ✅          | **#6 DRAFT** (creado en paralelo 2026-07-04)            | `wt-qa-smoke-suite`               |
+| `docs/integration-master-plan`                | `3a7cb4f` plan maestro de integración y PRs                                                         | ❌ sin push | —                                                       | `wt-integration-master-plan`      |
+| `chore/financiero-copy-antifragil`            | `42edd4d` renombrar marca visible Alsari→Antifragil                                                 | ❌ sin push | —                                                       | `wt-finanzas-rename`              |
+| `docs/finanzas-contabilidad-antifragil-audit` | `2c455ff` — **subsumida byte a byte** por `docs/finanzas-modelo-operativo` → **archivar sin merge** | ❌ sin push | —                                                       | `wt-finanzas-docs`                |
+| `docs/finanzas-modelo-operativo`              | `d429ec6` decisiones A1-D1..D5 en doc 06                                                            | ❌ sin push | —                                                       | `wt-finanzas-modelo`              |
 
 > Nota: la Fase 1 de Reservas se cerró en `f3a66b0`; la rama siguió hasta `b9860bb`
 > (Agenda v0.2 / Fase 2 + mini-hardening de compliance en los mocks).
@@ -117,6 +117,7 @@ Decisiones firmes (decision log D1-D11 del plan de integración): Supabase **nue
 **no** tocar `packages/supabase-client` todavía.
 
 **Finanzas (diseño)** — ramas de docs
+
 - `docs/finanzas-modelo-operativo` (**PR 1 del orden de integración**): docs 00-06 completos —
   auditoría base, modelo conceptual, plan Fase 2 de adaptación de `financiero`, mapa y gaps de
   finanzas operativas (3 lentes: tesorería/rentabilidad/precontabilidad), backlog F-Op por lotes
@@ -126,7 +127,7 @@ Decisiones firmes (decision log D1-D11 del plan de integración): Supabase **nue
   (docs 00/01/03 idénticos) → **archivar sin merge**.
 - `docs/finanzas-facturacion-emitida-design` (PR #1 OPEN): doc 02 — diseño de facturación emitida.
   Decisiones firmes tomadas (2026-06-26): **D1** el OS es precontable, NO emite factura legal
-  oficial (Veri*factu delegado a gestoría → resuelve F4-D); **D2** Clínica sin IVA provisional
+  oficial (Veri\*factu delegado a gestoría → resuelve F4-D); **D2** Clínica sin IVA provisional
   (`exento_provisional`, conservando campos fiscales); **D3** tratamiento fiscal por
   producto/proyecto, nunca global. Pendientes: F4-A (quién emite), F4-B (cuenta 705),
   F4-C (mapa exención con gestoría/Ramón), F4-E (serie propia clínica).
@@ -198,6 +199,7 @@ Plantilla: `.github/PULL_REQUEST_TEMPLATE.md`.
 
 **PRs existentes (✅ verificado 2026-07-04 ~13:35 — los #4-#6 se crearon en paralelo por otros
 chats durante esta sesión):**
+
 - **PR #1** — `docs(finanzas): diseño de facturación emitida + decisiones` — **OPEN** (anterior a la regla de Draft).
 - **PR #2** — `feat(db): Clínica Fase 1 — catálogos / modelo de datos` — **DRAFT** (alcance a reescribir: solo tipos, R10).
 - **PR #3** — `demo(local): Antifrágil OS mock shell y contexto global` — **DRAFT / NO MERGE** (se integrará partido en 5a-5d).
@@ -207,6 +209,7 @@ chats durante esta sesión):**
 - **PR #7** — `governance: contexto maestro, proceso de PRs y compliance scope` — **DRAFT** (este).
 
 **Ramas que aún necesitan push + PR Draft:**
+
 - `docs/integration-master-plan` (plan maestro del Chat 4 — fuente del orden)
 - `docs/finanzas-modelo-operativo` (posición 1 del orden del plan)
 - `chore/financiero-copy-antifragil` (rebrand visible, posición 3)
@@ -223,8 +226,8 @@ chats durante esta sesión):**
    (pendiente validación legal externa antes de producción).
 2. **Pushes + PR Drafts pendientes** — `docs/integration-master-plan`,
    `docs/finanzas-modelo-operativo` (posición 1 del orden) y
-   `chore/financiero-copy-antifragil` (posición 3). *(Reservas #5, baseline #4 y QA #6 ya
-   tienen PR Draft, creados en paralelo durante esta sesión.)*
+   `chore/financiero-copy-antifragil` (posición 3). _(Reservas #5, baseline #4 y QA #6 ya
+   tienen PR Draft, creados en paralelo durante esta sesión.)_
 3. **Demo** — mantener PR #3 en Draft/NO MERGE; preparar su **partición en 5a-5d** para después
    de que Reservas esté en `main`.
 4. **Clínica** — reescribir alcance del PR #2 (solo tipos + doc; SQL al baseline).
@@ -232,29 +235,29 @@ chats durante esta sesión):**
    `docs/finanzas-contabilidad-antifragil-audit` (ya subsumida).
 6. **Reservas Fase 2** — retomar **sin datos clínicos** cuando F1 esté integrada.
 
-*(Después, en la línea Finanzas: cerrar F4-A/B/E con Guille, F4-C con la gestoría, y abrir
-F4.0 — auditoría de paridad de `facturas_emitidas` — solo cuando Guille lo autorice.)*
+_(Después, en la línea Finanzas: cerrar F4-A/B/E con Guille, F4-C con la gestoría, y abrir
+F4.0 — auditoría de paridad de `facturas_emitidas` — solo cuando Guille lo autorice.)_
 
 ---
 
 ## 6. Discrepancias detectadas al escribir este traspaso (2026-07-04)
 
-| Traspaso decía | Realidad verificada |
-|---|---|
-| Demo "pendiente PR Draft" | El PR #3 Draft **ya existe** (creado 2026-06-30) |
-| QA era "línea prevista" (rama futura) | `qa/smoke-suite-antifragil-os` **ya existe y está en origin** (Chat 5: 3 scripts + 5 checklists) |
-| Reservas cerró en `f3a66b0` | La rama avanzó hasta `b9860bb` (Agenda v0.2 / Fase 2); el spike `feat/reservas-calendario-semana` es su **ancestro** (archivar, no fusionar) |
-| Solo PRs #1 y #2 conocidos | Existen #1, #2 y #3 |
-| Demo "se integra después de Reservas" (sin más detalle) | El plan del Chat 4 la parte en **4 PRs (5a-5d)** excluyendo su copia de reservas |
-| — | Existen 4 ramas más no mencionadas en el traspaso: `docs/integration-master-plan` (plan de integración completo, R1-R11 + D1-D11), `chore/financiero-copy-antifragil`, `docs/finanzas-contabilidad-antifragil-audit` (subsumida), `docs/finanzas-modelo-operativo` |
-| — | El plan del Chat 4 anotaba divergencia local/origin en facturación: **ya resuelta** (verificado) |
-| — | 🔴 Riesgo R5 (anon key legacy hardcodeada) documentado en el plan; **rotación aún pendiente** |
-| SESSION.md anterior (2026-06-12) | Hablaba del repo legacy Alsari (rama y PR inexistentes aquí); queda sustituido por este documento |
+| Traspaso decía                                          | Realidad verificada                                                                                                                                                                                                                                                |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Demo "pendiente PR Draft"                               | El PR #3 Draft **ya existe** (creado 2026-06-30)                                                                                                                                                                                                                   |
+| QA era "línea prevista" (rama futura)                   | `qa/smoke-suite-antifragil-os` **ya existe y está en origin** (Chat 5: 3 scripts + 5 checklists)                                                                                                                                                                   |
+| Reservas cerró en `f3a66b0`                             | La rama avanzó hasta `b9860bb` (Agenda v0.2 / Fase 2); el spike `feat/reservas-calendario-semana` es su **ancestro** (archivar, no fusionar)                                                                                                                       |
+| Solo PRs #1 y #2 conocidos                              | Existen #1, #2 y #3                                                                                                                                                                                                                                                |
+| Demo "se integra después de Reservas" (sin más detalle) | El plan del Chat 4 la parte en **4 PRs (5a-5d)** excluyendo su copia de reservas                                                                                                                                                                                   |
+| —                                                       | Existen 4 ramas más no mencionadas en el traspaso: `docs/integration-master-plan` (plan de integración completo, R1-R11 + D1-D11), `chore/financiero-copy-antifragil`, `docs/finanzas-contabilidad-antifragil-audit` (subsumida), `docs/finanzas-modelo-operativo` |
+| —                                                       | El plan del Chat 4 anotaba divergencia local/origin en facturación: **ya resuelta** (verificado)                                                                                                                                                                   |
+| —                                                       | 🔴 Riesgo R5 (anon key legacy hardcodeada) documentado en el plan; **rotación aún pendiente**                                                                                                                                                                      |
+| SESSION.md anterior (2026-06-12)                        | Hablaba del repo legacy Alsari (rama y PR inexistentes aquí); queda sustituido por este documento                                                                                                                                                                  |
 
 ---
 
-*Artefacto de traspaso entre sesiones. Un Claude nuevo debe leer este archivo ANTES de
+_Artefacto de traspaso entre sesiones. Un Claude nuevo debe leer este archivo ANTES de
 empezar a trabajar, junto con `.claude/CLAUDE.md`, `lessons-learned/log.md` y
 `docs/governance/00-master-tracker.md`. Si el estado real diverge de este documento,
 gana el estado real: verificar con `git branch -a`, `git worktree list` y `gh pr list`
-antes de asumir.*
+antes de asumir._

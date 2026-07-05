@@ -7,7 +7,14 @@ export { calcularVAN } from './npv';
 export { calcularMOIC } from './moic';
 
 type Flujo = { fecha: string; importe: number; [k: string]: unknown };
-type Metricas = { tir: number | null; van: number | null; moic: number | null; dias_desde_inicio: number | null; periodo_inversion_dias: number | null; tasa_descuento_van: number };
+type Metricas = {
+  tir: number | null;
+  van: number | null;
+  moic: number | null;
+  dias_desde_inicio: number | null;
+  periodo_inversion_dias: number | null;
+  tasa_descuento_van: number;
+};
 
 const MS_DIA = 24 * 3600 * 1000;
 
@@ -24,7 +31,9 @@ export function calcularMetricasProyecto(
     if (flujosOrdenados.length >= 2) {
       tir = calcularXIRR(flujosOrdenados);
     }
-  } catch { /* flujos insuficientes o no convergentes */ }
+  } catch {
+    /* flujos insuficientes o no convergentes */
+  }
 
   // VAN
   let van: number | null = null;
@@ -43,9 +52,19 @@ export function calcularMetricasProyecto(
 
   // Período total (inicio → último flujo o hoy)
   const ultimoFlujo = flujosOrdenados.at(-1);
-  const periodo_inversion_dias = fechaInicio && ultimoFlujo
-    ? Math.floor((new Date(ultimoFlujo.fecha).getTime() - new Date(fechaInicio).getTime()) / MS_DIA)
-    : null;
+  const periodo_inversion_dias =
+    fechaInicio && ultimoFlujo
+      ? Math.floor(
+          (new Date(ultimoFlujo.fecha).getTime() - new Date(fechaInicio).getTime()) / MS_DIA,
+        )
+      : null;
 
-  return { tir, van, moic, dias_desde_inicio, periodo_inversion_dias, tasa_descuento_van: tasaDescuento } satisfies Metricas;
+  return {
+    tir,
+    van,
+    moic,
+    dias_desde_inicio,
+    periodo_inversion_dias,
+    tasa_descuento_van: tasaDescuento,
+  } satisfies Metricas;
 }

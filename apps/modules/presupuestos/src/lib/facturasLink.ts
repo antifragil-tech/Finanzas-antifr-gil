@@ -62,21 +62,26 @@ export async function getFacturasMini(ids: string[]): Promise<Map<string, Factur
     'GET',
     `facturas_recibidas?select=id,proveedor_nombre,numero_factura,fecha_factura,base_imponible,total_a_pagar,estado&id=in.(${ids.join(',')})`,
   );
-  return new Map(rows.map(f => [f.id, f]));
+  return new Map(rows.map((f) => [f.id, f]));
 }
 
 export async function desvincularPago(pagoId: string): Promise<void> {
   // Read current factura_recibida_id to also clear the inverse FK
-  const rows = await req<Array<{ factura_recibida_id: string | null }>>('GET', `presupuesto_pagos?id=eq.${pagoId}&select=factura_recibida_id`);
+  const rows = await req<Array<{ factura_recibida_id: string | null }>>(
+    'GET',
+    `presupuesto_pagos?id=eq.${pagoId}&select=factura_recibida_id`,
+  );
   const facturaId = rows[0]?.factura_recibida_id ?? null;
   const ops: Promise<unknown>[] = [
     req('PATCH', `presupuesto_pagos?id=eq.${pagoId}`, { factura_recibida_id: null }),
   ];
   if (facturaId) {
-    ops.push(req('PATCH', `facturas_recibidas?id=eq.${facturaId}`, {
-      presupuesto_pago_id: null,
-      updated_at: new Date().toISOString(),
-    }));
+    ops.push(
+      req('PATCH', `facturas_recibidas?id=eq.${facturaId}`, {
+        presupuesto_pago_id: null,
+        updated_at: new Date().toISOString(),
+      }),
+    );
   }
   await Promise.all(ops);
 }

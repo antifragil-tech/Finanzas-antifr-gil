@@ -3,7 +3,7 @@
 > Rellenar a mano al revisar el demo. Marca `[x]` PASS, `[ ]` pendiente, y anota FAIL con nota.
 > Requisito: demo levantado en local con `ANTIFRAGIL_DEMO_MODE=true` y `NODE_ENV≠production` (ver `runbook-smoke-tests.md`).
 
-**Rama probada:** ____________  **Commit:** ____________  **Fecha:** ____________  **Revisor:** ____________
+**Rama probada:** \***\*\_\_\_\_\*\*** **Commit:** \***\*\_\_\_\_\*\*** **Fecha:** \***\*\_\_\_\_\*\*** **Revisor:** \***\*\_\_\_\_\*\***
 
 ## Rutas (cargan y responden 200)
 
@@ -49,4 +49,4 @@
 ## Resultado
 
 - [ ] **PASS global** (todos los aplicables marcados)
-- Notas de FAIL: ___________________________________________
+- Notas de FAIL: **\*\*\*\***\*\*\*\***\*\*\*\***\_\_\_**\*\*\*\***\*\*\*\***\*\*\*\***
