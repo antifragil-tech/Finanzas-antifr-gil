@@ -34,15 +34,15 @@ Hoy el OS (heredado + drafts) sabe cuánto entra y sale por proyecto, pero **no 
 
 Que el OS responda, con datos y por devengo, a las preguntas de dirección:
 
-| Pregunta | Nivel que la responde (§5) |
-|---|---|
-| ¿Cuánto ganamos realmente por una sesión? | Sesión (5.1) |
-| ¿Qué profesional es rentable? ¿Qué parte del coste es nómina y qué parte autónomos? | Profesional (5.2) |
-| ¿Qué servicio deja más margen? | Servicio (5.3) |
-| ¿Qué canal trae clientes rentables? | Canal (5.4) |
-| ¿Qué proyecto funciona? | Proyecto (5.5) |
-| ¿Qué margen deja Lidomare vs clínica propia? ¿Y Vivofácil? | Centro (5.6) |
-| ¿Qué clientes/programas son rentables? | Cliente/programa (5.7) |
+| Pregunta                                                                            | Nivel que la responde (§5) |
+| ----------------------------------------------------------------------------------- | -------------------------- |
+| ¿Cuánto ganamos realmente por una sesión?                                           | Sesión (5.1)               |
+| ¿Qué profesional es rentable? ¿Qué parte del coste es nómina y qué parte autónomos? | Profesional (5.2)          |
+| ¿Qué servicio deja más margen?                                                      | Servicio (5.3)             |
+| ¿Qué canal trae clientes rentables?                                                 | Canal (5.4)                |
+| ¿Qué proyecto funciona?                                                             | Proyecto (5.5)             |
+| ¿Qué margen deja Lidomare vs clínica propia? ¿Y Vivofácil?                          | Centro (5.6)               |
+| ¿Qué clientes/programas son rentables?                                              | Cliente/programa (5.7)     |
 
 **Fuera de alcance de FOP-B2:** contabilidad fiscal y cierre (gestoría), la lente de inversión (TIR/VAN — no aplica a proyectos operativos, doc 01 §6), presupuesto vs real (F-Op D, capa posterior que consumirá estas cifras), y cualquier dato clínico.
 
@@ -94,12 +94,12 @@ Reservas/agenda ──► sesión realizada+validada (fecha de prestación, serv
 
 Cuatro peldaños, del más fino al más agregado. Cada nivel de §5 se lee en el peldaño que le corresponde.
 
-| # | Peldaño | Fórmula | Se calcula a nivel de |
-|---|---|---|---|
-| M1 | **Margen bruto de sesión** | ingreso devengado de la sesión − coste profesional de la sesión | sesión |
-| M2 | **Margen de contribución** | M1 − otros costes directos imputables (comisión datáfono, material de la sesión, coste de sala/centro si es variable) | sesión / servicio |
-| M3 | **Margen operativo del proyecto/centro** | Σ M2 − costes fijos imputados del periodo (nóminas, parte Antifrágil de compartidas, alquiler del centro, software del proyecto) | proyecto · centro · mes |
-| M4 | **Resultado operativo global** | Σ M3 de todos los proyectos − costes generales de estructura | Antifrágil · mes |
+| #   | Peldaño                                  | Fórmula                                                                                                                          | Se calcula a nivel de   |
+| --- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| M1  | **Margen bruto de sesión**               | ingreso devengado de la sesión − coste profesional de la sesión                                                                  | sesión                  |
+| M2  | **Margen de contribución**               | M1 − otros costes directos imputables (comisión datáfono, material de la sesión, coste de sala/centro si es variable)            | sesión / servicio       |
+| M3  | **Margen operativo del proyecto/centro** | Σ M2 − costes fijos imputados del periodo (nóminas, parte Antifrágil de compartidas, alquiler del centro, software del proyecto) | proyecto · centro · mes |
+| M4  | **Resultado operativo global**           | Σ M3 de todos los proyectos − costes generales de estructura                                                                     | Antifrágil · mes        |
 
 ### 4.1 Ingreso devengado por sesión
 
@@ -134,10 +134,10 @@ Tres distinciones que el modelo **nunca** mezcla:
 
 ### 4.4 Dos vistas: devengo y caja
 
-| Vista | Qué cuenta | Para qué sirve |
-|---|---|---|
-| **Devengo** (principal) | Lo realizado en el periodo, cobrado o no; los costes del mes aunque no estén pagados | Medir el margen real de operar (todos los niveles de §5 se leen aquí por defecto) |
-| **Caja** (control) | Lo efectivamente cobrado y pagado en el periodo (libro de cobros + pagos de liquidación) | Contraste con tesorería FOP-A1; detectar desfases: mucho margen devengado con poca caja = CxC creciendo o liquidaciones atrasadas |
+| Vista                   | Qué cuenta                                                                               | Para qué sirve                                                                                                                    |
+| ----------------------- | ---------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Devengo** (principal) | Lo realizado en el periodo, cobrado o no; los costes del mes aunque no estén pagados     | Medir el margen real de operar (todos los niveles de §5 se leen aquí por defecto)                                                 |
+| **Caja** (control)      | Lo efectivamente cobrado y pagado en el periodo (libro de cobros + pagos de liquidación) | Contraste con tesorería FOP-A1; detectar desfases: mucho margen devengado con poca caja = CxC creciendo o liquidaciones atrasadas |
 
 Las dos vistas se muestran **etiquetadas y por separado**, nunca sumadas (invariante anti-doble-conteo). La vista caja no sustituye a la tesorería: es la misma rentabilidad releída por fecha de cobro/pago.
 
@@ -166,15 +166,15 @@ La misma sesión dentro de un **programa de 5 sesiones (225 €)** devenga 45 �
 
 **Ficha económica de la sesión** (lo que el panel muestra por sesión):
 
-| Campo | Fuente | Ejemplo |
-|---|---|---|
-| Ingreso previsto | tarifa/catálogo de la cita | 55 € |
-| Ingreso devengado | §4.1 (suelta, o porción de bono/plan) | 55 € / 45 € |
-| Ingreso cobrado | libro de cobros (doc 02 §7) | 55 € · 0 € si pendiente |
-| Estado de cobro | CxC operativo (F-Op A2) | cobrada · pendiente · parcial |
-| Coste profesional directo | regla de liquidación vigente (08 §4) | 30 € |
-| Estado de liquidación | ciclo FOP-B1 (08 §5) | pendiente_calculo … pagada |
-| Margen bruto M1 | devengado − coste directo | 25 € |
+| Campo                     | Fuente                                | Ejemplo                       |
+| ------------------------- | ------------------------------------- | ----------------------------- |
+| Ingreso previsto          | tarifa/catálogo de la cita            | 55 €                          |
+| Ingreso devengado         | §4.1 (suelta, o porción de bono/plan) | 55 € / 45 €                   |
+| Ingreso cobrado           | libro de cobros (doc 02 §7)           | 55 € · 0 € si pendiente       |
+| Estado de cobro           | CxC operativo (F-Op A2)               | cobrada · pendiente · parcial |
+| Coste profesional directo | regla de liquidación vigente (08 §4)  | 30 €                          |
+| Estado de liquidación     | ciclo FOP-B1 (08 §5)                  | pendiente_calculo … pagada    |
+| Margen bruto M1           | devengado − coste directo             | 25 €                          |
 
 Los estados de cobro y liquidación **no cambian el margen devengado**: cambian su lectura en la vista caja (§4.4) y su fiabilidad (una sesión sin validar no entra; una liquidación bloqueada marca el margen como provisional).
 
@@ -249,17 +249,17 @@ El nivel que **ya existe** (`metricas_proyecto_resumen`) y se mejora: hoy es ing
 
 ### 6.1 Dimensiones de cada hecho (extiende doc 04 §7)
 
-| Dimensión | Vive en | Estado |
-|---|---|---|
-| `sociedad` / `proyecto` | global (`*_id_ref`) | ✅ existe |
-| `servicio` (línea del catálogo) | `clinica` (futuro), agrega por proyecto | 🔜 línea Clínica |
-| `profesional` | FOP-B1 (`profesional`, 08 §3.1) | 🔜 PR #13 |
-| `centro` | **nuevo** — catálogo propio (§6.2) | ⚠️ este doc |
-| `canal` | **nuevo** — catálogo propio, atribuido al cliente | ⚠️ este doc |
-| `cliente` (id/seudónimo) | `clinica`, nunca sube identidad | 🔜 línea Clínica |
-| `tipo_venta` (suelta/bono/programa/plan) | catálogo Clínica | 🔜 línea Clínica |
-| `medio` de cobro | FOP-A1 / libro de cobros | 🔜 PR #4 / doc 02 |
-| `tipo_coste` (directo/compartido/fijo/general) | C1 | 🔜 F-Op C1 |
+| Dimensión                                      | Vive en                                           | Estado            |
+| ---------------------------------------------- | ------------------------------------------------- | ----------------- |
+| `sociedad` / `proyecto`                        | global (`*_id_ref`)                               | ✅ existe         |
+| `servicio` (línea del catálogo)                | `clinica` (futuro), agrega por proyecto           | 🔜 línea Clínica  |
+| `profesional`                                  | FOP-B1 (`profesional`, 08 §3.1)                   | 🔜 PR #13         |
+| `centro`                                       | **nuevo** — catálogo propio (§6.2)                | ⚠️ este doc       |
+| `canal`                                        | **nuevo** — catálogo propio, atribuido al cliente | ⚠️ este doc       |
+| `cliente` (id/seudónimo)                       | `clinica`, nunca sube identidad                   | 🔜 línea Clínica  |
+| `tipo_venta` (suelta/bono/programa/plan)       | catálogo Clínica                                  | 🔜 línea Clínica  |
+| `medio` de cobro                               | FOP-A1 / libro de cobros                          | 🔜 PR #4 / doc 02 |
+| `tipo_coste` (directo/compartido/fijo/general) | C1                                                | 🔜 F-Op C1        |
 
 ### 6.2 Entidades conceptuales nuevas (solo las de esta capa)
 
@@ -286,19 +286,19 @@ nomina_mensual (08) + reglas C1 (centro/compartidos) ──► margen proyecto/c
 
 Mes de la Clínica con dos centros activos y tarifas reales de la serie; volúmenes inventados solo para ilustrar la mecánica:
 
-| Concepto | Playamar | Lidomare | Total |
-|---|---|---|---|
-| Sesiones fisio sueltas (55 €) | 60 → 3.300 € | 20 → 1.100 € | 4.400 € |
-| Sesiones de programa (devengo 45 €) | 40 → 1.800 € | — | 1.800 € |
-| Planes nutrición (cuotas devengadas) | 600 € | — | 600 € |
-| **Ingreso devengado** | **5.700 €** | **1.100 €** | **6.800 €** |
-| Coste profesional por sesión (mix 20-30 €) | −2.400 € | −600 € | −3.000 € |
-| Comisiones datáfono | −60 € | −10 € | −70 € |
-| **M2 Margen de contribución** | **3.240 €** | **490 €** | **3.730 €** |
-| Nómina María Moreno (fijo) | −1.400 € | — | −1.400 € |
-| Recepción Lidia — parte Antifrágil (regla C1) | −300 € | −100 € | −400 € |
-| Alquiler / acuerdo del centro | −800 € | ⚠️ pendiente B2-P3 | −800 € |
-| **M3 Margen operativo del centro** | **740 €** | **390 €*** | **1.130 €** |
+| Concepto                                      | Playamar     | Lidomare           | Total       |
+| --------------------------------------------- | ------------ | ------------------ | ----------- |
+| Sesiones fisio sueltas (55 €)                 | 60 → 3.300 € | 20 → 1.100 €       | 4.400 €     |
+| Sesiones de programa (devengo 45 €)           | 40 → 1.800 € | —                  | 1.800 €     |
+| Planes nutrición (cuotas devengadas)          | 600 €        | —                  | 600 €       |
+| **Ingreso devengado**                         | **5.700 €**  | **1.100 €**        | **6.800 €** |
+| Coste profesional por sesión (mix 20-30 €)    | −2.400 €     | −600 €             | −3.000 €    |
+| Comisiones datáfono                           | −60 €        | −10 €              | −70 €       |
+| **M2 Margen de contribución**                 | **3.240 €**  | **490 €**          | **3.730 €** |
+| Nómina María Moreno (fijo)                    | −1.400 €     | —                  | −1.400 €    |
+| Recepción Lidia — parte Antifrágil (regla C1) | −300 €       | −100 €             | −400 €      |
+| Alquiler / acuerdo del centro                 | −800 €       | ⚠️ pendiente B2-P3 | −800 €      |
+| **M3 Margen operativo del centro**            | **740 €**    | **390 €\***        | **1.130 €** |
 
 \* El M3 de Lidomare quedará **incompleto y marcado** hasta confirmar su acuerdo económico (B2-P3): el panel debe mostrar el hueco, no un margen falsamente alto.
 
@@ -308,15 +308,15 @@ Lecturas que este cuadro habilita: fisio suelta margina más que el programa por
 
 ## 8. Casos especiales (reglas explícitas)
 
-| Caso | Tratamiento |
-|---|---|
-| **No-show cobrado** (política de cancelación) | Ingreso devengado en la fecha de la cita; coste profesional solo si la regla de liquidación lo paga (⚠️ confirmar por profesional, B2-P4). Margen alto visible, no filtrado. |
-| **No-show sin cobro con coste** | Margen negativo visible. Si se repite, es señal operativa (política de cancelación), no un dato a esconder. |
-| **Cortesías / garantías** | Ingreso 0, coste real. Etiquetadas como cortesía para poder filtrarlas en la lectura comercial sin borrarlas de la real. |
-| **Bono caducado con sesiones sin consumir** | El resto se devenga como ingreso del mes de caducidad (recomendación; confirmar en B2-P1). |
-| **Sesión de bono con profesional distinto al habitual** | El coste es el del profesional que la dio (regla vigente de ese profesional); el devengo del ingreso no cambia. |
-| **Regla de liquidación sin confirmar** (plan de Marta, 08 §4.4) o **relación sin regularizar** (Carlos, 08 §4.5) | El coste se calcula igual con la regla provisional y el margen se marca **provisional**; nunca margen "sin coste" por falta de confirmación. |
-| **Cobro parcial / impago** de una sesión ya prestada | El devengo no se revierte: la rentabilidad la mide igual; el impago vive en CxC (F-Op A2). Si se condona, apunte de ajuste de ingreso trazado. |
+| Caso                                                                                                             | Tratamiento                                                                                                                                                                  |
+| ---------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **No-show cobrado** (política de cancelación)                                                                    | Ingreso devengado en la fecha de la cita; coste profesional solo si la regla de liquidación lo paga (⚠️ confirmar por profesional, B2-P4). Margen alto visible, no filtrado. |
+| **No-show sin cobro con coste**                                                                                  | Margen negativo visible. Si se repite, es señal operativa (política de cancelación), no un dato a esconder.                                                                  |
+| **Cortesías / garantías**                                                                                        | Ingreso 0, coste real. Etiquetadas como cortesía para poder filtrarlas en la lectura comercial sin borrarlas de la real.                                                     |
+| **Bono caducado con sesiones sin consumir**                                                                      | El resto se devenga como ingreso del mes de caducidad (recomendación; confirmar en B2-P1).                                                                                   |
+| **Sesión de bono con profesional distinto al habitual**                                                          | El coste es el del profesional que la dio (regla vigente de ese profesional); el devengo del ingreso no cambia.                                                              |
+| **Regla de liquidación sin confirmar** (plan de Marta, 08 §4.4) o **relación sin regularizar** (Carlos, 08 §4.5) | El coste se calcula igual con la regla provisional y el margen se marca **provisional**; nunca margen "sin coste" por falta de confirmación.                                 |
+| **Cobro parcial / impago** de una sesión ya prestada                                                             | El devengo no se revierte: la rentabilidad la mide igual; el impago vive en CxC (F-Op A2). Si se condona, apunte de ajuste de ingreso trazado.                               |
 
 ---
 
@@ -344,14 +344,14 @@ Lecturas que este cuadro habilita: fisio suelta margina más que el programa por
 
 El margen por profesional **revela retribuciones** (coste = lo que cobra la persona). Hereda la matriz de FOP-B1 (08 §7) endurecida:
 
-| Capacidad | CEO | Coordinadora | Profesional | Recepción |
-|---|---|---|---|---|
-| Márgenes por profesional (implican coste/retribución de terceros) | ✅ | ❌ | ❌ | ❌ |
-| Márgenes por servicio/canal/centro/proyecto (agregados, sin desglose por persona) | ✅ | ✅ | ❌ | ❌ |
-| Su propio margen aportado (ingresos de sus sesiones − su coste) | ✅ | ✅ (el suyo) | ✅ (el suyo) | — |
-| Datos operativos que alimentan la capa (sesiones, validaciones, ocupación, incidencias) | ✅ | ✅ | los suyos | ✅ |
-| Cobros pendientes, citas no cobradas, errores administrativos (gestión CxC del día) | ✅ | ✅ | ❌ | ✅ |
-| Costes fijos y comparativas entre proyectos/centros | ✅ | ❌ (salvo permiso expreso) | ❌ | ❌ |
+| Capacidad                                                                               | CEO | Coordinadora               | Profesional  | Recepción |
+| --------------------------------------------------------------------------------------- | --- | -------------------------- | ------------ | --------- |
+| Márgenes por profesional (implican coste/retribución de terceros)                       | ✅  | ❌                         | ❌           | ❌        |
+| Márgenes por servicio/canal/centro/proyecto (agregados, sin desglose por persona)       | ✅  | ✅                         | ❌           | ❌        |
+| Su propio margen aportado (ingresos de sus sesiones − su coste)                         | ✅  | ✅ (el suyo)               | ✅ (el suyo) | —         |
+| Datos operativos que alimentan la capa (sesiones, validaciones, ocupación, incidencias) | ✅  | ✅                         | los suyos    | ✅        |
+| Cobros pendientes, citas no cobradas, errores administrativos (gestión CxC del día)     | ✅  | ✅                         | ❌           | ✅        |
+| Costes fijos y comparativas entre proyectos/centros                                     | ✅  | ❌ (salvo permiso expreso) | ❌           | ❌        |
 
 Principio: la coordinadora gestiona **rendimiento operativo** (mix, volumen, ocupación, incidencias, productividad) sin ver retribuciones de terceros ni la rentabilidad global sensible salvo permiso; recepción gestiona el **cobro del día** sin ver márgenes ni nóminas; cada profesional ve lo que aporta y su liquidación, nunca el margen del negocio.
 
@@ -359,16 +359,16 @@ Principio: la coordinadora gestiona **rendimiento operativo** (mix, volumen, ocu
 
 ## 11. Relación con otras capas y PRs (conectar, no redefinir)
 
-| Capa / línea | Qué toma FOP-B2 | Qué NO hace |
-|---|---|---|
-| **Facturación operativa** (doc 02, PR #1) | Ingreso documental, desglose fiscal futuro, libro de cobros | No emite ni redefine facturas; no usa fecha de emisión como devengo |
-| **Liquidaciones FOP-B1** (doc 08, PR #13) | Coste por sesión y fijo de personas, con sus estados | No recalcula liquidaciones; si una liquidación cambia, el margen se recalcula |
-| **Reservas/Agenda** (PR #5, versión canónica) | Sesiones/citas realizadas y validadas: el hecho generador | No gestiona agenda ni catálogo; solo consume sesiones validadas |
-| **Tesorería FOP-A1** (doc 06, PR #4 — NO APPLY) | Medio de cobro (para comisiones) | No mezcla caja con margen; no toca SQL del baseline |
-| **F-Op C1** (backlog) | Reglas de imputación de compartidos y acuerdos de centro | No decide los repartos; los consume cuando existan |
-| **F-Op A2 CxC** | Destino de los impagos | No gestiona cobros pendientes |
-| **F-Op D** (presupuesto vs real) | — (es su consumidor futuro) | No compara contra presupuesto |
-| **Línea Clínica/Reservas** | Sesiones, catálogo, tipo_venta, cliente-id | No define catálogo ni precios; no accede a datos clínicos |
+| Capa / línea                                    | Qué toma FOP-B2                                             | Qué NO hace                                                                   |
+| ----------------------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| **Facturación operativa** (doc 02, PR #1)       | Ingreso documental, desglose fiscal futuro, libro de cobros | No emite ni redefine facturas; no usa fecha de emisión como devengo           |
+| **Liquidaciones FOP-B1** (doc 08, PR #13)       | Coste por sesión y fijo de personas, con sus estados        | No recalcula liquidaciones; si una liquidación cambia, el margen se recalcula |
+| **Reservas/Agenda** (PR #5, versión canónica)   | Sesiones/citas realizadas y validadas: el hecho generador   | No gestiona agenda ni catálogo; solo consume sesiones validadas               |
+| **Tesorería FOP-A1** (doc 06, PR #4 — NO APPLY) | Medio de cobro (para comisiones)                            | No mezcla caja con margen; no toca SQL del baseline                           |
+| **F-Op C1** (backlog)                           | Reglas de imputación de compartidos y acuerdos de centro    | No decide los repartos; los consume cuando existan                            |
+| **F-Op A2 CxC**                                 | Destino de los impagos                                      | No gestiona cobros pendientes                                                 |
+| **F-Op D** (presupuesto vs real)                | — (es su consumidor futuro)                                 | No compara contra presupuesto                                                 |
+| **Línea Clínica/Reservas**                      | Sesiones, catálogo, tipo_venta, cliente-id                  | No define catálogo ni precios; no accede a datos clínicos                     |
 
 **Lectura de los estados de liquidación (08 §5) en esta capa:** cada `sesion_liquidable` genera coste y la liquidación mensual los agrupa; con la liquidación `pendiente_calculo`/`calculada` el coste **ya está devengado** (la sesión existe); `validada`/`pendiente_pago` → coste firme y CxP viva en tesorería; `pagada` → solo mueve la vista caja (§4.4); `bloqueada_por_incidencia` → el margen se marca provisional, pero el devengo no se borra ni el pago avanza.
 
@@ -378,31 +378,31 @@ Principio: la coordinadora gestiona **rendimiento operativo** (mix, volumen, ocu
 
 ## 12. Riesgos y salvaguardas
 
-| Riesgo | Salvaguarda en el modelo |
-|---|---|
-| **Confundir cobrado con rentable** | Dos vistas separadas (§4.4); la principal es devengo. Un mes de muchos bonos cobrados puede ser un mes de margen mediocre |
-| **No devengar costes profesionales** (margen inflado hasta que llega la factura del autónomo) | El coste nace de la sesión validada, no de la factura (08 §8); factura tardía no retrasa el devengo |
-| **No imputar nóminas** (los autónomos parecen caros y la nómina "gratis") | Fijos de personas en M3 + coste efectivo por sesión como métrica comparativa (§4.2) |
-| **Usar pagos no documentados** | Herencia FOP-B1: `pendiente_regularizar` bloquea y aflora; ningún coste opaco entra "por fuera" |
-| **Mezclar rentabilidad con historia clínica** | D-op-5: cliente id/seudónimo; ningún dato clínico es dimensión ni aparece en paneles; la finalidad terapéutica no se usa para explicar margen |
-| **No separar canal / centro / proyecto** | Tres dimensiones ortogonales (§6.1); la misma marca puede etiquetar las tres sin ambigüedad (§5.6) |
-| **Mezclar caja y banco** | Territorio FOP-A1 (D-op-3); esta capa no toca saldos ni medios, solo lee la comisión del cobro |
-| **Duplicar sesiones liquidadas** (doble coste) | Invariante R3 de 08 (una sesión ∈ una liquidación) + `ingreso_devengado` append-only (§6.2) |
-| **Confundir margen bruto con beneficio neto** | Escalera M1-M4 siempre etiquetada; M4 es operativo, no resultado fiscal (D-op-6) |
-| **Reparto artificial de generales que distorsiona** | Contribución primero (D-op-7); los generales se restan al global, no se prorratean por defecto |
+| Riesgo                                                                                        | Salvaguarda en el modelo                                                                                                                      |
+| --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Confundir cobrado con rentable**                                                            | Dos vistas separadas (§4.4); la principal es devengo. Un mes de muchos bonos cobrados puede ser un mes de margen mediocre                     |
+| **No devengar costes profesionales** (margen inflado hasta que llega la factura del autónomo) | El coste nace de la sesión validada, no de la factura (08 §8); factura tardía no retrasa el devengo                                           |
+| **No imputar nóminas** (los autónomos parecen caros y la nómina "gratis")                     | Fijos de personas en M3 + coste efectivo por sesión como métrica comparativa (§4.2)                                                           |
+| **Usar pagos no documentados**                                                                | Herencia FOP-B1: `pendiente_regularizar` bloquea y aflora; ningún coste opaco entra "por fuera"                                               |
+| **Mezclar rentabilidad con historia clínica**                                                 | D-op-5: cliente id/seudónimo; ningún dato clínico es dimensión ni aparece en paneles; la finalidad terapéutica no se usa para explicar margen |
+| **No separar canal / centro / proyecto**                                                      | Tres dimensiones ortogonales (§6.1); la misma marca puede etiquetar las tres sin ambigüedad (§5.6)                                            |
+| **Mezclar caja y banco**                                                                      | Territorio FOP-A1 (D-op-3); esta capa no toca saldos ni medios, solo lee la comisión del cobro                                                |
+| **Duplicar sesiones liquidadas** (doble coste)                                                | Invariante R3 de 08 (una sesión ∈ una liquidación) + `ingreso_devengado` append-only (§6.2)                                                   |
+| **Confundir margen bruto con beneficio neto**                                                 | Escalera M1-M4 siempre etiquetada; M4 es operativo, no resultado fiscal (D-op-6)                                                              |
+| **Reparto artificial de generales que distorsiona**                                           | Contribución primero (D-op-7); los generales se restan al global, no se prorratean por defecto                                                |
 
 ---
 
 ## 13. Pendientes de confirmación
 
-| # | Pendiente | Dueño | Efecto mientras tanto |
-|---|---|---|---|
-| B2-P1 | **Criterio de devengo de bonos/programas** (lineal recomendado; y regla de caducidad) — hereda F-7 del doc 04 | Guille | Se diseña con lineal; los paneles marcan "criterio provisional" |
-| B2-P2 | **Centro como dimensión del proyecto Clínica** (no proyectos separados) — recomendación de este doc | Guille | Se asume dimensión; elevar un centro a proyecto es alta en `proyectos`, sin rediseño |
-| B2-P3 | **Términos económicos de Lidomare, Vivofácil y Oasis** (renta, %, cesión; y si 9AM actúa también como centro) | Guille (+ acuerdos con terceros) | M3 de esos centros marcado **incompleto**; ningún acuerdo se inventa |
-| B2-P4 | **¿Se paga al profesional el no-show cobrado?** (por profesional/regla) | Guille + profesionales | Se asume que no; margen del no-show = ingreso completo |
-| B2-P5 | **Catálogo inicial de canales** y quién lo mantiene | Guille | Catálogo mínimo propuesto en §5.4 |
-| B2-P6 | **Parte del coste de María Moreno que es coordinación** (estructura) vs asistencial | Guille | Toda su nómina como fijo del proyecto Clínica, sin partir |
+| #     | Pendiente                                                                                                     | Dueño                            | Efecto mientras tanto                                                                |
+| ----- | ------------------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------------ |
+| B2-P1 | **Criterio de devengo de bonos/programas** (lineal recomendado; y regla de caducidad) — hereda F-7 del doc 04 | Guille                           | Se diseña con lineal; los paneles marcan "criterio provisional"                      |
+| B2-P2 | **Centro como dimensión del proyecto Clínica** (no proyectos separados) — recomendación de este doc           | Guille                           | Se asume dimensión; elevar un centro a proyecto es alta en `proyectos`, sin rediseño |
+| B2-P3 | **Términos económicos de Lidomare, Vivofácil y Oasis** (renta, %, cesión; y si 9AM actúa también como centro) | Guille (+ acuerdos con terceros) | M3 de esos centros marcado **incompleto**; ningún acuerdo se inventa                 |
+| B2-P4 | **¿Se paga al profesional el no-show cobrado?** (por profesional/regla)                                       | Guille + profesionales           | Se asume que no; margen del no-show = ingreso completo                               |
+| B2-P5 | **Catálogo inicial de canales** y quién lo mantiene                                                           | Guille                           | Catálogo mínimo propuesto en §5.4                                                    |
+| B2-P6 | **Parte del coste de María Moreno que es coordinación** (estructura) vs asistencial                           | Guille                           | Toda su nómina como fijo del proyecto Clínica, sin partir                            |
 
 **Fuera de alcance:** CAC/marketing por canal (previsto, no en v1), multi-touch attribution, presupuesto vs real (F-Op D), pricing del catálogo (línea Clínica).
 
@@ -412,13 +412,13 @@ Principio: la coordinadora gestiona **rendimiento operativo** (mix, volumen, ocu
 
 Este PR **solo añade este archivo**. Cambios que deben hacerse en otros documentos **después** de sus merges:
 
-| Doc a tocar | Vive en | Cambio pendiente |
-|---|---|---|
-| `05-backlog-finanzas-operativas.md` | PR #11 | En F-Op B, nota: "diseño funcional en [09-rentabilidad...](09-rentabilidad-operativa-servicios-profesionales-proyectos.md) (FOP-B2, nombre de producto)"; reconciliar nomenclatura junto con la de FOP-B1 (08 §0) |
-| `07-sincronizacion-prs-y-modelo-operativo.md` | PR #11 | Añadir esta línea de trabajo a la tabla de líneas (rama `docs/finanzas-rentabilidad-operativa`) |
-| `08-liquidaciones-equipo-y-profesionales.md` | PR #13 | Referencia cruzada opcional en su §8: el diseño de la cara de margen vive en el 09 |
-| `02-diseno-facturacion-emitida.md` | PR #1 | Referencia cruzada opcional: el devengo del ingreso facturado/cobrado se diseña en el 09 |
-| `docs/integration/01-orden-prs.md` | PR #10 | Añadir este PR al bloque "finanzas docs" (archivo nuevo, sin dependencias duras de merge) |
+| Doc a tocar                                   | Vive en | Cambio pendiente                                                                                                                                                                                                  |
+| --------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `05-backlog-finanzas-operativas.md`           | PR #11  | En F-Op B, nota: "diseño funcional en [09-rentabilidad...](09-rentabilidad-operativa-servicios-profesionales-proyectos.md) (FOP-B2, nombre de producto)"; reconciliar nomenclatura junto con la de FOP-B1 (08 §0) |
+| `07-sincronizacion-prs-y-modelo-operativo.md` | PR #11  | Añadir esta línea de trabajo a la tabla de líneas (rama `docs/finanzas-rentabilidad-operativa`)                                                                                                                   |
+| `08-liquidaciones-equipo-y-profesionales.md`  | PR #13  | Referencia cruzada opcional en su §8: el diseño de la cara de margen vive en el 09                                                                                                                                |
+| `02-diseno-facturacion-emitida.md`            | PR #1   | Referencia cruzada opcional: el devengo del ingreso facturado/cobrado se diseña en el 09                                                                                                                          |
+| `docs/integration/01-orden-prs.md`            | PR #10  | Añadir este PR al bloque "finanzas docs" (archivo nuevo, sin dependencias duras de merge)                                                                                                                         |
 
 Dependencias conceptuales (no de merge): PR #11 (backlog F-Op y marco general), PR #13 (coste profesional), PR #1 (facturas operativas), PR #4 (tesorería A1, NO APPLY), PR #5 (Reservas: fuente de sesiones/citas), PR #10 (orden de entrada en integración). Archivo nuevo sin colisiones: no exige orden de merge.
 
@@ -437,4 +437,4 @@ Dependencias conceptuales (no de merge): PR #11 (backlog F-Op y marco general), 
 
 ---
 
-*Diseño documental de FOP-B2. No modifica código productivo, SQL, tipos ni UI. Requiere validación de Guille antes de abrir implementación.*
+_Diseño documental de FOP-B2. No modifica código productivo, SQL, tipos ni UI. Requiere validación de Guille antes de abrir implementación._
