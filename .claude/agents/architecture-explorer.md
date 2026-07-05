@@ -39,26 +39,32 @@ ruta/
 \`\`\`
 
 ## 🚪 Puntos de entrada
+
 - `archivo.ts` — descripción breve de qué hace.
 - ...
 
 ## 🔗 Dependencias internas (otros packages del monorepo)
+
 - `@alsari/ui` (usado en X archivos)
 - `@alsari/utils` (usado en Y archivos)
 
 ## 📦 Dependencias externas clave
+
 - `react@19`, `zustand@5`, `zod@3`, ...
 
 ## 🧪 Tests
+
 - Archivos de test: N
 - Cobertura estimada: alta/media/baja (basado en ratio test/código)
 
 ## ⚠️ Deuda técnica detectada
+
 - N TODOs en el código (lista los más relevantes con archivo:línea).
 - N usos de `any` (justificados/no justificados).
 - Archivos >300 líneas (lista).
 
 ## 🎯 Recomendación
+
 [Una frase: ¿la zona está sana? ¿necesita refactor? ¿documentación al día?]
 ```
 

@@ -1,8 +1,8 @@
 ---
 name: 🐛 Bug
 about: Reportar un comportamiento inesperado
-title: "[BUG] "
-labels: ["bug"]
+title: '[BUG] '
+labels: ['bug']
 ---
 
 ## Descripción

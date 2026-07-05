@@ -85,6 +85,7 @@ ALTER TABLE financiero.monthly_revenue ENABLE ROW LEVEL SECURITY;
 
 Una tabla sin RLS es **una brecha de seguridad**. Si por alguna razón necesitas una
 tabla sin RLS (caso muy raro), debe estar:
+
 1. Justificado en un ADR.
 2. Documentado en la propia migration con comentario `-- RLS_OFF_JUSTIFICATION: ...`.
 3. Restringida a schema interno (no `public`).
@@ -92,6 +93,7 @@ tabla sin RLS (caso muy raro), debe estar:
 ### Patrones de policies
 
 **Acceso solo a admins:**
+
 ```sql
 CREATE POLICY "Solo admins leen monthly_revenue"
   ON financiero.monthly_revenue
@@ -102,6 +104,7 @@ CREATE POLICY "Solo admins leen monthly_revenue"
 ```
 
 **Acceso por entidad pertenecida:**
+
 ```sql
 CREATE POLICY "Usuarios ven solo facturas de sus entidades"
   ON facturas.invoices
@@ -119,6 +122,7 @@ CREATE POLICY "Usuarios ven solo facturas de sus entidades"
 ## 🔑 Autenticación
 
 ### Stack
+
 - **Supabase Auth** como proveedor.
 - **Métodos permitidos:** email + password con MFA, magic link, OAuth Google (para
   cuentas corporativas).
@@ -134,6 +138,7 @@ CREATE POLICY "Usuarios ven solo facturas de sus entidades"
 ### Manejo de roles
 
 Roles iniciales:
+
 - `admin` → Guille y socios. Acceso total.
 - `operator` → Personal de confianza (asesores externos, contables). Acceso a módulos
   específicos.
@@ -181,10 +186,12 @@ const validated = InvoiceSchema.parse(body); // lanza si inválido
 ## 🌐 Comunicaciones
 
 ### HTTPS siempre
+
 - Todas las llamadas externas: HTTPS obligatorio.
 - En desarrollo local: aceptable HTTP en `localhost` solo.
 
 ### CORS
+
 - Edge Functions configuran CORS estrictamente con dominio del Host OS.
 - Nunca `Access-Control-Allow-Origin: *` en endpoints que tocan datos sensibles.
 
@@ -223,6 +230,7 @@ async headers() {
 
 Tablas críticas (`monthly_revenue`, `invoices`, `contracts`) deben tener triggers
 que registren en una tabla `audit_log` cada INSERT/UPDATE/DELETE con:
+
 - Usuario que hizo el cambio (`auth.uid()`).
 - Timestamp.
 - Valores antiguos y nuevos (JSON).

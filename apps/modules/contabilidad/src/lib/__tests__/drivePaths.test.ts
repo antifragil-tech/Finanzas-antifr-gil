@@ -1,5 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { clean, token, carpetaFacturaSegments, nombreJustificante, NOMBRE_FACTURA_PDF } from '../drivePaths';
+import {
+  clean,
+  token,
+  carpetaFacturaSegments,
+  nombreJustificante,
+  NOMBRE_FACTURA_PDF,
+} from '../drivePaths';
 
 describe('clean', () => {
   it('quita acentos y caracteres inválidos, mantiene espacios', () => {
@@ -20,16 +26,29 @@ describe('token', () => {
 
 describe('carpetaFacturaSegments', () => {
   it('construye Contabilidad/Sociedad/Año/Mes/subcarpeta', () => {
-    expect(carpetaFacturaSegments({
-      sociedadNombre: 'Armia Group',
-      fechaFactura: '2026-06-15',
-      proveedorNombre: 'CONSTRUCCIONES HERMANOS COCA',
-      numeroFactura: '236',
-    })).toEqual(['Contabilidad', 'Armia Group', '2026', '06', '2026-06-15_CONSTRUCCIONES_HERMANOS_COCA_236']);
+    expect(
+      carpetaFacturaSegments({
+        sociedadNombre: 'Armia Group',
+        fechaFactura: '2026-06-15',
+        proveedorNombre: 'CONSTRUCCIONES HERMANOS COCA',
+        numeroFactura: '236',
+      }),
+    ).toEqual([
+      'Contabilidad',
+      'Armia Group',
+      '2026',
+      '06',
+      '2026-06-15_CONSTRUCCIONES_HERMANOS_COCA_236',
+    ]);
   });
 
   it('sin número de factura → s-n', () => {
-    const seg = carpetaFacturaSegments({ sociedadNombre: 'Alrive', fechaFactura: '2026-04-30', proveedorNombre: 'E.S. ALHAURIN S.L.', numeroFactura: null });
+    const seg = carpetaFacturaSegments({
+      sociedadNombre: 'Alrive',
+      fechaFactura: '2026-04-30',
+      proveedorNombre: 'E.S. ALHAURIN S.L.',
+      numeroFactura: null,
+    });
     expect(seg[0]).toBe('Contabilidad');
     expect(seg[2]).toBe('2026');
     expect(seg[3]).toBe('04');
@@ -37,7 +56,14 @@ describe('carpetaFacturaSegments', () => {
   });
 
   it('sociedad vacía → "Sin sociedad"', () => {
-    expect(carpetaFacturaSegments({ sociedadNombre: '', fechaFactura: '2026-01-02', proveedorNombre: 'X', numeroFactura: '1' })[1]).toBe('Sin sociedad');
+    expect(
+      carpetaFacturaSegments({
+        sociedadNombre: '',
+        fechaFactura: '2026-01-02',
+        proveedorNombre: 'X',
+        numeroFactura: '1',
+      })[1],
+    ).toBe('Sin sociedad');
   });
 });
 

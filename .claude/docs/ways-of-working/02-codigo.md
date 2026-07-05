@@ -6,7 +6,7 @@
 
 ## 🎯 Filosofía
 
-> *"Legible primero, óptimo después. Si no es legible, no es óptimo."*
+> _"Legible primero, óptimo después. Si no es legible, no es óptimo."_
 
 El código de Alsari OS lo leerá Claude muchas más veces de las que lo escribirá. Y
 Guille, sin ser técnico, debe poder seguir el flujo general de un componente o función.
@@ -16,12 +16,14 @@ Guille, sin ser técnico, debe poder seguir el flujo general de un componente o 
 ## 📐 TypeScript
 
 ### Configuración base
+
 - `"strict": true` siempre.
 - `"noUnusedLocals": true`, `"noUnusedParameters": true`.
 - `"noUncheckedIndexedAccess": true` (evita errores con arrays/objetos).
 - `"verbatimModuleSyntax": true`.
 
 ### Reglas
+
 1. **Nunca `any`.** Si lo necesitas, usa `unknown` y haz type guards. Si realmente
    no hay alternativa, comenta `// any-justificado: <razón>`.
 2. **Tipos explícitos en APIs públicas** (funciones exportadas, props de componentes).
@@ -48,18 +50,18 @@ type State =
 
 ## 🏷️ Naming
 
-| Elemento | Convención | Ejemplo |
-|----------|------------|---------|
-| Variables y funciones | `camelCase` | `getUserById`, `monthlyRevenue` |
-| Componentes React | `PascalCase` | `FinancialDashboard`, `SidebarNav` |
-| Tipos y enums | `PascalCase` | `type Revenue`, `enum Status` |
-| Constantes globales | `UPPER_SNAKE_CASE` | `MAX_RETRIES`, `API_TIMEOUT_MS` |
-| Archivos de componente | `PascalCase.tsx` | `FinancialDashboard.tsx` |
-| Archivos utilitarios | `camelCase.ts` | `formatCurrency.ts` |
-| Carpetas | `kebab-case` | `error-boundary/`, `module-loader/` |
-| CSS classes (custom) | `kebab-case` | `.glass-panel`, `.boot-screen` |
-| Variables Tailwind / tokens | `kebab-case` | `--color-accent`, `bg-zinc-950` |
-| Archivos de test | `*.test.ts` o `*.spec.ts` | `formatCurrency.test.ts` |
+| Elemento                    | Convención                | Ejemplo                             |
+| --------------------------- | ------------------------- | ----------------------------------- |
+| Variables y funciones       | `camelCase`               | `getUserById`, `monthlyRevenue`     |
+| Componentes React           | `PascalCase`              | `FinancialDashboard`, `SidebarNav`  |
+| Tipos y enums               | `PascalCase`              | `type Revenue`, `enum Status`       |
+| Constantes globales         | `UPPER_SNAKE_CASE`        | `MAX_RETRIES`, `API_TIMEOUT_MS`     |
+| Archivos de componente      | `PascalCase.tsx`          | `FinancialDashboard.tsx`            |
+| Archivos utilitarios        | `camelCase.ts`            | `formatCurrency.ts`                 |
+| Carpetas                    | `kebab-case`              | `error-boundary/`, `module-loader/` |
+| CSS classes (custom)        | `kebab-case`              | `.glass-panel`, `.boot-screen`      |
+| Variables Tailwind / tokens | `kebab-case`              | `--color-accent`, `bg-zinc-950`     |
+| Archivos de test            | `*.test.ts` o `*.spec.ts` | `formatCurrency.test.ts`            |
 
 ### Naming de funciones
 
@@ -73,9 +75,11 @@ type State =
 ## 📁 Estructura de archivos
 
 ### Un componente por archivo (regla general)
+
 Si un archivo tiene >300 líneas o >1 componente exportado, replantéate la separación.
 
 ### Co-ubicación
+
 Mantén juntos los archivos que cambian juntos:
 
 ```
@@ -88,6 +92,7 @@ components/FinancialDashboard/
 ```
 
 ### Barrel exports (`index.ts`)
+
 Usa `index.ts` para exponer la API pública de una carpeta. Internamente puedes tener
 muchos archivos; desde fuera se importa así:
 
@@ -150,6 +155,7 @@ export function UserCard({ userId, onUpdate }: Props) {
 ## 🎨 Estilos con Tailwind
 
 ### Reglas
+
 1. **Tailwind first.** Solo CSS custom para cosas que Tailwind no permite limpiamente.
 2. **Clases ordenadas** (Prettier plugin `prettier-plugin-tailwindcss` activado).
 3. **Variantes de color desde tokens.** Nada de colores hex sueltos en el JSX:
@@ -168,13 +174,14 @@ export function UserCard({ userId, onUpdate }: Props) {
 5. **Componentes "glass" reutilizables** con clases custom en `index.css`:
    - `.glass-panel` → panel con backdrop blur
    - `.glass-header` → header con blur intenso
-   Detalle en `04-ui-ux.md`.
+     Detalle en `04-ui-ux.md`.
 
 ---
 
 ## 🪝 Hooks personalizados
 
 ### Reglas
+
 1. **Un hook = una responsabilidad.** Si un hook devuelve >5 cosas, sepáralo.
 2. **Tipo de retorno explícito** en la firma del hook.
 3. **Manejo de errores incluido.** Un hook que hace fetch debe devolver `{ data, loading, error }`.
@@ -200,6 +207,7 @@ export function useMonthlyRevenue(year: number): UseRevenueResult {
 ## 📦 Imports
 
 ### Orden (Prettier lo formatea automáticamente)
+
 1. React y librerías externas
 2. Imports absolutos del proyecto (`@/components/...`, `@alsari/ui`)
 3. Imports relativos
@@ -207,6 +215,7 @@ export function useMonthlyRevenue(year: number): UseRevenueResult {
 5. Estilos (`import './styles.css'`)
 
 ### Alias
+
 - `@/` → raíz de `src/` del módulo o `apps/host`.
 - `@alsari/ui` → `packages/ui`.
 - `@alsari/utils` → `packages/utils`.
@@ -219,6 +228,7 @@ export function useMonthlyRevenue(year: number): UseRevenueResult {
 ## 🚨 Manejo de errores
 
 ### Reglas
+
 1. **Errores tipados.** Lanza `Error` o subclases, nunca strings.
 2. **Captura cerca del origen, propaga si no puedes manejar.**
 3. **UI siempre tiene fallback.** Cada componente que hace fetch tiene estado de error.
@@ -227,7 +237,10 @@ export function useMonthlyRevenue(year: number): UseRevenueResult {
 
 ```typescript
 class FinancialDataError extends Error {
-  constructor(message: string, public readonly code: string) {
+  constructor(
+    message: string,
+    public readonly code: string,
+  ) {
     super(message);
     this.name = 'FinancialDataError';
   }
@@ -238,26 +251,28 @@ class FinancialDataError extends Error {
 
 ## 📏 Métricas de calidad (objetivos)
 
-| Métrica | Objetivo |
-|---------|----------|
-| Líneas por archivo | < 300 (alarma a 500) |
-| Funciones por archivo | < 5 (excluye sub-componentes) |
-| Niveles de anidación | < 4 |
-| Argumentos por función | < 4 (si más, usa objeto) |
-| Cobertura tests (utilidades críticas) | > 80% |
-| Cobertura tests (componentes) | > 50% |
+| Métrica                               | Objetivo                      |
+| ------------------------------------- | ----------------------------- |
+| Líneas por archivo                    | < 300 (alarma a 500)          |
+| Funciones por archivo                 | < 5 (excluye sub-componentes) |
+| Niveles de anidación                  | < 4                           |
+| Argumentos por función                | < 4 (si más, usa objeto)      |
+| Cobertura tests (utilidades críticas) | > 80%                         |
+| Cobertura tests (componentes)         | > 50%                         |
 
 ---
 
 ## 🧪 Comentarios
 
 ### Cuándo comentar
+
 - **Por qué**, no qué. El código ya dice qué hace.
 - **Decisiones no obvias** ("usamos timestamp en lugar de ID porque...").
 - **Workarounds temporales** con TODO y referencia a issue.
 - **Fórmulas financieras complejas** con la fórmula matemática real arriba.
 
 ### Cuándo NO comentar
+
 - Repetir lo que dice el código (`// incrementa i en 1` para `i++`).
 - Documentación de funciones públicas → usa **JSDoc** (`/** ... */`) en su lugar.
 

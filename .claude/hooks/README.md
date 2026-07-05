@@ -17,36 +17,44 @@ Analogía: los hooks son a Claude lo que los **git hooks** son al desarrollador.
 
 ## 📋 Eventos disponibles
 
-| Hook | Cuándo se ejecuta | Qué puede hacer |
-|------|-------------------|-----------------|
-| `PreToolUse` | Antes de cualquier tool call | Bloquear (exit 2), inyectar contexto |
-| `PostToolUse` | Después de tool call exitosa | Lintar, loguear, notificar |
-| `SessionStart` | Al iniciar sesión | Imprimir contexto, estado del proyecto |
-| `Stop` | Cuando Claude termina turno | Recordar lecciones aprendidas |
-| `SubagentStop` | Cuando un subagent termina | Procesar resultado |
+| Hook           | Cuándo se ejecuta            | Qué puede hacer                        |
+| -------------- | ---------------------------- | -------------------------------------- |
+| `PreToolUse`   | Antes de cualquier tool call | Bloquear (exit 2), inyectar contexto   |
+| `PostToolUse`  | Después de tool call exitosa | Lintar, loguear, notificar             |
+| `SessionStart` | Al iniciar sesión            | Imprimir contexto, estado del proyecto |
+| `Stop`         | Cuando Claude termina turno  | Recordar lecciones aprendidas          |
+| `SubagentStop` | Cuando un subagent termina   | Procesar resultado                     |
 
 ---
 
 ## 🛡️ Hooks activos en este proyecto
 
 ### `PreToolUse.sh`
+
 Bloquea ejecuciones peligrosas antes de que ocurran:
+
 - Comandos destructivos (`rm -rf` masivos, `git push --force` a `main`).
 - Acceso a `.env` y archivos con secrets.
 - Operaciones que requieren confirmación explícita de Guille.
 
 ### `PostToolUse.sh`
+
 Tras editar código:
+
 - Ejecuta Prettier sobre el archivo modificado (auto-format).
 - Registra cambios en archivos críticos (CLAUDE.md, ways-of-working) en un log.
 
 ### `SessionStart.sh`
+
 Al arrancar una sesión:
+
 - Muestra rama actual, últimos 3 commits, estado del repo.
 - Recuerda a Claude leer `lessons-learned/log.md`.
 
 ### `Stop.sh`
+
 Al terminar un turno:
+
 - Si hubo correcciones del usuario en la sesión, recuerda registrar lecciones.
 
 ---

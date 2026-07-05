@@ -31,13 +31,13 @@ export async function updateFacturaEstado(
   id: string,
   estado: EstadoFacturaRecibida,
 ): Promise<void> {
-  await req('PATCH', `facturas_recibidas?id=eq.${id}`, { estado, updated_at: new Date().toISOString() });
+  await req('PATCH', `facturas_recibidas?id=eq.${id}`, {
+    estado,
+    updated_at: new Date().toISOString(),
+  });
 }
 
-export async function vincularFacturaAPago(
-  facturaId: string,
-  pagoId: string,
-): Promise<void> {
+export async function vincularFacturaAPago(facturaId: string, pagoId: string): Promise<void> {
   await Promise.all([
     req('PATCH', `facturas_recibidas?id=eq.${facturaId}`, {
       presupuesto_pago_id: pagoId,
@@ -49,10 +49,7 @@ export async function vincularFacturaAPago(
   ]);
 }
 
-export async function desvincularFactura(
-  facturaId: string,
-  pagoId: string,
-): Promise<void> {
+export async function desvincularFactura(facturaId: string, pagoId: string): Promise<void> {
   await Promise.all([
     req('PATCH', `facturas_recibidas?id=eq.${facturaId}`, {
       presupuesto_pago_id: null,
@@ -77,20 +74,27 @@ export type PagoParaVincular = {
   factura_recibida_id: string | null;
 };
 
-export async function searchPagosParaVincular(
-  query?: string,
-): Promise<PagoParaVincular[]> {
+export async function searchPagosParaVincular(query?: string): Promise<PagoParaVincular[]> {
   // Traemos pagos pendientes con datos del presupuesto
-  const rows = await req<Array<{
-    id: string;
-    descripcion: string | null;
-    importe: number;
-    fecha_prevista: string;
-    factura_recibida_id: string | null;
-    presupuestos: { nombre: string; proyecto_nombre: string | null; sociedad_id_ref: string | null } | null;
-  }>>('GET', 'presupuesto_pagos?select=id,descripcion,importe,fecha_prevista,factura_recibida_id,presupuestos!presupuesto_pagos_presupuesto_id_fkey(nombre,proyecto_nombre,sociedad_id_ref)&estado=eq.pendiente&order=fecha_prevista.asc&limit=100');
+  const rows = await req<
+    Array<{
+      id: string;
+      descripcion: string | null;
+      importe: number;
+      fecha_prevista: string;
+      factura_recibida_id: string | null;
+      presupuestos: {
+        nombre: string;
+        proyecto_nombre: string | null;
+        sociedad_id_ref: string | null;
+      } | null;
+    }>
+  >(
+    'GET',
+    'presupuesto_pagos?select=id,descripcion,importe,fecha_prevista,factura_recibida_id,presupuestos!presupuesto_pagos_presupuesto_id_fkey(nombre,proyecto_nombre,sociedad_id_ref)&estado=eq.pendiente&order=fecha_prevista.asc&limit=100',
+  );
 
-  const results = rows.map(r => ({
+  const results = rows.map((r) => ({
     id: r.id,
     descripcion: r.descripcion,
     importe: r.importe,
@@ -103,9 +107,10 @@ export async function searchPagosParaVincular(
 
   if (!query) return results;
   const q = query.toLowerCase();
-  return results.filter(r =>
-    r.presupuesto_nombre.toLowerCase().includes(q) ||
-    (r.proyecto_nombre?.toLowerCase().includes(q) ?? false) ||
-    (r.descripcion?.toLowerCase().includes(q) ?? false),
+  return results.filter(
+    (r) =>
+      r.presupuesto_nombre.toLowerCase().includes(q) ||
+      (r.proyecto_nombre?.toLowerCase().includes(q) ?? false) ||
+      (r.descripcion?.toLowerCase().includes(q) ?? false),
   );
 }
