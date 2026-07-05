@@ -8,13 +8,13 @@ import type { FacturaRecibida } from '@alsari/types';
 
 export type FacturaPdfSource =
   | { kind: 'signed'; path: string } // PDF en el bucket privado → firmar URL temporal
-  | { kind: 'legacy'; url: string }  // documento legado con URL pública directa
-  | { kind: 'none' };                // sin PDF persistido
+  | { kind: 'legacy'; url: string } // documento legado con URL pública directa
+  | { kind: 'none' }; // sin PDF persistido
 
 export function resolveFacturaPdfSource(
   factura: Pick<FacturaRecibida, 'storage_path' | 'archivo_url'>,
 ): FacturaPdfSource {
   if (factura.storage_path) return { kind: 'signed', path: factura.storage_path };
-  if (factura.archivo_url)  return { kind: 'legacy', url: factura.archivo_url };
+  if (factura.archivo_url) return { kind: 'legacy', url: factura.archivo_url };
   return { kind: 'none' };
 }
