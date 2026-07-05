@@ -1,0 +1,5 @@
+# Deuda de formato en zonas que no se pueden tocar sin autorización expresa
+# (cliente Supabase y Edge Functions). Se formatearán en un PR específico
+# autorizado; al corregirlas, eliminar la entrada correspondiente.
+packages/supabase-client/
+services/supabase/

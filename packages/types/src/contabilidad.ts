@@ -23,11 +23,11 @@ export type MovimientoBancario = {
   sociedad_id_ref: string;
   iban: string;
   banco: BancoOrigen;
-  fecha: string;                // ISO date
+  fecha: string; // ISO date
   fecha_valor: string | null;
   concepto: string;
   concepto_normalizado: string | null;
-  importe: number;              // negativo = salida, positivo = entrada
+  importe: number; // negativo = salida, positivo = entrada
   saldo: number | null;
   categoria: CategoriaMovimiento | null;
   subcategoria: string | null;
@@ -41,7 +41,7 @@ export type MovimientoBancario = {
   fuente: string;
   // PR F — importación de extractos bancarios
   extracto_id: string | null;
-  hash: string | null;              // dedup: sha256(sociedad|iban|fecha|importe|concepto_norm|saldo|referencia)
+  hash: string | null; // dedup: sha256(sociedad|iban|fecha|importe|concepto_norm|saldo|referencia)
   referencia: string | null;
   tipo_movimiento: string | null;
   cuenta_bancaria_id: string | null;
@@ -53,10 +53,10 @@ export type MovimientoBancario = {
 export type EstadoExtracto = 'importado' | 'pendiente_revision' | 'listo_conciliacion' | 'deshecho';
 
 export const ESTADO_EXTRACTO_LABEL: Record<EstadoExtracto, string> = {
-  importado:          'Importado',
+  importado: 'Importado',
   pendiente_revision: 'Pendiente de revisión',
   listo_conciliacion: 'Listo para conciliación',
-  deshecho:           'Deshecho',
+  deshecho: 'Deshecho',
 };
 
 export type ExtractoBancario = {
@@ -97,38 +97,50 @@ export type LineaFactura = {
 // validacion/revision/pago pero quedó HUÉRFANA: nunca se reflejó en código y la
 // migración 202606191000 la neutraliza. No usar validacion/revision/pago.
 export type EstadoFacturaRecibida =
-  | 'borrador_ocr'    // validación de Guille
-  | 'revision_javi'   // revisión de Javi (si supera el umbral)
-  | 'pendiente_pago'  // aprobada, pendiente de pago de Alicia
+  | 'borrador_ocr' // validación de Guille
+  | 'revision_javi' // revisión de Javi (si supera el umbral)
+  | 'pendiente_pago' // aprobada, pendiente de pago de Alicia
   | 'pagada'
   | 'rechazada';
 
 // Labels visibles canónicos (fuente única; no duplicar en componentes).
 export const ESTADO_FACTURA_RECIBIDA_LABEL: Record<EstadoFacturaRecibida, string> = {
-  borrador_ocr:   'Validación Guille',
-  revision_javi:  'Revisión Javi',
+  borrador_ocr: 'Validación Guille',
+  revision_javi: 'Revisión Javi',
   pendiente_pago: 'Pendiente de pago',
-  pagada:         'Pagada',
-  rechazada:      'Rechazada',
+  pagada: 'Pagada',
+  rechazada: 'Rechazada',
 };
 
 // Tipo de operación a efectos de IVA (España)
 export type TipoOperacion =
-  | 'normal'                  // IVA normal (21 %, 10 %, 5 %, 4 %, 0 %)
-  | 'exenta'                  // Exenta de IVA (art. 20 LIVA)
-  | 'no_sujeta'               // No sujeta a IVA
+  | 'normal' // IVA normal (21 %, 10 %, 5 %, 4 %, 0 %)
+  | 'exenta' // Exenta de IVA (art. 20 LIVA)
+  | 'no_sujeta' // No sujeta a IVA
   | 'inversion_sujeto_pasivo' // Receptor auto-liquida el IVA (art. 84 LIVA)
-  | 'suplido';                // Gasto pagado por cuenta del cliente, sin IVA
+  | 'suplido'; // Gasto pagado por cuenta del cliente, sin IVA
 
 // Confianza OCR por campo (0–1). Ausente = sin dato OCR.
-export type OcrConfianza = Partial<Record<
-  | 'proveedor_nombre' | 'proveedor_nif' | 'numero_factura'
-  | 'fecha_factura' | 'fecha_vencimiento'
-  | 'base_imponible' | 'tipo_iva' | 'cuota_iva'
-  | 'retencion_pct' | 'retencion_importe' | 'total' | 'concepto'
-  | 'tipo_operacion' | 'receptor_nombre' | 'receptor_nif',
-  number
->>;
+export type OcrConfianza = Partial<
+  Record<
+    | 'proveedor_nombre'
+    | 'proveedor_nif'
+    | 'numero_factura'
+    | 'fecha_factura'
+    | 'fecha_vencimiento'
+    | 'base_imponible'
+    | 'tipo_iva'
+    | 'cuota_iva'
+    | 'retencion_pct'
+    | 'retencion_importe'
+    | 'total'
+    | 'concepto'
+    | 'tipo_operacion'
+    | 'receptor_nombre'
+    | 'receptor_nif',
+    number
+  >
+>;
 
 export type RolAprobacion = 'guille' | 'javi' | 'alicia';
 
@@ -136,17 +148,17 @@ export type RolAprobacion = 'guille' | 'javi' | 'alicia';
 export type ActorRol = 'guille' | 'javi' | 'alicia' | 'sistema' | 'otro';
 
 export type AccionAprobacion =
-  | 'crea_borrador_ocr'   // la Edge Function crea la factura (actor: sistema)
-  | 'valida'              // Guille valida
-  | 'aprueba'             // Javi aprueba (si supera el umbral)
-  | 'rechaza'             // rechazo con motivo
-  | 'marca_pagada'        // Alicia marca pagada
-  | 'registra_pago'       // Alicia registra un pago (parcial/total/anticipo/regularización)
-  | 'crea_incidencia'     // descuadre de pago (sobrepago/infrapago)
+  | 'crea_borrador_ocr' // la Edge Function crea la factura (actor: sistema)
+  | 'valida' // Guille valida
+  | 'aprueba' // Javi aprueba (si supera el umbral)
+  | 'rechaza' // rechazo con motivo
+  | 'marca_pagada' // Alicia marca pagada
+  | 'registra_pago' // Alicia registra un pago (parcial/total/anticipo/regularización)
+  | 'crea_incidencia' // descuadre de pago (sobrepago/infrapago)
   | 'resuelve_incidencia' // incidencia resuelta
-  | 'cambia_sociedad'     // cambio manual de la sociedad receptora
+  | 'cambia_sociedad' // cambio manual de la sociedad receptora
   | 'solicita_aclaracion' // (reservado)
-  | 'cambia_estado';      // (reservado) cambio manual de estado
+  | 'cambia_estado'; // (reservado) cambio manual de estado
 
 export type FacturaAprobacion = {
   id: string;
@@ -165,17 +177,17 @@ export type FacturaAprobacion = {
 
 // Labels visibles de cada acción (fuente única para la timeline).
 export const ACCION_APROBACION_LABEL: Record<AccionAprobacion, string> = {
-  crea_borrador_ocr:   'Creada desde OCR',
-  valida:              'Validada',
-  aprueba:             'Aprobada',
-  rechaza:             'Rechazada',
-  marca_pagada:        'Marcada como pagada',
-  registra_pago:       'Pago registrado',
-  crea_incidencia:     'Incidencia creada',
+  crea_borrador_ocr: 'Creada desde OCR',
+  valida: 'Validada',
+  aprueba: 'Aprobada',
+  rechaza: 'Rechazada',
+  marca_pagada: 'Marcada como pagada',
+  registra_pago: 'Pago registrado',
+  crea_incidencia: 'Incidencia creada',
   resuelve_incidencia: 'Incidencia resuelta',
-  cambia_sociedad:     'Cambio de sociedad',
+  cambia_sociedad: 'Cambio de sociedad',
   solicita_aclaracion: 'Solicita aclaración',
-  cambia_estado:       'Cambio de estado',
+  cambia_estado: 'Cambio de estado',
 };
 
 // ── Pagos de factura (libro de tesorería) e incidencias ───────────────────────
@@ -186,25 +198,29 @@ export type TipoPago = 'total' | 'parcial' | 'anticipo' | 'regularizacion';
 export type EstadoPago = 'sin_pagos' | 'pago_parcial' | 'pagada' | 'sobrepagada' | 'descuadrada';
 
 export type TipoIncidenciaFactura =
-  | 'infrapago' | 'sobrepago' | 'justificante_no_coincide'
-  | 'falta_justificante' | 'pago_duplicado_posible' | 'otro';
+  | 'infrapago'
+  | 'sobrepago'
+  | 'justificante_no_coincide'
+  | 'falta_justificante'
+  | 'pago_duplicado_posible'
+  | 'otro';
 export type SeveridadIncidencia = 'baja' | 'media' | 'alta';
 
 export type FacturaPago = {
   id: string;
   factura_id: string;
-  importe: number;                        // negativo solo en tipo_pago='regularizacion'
-  fecha_pago: string;                     // ISO date
+  importe: number; // negativo solo en tipo_pago='regularizacion'
+  fecha_pago: string; // ISO date
   metodo_pago: MetodoPago;
   tipo_pago: TipoPago;
-  justificante_storage_path: string | null;   // bucket privado `facturas` → signed URL
+  justificante_storage_path: string | null; // bucket privado `facturas` → signed URL
   justificante_nombre_archivo: string | null;
   justificante_mime_type: string | null;
   justificante_size: number | null;
   comentario: string | null;
   registrado_por_email: string | null;
   registrado_por_rol: string | null;
-  drive_file_id: string | null;         // PR D: justificante archivado en Google Drive
+  drive_file_id: string | null; // PR D: justificante archivado en Google Drive
   drive_estado: DriveEstado;
   drive_error: string | null;
   drive_web_link: string | null;
@@ -229,33 +245,33 @@ export type FacturaIncidencia = {
 export const METODO_PAGO_LABEL: Record<MetodoPago, string> = {
   transferencia: 'Transferencia',
   domiciliacion: 'Domiciliación',
-  tarjeta:       'Tarjeta',
-  efectivo:      'Efectivo',
-  otro:          'Otro',
+  tarjeta: 'Tarjeta',
+  efectivo: 'Efectivo',
+  otro: 'Otro',
 };
 
 export const TIPO_PAGO_LABEL: Record<TipoPago, string> = {
-  total:          'Pago total',
-  parcial:        'Pago parcial',
-  anticipo:       'Anticipo',
+  total: 'Pago total',
+  parcial: 'Pago parcial',
+  anticipo: 'Anticipo',
   regularizacion: 'Regularización',
 };
 
 export const ESTADO_PAGO_LABEL: Record<EstadoPago, string> = {
-  sin_pagos:    'Sin pagos',
+  sin_pagos: 'Sin pagos',
   pago_parcial: 'Pago parcial',
-  pagada:       'Pagada',
-  sobrepagada:  'Sobrepagada',
-  descuadrada:  'Descuadrada',
+  pagada: 'Pagada',
+  sobrepagada: 'Sobrepagada',
+  descuadrada: 'Descuadrada',
 };
 
 export const TIPO_INCIDENCIA_LABEL: Record<TipoIncidenciaFactura, string> = {
-  infrapago:                'Infrapago',
-  sobrepago:                'Sobrepago',
+  infrapago: 'Infrapago',
+  sobrepago: 'Sobrepago',
   justificante_no_coincide: 'Justificante no coincide',
-  falta_justificante:       'Falta justificante',
-  pago_duplicado_posible:   'Posible pago duplicado',
-  otro:                     'Otro',
+  falta_justificante: 'Falta justificante',
+  pago_duplicado_posible: 'Posible pago duplicado',
+  otro: 'Otro',
 };
 
 // ── Archivo documental en Google Drive (PR D) ─────────────────────────────────
@@ -265,7 +281,7 @@ export type DriveEstado = 'no_archivado' | 'sincronizado' | 'error';
 export const DRIVE_ESTADO_LABEL: Record<DriveEstado, string> = {
   no_archivado: 'No archivado',
   sincronizado: 'Archivado en Drive',
-  error:        'Error Drive',
+  error: 'Error Drive',
 };
 
 export type ConfiguracionContabilidad = {
@@ -303,7 +319,7 @@ export type ProveedorRegla = {
   id: string;
   contacto_id: string;
   nif_normalizado: string | null;
-  sociedad_id_ref: string | null;            // null = regla global del proveedor
+  sociedad_id_ref: string | null; // null = regla global del proveedor
   cuenta_contable_default: string | null;
   proyecto_id_ref: string | null;
   presupuesto_id: string | null;
@@ -311,7 +327,7 @@ export type ProveedorRegla = {
   metodo_pago_default: MetodoPago | null;
   es_domiciliada: boolean;
   requiere_pago_manual: boolean;
-  requiere_aprobacion_javi: boolean;         // v1: solo aviso visual (no fuerza routing)
+  requiere_aprobacion_javi: boolean; // v1: solo aviso visual (no fuerza routing)
   requiere_factura: boolean;
   requiere_justificante_pago: boolean;
   tipo_operacion_default: TipoOperacion | null;
@@ -320,7 +336,7 @@ export type ProveedorRegla = {
   importe_habitual: number | null;
   tolerancia_importe_pct: number | null;
   concepto_recurrente: string | null;
-  auto_validar: boolean;                     // INERTE en v1 (reservado v2)
+  auto_validar: boolean; // INERTE en v1 (reservado v2)
   activa: boolean;
   notas: string | null;
   created_at: string;
@@ -331,15 +347,15 @@ export type ProveedorRegla = {
 export type EstadoOperativoDomiciliada = 'pendiente_cargo' | 'cargada_sin_justificante' | 'pagada';
 
 export const ESTADO_OPERATIVO_DOMICILIADA_LABEL: Record<EstadoOperativoDomiciliada, string> = {
-  pendiente_cargo:          'Pendiente de cargo',
+  pendiente_cargo: 'Pendiente de cargo',
   cargada_sin_justificante: 'Cargada · falta justificante',
-  pagada:                   'Pagada',
+  pagada: 'Pagada',
 };
 
 export type FacturaRecibida = {
   id: string;
-  sociedad_id_ref: string | null;       // PR D.1: null = sin sociedad validada (pendiente)
-  sociedad_validada: boolean;           // PR D.1: false = sociedad receptora pendiente de validar
+  sociedad_id_ref: string | null; // PR D.1: null = sin sociedad validada (pendiente)
+  sociedad_validada: boolean; // PR D.1: false = sociedad receptora pendiente de validar
   numero_factura: string | null;
   proveedor_nombre: string;
   proveedor_nif: string | null;
@@ -359,23 +375,23 @@ export type FacturaRecibida = {
   estado: EstadoFacturaRecibida;
   movimiento_id: string | null;
   cuenta_gasto: string | null;
-  tipo_operacion: TipoOperacion | null;     // régimen IVA detectado por OCR
-  receptor_nombre_ocr: string | null;       // destinatario detectado por OCR
-  receptor_nif_ocr: string | null;          // NIF del destinatario detectado
-  contacto_id: string | null;               // FK a contactos (auto-creado por OCR)
+  tipo_operacion: TipoOperacion | null; // régimen IVA detectado por OCR
+  receptor_nombre_ocr: string | null; // destinatario detectado por OCR
+  receptor_nif_ocr: string | null; // NIF del destinatario detectado
+  contacto_id: string | null; // FK a contactos (auto-creado por OCR)
   ocr_raw: Record<string, unknown> | null;
   ocr_confianza: OcrConfianza | null;
-  presupuesto_pago_id: string | null;   // FK a presupuesto_pagos — vinculación bidireccional
-  storage_path: string | null;          // ruta del PDF en el bucket privado `facturas` (fuente de signed URLs)
-  archivo_url: string | null;           // legado: URL pública previa (fallback si no hay storage_path)
-  drive_file_id: string | null;         // PR D: PDF archivado en Google Drive
+  presupuesto_pago_id: string | null; // FK a presupuesto_pagos — vinculación bidireccional
+  storage_path: string | null; // ruta del PDF en el bucket privado `facturas` (fuente de signed URLs)
+  archivo_url: string | null; // legado: URL pública previa (fallback si no hay storage_path)
+  drive_file_id: string | null; // PR D: PDF archivado en Google Drive
   drive_folder_id: string | null;
   drive_estado: DriveEstado;
   drive_error: string | null;
   drive_web_link: string | null;
   drive_synced_at: string | null;
-  es_domiciliada: boolean;              // PR E: se cargará por domiciliación (no requiere transferencia manual)
-  regla_aplicada_id: string | null;    // PR E: traza de la regla de proveedor usada para sugerir/aplicar
+  es_domiciliada: boolean; // PR E: se cargará por domiciliación (no requiere transferencia manual)
+  regla_aplicada_id: string | null; // PR E: traza de la regla de proveedor usada para sugerir/aplicar
   notas: string | null;
   created_at: string;
   updated_at: string;
@@ -383,7 +399,7 @@ export type FacturaRecibida = {
 
 // Ficha de sociedad enriquecida (para facturación y cuentas bancarias)
 export type SociedadContabilidad = {
-  id: string;           // = id_ref en la tabla sociedades
+  id: string; // = id_ref en la tabla sociedades
   nombre: string;
   cif: string | null;
   domicilio: string | null;
@@ -541,8 +557,8 @@ export type MovimientoCsvRaw = {
   concepto: string;
   importe: number;
   saldo?: number;
-  referencia?: string;        // PR F (opcional; algunos formatos la traen)
-  tipo_movimiento?: string;   // PR F (opcional)
+  referencia?: string; // PR F (opcional; algunos formatos la traen)
+  tipo_movimiento?: string; // PR F (opcional)
 };
 
 export type ResultadoImportacion = {
@@ -550,7 +566,7 @@ export type ResultadoImportacion = {
   importados: number;
   duplicados: number;
   errores: number;
-  extracto_id?: string;       // PR F
-  ya_importado?: boolean;     // PR F: el fichero ya se había importado
+  extracto_id?: string; // PR F
+  ya_importado?: boolean; // PR F: el fichero ya se había importado
   movimientos?: MovimientoBancario[];
 };

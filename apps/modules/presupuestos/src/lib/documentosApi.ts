@@ -3,7 +3,13 @@
 // El archivo se sube al bucket de Storage 'proyecto-documentos' vía REST y los
 // metadatos van a la tabla proyecto_documentos.
 
-import { SUPABASE_URL, SUPABASE_ANON_KEY, getJwt, sbHeaders as headers, sbUrl } from '@alsari/supabase-client';
+import {
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  getJwt,
+  sbHeaders as headers,
+  sbUrl,
+} from '@alsari/supabase-client';
 import { resolveDocumentoSource } from './documentoUrl';
 
 const BUCKET = 'proyecto-documentos';
@@ -25,10 +31,10 @@ export type ProyectoDocumento = {
 
 export const CATEGORIA_LABEL: Record<CategoriaDocumento, string> = {
   estudio_mercado: 'Estudio de mercado',
-  tasacion:        'Tasación oficial',
-  renta:           'Justificante de renta',
-  contrato:        'Escritura / contrato',
-  otro:            'Otro',
+  tasacion: 'Tasación oficial',
+  renta: 'Justificante de renta',
+  contrato: 'Escritura / contrato',
+  otro: 'Otro',
 };
 
 async function req<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -52,7 +58,10 @@ export type { DocumentoSource } from './documentoUrl';
 
 const SIGNED_URL_TTL_SECONDS = 3600; // 1 h: suficiente para abrir/descargar
 
-async function createSignedDocumentoUrl(path: string, expiresIn = SIGNED_URL_TTL_SECONDS): Promise<string> {
+async function createSignedDocumentoUrl(
+  path: string,
+  expiresIn = SIGNED_URL_TTL_SECONDS,
+): Promise<string> {
   const encodedPath = path.split('/').map(encodeURIComponent).join('/');
   const res = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/${BUCKET}/${encodedPath}`, {
     method: 'POST',
@@ -92,8 +101,9 @@ export async function getDocumentos(proyectoIdRef: string): Promise<ProyectoDocu
 
 function sanitizeFilename(name: string): string {
   return name
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')   // quitar acentos
-    .replace(/[^a-zA-Z0-9.\-_]/g, '_')                  // resto → _
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // quitar acentos
+    .replace(/[^a-zA-Z0-9.\-_]/g, '_') // resto → _
     .replace(/_+/g, '_');
 }
 
@@ -138,8 +148,9 @@ export async function uploadDocumento(
       mime_type: file.type || null,
     }),
   });
-  if (!res.ok) throw new Error(`Guardar documento: ${res.status} — ${(await res.text()).slice(0, 200)}`);
-  const rows = await res.json() as ProyectoDocumento[];
+  if (!res.ok)
+    throw new Error(`Guardar documento: ${res.status} — ${(await res.text()).slice(0, 200)}`);
+  const rows = (await res.json()) as ProyectoDocumento[];
   if (!rows[0]) throw new Error('Respuesta vacía al guardar el documento');
   return rows[0];
 }
@@ -149,7 +160,9 @@ export async function deleteDocumento(doc: ProyectoDocumento): Promise<void> {
   await fetch(`${SUPABASE_URL}/storage/v1/object/${BUCKET}/${doc.storage_path}`, {
     method: 'DELETE',
     headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${getJwt()}` },
-  }).catch(() => { /* si el objeto ya no existe, seguimos borrando la fila */ });
+  }).catch(() => {
+    /* si el objeto ya no existe, seguimos borrando la fila */
+  });
 
   await req('DELETE', `proyecto_documentos?id=eq.${doc.id}`);
 }

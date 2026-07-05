@@ -23,13 +23,13 @@ todo el proceso intermedio.
 
 ## 📋 Subagents disponibles
 
-| Agent | Cuándo invocarlo | Qué devuelve |
-|-------|------------------|--------------|
-| `code-reviewer` | Antes de commit/PR | Revisión contra ways-of-working |
-| `test-runner` | Cuando hay cambios significativos | Resultado de tests con failures resumidos |
-| `migration-checker` | Al crear/modificar migration SQL | Validación de seguridad y RLS |
-| `architecture-explorer` | Para entender una zona del monorepo | Mapa estructural y dependencias |
-| `doc-keeper` | Tras completar un feature/fix/milestone o cuando el contexto se agota | Actualiza ARQUITECTURA.md, CHANGELOG.md y **produce SESSION.md** — el estado de transferencia que permite a un Claude nuevo continuar sin perder contexto |
+| Agent                   | Cuándo invocarlo                                                      | Qué devuelve                                                                                                                                              |
+| ----------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `code-reviewer`         | Antes de commit/PR                                                    | Revisión contra ways-of-working                                                                                                                           |
+| `test-runner`           | Cuando hay cambios significativos                                     | Resultado de tests con failures resumidos                                                                                                                 |
+| `migration-checker`     | Al crear/modificar migration SQL                                      | Validación de seguridad y RLS                                                                                                                             |
+| `architecture-explorer` | Para entender una zona del monorepo                                   | Mapa estructural y dependencias                                                                                                                           |
+| `doc-keeper`            | Tras completar un feature/fix/milestone o cuando el contexto se agota | Actualiza ARQUITECTURA.md, CHANGELOG.md y **produce SESSION.md** — el estado de transferencia que permite a un Claude nuevo continuar sin perder contexto |
 
 Todos son **opcionales**. La sesión principal puede hacer estas tareas; los
 subagents son optimización de contexto para tareas largas o repetitivas.
@@ -40,7 +40,7 @@ subagents son optimización de contexto para tareas largas o repetitivas.
 
 Desde la conversación con Claude principal, basta con pedírselo:
 
-> *"Lanza el code-reviewer sobre los cambios en `apps/modules/financiero/`."*
+> _"Lanza el code-reviewer sobre los cambios en `apps/modules/financiero/`."_
 
 Claude lo invocará, esperará el resultado y te lo presentará consolidado.
 

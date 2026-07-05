@@ -17,20 +17,35 @@ const renta = (over: Partial<AnalisisFinanciero>): AnalisisFinanciero => ({
 });
 
 const proyecto = (nombre: string): ProyectoRow =>
-  ({ nombre, sociedad_tenedora: 'S-001', fecha_inicio: null, fecha_prevista_salida: null }) as unknown as ProyectoRow;
+  ({
+    nombre,
+    sociedad_tenedora: 'S-001',
+    fecha_inicio: null,
+    fecha_prevista_salida: null,
+  }) as unknown as ProyectoRow;
 
 const casos = [
   {
     archivo: 'informe-villa-el-chorro.pdf',
     informe: construirInforme(
-      renta({ precio_adquisicion: 491000, renta_mensual_bruta: 79380 / 12, tasa_ocupacion_prevista_pct: 100, valoracion_actual: 1000000 }),
+      renta({
+        precio_adquisicion: 491000,
+        renta_mensual_bruta: 79380 / 12,
+        tasa_ocupacion_prevista_pct: 100,
+        valoracion_actual: 1000000,
+      }),
       proyecto('Villa el Chorro'),
     ),
   },
   {
     archivo: 'informe-ciudad-rialsa.pdf',
     informe: construirInforme(
-      renta({ precio_adquisicion: 799682, renta_mensual_bruta: 141750 / 12, tasa_ocupacion_prevista_pct: 100, valoracion_actual: 1500000 }),
+      renta({
+        precio_adquisicion: 799682,
+        renta_mensual_bruta: 141750 / 12,
+        tasa_ocupacion_prevista_pct: 100,
+        valoracion_actual: 1500000,
+      }),
       proyecto('Ciudad Rialsa'),
     ),
   },

@@ -335,56 +335,68 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 #### Estructura societaria real: Perisur directa, duplicado Andalvia y marco "Alsari Capital" (2026-06-12)
 
 **Datos — migración `202606121000_estructura_societaria_real.sql` (aplicada al remoto):**
+
 - **Perisur** colgaba de Alsari Inversiones como filial al 50%; en realidad es participada **directa** de Pavier (25%) y Armia (25%), al mismo nivel que Rialsa y Alsari. Eliminado el `parent_sociedad_id` erróneo — el mapa la pintaba (junto a Capellanía y UTE Lagunas Park) en la rama equivocada.
 - Eliminada la fila duplicada **"Transporte" (S-006-2)**: era el nombre antiguo de Andalvia (S-002-2). Sin datos asociados (KPIs todo NULL); se conserva Andalvia.
 - Consistencia look-through: Alrive y Andalvia pasan de 0/0 a `pct_pavier`/`pct_armia` 0.20/0.20 (vía Rialsa), igual que Capellanía/UTE llevan su 12,5%. No altera la consolidación (los hijos directos se detectan por `parent_sociedad_id IS NULL`).
 
 **`@alsari/financiero` — CorporateMap:**
+
 - Nuevo marco punteado **"Alsari Capital · denominación comercial"** agrupando Pavier y Armia: documenta en el propio mapa que la marca comercial no es una sociedad constituida.
 
 **Eliminado — vía de carga Excel del maestro:**
+
 - `syncFromExcel` y `parseMaestroDB` eran código muerto (sin llamadas desde la UI) y un riesgo latente: el Excel maestro fue solo el vehículo de carga inicial y quedó anticuado — un reimport accidental habría machacado los datos buenos de Supabase con la estructura antigua. `maestroParser.ts` queda como archivo de tipos; el CRUD desde la app es la única vía de edición de datos maestros.
 
 #### Refresh estético "Quiet Luxury": tokens unificados, rebalanceo tipográfico y componentes UI (2026-06-12)
 
 **Tokens — preset Tailwind compartido (`@alsari/config/tailwind-preset`):**
+
 - Nueva fuente única de verdad para la paleta (zinc custom con tinte navy + token `brand` `#F5F0E1`), animaciones (`fade-in`, `fade-up`, `pulse-subtle`, `shimmer`), fuentes y escala. Los 5 tailwind.config (host + 4 módulos) consumen el preset; eliminadas 5 copias divergentes de la paleta.
 - `.glass-panel`/`.glass-header` unificados: el host tenía una definición distinta (`zinc-800/40`, `white/[0.08]`) que competía con la de los módulos según el orden de carga del CSS. Body del host corregido de `zinc-900` a `zinc-950`.
 - Scrollbars unificados a tokens de la paleta (3 variantes antes, 1 ahora).
 
 **Tipografía — el cambio más visible:**
+
 - Fuente **Geist Sans + Geist Mono** vía `next/font` (antes: fuente del sistema sin definir). `tabular-nums` global — todas las cifras alinean en columna.
 - Rebalanceo completo de pesos: la app tenía 467 `font-black` y 366 `font-bold` frente a 1 `font-light`. Ahora: cifras hero (`text-3xl+`) en `font-light tracking-tight`, `font-black`→`font-semibold`, `font-bold`→`font-medium`. El máximo del sistema es `semibold`.
 - Eliminados los 604 tamaños arbitrarios (`text-[8px]`…`text-[13px]`): nuevo token `text-2xs` (10px) como mínimo absoluto de la escala.
 
 **Color semántico:**
+
 - `red`→`rose` en los 4 módulos (208 usos): un solo tono para negativo/error. `violet` documentado como "previsto/simulado". Hex de marca sustituido por token `brand` en LoginForm.
 
 **Componentes — `@alsari/ui` pasa de 1 a 6 componentes:**
+
 - Nuevos: `Button` (primario claro estilo spec, secondary, ghost, danger), `Modal` (backdrop `bg-black/60` + z-50 canónicos, cierre con Escape), `EmptyState`, `Skeleton`/`SkeletonCard` (shimmer), `Badge` (semántica de color del OS).
 - `KPICard` realineado al spec: `rounded-2xl` (antes `rounded-[2rem]`), valor en `font-light`, labels `text-2xs font-medium`, transiciones 200ms sin `hover:scale`.
 - Iconos Lucide con trazo 1.5 global (`.lucide { stroke-width: 1.5 }`).
 - Backdrops de modal existentes normalizados a `bg-black/60` (había 5 opacidades).
 
 **Documentación:**
+
 - `ui-quiet-luxury/SKILL.md` actualizado con los valores reales de la paleta (era documentación aspiracional: describía zinc puro de Tailwind cuando la app usa la paleta navy custom), la escala con `text-2xs`, los pesos máximos, y 4 anti-patrones nuevos.
 
 #### Auditoría técnica: RLS en producción, cliente Supabase centralizado y type-check reparado (2026-06-11)
 
 **Seguridad — RLS (2 migraciones nuevas, aplicadas al remoto):**
+
 - `20260611131000_rls_alsari_knowledge.sql`: la tabla `alsari_knowledge` (documentos confidenciales del sistema de conocimiento Python) estaba **sin RLS en producción** — cualquier petición con la anon key pública podía leer su contenido completo. RLS activado sin política para `anon`; el pipeline Python no se ve afectado porque usa `service_role` (bypasea RLS).
 - `20260611130000_rls_proyecto_escenarios_financieros.sql`: la migración de escenarios creó la tabla sin RLS. Activado con la política permisiva estándar del proyecto.
 - Verificado contra el remoto: **0 tablas sin RLS** en el schema `public`.
 
 **Producción — 5 migraciones de mayo/junio que nunca se aplicaron al remoto:**
+
 - `20260531000001` (presupuesto maestro), `20260531000002` (tabla de escenarios + vista `metricas_proyecto_resumen` v2), `20260531000003` (horizonte renta), `20260531000004` (plazo total CV) y `20260601000000` (impuesto de sociedades CV) existían en el repo pero no en la BD. Las funcionalidades de presupuesto maestro y escenarios financieros estaban **rotas en producción** (error 42703/42P01 al usarlas). Aplicadas todas con `supabase db query --linked --file`.
 
 **Refactor — `@alsari/supabase-client` implementado de verdad:**
+
 - El paquete existía vacío (solo `.gitkeep`) aunque la documentación afirmaba que centralizaba el acceso a Supabase. Ahora exporta `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `getJwt()` (bridge `window.alsariToken` → `localStorage` → anon), `sbUrl()` y `sbHeaders()`.
 - Eliminadas **15 copias** de la URL, la anon key y `getJwt()` repartidas en financiero (8 archivos), contabilidad, facturas y presupuestos (5). Todos los módulos importan ahora del paquete. Rotar la anon key pasa de tocar 16 archivos a tocar 1.
 - Los importadores de financiero (`patrimonioImport`, `maestroImport`, `sumasSaldosImport`) firmaban siempre con la anon key; ahora usan `getJwt()` como el resto (usan el token de sesión cuando existe).
 
 **Tooling:**
+
 - `pnpm type-check` reparado: el paquete `supabase-client` no tenía `tsconfig.json` propio y `tsc` subía hasta el raíz, compilando la carpeta legacy `IGNORE/` (~70 errores ajenos al monorepo). Añadido tsconfig propio + `IGNORE` excluido del tsconfig raíz.
 - `turbo.json`: `type-check` ya no depende de `^build` — verificar tipos no requiere compilar los módulos Vite (de ~22 s a ~9 s).
 - `.gitignore`: añadido `.claude/worktrees/`.
@@ -394,6 +406,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 #### `@alsari/financiero` — Rediseno mapa corporativo: bus compartido + alineacion correcta de holdings (2026-06-11)
 
 **UI — `apps/modules/financiero/src/components/CorporateMap.tsx`:**
+
 - Rediseno completo de `buildLayout()` (commits `deb526b`, `0e07721`, `fd3657f`). La funcion ahora calcula los niveles en orden: L2 primero (filiales directas), L1 a continuacion (holdings anclados a los extremos de L2), L0 al final (personas fisicas alineadas con su holding).
 - Nueva funcion `isPersona(idRef)`: detecta personas fisicas por ID-Ref numerico (`"1"` = Javier, `"2"` = Ivan). Garantiza que no aparezcan mezcladas con filiales societarias en el mismo nivel.
 - Personas fisicas pasan a **Level 0** (encima de todo), holdings a **Level 1**, filiales directas a **Level 2**. El orden visual es JAVIER->PAVIER (izquierda) | IVAN->ARMIA (derecha) -> bus -> PERISUR · RIALSA · ALSARI.
@@ -403,25 +416,30 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - Porcentaje de participacion visible dentro del nodo de cada filial; ID-Ref ya no aparece visible.
 
 **Modelo de datos — `services/supabase/migrations/20260611090000_activos_patrimonio_campos_fondo.sql`:**
+
 - `ALTER TABLE activos_patrimonio ADD COLUMN fecha_inicio_inversion DATE` y `ADD COLUMN tae_declarada NUMERIC(6,3)`. Resuelve error PGRST204 que ocurria al insertar activos con campos de fondo de inversion o activo cotizado cuando esas columnas no existian en la tabla remota.
 
 #### `@alsari/financiero` — Fix HTTP 400 al guardar vencimientos con tipo prestamo (2026-06-10)
 
 **Causa raíz — migración no aplicada:**
+
 - La migración `20260610090000_vencimientos_tipo_prestamo.sql` existía en el repo pero no estaba ejecutada en el Supabase remoto. El CHECK constraint de la columna `tipo` en `vencimientos` no incluía `'prestamo'`, por lo que cualquier INSERT o PATCH con `tipo = 'prestamo'` devolvía HTTP 400 con código `23514` (check violation).
 - Aplicada directamente con `supabase db query --linked`. El directorio `supabase/migrations/` (CLI) sigue vacío por diseño — las migraciones reales están en `services/supabase/migrations/` y se gestionan manualmente.
 
 **Bugs corregidos en frontend — `apps/modules/financiero/src/components/views/VencimientosView.tsx`:**
+
 - `formIsValid()`: añadida validación `socPcts.some(s => !s.sociedad_id)`. Sin este check, una fila con `sociedad_id: ''` (string vacío) pasaba la validación y llegaba al INSERT, causando FK violation (código `23503`) en `vencimiento_sociedades`.
 - `handleSave()`: cambiado `primaria?.sociedad_id ?? null` por `primaria?.sociedad_id || null`. El operador `??` solo hace fallback con `null`/`undefined`; un string vacío `''` se propagaba como valor de FK. Con `||`, los strings vacíos también se convierten en `null`.
 
 **Mejora de observabilidad — `apps/modules/financiero/src/lib/vencimientosImport.ts`:**
+
 - `req()`: el mensaje de error ahora incluye el body completo de la respuesta HTTP (`HTTP 400 — {"code":"23514","message":"...","details":"..."}`). Antes solo mostraba el código de estado, lo que ocultaba la causa exacta del error.
 - `setVencimientoSociedades()`: añadido `rows.filter(r => r.sociedad_id)` antes del DELETE+INSERT. Filtra rows con `sociedad_id` vacío antes de que lleguen a Supabase, añadiendo una segunda línea de defensa además de `formIsValid()`.
 
 #### Cashflow multi-sociedad + Presupuesto de Ingresos + Recurrencia (2026-06-05)
 
 **Modelo de datos — 5 migraciones aplicadas:**
+
 - `20260604090000`: elimina columna duplicada `sociedad_id_ref` en `vencimientos`, añade `recurrencia` / `fecha_inicio_recurrencia` / `fecha_fin_recurrencia` a `presupuesto_partidas`, crea índice en `presupuestos.sociedad_id_ref`.
 - `20260605000000`: nueva tabla `vencimiento_sociedades` (`vencimiento_id`, `sociedad_id`, `porcentaje NUMERIC(5,2)`) con RLS, ON DELETE CASCADE e índices. Permite asignar un vencimiento a N sociedades con distribución porcentual que debe sumar 100.
 - `20260605000001`: datos de distribución de todos los vencimientos existentes según el Excel "Calendario de Pagos — Alsari.xlsx". Correcciones: Perisur 5 contratos → Javier 50% / Iván 50%; Fondos Pignorados → Javier 50% / Iván 50%; Earn-out Evariste → ambos tramos a Javier 100%; Precio Aplazado Álvaro → Javier 100% (corregido desde S-002 Rialsa que era incorrecto).
@@ -430,20 +448,24 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - `20260605000004`: columna `categoria TEXT ('gasto'|'ingreso')` en `presupuestos` (default `gasto`); columna `factura_emitida_id UUID` en `presupuesto_pagos` (FK a `facturas_emitidas`, nullable); columnas de recurrencia en `presupuesto_partidas` (idempotente con `IF NOT EXISTS`).
 
 **API — `cashflowHoldingApi.ts`:**
+
 - Nueva función `getSociedadesCashflow()`: devuelve lista de sociedades disponibles para el selector.
 - `getFlujosHolding()` acepta ahora `sociedadIds: string[]` (array, multi-sociedad) y `desde`/`hasta` (rango de fechas). Sin parámetros = consolidado + sin límite temporal.
 - Tipo `SociedadOpcion` añadido.
 
 **API — `vencimientosImport.ts`:**
+
 - Nuevas funciones `getVencimientoSociedades(vencimientoId)` y `setVencimientoSociedades(vencimientoId, rows)`.
 - Tipo `VencimientoSociedad` exportado.
 
 **API — `presupuestosApi.ts`:**
+
 - `createPartida()` genera automáticamente los pagos recurrentes si se especifica `recurrencia` + `fecha_inicio_recurrencia` + `fecha_fin_recurrencia`. El importe total se divide a partes iguales entre los periodos generados. La descripción de cada pago incluye el mes/año (ej. "Alquiler oficina (jun. 2026)").
 - `createPresupuesto()` acepta ahora `categoria?: PresupuestoCategoria`.
 - Función auxiliar `generarFechasRecurrentes()` (privada) calcula las fechas de cada periodo.
 
 **UI — `CashflowView.tsx` (reescritura dirigida):**
+
 - Selector multi-sociedad: dropdown con checkboxes (cierre automático al clicar fuera con `useRef`). "Todas las sociedades" = sin filtro. Se sincroniza con el selector global del OS al montar y cuando cambia.
 - Selector horizonte temporal: tabs 3m / 6m / 12m / Todo. La query se relanza al cambiar horizonte o selección de sociedades.
 - Meses agrupados en orden cronológico (pasado → futuro). Meses pasados: fondo zinc. Meses futuros: borde y fondo azul tenue con badge "Previsto".
@@ -453,23 +475,28 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - Nombre de sociedad resuelto en las filas de detalle (antes mostraba el `id_ref` crudo).
 
 **UI — `VencimientosView.tsx`:**
+
 - Formulario de nuevo/editar vencimiento reemplaza el selector único de sociedad por checkboxes multi-sociedad con campo de porcentaje por sociedad. Validación en tiempo real: los porcentajes deben sumar 100 para habilitar el botón Guardar.
 - `socMap: Map<vencimientoId, VencimientoSociedad[]>` cargado al montar: muestra las sociedades asignadas en la vista calendario y en la vista lista, con porcentaje si hay más de una.
 - Lápiz de edición abre el formulario inmediatamente (antes esperaba un fetch adicional que podía fallar).
 - Estado `editingId` para distinguir crear vs editar.
 
 **UI — `TabPresupuesto.tsx`:**
+
 - Nueva prop `categoria: PresupuestoCategoria`. Filtra los presupuestos del proyecto por `categoria`. Genera nombre, tipo e icono adaptativos (Wallet para gastos, TrendingDown para ingresos).
 
 **UI — `DetalleProyecto.tsx` y `ProyectosSidebar.tsx`:**
+
 - Tab única `presupuesto` dividida en `presupuesto-gasto` y `presupuesto-ingreso`. Cada tab renderiza `TabPresupuesto` con la `categoria` correspondiente.
 
 **UI — `DetallePresupuesto.tsx`:**
+
 - Formulario de nueva partida ampliado con sección "Pago recurrente": selector mensual/trimestral/semestral/anual y campos de primer/último pago. Aparece solo si se activa la recurrencia.
 - Preview en tiempo real: muestra "Se generarán N pagos de X€" calculado en cliente antes de guardar.
 - Botón Guardar deshabilitado si hay recurrencia pero faltan fechas.
 
 **Tipos — `packages/types/src/presupuestos.ts`:**
+
 - `PresupuestoCategoria = 'gasto' | 'ingreso'`.
 - `RecurrenciaPartida = 'mensual' | 'trimestral' | 'semestral' | 'anual'`.
 - `Presupuesto.categoria: PresupuestoCategoria` añadido.
@@ -478,21 +505,25 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 #### Tesorería multi-sociedad: corrección de bugs + selector múltiple + horizonte temporal (2026-06-05)
 
 **Bugs corregidos en la vista `compromisos_tesoreria`:**
+
 - Bug 1: La rama de vencimientos referenciaba la columna `sociedad_id_ref`, que no existe — la columna real de la tabla es `sociedad_id` (la vista fallaba silenciosamente y no mostraba ningún vencimiento en tesorería).
 - Bug 2: Los pagos de presupuestos vinculados a un proyecto heredaban `sociedad_id_ref = NULL` del presupuesto aunque el proyecto sí tenía sociedad. Ahora se hace `COALESCE(presupuestos.sociedad_id_ref, proyectos.sociedad_tenedora)` vía `LEFT JOIN`. La sociedad se deriva automáticamente del proyecto sin pedírsela al usuario.
 - Bug 3: Los vencimientos con `es_entrada = true` siempre se negaban en importe, tratándolos como salidas. Ahora se respeta la dirección: entradas suman positivo, salidas suman negativo.
 - Bug 4: El filtro `fecha >= CURRENT_DATE` en la rama de vencimientos ocultaba los vencidos pendientes. Se elimina para que puedan aparecer como alerta en la UI.
 
 **Modelo de datos — nueva migración `20260604120000_tesoreria_multi_sociedad.sql`:**
+
 - `CREATE OR REPLACE VIEW compromisos_tesoreria` reconstruida con los 4 bugs corregidos.
 - Campos nuevos en la vista: `es_entrada`, `estado`, `fuente`, `presupuesto_id`, `partida_id`, `factura_id`, `vencimiento_id` (trazabilidad completa del origen).
 - Regla anti-doble conteo mantenida: facturas con `presupuesto_pago_id IS NOT NULL` quedan excluidas de la rama de facturas (ya están en la rama de presupuestos).
 
 **API — `proyectosApi.ts`:**
+
 - `CompromisoTesoreria` ampliado con los nuevos campos (`es_entrada`, `estado`, `fuente`, IDs de trazabilidad).
 - `getCompromisosTesoreria(sociedadIds?: string[])` acepta array de IDs. Usa el filtro `in.(...)` de PostgREST para multi-sociedad. Sin parámetros = consolidado.
 
 **UI — `Tesoreria.tsx` (reescritura dirigida):**
+
 - **Selector multi-sociedad**: pills toggle por sociedad. "Todas" = consolidado. Seleccionar N pills = filtra y refetcha. El badge muestra cuántas están activas.
 - **Horizonte temporal**: barra de tabs 7d / 15d / 30d / 60d / 90d / 6m / 12m / Todo. Los KPIs y la timeline se recalculan al cambiar.
 - **KPIs mejorados**: Caja disponible · Salidas Nd (confirmadas) · Entradas Nd (previstas) · Posición neta Nd con indicador Déficit/Superávit.
@@ -502,17 +533,20 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - **Desglose por fuente**: cuánto corresponde a presupuestos, vencimientos y facturas dentro del horizonte.
 
 **UI — `VencimientosView.tsx`:**
+
 - Sociedad pasa de campo "(opcional)" a obligatorio en el formulario de nuevo vencimiento: asterisco rojo, borde ámbar si vacío, botón Guardar bloqueado hasta que se seleccione una sociedad.
 - El esquema BD mantiene `sociedad_id` nullable para no romper datos existentes (fondos pignorados insertados sin sociedad por migración histórica).
 
 #### `@alsari/financiero` — Vencimientos: fondos pignorados por tramos + dirección de flujo (2026-06-03)
 
 **Modelo de datos:**
+
 - Nuevo tipo `'pignorado'` en el CHECK de la tabla `vencimientos` (migración `20260601*`).
 - Nueva columna `es_entrada: boolean` (default `false`) para distinguir cobros de pagos (migración `20260602*`). Regla: `true` = el holding recibe dinero; `false` = el holding paga.
 - **Categorización correcta de todos los vencimientos existentes** según el Excel "Calendario de Pagos - Alsari.xlsx" (columna Prestamista = Acreedor = quien cobra = entrada). Todos los préstamos donde Javier/Iván son prestamistas son entradas; el seguro es salida.
 
 **Fondos pignorados Santander:**
+
 - Eliminada la entrada incorrecta (1.100.000€ todo en oct-2029, tipo "otro").
 - Sustituida por **3 tramos reales** según el calendario:
   - Tramo 1: 23-oct-2027 · 550.000€ (50%) — liberación condicionada a no-reclamaciones de Evariste
@@ -522,6 +556,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - Contexto de negocio: aval bancario Santander por 1.051.378€ constituido para garantizar responsabilidades de Javier frente a Evariste tras la venta del 57% de Rialsa Obras S.L. El banco bloqueó 1.100.000€ de liquidez de Javier.
 
 **UI:**
+
 - Indicador **↑ verde** (emerald) para entradas, **↓ gris** para salidas en calendario y vista lista.
 - Resumen separado: card "Por pagar" (rose) + card "Por cobrar" (emerald).
 - Meses con solo entradas: borde esmeralda, icono ↑, sin alarma roja/ámbar.
@@ -544,11 +579,13 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - Errores surfaced en el banner rojo del panel (antes se silenciaban con `catch {}`).
 
 **Nueva función `crearPagoDesdeFactura`** en `contabilidadApi.ts`:
+
 - POST a `presupuesto_pagos` con todos los campos relevantes.
 - PATCH inverso a `facturas_recibidas.presupuesto_pago_id`.
 - Mensaje de error detallado incluye el body HTTP de Supabase para depuración.
 
 **Nueva función `searchPartidasPresupuesto`** en `contabilidadApi.ts`:
+
 - 3 queries paralelas (`presupuesto_partidas`, `presupuesto_capitulos`, `presupuestos`) + join en cliente (evita hints FK de PostgREST que fallaban silenciosamente).
 - Filtro de texto por presupuesto, descripción, capítulo, proyecto o proveedor esperado.
 
@@ -581,11 +618,13 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 **Nuevo módulo completo** para presupuestar proyectos/sociedad, controlar el cronograma de pagos y anticipar la posición de tesorería futura.
 
 **Stack:**
+
 - Vite + React 19 · TypeScript estricto · Tailwind CSS. Puerto `5176`.
 - API: PostgREST directo a Supabase. Auth bridge `window.alsariToken` (mismo patrón que `@alsari/contabilidad`).
 - Exporta `PresupuestosDashboard`.
 
 **4 vistas principales:**
+
 1. **Dashboard** — 4 KPI cards (presupuestos activos, pagos próximos 30d, total presupuestado pendiente, pagos vencidos). Lista de los 5 próximos pagos con badge de urgencia. Grid de presupuestos activos con barra de progreso (importe comprometido vs presupuestado).
 2. **Calendario de Pagos** — Vista cronológica de todos los pagos de todos los presupuestos. Filtros por horizonte (3m/6m/12m/todo), tipo (gasto/ingreso) y estado (pendiente/pagado). Agrupación mensual. Resumen de saldo previsto (ingresos esperados − gastos pendientes). Acción inline "Marcar pagado" / "Deshacer".
 3. **Mis Presupuestos** — Lista filtrable por estado (borrador/activo/cerrado). Barra de progreso por presupuesto. Navegación al detalle. Eliminación con confirmación.
@@ -593,6 +632,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 5. **Nuevo Presupuesto** — Formulario con 5 tipos (obra, explotación, capex, corporativo, tesorería) con descripción contextual. Campos: nombre, proyecto, fechas inicio/fin, notas.
 
 **Infraestructura Supabase — 4 tablas nuevas (todas con RLS `authenticated`):**
+
 - `presupuestos` — cabecera (nombre, tipo, proyecto_nombre, estado, fechas).
 - `presupuesto_capitulos` — agrupación jerárquica dentro del presupuesto.
 - `presupuesto_partidas` — línea de gasto/ingreso dentro de un capítulo (importe presupuestado).
@@ -600,12 +640,14 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - `facturas_recibidas` — nueva columna `presupuesto_pago_id` para la vinculación inversa.
 
 **Host OS — cambios:**
+
 - Nueva ruta `/presupuestos` → `PresupuestosPage` → `PresupuestosDashboard`.
 - `OSSidebar`: nuevo item "Presupuestos" con icono `Wallet`.
 - `Home` (`/`): nueva card Presupuestos (verde esmeralda).
 - `next.config.ts`: `@alsari/presupuestos` añadido a `transpilePackages`.
 
 **Supabase PAT:**
+
 - Almacenado en `.env.local` como `SUPABASE_PAT`. Permite a Claude Code aplicar migraciones directamente vía Management API sin acceso al Dashboard.
 
 > **Rama:** `feat/presupuestos-module` · Type-check limpio en `@alsari/presupuestos`, `@alsari/types` y `@alsari/host`.
@@ -619,6 +661,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 #### Módulo `@alsari/contabilidad` — Facturas Emitidas completas (2026-05-22)
 
 **Editor de facturas emitidas (Holded-style):**
+
 - Vista `FacturasEmitidas` refactorizada: patrón `view: 'list' | 'editor'` en lugar de modal. El editor ocupa la pantalla completa al crear o editar.
 - `FacturaEmitidaEditor` — componente de ~1.600 líneas con:
   - Búsqueda de contacto con autocompletado (nombre / NIF).
@@ -633,6 +676,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   - **Descarga PDF** vía `window.open` + `document.write` + `window.print()`.
 
 **Factura PDF (diseño profesional — "Pin Box"):**
+
 - Cabecera oscura (`#111827`) con logo Alsari Capital (siempre `/logo.png`), nombre legal de la sociedad emisora, CIF, domicilio social y email.
 - Columna derecha: "Factura" en 36px bold, nº de documento, fecha y vencimiento.
 - Sección "Facturado a" + "Total a cobrar" (dos columnas).
@@ -643,6 +687,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - **A4 completo**: `.page { min-height: 297mm; display: flex; flex-direction: column }` + spacer `flex: 1` entre contenido y pie. `@page { size: A4; margin: 0 }`.
 
 **Ficha de sociedad y cuentas bancarias:**
+
 - Migración `20260522120000_sociedades_ficha_bancaria.sql`:
   - `ALTER TABLE sociedades` — añadidos: `domicilio`, `localidad`, `codigo_postal`, `pais`, `email`, `telefono`, `logo_url`.
   - Nueva tabla `cuentas_bancarias_sociedad` (id, sociedad_id_ref, alias, titular, banco, iban, swift, activa). RLS `authenticated`.
@@ -651,6 +696,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - API: `getSociedadesContabilidad()`, `updateSociedad()`, `getCuentasBancarias()`, `createCuentaBancaria()`, `deleteCuentaBancaria()`.
 
 **Vista "Mis Empresas" (nueva):**
+
 - Nueva sección **CONFIGURACIÓN** al final del sidebar de Contabilidad.
 - Item "Mis Empresas": card por cada sociedad con todos sus datos legales editables inline (nombre, CIF, domicilio, localidad/CP, país, email, teléfono).
 - Lista de cuentas bancarias por sociedad con botón eliminar.
@@ -658,10 +704,12 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - Separada del flujo operativo contable — se configura una vez.
 
 **Auth token bridge (`window.alsariToken`):**
+
 - `AppShell.tsx` expone `window.alsariToken` leyendo la sesión de Supabase via `getSession()` + `onAuthStateChange`. Se mantiene siempre actualizado.
 - `getJwt()` en `contabilidadApi.ts`: lee `window.alsariToken` primero, fallback a `localStorage`, fallback a anon key. Resuelve los 401 en POST/PATCH de módulos Vite embebidos en el host Next.js (`@supabase/ssr` guarda sesión en cookies, no en localStorage).
 
 **Dark mode más luminoso:**
+
 - `globals.css`, `AppShell`, `ContabilidadLayout`, `ContabilidadSidebar`: fondo `zinc-950` → `zinc-900`, bordes y opacidades subidas. Aspecto más próximo a apps oscuras estándar.
 
 > **Rama:** `feat/contabilidad-workflow` · Type-check limpio en `@alsari/contabilidad` y `@alsari/types`.
@@ -677,15 +725,18 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 #### Módulo `@alsari/contabilidad` — OCR + Workflow + Contabilidad (2026-05-21)
 
 **Fusión de módulos:**
+
 - `@alsari/facturas` (módulo Fase 1, solo lista básica) absorbido en `@alsari/contabilidad`.
 - `/facturas` en el OSSidebar eliminado. La ruta redirige automáticamente a `/contabilidad`.
 
 **Stack del módulo:**
+
 - Vite + React 19 · TypeScript estricto · Tailwind CSS.
 - API: PostgREST directo a Supabase (sin CF Worker). Anon key pública; RLS controla acceso.
 - Export: `ContabilidadDashboard`.
 
 **5 vistas principales:**
+
 1. **Dashboard** — KPIs en tiempo real (movimientos sin revisar, pendiente de pago, asientos borrador),
    flujo de caja (entradas / salidas de los últimos 50 movimientos), tabla de movimientos recientes,
    panel de facturas vencidas con alerta roja.
@@ -710,20 +761,21 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 
 **Infraestructura Supabase — 10 tablas nuevas (todas con RLS `authenticated`):**
 
-| Tabla | Propósito |
-|-------|-----------|
-| `movimientos_bancarios` | Transacciones de extractos CSV (multi-banco) |
-| `facturas_recibidas` | Facturas de proveedor con soporte OCR y workflow |
-| `facturas_emitidas` | Facturas emitidas por el grupo |
-| `asientos_borrador` | Asientos contables generados automáticamente |
-| `asientos_oficiales` | Asientos importados desde gestoría (A3/Sage/CSV) |
-| `plan_cuentas` | PGC por sociedad (personalizable) |
-| `reglas_categorizacion` | Motor de categorización con aprendizaje (seed: 30+ reglas) |
-| `reconciliacion_log` | Log de comparativas borrador vs oficial |
-| `configuracion_contabilidad` | Single-row config (umbral aprobación, emails) |
-| `ocr_accuracy_stats` | Estadísticas de acierto OCR por campo |
+| Tabla                        | Propósito                                                  |
+| ---------------------------- | ---------------------------------------------------------- |
+| `movimientos_bancarios`      | Transacciones de extractos CSV (multi-banco)               |
+| `facturas_recibidas`         | Facturas de proveedor con soporte OCR y workflow           |
+| `facturas_emitidas`          | Facturas emitidas por el grupo                             |
+| `asientos_borrador`          | Asientos contables generados automáticamente               |
+| `asientos_oficiales`         | Asientos importados desde gestoría (A3/Sage/CSV)           |
+| `plan_cuentas`               | PGC por sociedad (personalizable)                          |
+| `reglas_categorizacion`      | Motor de categorización con aprendizaje (seed: 30+ reglas) |
+| `reconciliacion_log`         | Log de comparativas borrador vs oficial                    |
+| `configuracion_contabilidad` | Single-row config (umbral aprobación, emails)              |
+| `ocr_accuracy_stats`         | Estadísticas de acierto OCR por campo                      |
 
 **Edge Function `procesar-factura`** (Deno, desplegada en `swtyxysvnfcfxziclteq`):
+
 - Recibe PDF o imagen vía `multipart/form-data`.
 - Convierte a base64 y llama a Claude `claude-sonnet-4-6` con soporte de documentos (`pdfs-2024-09-25`).
 - Extrae 12 campos con puntuaciones de confianza (0–1) por campo.
@@ -731,33 +783,39 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - Secreto `ANTHROPIC_API_KEY` configurado en el proyecto Supabase.
 
 **Asiento contable automático:**
+
 - Lógica: `6xxx (gasto) + 472 (IVA) → 4751 (retención, si aplica) + 400 (proveedores)`.
 - Cuenta de gasto sugerida por palabras clave del concepto y proveedor.
 - Asiento creado en `asientos_borrador` al dar visto bueno a la factura.
 
 **Motor de categorización (`categorizacion.ts`):**
+
 - 15 reglas hardcoded para el contexto Alsari (intragrupo, fiscal, notaría, rentas, bancarios…).
 - Aplica reglas de BD (`reglas_categorizacion`) con prioridad descendente.
 - Actualiza `confirmaciones` en cada regla correctamente aplicada.
 
 **Parsers CSV bancarios (`csvParsers.ts`):**
+
 - Santander, BBVA, CaixaBank, Caja Rural, genérico.
 - Auto-detección del banco por cabeceras.
 - Normalización de fechas (DD/MM/YYYY → YYYY-MM-DD), importes con coma decimal.
 
 **API (`contabilidadApi.ts`):**
+
 - CRUD completo para las 8 entidades principales via PostgREST.
 - `procesarFacturaPdf()` — llamada a la Edge Function OCR.
 - `avanzarEstadoFactura()` — transición de estados con actualización parcial.
 - `getCurrentUserEmail()` — lee token de sesión de localStorage para identificar el rol.
 
 **Tipos nuevos en `@alsari/types`:**
+
 - `FacturaRecibida` extendida: `ocr_confianza`, `cuenta_gasto`, workflow states.
 - `MovimientoBancario`, `FacturaEmitida`, `AsientoBorrador`, `AsientoOficial`.
 - `LineaAsiento`, `PlanCuenta`, `ReglaCategorizacion`, `ReconciliacionItem`.
 - `ConfiguracionContabilidad`, `OcrConfianza`, `RolAprobacion`.
 
 **Integración en el Host:**
+
 - `apps/host/src/app/(app)/contabilidad/page.tsx` — carga `ContabilidadDashboard`.
 - `apps/host/next.config.ts` — `@alsari/contabilidad` añadido a `transpilePackages`.
 - `apps/host/src/app/globals.css` — `.field-input` / `.field-label` con `color-scheme: dark`.
@@ -775,6 +833,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 ### Added
 
 #### Importación Sumas y Saldos + derivación KPIs PGC (2026-05-20)
+
 - **`services/supabase/migrations/20260520130000_balance_sumas_saldos.sql`** —
   tabla `balance_sumas_saldos` con UNIQUE(sociedad_id, periodo, cuenta), índice
   parcial e índice de búsqueda. Vista `v_balance_periodos` (GROUP BY) para listar
@@ -794,6 +853,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   EntidadesView, Overview y CashflowView sin configuración adicional.
 
 #### Arquitectura de navegación — galería Entidades (2026-05-20)
+
 - **Eliminado dropdown de sociedades del sidebar.** La sociedad activa ya no se
   selecciona en la barra lateral, evitando la confusión de ver "Pavier S.L." en
   el header al ver Cashflow global.
@@ -814,6 +874,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   KPIs consolidados para Alsari Capital (idRef === null) sumando todas las sociedades.
 
 #### Módulo Cashflow (2026-05-20)
+
 - **`services/supabase/migrations/20260520100000_vencimientos.sql`** — tabla
   `vencimientos` (titulo, tipo, fecha_vencimiento, importe, sociedad_id, estado,
   recurrencia) con RLS. Tabla `flujos_caja_proyectos` con tipos de flujo tipados.
@@ -822,6 +883,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - **`cashflowImport.ts`** (nuevo) — CRUD sobre `flujos_caja_proyectos`.
 
 #### Módulo Vencimientos (2026-05-20)
+
 - **`VencimientosView.tsx`** (nuevo) — CRUD completo de vencimientos. Código de
   color por urgencia (rojo = vencido, ámbar ≤ 30 días, verde > 30 días).
   Filtro por tipo. Toggle estado pendiente ↔ gestionado on hover. Badge con
@@ -829,6 +891,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - **`vencimientosImport.ts`** (nuevo) — CRUD sobre `vencimientos`.
 
 #### Overview + PersonaView (2026-05-20)
+
 - **`PersonaView.tsx`** — vista dedicada para Javier/Iván Alarcón como personas
   físicas. Muestra patrimonio personal sin KPIs societarios.
 - **`Overview.tsx`** — eliminada sección duplicada "Cartera de Proyectos" y
@@ -838,6 +901,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 ### Added
 
 #### Migración datos maestros a Supabase (2026-05-18)
+
 - **`services/supabase/migrations/20260518120000_holding_structure.sql`** —
   tablas `sociedades`, `proyectos`, `kpis_sociedades`, `kpis_proyectos` con RLS
   `anon + authenticated`. Índices en `sociedad_tenedora` para filtrado en dashboard.
@@ -852,6 +916,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   para modo offline.
 
 #### Módulo financiero — Balance PGC + libro mayor (2026-05-18)
+
 - **`services/supabase/migrations/20260518000000_financial_module.sql`** —
   tablas `import_batches`, `journal_entries`, `account_mappings` con seed de
   reglas PGC validadas por gestoría.
@@ -860,8 +925,8 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   `/^(\d{4,8})(?:\s+(.+))?$/` para código+nombre en misma celda. `isEmpty(0)`
   correcto para celdas Excel con valor 0.
 - **`apps/modules/financiero/src/lib/pgcEngine.ts`** — motor de clasificación PGC.
-  Categorías: caja, deuda_bancaria_{cp,lp}, deuda_partes_vinc_{cp,lp},
-  patrimonio_neto, activo_{corriente,no_corriente}, pasivo_{corriente,no_corriente},
+  Categorías: caja, deuda*bancaria*{cp,lp}, deuda*partes_vinc*{cp,lp},
+  patrimonio*neto, activo*{corriente,no*corriente}, pasivo*{corriente,no_corriente},
   resultado_ejercicio (grupos 6+7). `patrimonioNeto = base + resultado`.
 - **`apps/modules/financiero/src/lib/supabaseImport.ts`** — `saveImport()` con
   bulk-insert en chunks de 500, rollback de batch en fallo, detección de
@@ -874,12 +939,14 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   banner rojo + BalanceView standalone. Caché amber banner cuando hay datos.
 
 #### Anteriores (2026-05-17)
+
 > **Fase 2 parcial + cierre estructural** — Auth Supabase, reorganización de
 > servicios, home launcher, sidebar expandable, governance completa por módulo.
 
 ### Added
 
 #### Home page + sidebar expandable (2026-05-17)
+
 - **`apps/host/src/app/(app)/page.tsx`** — home page tipo launcher. Grid de cards
   por módulo activo (Financiero, Proyectos, Facturas) con icono grande,
   descripción, indicador de estado y CTA. Logo "ALSARI CAPITAL" sobre el saludo.
@@ -894,6 +961,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   para la ruta `/`.
 
 #### Limpieza estructural del monorepo (2026-05-17)
+
 - **Capa de gobernanza por módulo** — `CLAUDE.md`, `README.md`, `ARQUITECTURA.md`,
   `CHANGELOG.md` y `ways-of-working-local/README.md` añadidos a los tres módulos
   activos (`financiero`, `facturas`, `proyectos`) con contenido específico real
@@ -913,6 +981,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   `App financiera/`). Añadida al `.gitignore`.
 
 #### Fase 2 — Autenticación con Supabase (rama `feat/fase2-reorganizacion-servicios`)
+
 - **`apps/host/src/lib/supabase/client.ts`** — cliente browser con `@supabase/ssr`.
 - **`apps/host/src/lib/supabase/server.ts`** — cliente server-side con cookies.
 - **`apps/host/src/middleware.ts`** — protege todas las rutas; redirige a `/login`
@@ -925,6 +994,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   a `/login` y `router.refresh()`.
 
 #### Fase 2 — Reorganización de servicios al monorepo
+
 - **`services/workers/cf-api/`** — CF Worker (Wrangler v3) migrado desde la carpeta
   legacy `App financiera, control de facturas/backend/`. Incluye `worker.ts`,
   `auth.ts` (JWT Google), `sheets.ts`, `transform.ts`, `services/imap-ingestion.ts`,
@@ -939,6 +1009,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   - **`.env.example`** documenta variables necesarias.
 
 #### Fase 2 — Fix crítico de Tailwind para módulos workspace
+
 - **`apps/host/tailwind.config.ts`** — añadido `'../modules/*/src/**/*.{ts,tsx}'`
   al `content`. Sin esto, las clases Tailwind usadas exclusivamente en los módulos
   (`absolute`, `fixed`, `z-50`, `top-full`, etc.) no se generaban como CSS y los
@@ -952,6 +1023,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   Vite, así que sin el `?.` crasheaba en runtime.
 
 #### Fase 2 — Ajustes de layout para integración Host + módulos
+
 - **`apps/host/src/components/OSSidebar.tsx`** — siempre `w-16` (icon-only); ya no
   se expande a `w-56` en pantallas grandes. Solo iconos con `title` tooltip.
 - **`apps/modules/financiero/src/components/FinancialSidebar.tsx`** —
@@ -959,6 +1031,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   del OSSidebar. Resto idéntico al original.
 
 ### Lessons Learned
+
 - **Lección 3** (`2026-05-17`) — Tailwind del host no escanea `apps/modules/`
   automáticamente; debe añadirse explícitamente al `content` con path restringido
   a `src/`. Ver `.claude/skills/lessons-learned/log.md` para detalle completo.
@@ -973,12 +1046,14 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 ### Added
 
 #### Paso 8 — Verificación, docs y cierre de Fase 1
+
 - Documentación actualizada: `ARQUITECTURA.md`, `CHANGELOG.md`, `ROADMAP.md`.
 - ADR 0002 marcado como completado.
 - Type-check limpio en todos los módulos y en host (`@alsari/proyectos`,
   `@alsari/facturas`, `@alsari/host`).
 
 #### Paso 7 — `@alsari/facturas`
+
 - **`@alsari/facturas`** (`apps/modules/facturas/`, puerto 5176) — módulo de
   gestión de facturas del holding (Fase 1).
   - Lista de facturas con búsqueda por texto libre y filtros por estado.
@@ -990,6 +1065,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   en host con wrapper `'use client'`.
 
 #### Paso 6 — `@alsari/proyectos`
+
 - **`@alsari/proyectos`** (`apps/modules/proyectos/`, puerto 5175) — dashboard de
   proyectos del holding (Fase 1).
   - Grid de tarjetas con capital expuesto, valoración y margen por proyecto.
@@ -1000,6 +1076,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   en host con wrapper `'use client'`.
 
 #### Paso 5 — `@alsari/financiero`
+
 - **`@alsari/financiero`** (`apps/modules/financiero/`) — migración completa del
   dashboard financiero SPA standalone al monorepo (Fase 1).
   - Vistas: Overview (KPIs + cartera), CorporateMap (SVG interactivo), ProjectView
@@ -1018,6 +1095,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 ## [0.2.0] — 2026-05-15
 
 ### Added
+
 - **Constitución completa del agente** movida a `.claude/CLAUDE.md`; el archivo
   raíz `CLAUDE.md` queda como puntero corto.
 - **`.claude/settings.json`** — configuración central de Claude Code (hooks,
@@ -1040,6 +1118,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
   - `/revisar-cambios` (invocar code-reviewer sobre diff).
 
 ### Changed
+
 - **Refactor estructural completo:**
   - `core-host/` → `apps/host/`.
   - `modulos/_template-modulo/` → `apps/modules/_template/`.
@@ -1053,6 +1132,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - Script PowerShell `setup-alsari-os.ps1` regenerado para validar v0.2.
 
 ### Rationale
+
 - La estructura `apps/` + `packages/` es el estándar de la industria (Turborepo,
   Vercel) y mejora el reconocimiento universal frente a `core-host` + `modulos`.
 - Mantener `apps/host/` separado de `apps/modules/` preserva la metáfora visual
@@ -1069,6 +1149,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 ## [0.1.0] — 2026-05-14
 
 ### Added
+
 - **Estructura inicial del monorepo** con pnpm workspaces + Turborepo.
 - **Ways of Working globales** (10 archivos): rol y autoridad, arquitectura, código,
   git workflow, UI/UX, seguridad, testing, documentación, glosario, protocolo de
@@ -1087,6 +1168,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 - **Script PowerShell** para validar la estructura en Windows.
 
 ### Notas
+
 - Esta es la **versión 0 conceptual**: la infraestructura está montada pero el
   código de aplicación (Host OS y módulos) aún se va a generar/migrar en sesiones
   posteriores.
