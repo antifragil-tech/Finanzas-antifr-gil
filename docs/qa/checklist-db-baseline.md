@@ -3,7 +3,7 @@
 > Rellenar a mano. **NO aplicar SQL** desde esta checklist. Solo verificación documental y, cuando exista un proyecto autorizado, comprobación de estado.
 > Baseline de referencia: `services/supabase/baselines/antifragil_os/` (rama `chore/db-baseline-antifragil-os`).
 
-**Quién revisa:** ****\_\_\_\_**** **Fecha:** ****\_\_\_\_**** **Proyecto objetivo (ref):** ****\_\_\_\_****
+**Quién revisa:** \***\*\_\_\_\_\*\*** **Fecha:** \***\*\_\_\_\_\*\*** **Proyecto objetivo (ref):** \***\*\_\_\_\_\*\***
 
 ## Identidad del proyecto
 
@@ -59,4 +59,4 @@
 
 - [ ] **PASS documental** (ficheros del baseline correctos)
 - [ ] **PASS aplicado** (solo si se aplicó con autorización)
-- Notas: ********************\_\_\_********************
+- Notas: **\*\*\*\***\*\*\*\***\*\*\*\***\_\_\_**\*\*\*\***\*\*\*\***\*\*\*\***

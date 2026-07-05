@@ -3,7 +3,7 @@
 > Rellenar a mano. Versión canónica del módulo: `feat/reservas-agenda-hoy` (Chat 1).
 > Probar en standalone (`pnpm --filter @alsari/reservas dev`) o embebido en el demo (`/reservas`).
 
-**Rama probada:** ****\_\_\_\_**** **Commit:** ****\_\_\_\_**** **Fecha:** ****\_\_\_\_**** **Revisor:** ****\_\_\_\_****
+**Rama probada:** \***\*\_\_\_\_\*\*** **Commit:** \***\*\_\_\_\_\*\*** **Fecha:** \***\*\_\_\_\_\*\*** **Revisor:** \***\*\_\_\_\_\*\***
 
 ## Agenda · Hoy (vista núcleo de recepción)
 
@@ -45,4 +45,4 @@
 ## Resultado
 
 - [ ] **PASS global**
-- Notas de FAIL: ********************\_\_\_********************
+- Notas de FAIL: **\*\*\*\***\*\*\*\***\*\*\*\***\_\_\_**\*\*\*\***\*\*\*\***\*\*\*\***
