@@ -12,12 +12,12 @@
 
 ### 1.1 Qué incluye (56 archivos, 4 bloques)
 
-| Bloque | Archivos | Qué es |
-|---|---|---|
-| **Shell demo del host** | `components/demo/` (DemoShell, DemoSidebar, DemoTopbar, DemoContext, demoNav), `EnConstruccion.tsx`, cambios en `(app)/layout.tsx` y `app/layout.tsx` | Cascarón visual con sidebar/topbar y contexto global (proyecto + periodo + rol) |
-| **Pantallas mock** | `components/demo/screens/` (6 pantallas + ScreenShell), `components/demo/panel/` (PanelDireccion, PanelKit, panelMock), `mock/demoData.ts`, cambios en las 7 `(app)/*/page.tsx` | Dashboards de demostración parametrizados por proyecto/periodo/rol; cifras marcadas como ilustrativas |
-| **Reservas embebido (copia VIEJA)** | ~30 archivos en `apps/modules/reservas/**`, `ReservasClient.tsx`, `(app)/reservas/`, import de `reservas/src/index.css` en el root layout, dep `@alsari/reservas` en `package.json` + `next.config.ts`, `pnpm-lock.yaml` | Una copia **anterior y divergente** del módulo Reservas (la canónica vive en el PR #5) |
-| **Demo-mode** | `lib/demo.ts`, bypass en `middleware.ts`, `.env.example` | Salta el gate de auth con `ANTIFRAGIL_DEMO_MODE=true` en local |
+| Bloque                              | Archivos                                                                                                                                                                                                                 | Qué es                                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| **Shell demo del host**             | `components/demo/` (DemoShell, DemoSidebar, DemoTopbar, DemoContext, demoNav), `EnConstruccion.tsx`, cambios en `(app)/layout.tsx` y `app/layout.tsx`                                                                    | Cascarón visual con sidebar/topbar y contexto global (proyecto + periodo + rol)                       |
+| **Pantallas mock**                  | `components/demo/screens/` (6 pantallas + ScreenShell), `components/demo/panel/` (PanelDireccion, PanelKit, panelMock), `mock/demoData.ts`, cambios en las 7 `(app)/*/page.tsx`                                          | Dashboards de demostración parametrizados por proyecto/periodo/rol; cifras marcadas como ilustrativas |
+| **Reservas embebido (copia VIEJA)** | ~30 archivos en `apps/modules/reservas/**`, `ReservasClient.tsx`, `(app)/reservas/`, import de `reservas/src/index.css` en el root layout, dep `@alsari/reservas` en `package.json` + `next.config.ts`, `pnpm-lock.yaml` | Una copia **anterior y divergente** del módulo Reservas (la canónica vive en el PR #5)                |
+| **Demo-mode**                       | `lib/demo.ts`, bypass en `middleware.ts`, `.env.example`                                                                                                                                                                 | Salta el gate de auth con `ANTIFRAGIL_DEMO_MODE=true` en local                                        |
 
 ### 1.2 Por qué no se puede mergear entero
 
@@ -48,13 +48,13 @@
 
 ## 3. Piezas pendientes de extraer
 
-| Pieza | Contenido origen (PR #3) | Valor | Condiciones de rescate |
-|---|---|---|---|
-| **5C — Contexto global mock seguro** | `DemoContext` (proyecto + periodo + rol) sin el demo-mode | Alto: el selector proyecto/periodo/rol es el patrón de navegación del OS real | Renombrar fuera de `demo/`; sin `lib/demo.ts`; el rol simulado debe rotularse "vista, no permisos"; integrarlo en el shell del PR #16 |
-| **5D — Componentes visuales reutilizables** | `PanelKit` (tiles, badges, tablas), `ScreenShell`, ajustes de `BootScreen`/`LoginForm` (copy) | Medio-alto: son los átomos de UI Quiet Luxury que usarán los módulos reales | Sin datos incrustados; candidatos a `packages/ui` en vez de `apps/host` (decidir al extraer); copy coordinado con PR #9 |
-| **5E — Dashboard mock sin datos reales** | `PanelDireccion` + `panelMock`/`demoData` + pantallas `screens/` | Medio: útil para enseñar el OS y como spec visual de los módulos | Revisar nombres antes de rescatar: el mock usa sociedad y centros reales (`Antifrágil S.C.`, `Clínica Playamar`, `9 A.M.`, `Lido Pro`) y nombres de profesionales; cifras ilustrativas OK, identidades a revisar con Fernando. Montarlo en las rutas placeholder del shell #16, **sin** tocar auth |
-| **5F — Integración futura de Reservas desde PR #5** | (nada del PR #3) | Alto | Cuando #5 esté mergeado: dep `@alsari/reservas` + `ReservasClient` + página real montada en `/reservas` del shell. La dep y el lockfile entran AQUÍ, apuntando a la versión canónica, nunca a la copia del demo |
-| **5G — Limpieza/cierre del PR #3** | — | — | Cuando 5C-5F estén mergeadas: comentario final en #3 con el mapa "qué pieza fue a qué PR" y **cierre sin merge** (autoriza Fernando; la rama/worktree se archiva, no se borra sin orden) |
+| Pieza                                               | Contenido origen (PR #3)                                                                      | Valor                                                                         | Condiciones de rescate                                                                                                                                                                                                                                                                             |
+| --------------------------------------------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **5C — Contexto global mock seguro**                | `DemoContext` (proyecto + periodo + rol) sin el demo-mode                                     | Alto: el selector proyecto/periodo/rol es el patrón de navegación del OS real | Renombrar fuera de `demo/`; sin `lib/demo.ts`; el rol simulado debe rotularse "vista, no permisos"; integrarlo en el shell del PR #16                                                                                                                                                              |
+| **5D — Componentes visuales reutilizables**         | `PanelKit` (tiles, badges, tablas), `ScreenShell`, ajustes de `BootScreen`/`LoginForm` (copy) | Medio-alto: son los átomos de UI Quiet Luxury que usarán los módulos reales   | Sin datos incrustados; candidatos a `packages/ui` en vez de `apps/host` (decidir al extraer); copy coordinado con PR #9                                                                                                                                                                            |
+| **5E — Dashboard mock sin datos reales**            | `PanelDireccion` + `panelMock`/`demoData` + pantallas `screens/`                              | Medio: útil para enseñar el OS y como spec visual de los módulos              | Revisar nombres antes de rescatar: el mock usa sociedad y centros reales (`Antifrágil S.C.`, `Clínica Playamar`, `9 A.M.`, `Lido Pro`) y nombres de profesionales; cifras ilustrativas OK, identidades a revisar con Fernando. Montarlo en las rutas placeholder del shell #16, **sin** tocar auth |
+| **5F — Integración futura de Reservas desde PR #5** | (nada del PR #3)                                                                              | Alto                                                                          | Cuando #5 esté mergeado: dep `@alsari/reservas` + `ReservasClient` + página real montada en `/reservas` del shell. La dep y el lockfile entran AQUÍ, apuntando a la versión canónica, nunca a la copia del demo                                                                                    |
+| **5G — Limpieza/cierre del PR #3**                  | —                                                                                             | —                                                                             | Cuando 5C-5F estén mergeadas: comentario final en #3 con el mapa "qué pieza fue a qué PR" y **cierre sin merge** (autoriza Fernando; la rama/worktree se archiva, no se borra sin orden)                                                                                                           |
 
 Cada pieza = un PR Draft pequeño e independiente, en este orden (5C → 5D → 5E; 5F depende de #5; 5G al final).
 
@@ -62,7 +62,7 @@ Cada pieza = un PR Draft pequeño e independiente, en este orden (5C → 5D → 
 
 ## 4. Qué se descarta definitivamente del PR #3
 
-1. **La copia antigua de `apps/modules/reservas/**`** (~30 archivos): la canónica es la del PR #5. No se extrae jamás.
+1. **La copia antigua de `apps/modules/reservas/**`\*\* (~30 archivos): la canónica es la del PR #5. No se extrae jamás.
 2. **La dependencia `@alsari/reservas`** en `package.json`/`next.config.ts` **tal como está en #3** (apunta a la copia vieja). Se re-añadirá limpia en 5F contra la versión canónica.
 3. **El demo-mode por variable de entorno** (`lib/demo.ts` + condicional en `(app)/layout.tsx`).
 4. **El bypass de middleware/auth**: el gate de autenticación no se salta ni en local. Si hace falta demo sin backend, se decidirá otro mecanismo explícito (p. ej. build separado), nunca una env var sobre el middleware real.
@@ -99,29 +99,30 @@ Una pieza del demo solo se extrae si cumple TODO:
 
 ## 7. Riesgos
 
-| Riesgo | Mitigación |
-|---|---|
-| Conflicto con PR #5 (Reservas duplicado) | Regla dura: nada de `apps/modules/reservas` sale del PR #3 |
-| Conflicto con PR #16 (`app/layout.tsx`, shell) | El shell canónico es #16; 5C/5D/5E se montan SOBRE él, no crean otro |
-| Duplicidad de rutas (`/finanzas` vs `/financiero`, `/facturacion` vs `/facturas`) | Convención fijada en #16: se respetan las rutas existentes del host |
-| Bypass de auth colándose en un split | Criterio 5.5 + grep de `ANTIFRAGIL_DEMO_MODE`/`isDemoMode` en cada split |
-| Dependencia vieja de Reservas reintroducida | `@alsari/reservas` solo entra en 5F, tras merge de #5 |
-| Lockfile inflado | Splits 5C/5D/5E no deben tocar `pnpm-lock.yaml` en absoluto |
-| Mocks demasiado realistas | Revisión de identidades con Fernando antes de 5E (§4.8) |
-| Mezclar demo con producto | Todo lo mock vive rotulado ("Datos de demostración · sin backend") y montado en rutas placeholder, nunca en las legacy |
-| CI verde prematuro | La deuda de `format:check` (~227 archivos según CI) la trabaja la línea `ci/quality-gates-hardening`, que debe mergear DESPUÉS de #14; ningún split formatea archivos ajenos a su pieza |
+| Riesgo                                                                            | Mitigación                                                                                                                                                                              |
+| --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Conflicto con PR #5 (Reservas duplicado)                                          | Regla dura: nada de `apps/modules/reservas` sale del PR #3                                                                                                                              |
+| Conflicto con PR #16 (`app/layout.tsx`, shell)                                    | El shell canónico es #16; 5C/5D/5E se montan SOBRE él, no crean otro                                                                                                                    |
+| Duplicidad de rutas (`/finanzas` vs `/financiero`, `/facturacion` vs `/facturas`) | Convención fijada en #16: se respetan las rutas existentes del host                                                                                                                     |
+| Bypass de auth colándose en un split                                              | Criterio 5.5 + grep de `ANTIFRAGIL_DEMO_MODE`/`isDemoMode` en cada split                                                                                                                |
+| Dependencia vieja de Reservas reintroducida                                       | `@alsari/reservas` solo entra en 5F, tras merge de #5                                                                                                                                   |
+| Lockfile inflado                                                                  | Splits 5C/5D/5E no deben tocar `pnpm-lock.yaml` en absoluto                                                                                                                             |
+| Mocks demasiado realistas                                                         | Revisión de identidades con Fernando antes de 5E (§4.8)                                                                                                                                 |
+| Mezclar demo con producto                                                         | Todo lo mock vive rotulado ("Datos de demostración · sin backend") y montado en rutas placeholder, nunca en las legacy                                                                  |
+| CI verde prematuro                                                                | La deuda de `format:check` (~227 archivos según CI) la trabaja la línea `ci/quality-gates-hardening`, que debe mergear DESPUÉS de #14; ningún split formatea archivos ajenos a su pieza |
 
 ## 8. Checklist copiable para próximos splits (5C/5D/5E/5F)
 
 ```markdown
 ## Checklist split 5X — [nombre]
+
 - [ ] Rama nueva desde main: `feat/host-[pieza]` · worktree propio `wt-host-[pieza]`.
 - [ ] Leído docs/host/01-demo-split-plan.md (este doc) y el estado real de PRs (`gh pr list`).
 - [ ] Solo archivos del bloque de la pieza; <15 archivos; sin mezclar bloques.
-- [ ] 0 archivos en apps/modules/reservas/**.
+- [ ] 0 archivos en apps/modules/reservas/\*\*.
 - [ ] Sin cambios en package.json / next.config.ts / pnpm-lock.yaml (excepción justificada solo en 5F).
-- [ ] Sin lib/demo.ts, sin isDemoMode, sin cambios en middleware.ts, sin .env*.
-- [ ] Sin Supabase, sin SQL, sin packages/supabase-client, sin services/**.
+- [ ] Sin lib/demo.ts, sin isDemoMode, sin cambios en middleware.ts, sin .env\*.
+- [ ] Sin Supabase, sin SQL, sin packages/supabase-client, sin services/\*\*.
 - [ ] grep -RniE "ANTIFRAGIL_DEMO_MODE|isDemoMode|service_role|anon key" [archivos] → limpio.
 - [ ] grep clínico (diagnóstico|lesión|tratamiento|...) → limpio; identidades del mock revisadas.
 - [ ] corepack pnpm --filter @alsari/host type-check ✅ · lint ✅ · prettier sobre lo nuevo ✅.
@@ -133,4 +134,4 @@ Una pieza del demo solo se extrae si cumple TODO:
 
 ---
 
-*Documento de integración visual. No modifica código. El PR #3 permanece DRAFT / NO MERGE hasta completar 5C-5G.*
+_Documento de integración visual. No modifica código. El PR #3 permanece DRAFT / NO MERGE hasta completar 5C-5G._
