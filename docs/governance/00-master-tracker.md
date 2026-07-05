@@ -1,0 +1,61 @@
+# 00 — Master Tracker · Antifrágil OS
+
+> **Fuente única de estado por línea de trabajo.** Se actualiza al cerrar cada sesión de trabajo
+> y al abrir/cerrar cada PR. Si este tracker y la realidad divergen, gana la realidad
+> (verificar con `git branch -a`, `git worktree list`, `gh pr list`).
+> **Última verificación real:** 2026-07-04, tras la revisión de PR #7 (HEADs verificados
+> contra `origin` con `git fetch`). ⚠️ Los PRs **#4, #5 y #6 se crearon en paralelo por otros
+> chats** durante la sesión de governance — recordatorio de que este tracker caduca rápido:
+> verificar siempre antes de asumir.
+> El detalle de integración (orden de PRs, matriz de conflictos, riesgos R1-R11, decision log
+> D1-D11) vive en la rama `docs/integration-master-plan` (`docs/integration/00-06`), del
+> "Chat 4"; [04-integration-order.md](04-integration-order.md) lo resume y lo sitúa.
+
+---
+
+## Tracker
+
+| Línea de trabajo | Rama | Último commit conocido | Estado | Local / Remoto / PR | Bloqueos | Siguiente paso |
+|---|---|---|---|---|---|---|
+| **Governance** | `docs/project-governance-antifragil-os` | (este PR) | En curso | Remoto ✅ + **PR #7 Draft** | — | Revisión de Guille → merge (1º del orden) |
+| **Compliance** | `docs/project-governance-antifragil-os` (carpeta `docs/compliance/`) | (este PR) | Redactado, pendiente validación legal | Con governance | Requiere asesor legal/DPO antes de producción | Revisión legal externa |
+| **Integración (plan maestro)** | `docs/integration-master-plan` | `3a7cb4f` — 7 docs en `docs/integration/` (estado ramas, orden PRs, matriz conflictos, runbook, checklist merge, riesgos, decision log) | Escrito (Chat 4, 2026-06-30); algunos HEADs ya avanzaron | Solo local ❌ | Sin push | Push + PR Draft (es la fuente de detalle del orden) |
+| **Finanzas — modelo operativo (docs 00-06)** | `docs/finanzas-modelo-operativo` | `d429ec6` decisiones A1-D1..D5 resueltas en doc 06 | Docs completos (auditoría, modelo conceptual, plan F2, mapa/gaps, backlog F-Op, mini-diseño FOP-A1) | Solo local ❌ | Sin push | Push + PR Draft (**PR 1 del orden del plan**) |
+| **Facturación emitida (diseño)** | `docs/finanzas-facturacion-emitida-design` | `6767680` | Diseño completo; D1-D3 firmes. La divergencia local/origin que anotó el plan del Chat 4 está **resuelta** (verificado: up to date) | Remoto ✅ + **PR #1 OPEN** | F4-A/B/E (Guille), F4-C (gestoría) | Revisión/merge PR #1 (PR 2 del orden); F4.0 solo con autorización |
+| **Rebrand marca visible** | `chore/financiero-copy-antifragil` | `42edd4d` — 4 líneas de copy en `financiero` | Listo (cambio aislado, no toca paquetes) | Solo local ❌ | Sin push | Push + PR Draft (PR 3 del orden — puede ir antes que Reservas: aislado) |
+| **Reservas / Agenda** | `feat/reservas-agenda-hoy` | `b9860bb` limpiar términos clínicos en mocks | **Agenda v0.2 (Fase 2) + mini-hardening compliance hecho**; standalone (`pnpm --filter @alsari/reservas dev`); **versión CANÓNICA (D7)**; cableado host vive en demo (PR 5a) | Remoto ✅ + **PR #5 Draft (NO MERGE)** | Hardening funcional pendiente: **estado compartido** y **CitaPanel embebible** | Revisión + hardening funcional; es el **GATE** (posición 4 del orden). Al mergear: archivar el spike |
+| **Reservas — spike semana** | `feat/reservas-calendario-semana` | `4d6dc7f` | **Ancestro común** de reservas y demo; su contenido ya vive en ambas | Solo local ❌ | — | **Archivar tras integrar PR 4** (no fusionar, no mergear) |
+| **Demo OS** | `demo/local-antifragil-os` | `7854be1` (el plan la conoció en `95f3f72`; avanzó y se subió) | Congelada — NO MERGE tal cual (D8). **Se integra PARTIDA** (5a cableado host · 5b shell+panel · 5c gating anti-producción · 5d rutas mock), **excluyendo** `apps/modules/reservas/**` (copia del spike que "se va sola" si Reservas entra antes) | Remoto ✅ + **PR #3 Draft** | PR 4 (Reservas) primero | Mantener Draft; partir en PRs 5a-5d tras Reservas |
+| **Baseline Supabase** | `chore/db-baseline-antifragil-os` | `27f6392` reforzar invariantes A1 | **Cerrado como paquete técnico**: baseline curado en `services/supabase/baselines/antifragil_os/` (SQL 26 tablas + RLS + Storage + seed mínimo — Antifrágil S.C. `ANT`, proyecto `CLI-PLY` activo, emails placeholder — + runbook + checks + `excluded_legacy.md`). **Nada aplicado** | Remoto ✅ + **PR #4 Draft (NO APPLY)** | Supabase nuevo no creado | **Revisión** (posición 6 del orden; additive, **no aplicar SQL**) |
+| **A1 Tesorería/Caja** | `chore/db-baseline-antifragil-os` (subcarpeta `a1_tesoreria/`) | `27f6392` | Draft encima del baseline: `cuenta_tesoreria`, `movimiento_caja` (append-only), `arqueo_caja`, vistas de tesorería, 3 RPCs, seed "Caja Clínica Playamar". **Invariantes reforzados** (anti-duplicación banco + compliance clínica). Puente pagos→tesorería **diferido a A1b**. Implementa el mini-diseño FOP-A1 (doc 06 de finanzas) | Con baseline (PR #4) | Baseline aplicado primero (futuro) | Revisar dentro del PR #4 |
+| **Clínica Fase 1 — catálogos** | `feat/clinica-fase1-catalogos` | `d08058d` | Tipos `packages/types/clinica.ts` + doc de decisión (prefijo `clinica_*` en `public`) + **SQL fuera de patrón** (migración activa, incompatible con D4 baseline curado — riesgo R10) | Remoto ✅ + **PR #2 Draft** | Baseline (PR 6): el SQL debe reubicarse/reflejarse en el baseline | Reescribir alcance del PR: **solo tipos + doc**; SQL al baseline (PR 7 del orden) |
+| **QA** | `qa/smoke-suite-antifragil-os` | `2ebe938` añadir check-no-clinical-data y check-pr-scope | Suite no destructiva creada (Chat 5): `smoke-routes.mjs`, `check-no-secrets.mjs`, `check-legacy-strings.mjs`, `check-no-clinical-data.mjs`, `check-pr-scope.mjs` + 5 checklists + runbook en `docs/qa/` | Remoto ✅ + **PR #6 Draft** | Hardening pendiente: perfiles `--profile`, `--changed-only`, `--baseline-known-issues` | Revisión + hardening de perfiles (aditivo, puede ir temprano) |
+| **Finanzas — auditoría base (docs 00/01/03)** | `docs/finanzas-contabilidad-antifragil-audit` | `2c455ff` | **Subsumida byte a byte** por `docs/finanzas-modelo-operativo` | Solo local ❌ | — | **Archivar sin merge** (no push, no PR) |
+| 🔴 **Seguridad — anon key legacy** | (fuera del repo) | — | El plan del Chat 4 (riesgo **R5**) detectó una `FALLBACK_ANON_KEY` real del proyecto legacy hardcodeada en `packages/supabase-client`. El fichero NO se toca (D9), pero la **rotación de la clave en el Dashboard del proyecto legacy** está pendiente | — | Acción manual de Guille/operador en Supabase legacy | **Rotar la anon key legacy** (no requiere tocar el repo) |
+
+---
+
+## Diferidos (decisión explícita, no son "pendientes olvidados")
+
+| Qué | Por qué espera | Cuándo |
+|---|---|---|
+| **Rebranding global `@alsari/*`** (PR 8) | Toca 11 package.json + todos los imports + `vercel.json` + raíz; a medias rompe el build | PR único coordinado, con integración funcional estable y todas las ramas grandes mergeadas |
+| **`packages/supabase-client` + proyecto Supabase nuevo** (PR 9) | Punto único de acceso a datos; cambiarlo afecta a todos los módulos a la vez | Tras baseline mergeado + decisión de crear el proyecto Supabase real + plan de rotación |
+| **Aplicar el baseline al Supabase real** | El SQL versionado ≠ aplicado (lección de drift del legacy); exige runbook + checks + autorización | Fase Supabase, con autorización expresa de Guille |
+
+---
+
+## Leyenda de estados
+
+- **En curso** — se está trabajando activamente.
+- **Congelada** — trabajo detenido a propósito (esperando a otra línea).
+- **Docs listos / nada aplicado** — diseño terminado; sin efecto sobre sistemas reales.
+- **Archivar** — rama cuyo contenido ya vive en otra (ancestro o subsumida); se cierra sin merge.
+
+## Reglas del tracker
+
+1. Cada sesión que toque una línea **actualiza su fila** (commit, estado, siguiente paso).
+2. Ninguna línea pasa a "mergeada" sin autorización explícita de Guille.
+3. Los "bloqueos" se escriben con nombre y apellido (qué falta y de quién depende).
+4. Las líneas nuevas se añaden al tracker **antes** de crear su rama.
+5. **Una sola rama en integración a la vez** (el `.git` es compartido entre 13 worktrees — riesgo R1).
