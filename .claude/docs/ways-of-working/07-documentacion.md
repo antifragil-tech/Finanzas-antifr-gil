@@ -6,8 +6,8 @@
 
 ## 🎯 Filosofía
 
-> *"La documentación es el sistema operativo del proyecto. Sin ella, el contexto
-> muere con cada sesión."*
+> _"La documentación es el sistema operativo del proyecto. Sin ella, el contexto
+> muere con cada sesión."_
 
 Estamos construyendo un sistema que durará años y por el que pasarán múltiples sesiones
 de trabajo con Claude. Si la documentación no está al día, **el conocimiento se pierde**
@@ -22,28 +22,28 @@ documentación dice por qué se hizo así.
 
 ### 1. Documentación viva (cambia con el código)
 
-| Archivo | Ubicación | Propósito | Quién lo mantiene |
-|---------|-----------|-----------|-------------------|
-| `CLAUDE.md` | Raíz y cada módulo | Contexto para Claude Code | Claude (auto) |
-| `README.md` | Raíz y cada módulo | Bienvenida y onboarding | Claude + Guille |
-| `ARQUITECTURA.md` | `docs/` y cada módulo | Mapa técnico actual | Claude (auto) |
-| `CHANGELOG.md` | `docs/` y cada módulo | Historial de cambios | Claude (auto) |
-| `ROADMAP.md` | `docs/` | Próximos pasos | Guille + Claude |
-| `ways-of-working-*/` | Raíz y cada módulo | Reglas que aplican | Guille + Claude |
+| Archivo              | Ubicación             | Propósito                 | Quién lo mantiene |
+| -------------------- | --------------------- | ------------------------- | ----------------- |
+| `CLAUDE.md`          | Raíz y cada módulo    | Contexto para Claude Code | Claude (auto)     |
+| `README.md`          | Raíz y cada módulo    | Bienvenida y onboarding   | Claude + Guille   |
+| `ARQUITECTURA.md`    | `docs/` y cada módulo | Mapa técnico actual       | Claude (auto)     |
+| `CHANGELOG.md`       | `docs/` y cada módulo | Historial de cambios      | Claude (auto)     |
+| `ROADMAP.md`         | `docs/`               | Próximos pasos            | Guille + Claude   |
+| `ways-of-working-*/` | Raíz y cada módulo    | Reglas que aplican        | Guille + Claude   |
 
 ### 2. Documentación de decisiones (no cambia, se añade)
 
-| Archivo | Ubicación | Propósito |
-|---------|-----------|-----------|
-| `docs/decisiones/NNNN-titulo.md` | `docs/decisiones/` | ADR (Architecture Decision Record) |
-| `docs/incidentes/YYYY-MM-DD-titulo.md` | `docs/incidentes/` | Postmortems de incidentes |
+| Archivo                                | Ubicación          | Propósito                          |
+| -------------------------------------- | ------------------ | ---------------------------------- |
+| `docs/decisiones/NNNN-titulo.md`       | `docs/decisiones/` | ADR (Architecture Decision Record) |
+| `docs/incidentes/YYYY-MM-DD-titulo.md` | `docs/incidentes/` | Postmortems de incidentes          |
 
 ### 3. Documentación contextual (skills de Claude)
 
-| Archivo | Ubicación | Propósito |
-|---------|-----------|-----------|
-| `.claude/skills/*/SKILL.md` | Raíz y cada módulo | Skills que Claude carga automáticamente |
-| `.claude/skills/lessons-learned/log.md` | Raíz y cada módulo | Aprendizajes vivos |
+| Archivo                                 | Ubicación          | Propósito                               |
+| --------------------------------------- | ------------------ | --------------------------------------- |
+| `.claude/skills/*/SKILL.md`             | Raíz y cada módulo | Skills que Claude carga automáticamente |
+| `.claude/skills/lessons-learned/log.md` | Raíz y cada módulo | Aprendizajes vivos                      |
 
 ---
 
@@ -91,15 +91,18 @@ documentación dice por qué se hizo así.
 ## [Unreleased]
 
 ### Added
+
 - Módulo `financiero`: cálculo de TIR con tests (#23)
 - KPI Card reutilizable en `packages/ui`
 
 ### Fixed
+
 - Error boundary del Host OS no capturaba errores asíncronos (#31)
 
 ## [0.2.0] - 2026-06-15
 
 ### Added
+
 - ...
 ```
 
@@ -130,12 +133,14 @@ contexto, alternativas consideradas y consecuencias.
 ### Cuándo escribir uno
 
 ✅ SÍ:
+
 - Elección de stack (lenguaje, framework, BD).
 - Cambio de patrón fundamental (SSR↔CSR, REST↔GraphQL).
 - Introducción de una librería de impacto transversal.
 - Decisión de seguridad/permisos.
 
 ❌ NO:
+
 - Refactor interno de un módulo.
 - Renombrar variables.
 - Añadir un componente nuevo.
@@ -150,23 +155,30 @@ contexto, alternativas consideradas y consecuencias.
 - **Decisores:** Guille, Claude
 
 ## Contexto
+
 [Qué problema o necesidad llevó a tomar esta decisión.]
 
 ## Decisión
+
 [Qué se decidió hacer.]
 
 ## Alternativas consideradas
+
 1. **Alternativa A** — Por qué se descartó.
 2. **Alternativa B** — Por qué se descartó.
 
 ## Consecuencias
+
 **Positivas:**
+
 - ...
 
 **Negativas / Riesgos:**
+
 - ...
 
 **Acciones derivadas:**
+
 - ...
 ```
 
@@ -186,28 +198,35 @@ Cuando algo se rompe en producción (o casi se rompe), documentamos en
 - **Módulos afectados:** ...
 
 ## Resumen ejecutivo
+
 [Una frase para Guille: qué pasó, qué impacto tuvo, ya está resuelto.]
 
 ## Cronología
+
 - HH:MM — Se detecta...
 - HH:MM — Se identifica causa...
 - HH:MM — Se aplica fix...
 - HH:MM — Confirmado resuelto.
 
 ## Causa raíz
+
 [Por qué pasó realmente, no solo el síntoma.]
 
 ## Qué funcionó
+
 - ...
 
 ## Qué no funcionó
+
 - ...
 
 ## Acciones de mejora
+
 - [ ] ...
 - [ ] ...
 
 ## Lecciones aprendidas
+
 [Registrar también en `lessons-learned/log.md`.]
 ```
 

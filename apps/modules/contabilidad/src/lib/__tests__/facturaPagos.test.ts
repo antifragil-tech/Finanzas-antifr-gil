@@ -73,11 +73,15 @@ describe('evaluarIncidenciasDelPago', () => {
   });
 
   it('un pago marcado como total que no llega → infrapago', () => {
-    expect(evaluarIncidenciasDelPago({ tipoPago: 'total', pendienteDespues: 300 })).toEqual(['infrapago']);
+    expect(evaluarIncidenciasDelPago({ tipoPago: 'total', pendienteDespues: 300 })).toEqual([
+      'infrapago',
+    ]);
   });
 
   it('un sobrepago crea incidencia de sobrepago', () => {
-    expect(evaluarIncidenciasDelPago({ tipoPago: 'total', pendienteDespues: -200 })).toEqual(['sobrepago']);
+    expect(evaluarIncidenciasDelPago({ tipoPago: 'total', pendienteDespues: -200 })).toEqual([
+      'sobrepago',
+    ]);
   });
 
   it('dentro de tolerancia no crea incidencia', () => {

@@ -4,7 +4,12 @@
 // discretos. Solo pinta el modelo `InformeFinanciero` (no calcula nada). Sin
 // glifos Unicode problemáticos: estados como texto, viñetas como puntos dibujados.
 import { Document, Page, View, Text, Image, StyleSheet, Font } from '@react-pdf/renderer';
-import type { InformeFinanciero, Fila, Seccion, EscenarioCol } from '../../lib/exportProyectoFinanciero';
+import type {
+  InformeFinanciero,
+  Fila,
+  Seccion,
+  EscenarioCol,
+} from '../../lib/exportProyectoFinanciero';
 import { LOGO_ALSARI } from '../../lib/logoAlsari';
 
 // Sin partición de palabras a mitad ("AC-TUAL"): un documento financiero no
@@ -13,47 +18,118 @@ Font.registerHyphenationCallback((word) => [word]);
 
 // Paleta: portada antracita + marfil; interiores cálidos claros; acentos sobrios.
 const C = {
-  dark: '#0d0d10',        // antracita portada/cabeceras
-  darkBand: '#15151a',    // banda de cabecera interior
-  ivory: '#F5F0E1',       // marfil de marca
-  ivoryDim: '#b9b3a3',    // marfil atenuado
-  ink: '#1b1b1f',         // texto principal interior
-  soft: '#55555f',        // texto secundario
-  faint: '#9a978f',       // hints
-  line: '#e7e3da',        // líneas finas cálidas
-  card: '#f7f5f0',        // fondo de tarjetas/bloques
+  dark: '#0d0d10', // antracita portada/cabeceras
+  darkBand: '#15151a', // banda de cabecera interior
+  ivory: '#F5F0E1', // marfil de marca
+  ivoryDim: '#b9b3a3', // marfil atenuado
+  ink: '#1b1b1f', // texto principal interior
+  soft: '#55555f', // texto secundario
+  faint: '#9a978f', // hints
+  line: '#e7e3da', // líneas finas cálidas
+  card: '#f7f5f0', // fondo de tarjetas/bloques
   cardLine: '#e6e1d6',
   paper: '#ffffff',
-  verde: '#1f7a4d', verdeBg: '#eef6f0',
-  ambar: '#9a6512', ambarBg: '#f8f1e6',
-  rojo: '#9f3a3a', rojoBg: '#f8eeee',
+  verde: '#1f7a4d',
+  verdeBg: '#eef6f0',
+  ambar: '#9a6512',
+  ambarBg: '#f8f1e6',
+  rojo: '#9f3a3a',
+  rojoBg: '#f8eeee',
   azul: '#2b4a6f',
 };
 
 const s = StyleSheet.create({
   // Páginas
   cover: { backgroundColor: C.dark, color: C.ivory, fontFamily: 'Helvetica' },
-  page: { paddingTop: 50, paddingBottom: 46, paddingHorizontal: 54, fontSize: 9, color: C.ink, fontFamily: 'Helvetica', backgroundColor: C.paper },
+  page: {
+    paddingTop: 50,
+    paddingBottom: 46,
+    paddingHorizontal: 54,
+    fontSize: 9,
+    color: C.ink,
+    fontFamily: 'Helvetica',
+    backgroundColor: C.paper,
+  },
 
   // ── Portada ──────────────────────────────────────────────
   coverFrame: { flex: 1, paddingHorizontal: 64, paddingTop: 150, paddingBottom: 52 },
-  coverHair: { width: 46, height: 2, backgroundColor: C.ivory, opacity: 0.55, marginBottom: 26, alignSelf: 'center' },
-  coverLogo: { width: 250, height: 64, objectFit: 'contain', alignSelf: 'center', marginBottom: 64 },
-  coverTitle: { fontSize: 34, fontFamily: 'Helvetica-Bold', color: C.ivory, textAlign: 'center', letterSpacing: 0.3 },
-  coverSubtitle: { fontSize: 12, color: C.ivoryDim, textAlign: 'center', letterSpacing: 3, marginTop: 12, textTransform: 'uppercase' },
+  coverHair: {
+    width: 46,
+    height: 2,
+    backgroundColor: C.ivory,
+    opacity: 0.55,
+    marginBottom: 26,
+    alignSelf: 'center',
+  },
+  coverLogo: {
+    width: 250,
+    height: 64,
+    objectFit: 'contain',
+    alignSelf: 'center',
+    marginBottom: 64,
+  },
+  coverTitle: {
+    fontSize: 34,
+    fontFamily: 'Helvetica-Bold',
+    color: C.ivory,
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
+  coverSubtitle: {
+    fontSize: 12,
+    color: C.ivoryDim,
+    textAlign: 'center',
+    letterSpacing: 3,
+    marginTop: 12,
+    textTransform: 'uppercase',
+  },
   coverMetaWrap: { marginTop: 30, alignItems: 'center' },
   coverMeta: { fontSize: 11, color: C.ivory, textAlign: 'center', marginBottom: 3 },
   coverSpacer: { flex: 1 },
-  coverFootWrap: { borderTopWidth: 0.7, borderTopColor: 'rgba(245,240,225,0.18)', paddingTop: 14, alignItems: 'center' },
+  coverFootWrap: {
+    borderTopWidth: 0.7,
+    borderTopColor: 'rgba(245,240,225,0.18)',
+    paddingTop: 14,
+    alignItems: 'center',
+  },
   coverSociedad: { fontSize: 10, color: C.ivory, marginBottom: 6, letterSpacing: 0.5 },
   coverNote: { fontSize: 8.5, color: C.ivoryDim, textAlign: 'center' },
-  coverBrandTiny: { fontSize: 7, color: 'rgba(245,240,225,0.45)', letterSpacing: 1.5, marginTop: 10, textTransform: 'uppercase' },
+  coverBrandTiny: {
+    fontSize: 7,
+    color: 'rgba(245,240,225,0.45)',
+    letterSpacing: 1.5,
+    marginTop: 10,
+    textTransform: 'uppercase',
+  },
 
   // ── Cabecera / pie interiores ────────────────────────────
-  hdrBand: { position: 'absolute', top: 0, left: 0, right: 0, height: 30, backgroundColor: C.darkBand, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 54 },
+  hdrBand: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 30,
+    backgroundColor: C.darkBand,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 54,
+  },
   hdrLogo: { width: 74, height: 19, objectFit: 'contain' },
   hdrProj: { fontSize: 8, color: C.ivoryDim, letterSpacing: 0.5 },
-  ftr: { position: 'absolute', bottom: 22, left: 54, right: 54, flexDirection: 'row', justifyContent: 'space-between', borderTopWidth: 0.6, borderTopColor: C.line, paddingTop: 6, fontSize: 7.5, color: C.faint },
+  ftr: {
+    position: 'absolute',
+    bottom: 22,
+    left: 54,
+    right: 54,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderTopWidth: 0.6,
+    borderTopColor: C.line,
+    paddingTop: 6,
+    fontSize: 7.5,
+    color: C.faint,
+  },
 
   // ── Secciones ────────────────────────────────────────────
   secWrap: { marginTop: 17, marginBottom: 3 },
@@ -75,27 +151,81 @@ const s = StyleSheet.create({
   // ── Grid de KPIs (tarjetas) ──────────────────────────────
   kpiGrid: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 10, marginHorizontal: -4 },
   kpiCard: { width: '33.33%', paddingHorizontal: 4, marginBottom: 8 },
-  kpiInner: { backgroundColor: C.card, borderWidth: 0.8, borderColor: C.cardLine, borderRadius: 4, paddingVertical: 9, paddingHorizontal: 10, height: 50, justifyContent: 'center' },
-  kpiLabel: { fontSize: 7, color: C.faint, letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 3 },
+  kpiInner: {
+    backgroundColor: C.card,
+    borderWidth: 0.8,
+    borderColor: C.cardLine,
+    borderRadius: 4,
+    paddingVertical: 9,
+    paddingHorizontal: 10,
+    height: 50,
+    justifyContent: 'center',
+  },
+  kpiLabel: {
+    fontSize: 7,
+    color: C.faint,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    marginBottom: 3,
+  },
   kpiValue: { fontSize: 14, fontFamily: 'Helvetica-Bold', color: C.ink },
 
   // ── Bloques de datos (cards) ─────────────────────────────
-  block: { backgroundColor: C.card, borderWidth: 0.8, borderColor: C.cardLine, borderRadius: 4, paddingHorizontal: 11, paddingTop: 8, paddingBottom: 4, marginBottom: 8 },
-  blockTitle: { fontSize: 8.5, fontFamily: 'Helvetica-Bold', color: C.azul, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 5 },
-  dRow: { flexDirection: 'row', justifyContent: 'space-between', borderBottomWidth: 0.5, borderBottomColor: C.cardLine, paddingVertical: 2.8 },
+  block: {
+    backgroundColor: C.card,
+    borderWidth: 0.8,
+    borderColor: C.cardLine,
+    borderRadius: 4,
+    paddingHorizontal: 11,
+    paddingTop: 8,
+    paddingBottom: 4,
+    marginBottom: 8,
+  },
+  blockTitle: {
+    fontSize: 8.5,
+    fontFamily: 'Helvetica-Bold',
+    color: C.azul,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 5,
+  },
+  dRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderBottomWidth: 0.5,
+    borderBottomColor: C.cardLine,
+    paddingVertical: 2.8,
+  },
   dRowLast: { borderBottomWidth: 0 },
   dLabel: { fontSize: 8.5, color: C.soft, flex: 1, paddingRight: 10 },
   dValue: { fontSize: 8.5, fontFamily: 'Helvetica-Bold', color: C.ink, textAlign: 'right' },
 
   // ── Tabla limpia (KPIs calculados / supuestos / desglose) ─
-  tRow: { flexDirection: 'row', paddingVertical: 3.2, paddingHorizontal: 6, borderBottomWidth: 0.5, borderBottomColor: C.line },
+  tRow: {
+    flexDirection: 'row',
+    paddingVertical: 3.2,
+    paddingHorizontal: 6,
+    borderBottomWidth: 0.5,
+    borderBottomColor: C.line,
+  },
   tRowAlt: { backgroundColor: '#faf9f5' },
   tLabel: { flex: 1, color: C.soft, fontSize: 9, paddingRight: 10 },
-  tValue: { width: 160, textAlign: 'right', fontFamily: 'Helvetica-Bold', color: C.ink, fontSize: 9 },
+  tValue: {
+    width: 160,
+    textAlign: 'right',
+    fontFamily: 'Helvetica-Bold',
+    color: C.ink,
+    fontSize: 9,
+  },
 
   // ── Explotar vs liquidar ─────────────────────────────────
   elBox: { borderWidth: 1, borderRadius: 5, padding: 13, marginTop: 9 },
-  elTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 7 },
+  elTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 7,
+  },
   elEstado: { fontSize: 13, fontFamily: 'Helvetica-Bold' },
   elMetrics: { flexDirection: 'row' },
   elMetric: { marginLeft: 18, alignItems: 'flex-end' },
@@ -105,21 +235,71 @@ const s = StyleSheet.create({
   elNota: { fontSize: 7.5, color: C.faint, marginTop: 6, fontStyle: 'italic' },
 
   // ── Escenarios ───────────────────────────────────────────
-  escHead: { flexDirection: 'row', backgroundColor: C.dark, paddingVertical: 6, paddingHorizontal: 7, borderTopLeftRadius: 4, borderTopRightRadius: 4 },
-  escHM: { flex: 1.5, color: C.ivoryDim, fontSize: 8, letterSpacing: 0.5, textTransform: 'uppercase' },
-  escHC: { flex: 1, textAlign: 'right', color: C.ivory, fontSize: 8.5, fontFamily: 'Helvetica-Bold' },
-  escHCbase: { flex: 1, textAlign: 'right', color: C.ivory, fontSize: 8.5, fontFamily: 'Helvetica-Bold' },
-  escRow: { flexDirection: 'row', paddingVertical: 4, paddingHorizontal: 7, borderBottomWidth: 0.5, borderBottomColor: C.line },
+  escHead: {
+    flexDirection: 'row',
+    backgroundColor: C.dark,
+    paddingVertical: 6,
+    paddingHorizontal: 7,
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+  },
+  escHM: {
+    flex: 1.5,
+    color: C.ivoryDim,
+    fontSize: 8,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  escHC: {
+    flex: 1,
+    textAlign: 'right',
+    color: C.ivory,
+    fontSize: 8.5,
+    fontFamily: 'Helvetica-Bold',
+  },
+  escHCbase: {
+    flex: 1,
+    textAlign: 'right',
+    color: C.ivory,
+    fontSize: 8.5,
+    fontFamily: 'Helvetica-Bold',
+  },
+  escRow: {
+    flexDirection: 'row',
+    paddingVertical: 4,
+    paddingHorizontal: 7,
+    borderBottomWidth: 0.5,
+    borderBottomColor: C.line,
+  },
   escM: { flex: 1.5, color: C.soft, fontSize: 8.5 },
   escC: { flex: 1, textAlign: 'right', fontSize: 8.5, color: C.ink },
-  escCbase: { flex: 1, textAlign: 'right', fontSize: 8.5, fontFamily: 'Helvetica-Bold', color: C.ink },
+  escCbase: {
+    flex: 1,
+    textAlign: 'right',
+    fontSize: 8.5,
+    fontFamily: 'Helvetica-Bold',
+    color: C.ink,
+  },
   escBaseCol: { backgroundColor: '#f4f2ec' },
 
   // ── Calidad del dato ─────────────────────────────────────
-  calBadge: { alignSelf: 'flex-start', borderRadius: 4, paddingVertical: 5, paddingHorizontal: 11, marginTop: 8, marginBottom: 4 },
+  calBadge: {
+    alignSelf: 'flex-start',
+    borderRadius: 4,
+    paddingVertical: 5,
+    paddingHorizontal: 11,
+    marginTop: 8,
+    marginBottom: 4,
+  },
   calBadgeTxt: { fontSize: 11, fontFamily: 'Helvetica-Bold' },
   calGroup: { marginTop: 7 },
-  calGroupTitle: { fontSize: 8, fontFamily: 'Helvetica-Bold', letterSpacing: 0.5, textTransform: 'uppercase', marginBottom: 2 },
+  calGroupTitle: {
+    fontSize: 8,
+    fontFamily: 'Helvetica-Bold',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
   calGroupItems: { fontSize: 8.5, color: C.soft, lineHeight: 1.5 },
 
   // ── Alertas ──────────────────────────────────────────────
@@ -132,15 +312,24 @@ const s = StyleSheet.create({
   fxBody: { fontSize: 8.5, color: C.soft, marginTop: 1, lineHeight: 1.4 },
 });
 
-const verColor = (t: string) => (t === 'Atractivo' ? C.verde : t === 'Defensivo' ? C.azul : t === 'Agresivo' ? C.ambar : C.rojo);
-const verBg = (t: string) => (t === 'Atractivo' ? C.verdeBg : t === 'Defensivo' ? '#eef1f5' : t === 'Agresivo' ? C.ambarBg : C.rojoBg);
+const verColor = (t: string) =>
+  t === 'Atractivo' ? C.verde : t === 'Defensivo' ? C.azul : t === 'Agresivo' ? C.ambar : C.rojo;
+const verBg = (t: string) =>
+  t === 'Atractivo'
+    ? C.verdeBg
+    : t === 'Defensivo'
+      ? '#eef1f5'
+      : t === 'Agresivo'
+        ? C.ambarBg
+        : C.rojoBg;
 const nivelColor = (n: string) => (n === 'Alta' ? C.verde : n === 'Media' ? C.ambar : C.rojo);
 const nivelBg = (n: string) => (n === 'Alta' ? C.verdeBg : n === 'Media' ? C.ambarBg : C.rojoBg);
 const elColor = (n: string) => (n === 'explotar' ? C.verde : n === 'neutral' ? C.ambar : C.rojo);
 const elBg = (n: string) => (n === 'explotar' ? C.verdeBg : n === 'neutral' ? C.ambarBg : C.rojoBg);
 
 // Reparte alertas en "supuestos por defecto" vs "limitaciones" (presentacional).
-const RE_SUPUESTO = /no informad|se asume|se usan|se usa|no aplicada|antes de impuestos|por defecto|como estimación/i;
+const RE_SUPUESTO =
+  /no informad|se asume|se usan|se usa|no aplicada|antes de impuestos|por defecto|como estimación/i;
 
 function SectionTitle({ kicker, titulo }: { kicker?: string; titulo: string }) {
   return (
@@ -229,7 +418,9 @@ function Header({ r }: { r: InformeFinanciero }) {
   return (
     <View style={s.hdrBand} fixed>
       <Image style={s.hdrLogo} src={LOGO_ALSARI} />
-      <Text style={s.hdrProj}>{r.nombreProyecto} · {r.tipoLabel}</Text>
+      <Text style={s.hdrProj}>
+        {r.nombreProyecto} · {r.tipoLabel}
+      </Text>
     </View>
   );
 }
@@ -269,8 +460,12 @@ export function InformeFinancieroProyecto({ informe: r }: { informe: InformeFina
           <View style={s.coverSpacer} />
 
           <View style={s.coverFootWrap}>
-            {r.sociedad ? <Text style={s.coverSociedad}>Sociedad tenedora · {r.sociedad}</Text> : null}
-            <Text style={s.coverNote}>Informe interno basado en datos introducidos por el usuario.</Text>
+            {r.sociedad ? (
+              <Text style={s.coverSociedad}>Sociedad tenedora · {r.sociedad}</Text>
+            ) : null}
+            <Text style={s.coverNote}>
+              Informe interno basado en datos introducidos por el usuario.
+            </Text>
             <Text style={s.coverBrandTiny}>Generado desde Alsari Capital OS</Text>
           </View>
         </View>
@@ -282,12 +477,22 @@ export function InformeFinancieroProyecto({ informe: r }: { informe: InformeFina
 
         {/* Resumen ejecutivo */}
         <SectionTitle kicker="01" titulo="Resumen ejecutivo" />
-        <View style={[s.verCard, { borderColor: vc, borderLeftColor: vc, backgroundColor: verBg(r.veredictoTipo) }]} wrap={false}>
+        <View
+          style={[
+            s.verCard,
+            { borderColor: vc, borderLeftColor: vc, backgroundColor: verBg(r.veredictoTipo) },
+          ]}
+          wrap={false}
+        >
           <Text style={s.verLabel}>Veredicto</Text>
           <Text style={[s.verTipo, { color: vc }]}>{r.veredictoTipo}</Text>
           <Text style={s.verMotivo}>{r.veredictoMotivo}</Text>
-          {r.veredictoBullets.map((b, i) => <Bullet key={i} texto={b} color={vc} />)}
-          <Text style={s.verNota}>Ayuda interna de análisis; no es una recomendación de inversión definitiva.</Text>
+          {r.veredictoBullets.map((b, i) => (
+            <Bullet key={i} texto={b} color={vc} />
+          ))}
+          <Text style={s.verNota}>
+            Ayuda interna de análisis; no es una recomendación de inversión definitiva.
+          </Text>
         </View>
 
         <Text style={s.lead}>Indicadores principales</Text>
@@ -297,9 +502,19 @@ export function InformeFinancieroProyecto({ informe: r }: { informe: InformeFina
         {r.explotarLiquidar ? (
           <View wrap={false}>
             <SectionTitle kicker="02" titulo="Explotar vs liquidar" />
-            <View style={[s.elBox, { borderColor: elColor(r.explotarLiquidar.nivel), backgroundColor: elBg(r.explotarLiquidar.nivel) }]}>
+            <View
+              style={[
+                s.elBox,
+                {
+                  borderColor: elColor(r.explotarLiquidar.nivel),
+                  backgroundColor: elBg(r.explotarLiquidar.nivel),
+                },
+              ]}
+            >
               <View style={s.elTop}>
-                <Text style={[s.elEstado, { color: elColor(r.explotarLiquidar.nivel) }]}>{r.explotarLiquidar.titulo}</Text>
+                <Text style={[s.elEstado, { color: elColor(r.explotarLiquidar.nivel) }]}>
+                  {r.explotarLiquidar.titulo}
+                </Text>
                 <View style={s.elMetrics}>
                   <View style={s.elMetric}>
                     <Text style={s.elMetricLabel}>Rentab. neta s/ valor actual</Text>
@@ -319,12 +534,18 @@ export function InformeFinancieroProyecto({ informe: r }: { informe: InformeFina
 
         {/* Datos introducidos */}
         <SectionTitle kicker={r.explotarLiquidar ? '03' : '02'} titulo="Datos introducidos" />
-        <Text style={s.lead}>Inputs facilitados por el usuario. Los campos sin informar aparecen como "No informado".</Text>
-        {r.datosIntroducidos.map((sec, i) => <DataBlock key={i} sec={sec} />)}
+        <Text style={s.lead}>
+          Inputs facilitados por el usuario. Los campos sin informar aparecen como "No informado".
+        </Text>
+        {r.datosIntroducidos.map((sec, i) => (
+          <DataBlock key={i} sec={sec} />
+        ))}
 
         {/* KPIs calculados */}
         <SectionTitle kicker={r.explotarLiquidar ? '04' : '03'} titulo="KPIs calculados" />
-        <Text style={s.lead}>Resultados estimados por la aplicación a partir de los datos anteriores.</Text>
+        <Text style={s.lead}>
+          Resultados estimados por la aplicación a partir de los datos anteriores.
+        </Text>
         <CleanTable filas={r.kpisCalculados} />
 
         {/* Escenarios */}
@@ -351,7 +572,9 @@ export function InformeFinancieroProyecto({ informe: r }: { informe: InformeFina
         {/* Calidad del dato */}
         <SectionTitle titulo="Calidad del dato" />
         <View style={[s.calBadge, { backgroundColor: nivelBg(r.calidadNivel) }]}>
-          <Text style={[s.calBadgeTxt, { color: nivelColor(r.calidadNivel) }]}>{r.calidadScore}% · Calidad {r.calidadNivel}</Text>
+          <Text style={[s.calBadgeTxt, { color: nivelColor(r.calidadNivel) }]}>
+            {r.calidadScore}% · Calidad {r.calidadNivel}
+          </Text>
         </View>
         {completos.length > 0 ? (
           <View style={s.calGroup} wrap={false}>
@@ -368,7 +591,9 @@ export function InformeFinancieroProyecto({ informe: r }: { informe: InformeFina
         {faltantes.length > 0 ? (
           <View style={s.calGroup} wrap={false}>
             <Text style={[s.calGroupTitle, { color: C.rojo }]}>Faltantes</Text>
-            <Text style={s.calGroupItems}>{faltantes.map((c) => c.label + (c.critico ? ' (clave)' : '')).join('  ·  ')}</Text>
+            <Text style={s.calGroupItems}>
+              {faltantes.map((c) => c.label + (c.critico ? ' (clave)' : '')).join('  ·  ')}
+            </Text>
           </View>
         ) : null}
 
@@ -377,12 +602,16 @@ export function InformeFinancieroProyecto({ informe: r }: { informe: InformeFina
         {supuestos.length > 0 ? (
           <View style={s.alGroup} wrap={false}>
             <Text style={s.alTitle}>Supuestos por defecto</Text>
-            {supuestos.map((a, i) => <Bullet key={i} texto={a} color={C.ambar} />)}
+            {supuestos.map((a, i) => (
+              <Bullet key={i} texto={a} color={C.ambar} />
+            ))}
           </View>
         ) : null}
         <View style={s.alGroup} wrap={false}>
           <Text style={s.alTitle}>Limitaciones</Text>
-          {limitaciones.map((a, i) => <Bullet key={i} texto={a} color={C.faint} />)}
+          {limitaciones.map((a, i) => (
+            <Bullet key={i} texto={a} color={C.faint} />
+          ))}
         </View>
 
         {/* Anexo */}

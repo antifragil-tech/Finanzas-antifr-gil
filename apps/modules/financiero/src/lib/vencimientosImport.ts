@@ -1,6 +1,14 @@
 import { sbHeaders, sbUrl } from '@alsari/supabase-client';
 
-export type TipoVencimiento = 'seguro' | 'deuda' | 'prestamo' | 'contrato' | 'impuesto' | 'compromiso' | 'otro' | 'pignorado';
+export type TipoVencimiento =
+  | 'seguro'
+  | 'deuda'
+  | 'prestamo'
+  | 'contrato'
+  | 'impuesto'
+  | 'compromiso'
+  | 'otro'
+  | 'pignorado';
 export type EstadoVencimiento = 'pendiente' | 'gestionado' | 'vencido';
 export type Recurrencia = 'anual' | 'semestral' | 'trimestral' | 'mensual';
 
@@ -46,7 +54,10 @@ export async function insertVencimiento(data: VencimientoInput): Promise<Vencimi
   return rows[0]!;
 }
 
-export async function updateVencimiento(id: string, data: Partial<VencimientoInput>): Promise<void> {
+export async function updateVencimiento(
+  id: string,
+  data: Partial<VencimientoInput>,
+): Promise<void> {
   await req(`vencimientos?id=eq.${id}`, {
     method: 'PATCH',
     body: JSON.stringify({ ...data, updated_at: new Date().toISOString() }),
@@ -78,7 +89,7 @@ export async function setVencimientoSociedades(
   vencimientoId: string,
   rows: { sociedad_id: string; porcentaje: number }[],
 ): Promise<void> {
-  const validRows = rows.filter(r => r.sociedad_id);
+  const validRows = rows.filter((r) => r.sociedad_id);
   // Borra las existentes y reinserta (upsert completo)
   await req(`vencimiento_sociedades?vencimiento_id=eq.${vencimientoId}`, {
     method: 'DELETE',
@@ -86,6 +97,6 @@ export async function setVencimientoSociedades(
   if (validRows.length === 0) return;
   await req('vencimiento_sociedades', {
     method: 'POST',
-    body: JSON.stringify(validRows.map(r => ({ ...r, vencimiento_id: vencimientoId }))),
+    body: JSON.stringify(validRows.map((r) => ({ ...r, vencimiento_id: vencimientoId }))),
   });
 }

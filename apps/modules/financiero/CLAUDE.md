@@ -46,6 +46,7 @@ src/
 ```
 
 Flujo de datos:
+
 ```
 App.tsx → fetch /api/data (CF Worker)
   → { entities, projects, financialProjects, weeklyWorkspaces, ... }
@@ -63,7 +64,15 @@ Auth bridge: `window.alsariToken` inyectado por el host. Si no existe, cae al `a
 ### Schema de `vencimientos` (tabla crítica)
 
 ```typescript
-type TipoVencimiento = 'seguro' | 'deuda' | 'prestamo' | 'contrato' | 'impuesto' | 'compromiso' | 'otro' | 'pignorado';
+type TipoVencimiento =
+  | 'seguro'
+  | 'deuda'
+  | 'prestamo'
+  | 'contrato'
+  | 'impuesto'
+  | 'compromiso'
+  | 'otro'
+  | 'pignorado';
 type EstadoVencimiento = 'pendiente' | 'gestionado' | 'vencido';
 
 type Vencimiento = {
@@ -76,7 +85,7 @@ type Vencimiento = {
   notas: string | null;
   estado: EstadoVencimiento;
   recurrencia: 'anual' | 'semestral' | 'trimestral' | 'mensual' | null;
-  es_entrada: boolean;       // true = cobro (holding recibe), false = pago (holding paga)
+  es_entrada: boolean; // true = cobro (holding recibe), false = pago (holding paga)
   created_at: string;
 };
 ```
@@ -84,10 +93,11 @@ type Vencimiento = {
 **Regla de negocio `es_entrada`:** si el holding/Javier es el Prestamista/Acreedor en el Excel → `true` (entrada). Si paga (seguros, gastos) → `false`. Los préstamos a Perisur, Ivan, Ivaltia, Procourval, earn-out Evariste y precio aplazado Álvaro son **entradas**. Los seguros son **salidas**.
 
 **Fondos pignorados Santander** — 3 filas en BD con `tipo='pignorado'`, `es_entrada=true`:
+
 - Tramo 1: 2027-10-23 · 550.000€ (50%)
 - Tramo 2: 2028-10-23 · 275.000€ (25%)
 - Tramo 3: 2029-10-23 · 275.000€ (25%)
-Aval bancario constituido para garantizar responsabilidades frente a Evariste por venta de Rialsa.
+  Aval bancario constituido para garantizar responsabilidades frente a Evariste por venta de Rialsa.
 
 ---
 

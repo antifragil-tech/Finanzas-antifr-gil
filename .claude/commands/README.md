@@ -17,13 +17,13 @@ Analogía: como aliases en shell, pero para prompts.
 
 ## 📋 Commands disponibles
 
-| Comando | Para qué sirve |
-|---------|----------------|
-| `/nueva-leccion` | Registrar una lección aprendida en el log |
-| `/nuevo-modulo <nombre>` | Crear un módulo nuevo desde `_template` |
-| `/reporte-semana` | Generar un Reporte de Semana siguiendo plantilla |
-| `/revisar-cambios` | Invocar code-reviewer sobre el diff actual |
-| `/migrar [origen] [destino]` | Asistente de migración de código entre paths |
+| Comando                      | Para qué sirve                                   |
+| ---------------------------- | ------------------------------------------------ |
+| `/nueva-leccion`             | Registrar una lección aprendida en el log        |
+| `/nuevo-modulo <nombre>`     | Crear un módulo nuevo desde `_template`          |
+| `/reporte-semana`            | Generar un Reporte de Semana siguiendo plantilla |
+| `/revisar-cambios`           | Invocar code-reviewer sobre el diff actual       |
+| `/migrar [origen] [destino]` | Asistente de migración de código entre paths     |
 
 ---
 
@@ -34,10 +34,11 @@ Crea `.claude/commands/nombre.md`:
 ```markdown
 ---
 description: Una línea explicando qué hace.
-argument-hint: "[arg1] [arg2]"
+argument-hint: '[arg1] [arg2]'
 ---
 
 Aquí va el prompt-plantilla. Puedes usar:
+
 - $ARGUMENTS → todos los argumentos pasados.
 - $1, $2, ... → argumentos individuales.
 - !`comando bash` → resultado de ejecutar bash.
