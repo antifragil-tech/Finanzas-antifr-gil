@@ -1,11 +1,21 @@
-import type { CategoriaMovimiento, MovimientoCsvRaw, MovimientoBancario, ReglaCategorizacion } from '@alsari/types';
+import type {
+  CategoriaMovimiento,
+  MovimientoCsvRaw,
+  MovimientoBancario,
+  ReglaCategorizacion,
+} from '@alsari/types';
 
 // ── Entidades del grupo Alsari (para detección intragrupo) ────────────────────
 // Se actualiza manualmente cuando se añaden nuevas sociedades al holding.
 
 const ENTIDADES_GRUPO = [
-  'alsari', 'pavier', 'armia', 'rialsa', 'inversiones sl',
-  'legacy group', 'capital os',
+  'alsari',
+  'pavier',
+  'armia',
+  'rialsa',
+  'inversiones sl',
+  'legacy group',
+  'capital os',
 ];
 
 // ── Reglas hard-coded de alta prioridad (no dependen de DB) ──────────────────
@@ -22,7 +32,7 @@ type ReglaLocal = {
 const REGLAS_LOCALES: ReglaLocal[] = [
   // Intragrupo — detección por nombre de entidad del grupo
   {
-    test: (c) => ENTIDADES_GRUPO.some(e => c.toLowerCase().includes(e)),
+    test: (c) => ENTIDADES_GRUPO.some((e) => c.toLowerCase().includes(e)),
     categoria: 'intragrupo_salida',
     subcategoria: null,
     es_intragrupo: true,
@@ -46,7 +56,10 @@ const REGLAS_LOCALES: ReglaLocal[] = [
   },
   // Fiscal — Junta autonómica (ITP, AJD, otros)
   {
-    test: (c) => /junta de (andaluc|castilla|cataluñ|madrid|galicia|aragon|murcia|navarra|rioja|balear|canaria|astur|cantabr|extrem|valenci)/i.test(c),
+    test: (c) =>
+      /junta de (andaluc|castilla|cataluñ|madrid|galicia|aragon|murcia|navarra|rioja|balear|canaria|astur|cantabr|extrem|valenci)/i.test(
+        c,
+      ),
     categoria: 'fiscal',
     subcategoria: 'itp_ajd',
     es_intragrupo: false,
@@ -144,9 +157,9 @@ export function categorizar(
   const c = concepto.toLowerCase();
 
   // 1. Reglas hard-coded (máxima prioridad)
-  const reglaLocal = REGLAS_LOCALES
-    .sort((a, b) => b.prioridad - a.prioridad)
-    .find(r => r.test(c));
+  const reglaLocal = REGLAS_LOCALES.sort((a, b) => b.prioridad - a.prioridad).find((r) =>
+    r.test(c),
+  );
 
   if (reglaLocal) {
     return {
@@ -162,7 +175,11 @@ export function categorizar(
     if (!regla.activa) continue;
     let match: boolean;
     if (regla.es_regex) {
-      try { match = new RegExp(regla.patron, 'i').test(c); } catch { match = false; }
+      try {
+        match = new RegExp(regla.patron, 'i').test(c);
+      } catch {
+        match = false;
+      }
     } else {
       match = c.includes(regla.patron.toLowerCase());
     }
@@ -171,7 +188,8 @@ export function categorizar(
         categoria: regla.categoria,
         subcategoria: regla.subcategoria,
         es_intragrupo: regla.es_intragrupo,
-        confianza: regla.fuente === 'aprendizaje' ? 'alta' : regla.fuente === 'usuario' ? 'alta' : 'media',
+        confianza:
+          regla.fuente === 'aprendizaje' ? 'alta' : regla.fuente === 'usuario' ? 'alta' : 'media',
         regla_id: regla.id,
       };
     }
@@ -192,7 +210,7 @@ export function normalizarConcepto(raw: string): string {
   return raw
     .toLowerCase()
     .replace(/\b(ref|nro?|núm?|num|mandato|id|ref\.?)\s*[:.]\s*[\w\d-]+/gi, '') // elimina refs numéricas
-    .replace(/\d{10,}/g, '')           // elimina números largos (cuentas, refs)
+    .replace(/\d{10,}/g, '') // elimina números largos (cuentas, refs)
     .replace(/\s{2,}/g, ' ')
     .trim();
 }
@@ -202,13 +220,17 @@ export function normalizarConcepto(raw: string): string {
 export function extraerContraparte(concepto: string): string | null {
   const c = concepto.trim();
   // "Transferencia [de/a] [Nombre]"
-  const transf = /transferencia\s+(?:de|a favor de|inmediata a favor de)?\s*(.+?)(?:\s+concepto|\s+ref|\s+nro|$)/i.exec(c);
+  const transf =
+    /transferencia\s+(?:de|a favor de|inmediata a favor de)?\s*(.+?)(?:\s+concepto|\s+ref|\s+nro|$)/i.exec(
+      c,
+    );
   if (transf?.[1]) return transf[1].trim();
   // "Recibo [Nombre]"
   const recibo = /recibo\s+([a-zA-ZÀ-ÿ][^\d]{3,}?)(?:\s+nº|\s+ref|\s+mandato|$)/i.exec(c);
   if (recibo?.[1]) return recibo[1].trim();
   // "Pago [a] [Nombre]"
-  const pago = /pago\s+(?:puntual\s+)?(?:a\s+)?([a-zA-ZÀ-ÿ][^\d]{3,}?)(?:\s+concepto|\s+ref|$)/i.exec(c);
+  const pago =
+    /pago\s+(?:puntual\s+)?(?:a\s+)?([a-zA-ZÀ-ÿ][^\d]{3,}?)(?:\s+concepto|\s+ref|$)/i.exec(c);
   if (pago?.[1]) return pago[1].trim();
   return null;
 }

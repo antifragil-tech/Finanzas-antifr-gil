@@ -1,8 +1,8 @@
 ---
 name: ✨ Feature / Mejora
 about: Proponer una nueva funcionalidad o mejora
-title: "[FEAT] "
-labels: ["enhancement"]
+title: '[FEAT] '
+labels: ['enhancement']
 ---
 
 ## Necesidad de negocio

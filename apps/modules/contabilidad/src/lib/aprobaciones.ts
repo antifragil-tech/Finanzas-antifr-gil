@@ -38,6 +38,8 @@ export function calcularEstadoNuevo(
 
 // La acción humana a registrar al pulsar "Aprobar/Validar" depende del estado:
 // desde borrador_ocr es "valida" (Guille); desde revision_javi es "aprueba" (Javi).
-export function accionDeAvance(estadoActual: EstadoFacturaRecibida): Extract<AccionAprobacion, 'valida' | 'aprueba'> {
+export function accionDeAvance(
+  estadoActual: EstadoFacturaRecibida,
+): Extract<AccionAprobacion, 'valida' | 'aprueba'> {
   return estadoActual === 'revision_javi' ? 'aprueba' : 'valida';
 }

@@ -30,23 +30,24 @@ description: Sistema de diseño "Quiet Luxury" de Alsari Capital OS. Cárgalo an
 La escala "zinc" del OS es **custom con tinte azul marino sutil** (decisión de
 marca, más cálida que el zinc puro de Tailwind):
 
-| Token | Valor real | Uso |
-|-------|-----------|-----|
-| `bg-zinc-950` | `#14141e` | Fondo principal |
-| `bg-zinc-900` | `#1e1f2a` | Cards y paneles |
-| `bg-zinc-800` | `#2a2b38` | Hovers |
-| `text-zinc-100` | `#f4f4f5` | Texto principal |
-| `text-zinc-400` | `#a1a1aa` | Texto secundario |
-| `text-zinc-500` | `#71717a` | Hints, placeholders (mínimo para texto legible) |
-| `border-white/5` | rgba blanco | Bordes glass-panel |
-| `text-brand` / `bg-brand` | `#F5F0E1` | Crema marfil de marca (logo, CTA primario). Nunca hardcodear el hex |
-| `bg-blue-500/30` | azul tenue | Selección de texto, info, acción |
-| `text-emerald-500` | verde | Métricas positivas |
-| `text-rose-500` | rosa/rojo | Métricas negativas / errores (en módulos se usa `rose`, no `red`) |
-| `text-amber-500` | ámbar | Warnings |
-| `text-violet-400` | violeta | Previsto / simulado / escenarios (único uso permitido) |
+| Token                     | Valor real  | Uso                                                                 |
+| ------------------------- | ----------- | ------------------------------------------------------------------- |
+| `bg-zinc-950`             | `#14141e`   | Fondo principal                                                     |
+| `bg-zinc-900`             | `#1e1f2a`   | Cards y paneles                                                     |
+| `bg-zinc-800`             | `#2a2b38`   | Hovers                                                              |
+| `text-zinc-100`           | `#f4f4f5`   | Texto principal                                                     |
+| `text-zinc-400`           | `#a1a1aa`   | Texto secundario                                                    |
+| `text-zinc-500`           | `#71717a`   | Hints, placeholders (mínimo para texto legible)                     |
+| `border-white/5`          | rgba blanco | Bordes glass-panel                                                  |
+| `text-brand` / `bg-brand` | `#F5F0E1`   | Crema marfil de marca (logo, CTA primario). Nunca hardcodear el hex |
+| `bg-blue-500/30`          | azul tenue  | Selección de texto, info, acción                                    |
+| `text-emerald-500`        | verde       | Métricas positivas                                                  |
+| `text-rose-500`           | rosa/rojo   | Métricas negativas / errores (en módulos se usa `rose`, no `red`)   |
+| `text-amber-500`          | ámbar       | Warnings                                                            |
+| `text-violet-400`         | violeta     | Previsto / simulado / escenarios (único uso permitido)              |
 
 **Reglas:**
+
 - Verde y rosa SOLO con significado numérico/estado. Nunca decorativos.
 - `zinc-600` y más oscuros NUNCA como color de texto (contraste < 3:1) — solo decorativo.
 - Máximo 2 acentos de color por componente.
@@ -66,16 +67,18 @@ color del OS).
 ## 🧊 Componentes esenciales
 
 ### Glass Panel
+
 ```css
 .glass-panel {
-  @apply bg-zinc-900/40 backdrop-blur-md border border-white/5 shadow-xl rounded-lg;
+  @apply rounded-lg border border-white/5 bg-zinc-900/40 shadow-xl backdrop-blur-md;
 }
 ```
 
 ### Glass Header
+
 ```css
 .glass-header {
-  @apply bg-zinc-950/80 backdrop-blur-xl border-b border-white/5;
+  @apply border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl;
 }
 ```
 
@@ -102,26 +105,25 @@ color del OS).
 ```
 
 ### KPI Card
+
 ```tsx
 <div className="glass-panel p-6">
-  <p className="text-xs text-zinc-500 uppercase tracking-wider mb-2">
-    Ingresos Q4
-  </p>
-  <p className="text-4xl font-light tracking-tight text-zinc-100">
-    1.247.500 €
-  </p>
-  <p className="text-sm text-emerald-500 mt-2">↑ +12.4% vs Q3</p>
+  <p className="mb-2 text-xs uppercase tracking-wider text-zinc-500">Ingresos Q4</p>
+  <p className="text-4xl font-light tracking-tight text-zinc-100">1.247.500 €</p>
+  <p className="mt-2 text-sm text-emerald-500">↑ +12.4% vs Q3</p>
 </div>
 ```
 
 ### Boot Screen (firma visual)
+
 ```tsx
-<div className="flex flex-col items-center justify-center min-h-screen bg-zinc-950">
-  <img src="/logo.png" alt="Alsari Capital"
-       className="h-24 w-auto animate-pulse mb-4 object-contain" />
-  <p className="text-zinc-500 text-sm font-medium tracking-wider">
-    NEURAL FINANCE V3.0
-  </p>
+<div className="flex min-h-screen flex-col items-center justify-center bg-zinc-950">
+  <img
+    src="/logo.png"
+    alt="Alsari Capital"
+    className="mb-4 h-24 w-auto animate-pulse object-contain"
+  />
+  <p className="text-sm font-medium tracking-wider text-zinc-500">NEURAL FINANCE V3.0</p>
 </div>
 ```
 
@@ -134,6 +136,7 @@ variables `--font-geist-sans`/`--font-geist-mono` en el preset). El body lleva
 `font-variant-numeric: tabular-nums` — todas las cifras alinean en columna.
 
 **Escala:**
+
 - `text-2xs` (10px) → micro-labels de sidebar/badges. **Mínimo absoluto** — prohibido `text-[8px]`/`text-[9px]` y cualquier tamaño arbitrario
 - `text-xs` (12px) → labels, captions
 - `text-sm` (14px) → texto secundario
@@ -142,12 +145,14 @@ variables `--font-geist-sans`/`--font-geist-mono` en el preset). El body lleva
 - `text-3xl` / `text-4xl` → KPIs principales
 
 **Pesos** (máximo `semibold` — `font-bold` y `font-black` están PROHIBIDOS):
+
 - `font-light` (300) → números hero (la firma visual del OS: cifra grande y fina)
 - `font-normal` (400) → texto base
 - `font-medium` (500) → labels destacadas, botones, micro-caps
 - `font-semibold` (600) → títulos
 
 **Tracking:**
+
 - `tracking-tight` → números grandes
 - `tracking-wider` o `tracking-widest` → captions de marca en MAYÚSCULAS
   (ej. `"NEURAL FINANCE V3.0"`)
@@ -166,6 +171,7 @@ animation: {
 ```
 
 **Uso:**
+
 - `animate-fade-in` → entrada de páginas, modales.
 - `animate-fade-up` → cards en grids.
 - `animate-pulse-subtle` → loading states (logo boot, skeletons).
@@ -179,14 +185,15 @@ animation: {
 
 Sistema de 4px (Tailwind). Nunca valores custom.
 
-| Contexto | Padding | Gap |
-|----------|---------|-----|
-| Card densa | `p-4` | `gap-3` |
-| Card estándar | `p-6` | `gap-4` |
-| Card relajada | `p-8` | `gap-6` |
-| Sección | `py-12` | `gap-8` |
+| Contexto      | Padding | Gap     |
+| ------------- | ------- | ------- |
+| Card densa    | `p-4`   | `gap-3` |
+| Card estándar | `p-6`   | `gap-4` |
+| Card relajada | `p-8`   | `gap-6` |
+| Sección       | `py-12` | `gap-8` |
 
 **Anchos:**
+
 - Sidebar: `w-64` (256px)
 - Main content: `max-w-7xl mx-auto`
 - Modal: `max-w-lg`
@@ -206,6 +213,7 @@ El trazo es **1.5 global** (regla `.lucide { stroke-width: 1.5; }` en los CSS
 base) — no pasar `strokeWidth` por icono salvo excepción justificada.
 
 **Tamaños:**
+
 - `w-4 h-4` → inline en texto
 - `w-5 h-5` → botones
 - `w-6 h-6` → sidebar
@@ -220,10 +228,20 @@ base) — no pasar `strokeWidth` por icono salvo excepción justificada.
 Ya en `index.css` (Webkit):
 
 ```css
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: #09090b; }
-::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #09090b;
+}
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
 ```
 
 ---

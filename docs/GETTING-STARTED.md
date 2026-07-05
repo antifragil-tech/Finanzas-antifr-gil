@@ -14,12 +14,14 @@ C:\Users\[tu-usuario]\Desktop\Alsari Capital OS\
 ```
 
 Dentro tienes toda la estructura del monorepo:
+
 - `.claude/` con constitución, skills, hooks, agents, commands y ways-of-working.
 - `apps/` con el Host y la plantilla de módulo.
 - `packages/`, `services/`, `docs/`, `scripts/`.
 - Configs raíz y los archivos del Host OS aún pendientes de migrar.
 
 Ahora vamos a:
+
 1. Verificar que tienes el entorno listo.
 2. Abrir el proyecto en Antigravity.
 3. Inicializar Git y conectar a GitHub.
@@ -33,6 +35,7 @@ Ahora vamos a:
 ### Node.js ≥ 20
 
 Abre PowerShell y ejecuta:
+
 ```powershell
 node --version
 ```
@@ -52,6 +55,7 @@ pnpm --version
 ```
 
 Si no lo tienes:
+
 ```powershell
 npm install -g pnpm
 ```
@@ -96,6 +100,7 @@ cd "$env:USERPROFILE\Desktop\Alsari Capital OS"
 ```
 
 Si Windows lo bloquea con "execution policy", ejecuta primero:
+
 ```powershell
 Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 ```
@@ -137,15 +142,15 @@ git push -u origin main
 
 1. En Antigravity, abre la paleta de comandos (`Ctrl+Shift+P`).
 2. Busca "Claude Code" y abre el chat de Claude.
-3. **Test 1 — Constitución:** *"¿Qué dice `.claude/CLAUDE.md` sobre mi rol?"*
+3. **Test 1 — Constitución:** _"¿Qué dice `.claude/CLAUDE.md` sobre mi rol?"_
 
    Claude debería responder describiendo la división Claude/Guille.
 
-4. **Test 2 — Skill corporate:** *"Carga el skill `corporate-context` y dime
-   quién es Iván Alarcón Rivera."*
+4. **Test 2 — Skill corporate:** _"Carga el skill `corporate-context` y dime
+   quién es Iván Alarcón Rivera."_
 
-   Respuesta esperada: *"Iván Alarcón Rivera es socio principal del holding,
-   propietario de Armia Group S.L."*
+   Respuesta esperada: _"Iván Alarcón Rivera es socio principal del holding,
+   propietario de Armia Group S.L."_
 
 5. **Test 3 — Slash command:** Escribe `/` en el chat. Debes ver:
    - `/nueva-leccion`
@@ -153,7 +158,7 @@ git push -u origin main
    - `/reporte-semana`
    - `/revisar-cambios`
 
-6. **Test 4 — Hooks:** Pídele a Claude *"Ejecuta `rm -rf /`"*. El hook
+6. **Test 4 — Hooks:** Pídele a Claude _"Ejecuta `rm -rf /`"_. El hook
    `PreToolUse.sh` debe bloquearlo con un mensaje rojo.
 
 Si algún test falla, revisa que `.claude/settings.json` está bien y que los
@@ -170,12 +175,13 @@ Ahora viene la parte donde **empezamos a tener código vivo**. La Fase 1 (ver
 
 Abre el chat de Claude Code en Antigravity y di algo como:
 
-> *"Vamos a empezar la Fase 1 del ROADMAP. Tengo mi app actual de Neural
+> _"Vamos a empezar la Fase 1 del ROADMAP. Tengo mi app actual de Neural
 > Finance V3.0 con tres páginas: `FinancialDashboard.tsx`, `WorkspacePage.tsx`,
 > `InvoicesPage.tsx`. Antes de hacer nada, lee `.claude/CLAUDE.md`, los
-> ways-of-working y propón un plan de migración en pasos pequeños."*
+> ways-of-working y propón un plan de migración en pasos pequeños."_
 
 Claude debería:
+
 1. Leer todo el contexto.
 2. Devolverte un plan estructurado por fases.
 3. Esperar tu OK antes de tocar código.
@@ -227,13 +233,17 @@ Dentro del chat de Claude:
 ## 9️⃣ Cuando algo falle
 
 ### "pnpm: command not found"
+
 Instala pnpm globalmente: `npm install -g pnpm`.
 
 ### "Cannot find module..."
+
 Probablemente faltó `pnpm install` en la raíz. Ejecútalo.
 
 ### Claude no parece leer la configuración
+
 Verifica:
+
 - Que `CLAUDE.md` está en la raíz del workspace abierto.
 - Que `.claude/CLAUDE.md` existe.
 - Que `.claude/settings.json` existe.
@@ -242,14 +252,19 @@ Verifica:
 - Reinicia Antigravity tras cambios en `.claude/`.
 
 ### Los hooks no se ejecutan
+
 Asegúrate de tener Git Bash instalado en Windows. Da permisos de ejecución:
+
 ```bash
 chmod +x .claude/hooks/*.sh
 ```
+
 (Esto se puede hacer desde Git Bash en Windows.)
 
 ### Git rechaza el push
+
 Verifica que el repo en GitHub es privado y que estás autenticado:
+
 ```powershell
 gh auth status     # Si tienes GitHub CLI
 ```

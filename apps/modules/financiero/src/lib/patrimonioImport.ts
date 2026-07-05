@@ -28,32 +28,55 @@ export async function getActivos(): Promise<ActivoPatrimonio[]> {
 }
 
 export async function getActivosByPersona(personaId: string): Promise<ActivoPatrimonio[]> {
-  const res = await req('GET', `activos_patrimonio?titular_persona_id=eq.${encodeURIComponent(personaId)}&select=*&order=categoria,nombre`);
+  const res = await req(
+    'GET',
+    `activos_patrimonio?titular_persona_id=eq.${encodeURIComponent(personaId)}&select=*&order=categoria,nombre`,
+  );
   return res.json() as Promise<ActivoPatrimonio[]>;
 }
 
 export async function getActivosBySociedad(sociedadId: string): Promise<ActivoPatrimonio[]> {
-  const res = await req('GET', `activos_patrimonio?titular_sociedad_id=eq.${encodeURIComponent(sociedadId)}&select=*&order=categoria,nombre`);
+  const res = await req(
+    'GET',
+    `activos_patrimonio?titular_sociedad_id=eq.${encodeURIComponent(sociedadId)}&select=*&order=categoria,nombre`,
+  );
   return res.json() as Promise<ActivoPatrimonio[]>;
 }
 
-export async function insertActivo(data: Omit<ActivoPatrimonio, 'id' | 'created_at' | 'updated_at' | 'titular_nombre'>): Promise<ActivoPatrimonio> {
+export async function insertActivo(
+  data: Omit<ActivoPatrimonio, 'id' | 'created_at' | 'updated_at' | 'titular_nombre'>,
+): Promise<ActivoPatrimonio> {
   const res = await fetch(sbUrl('activos_patrimonio'), {
     method: 'POST',
     headers: h({ Prefer: 'return=representation' }),
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(`insertActivo: ${res.status} — ${(await res.text()).slice(0, 200)}`);
-  const rows = await res.json() as ActivoPatrimonio[];
+  const rows = (await res.json()) as ActivoPatrimonio[];
   if (!rows[0]) throw new Error('insertActivo: respuesta vacía');
   return rows[0];
 }
 
-export async function updateActivo(id: string, data: Partial<Omit<ActivoPatrimonio, 'id' | 'created_at' | 'updated_at' | 'titular_nombre'>>): Promise<void> {
+export async function updateActivo(
+  id: string,
+  data: Partial<Omit<ActivoPatrimonio, 'id' | 'created_at' | 'updated_at' | 'titular_nombre'>>,
+): Promise<void> {
   // Eliminar campos virtuales/computados que no existen en la tabla antes de enviar
-  const { titular_nombre: _tn, id: _id, created_at: _ca, updated_at: _ua, ...clean } = data as ActivoPatrimonio;
-  void _tn; void _id; void _ca; void _ua;
-  await req('PATCH', `activos_patrimonio?id=eq.${encodeURIComponent(id)}`, { ...clean, updated_at: new Date().toISOString() });
+  const {
+    titular_nombre: _tn,
+    id: _id,
+    created_at: _ca,
+    updated_at: _ua,
+    ...clean
+  } = data as ActivoPatrimonio;
+  void _tn;
+  void _id;
+  void _ca;
+  void _ua;
+  await req('PATCH', `activos_patrimonio?id=eq.${encodeURIComponent(id)}`, {
+    ...clean,
+    updated_at: new Date().toISOString(),
+  });
 }
 
 export async function deleteActivo(id: string): Promise<void> {
@@ -63,18 +86,23 @@ export async function deleteActivo(id: string): Promise<void> {
 // ── CAPEX ─────────────────────────────────────────────────────────────────────
 
 export async function getCapexByActivo(activoId: string): Promise<CapexActivo[]> {
-  const res = await req('GET', `capex_activos?activo_id=eq.${encodeURIComponent(activoId)}&select=*&order=fecha.desc`);
+  const res = await req(
+    'GET',
+    `capex_activos?activo_id=eq.${encodeURIComponent(activoId)}&select=*&order=fecha.desc`,
+  );
   return res.json() as Promise<CapexActivo[]>;
 }
 
-export async function insertCapex(data: Omit<CapexActivo, 'id' | 'created_at'>): Promise<CapexActivo> {
+export async function insertCapex(
+  data: Omit<CapexActivo, 'id' | 'created_at'>,
+): Promise<CapexActivo> {
   const res = await fetch(sbUrl('capex_activos'), {
     method: 'POST',
     headers: h({ Prefer: 'return=representation' }),
     body: JSON.stringify(data),
   });
   if (!res.ok) throw new Error(`insertCapex: ${res.status} — ${(await res.text()).slice(0, 200)}`);
-  const rows = await res.json() as CapexActivo[];
+  const rows = (await res.json()) as CapexActivo[];
   if (!rows[0]) throw new Error('insertCapex: respuesta vacía');
   return rows[0];
 }

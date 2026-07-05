@@ -1,8 +1,13 @@
 import { sbHeaders, sbUrl } from '@alsari/supabase-client';
 
 export type TipoFlujo =
-  | 'inversion' | 'recapex' | 'venta'
-  | 'dividendo' | 'ingreso_operativo' | 'gasto_operativo' | 'otro';
+  | 'inversion'
+  | 'recapex'
+  | 'venta'
+  | 'dividendo'
+  | 'ingreso_operativo'
+  | 'gasto_operativo'
+  | 'otro';
 
 export type FlujoCaja = {
   id: string;
