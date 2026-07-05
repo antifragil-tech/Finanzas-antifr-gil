@@ -39,60 +39,65 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       {/* Header */}
-      <header className="px-10 pt-14 pb-10">
+      <header className="px-10 pb-10 pt-14">
         <Image
           src="/logo.png"
           alt="Alsari Capital"
           width={160}
           height={46}
-          className="object-contain opacity-70 mb-8"
+          className="mb-8 object-contain opacity-70"
           priority
         />
-        <div className="flex items-center gap-2 text-2xs text-zinc-600 font-medium uppercase tracking-widest mb-3">
+        <div className="text-2xs mb-3 flex items-center gap-2 font-medium uppercase tracking-widest text-zinc-600">
           <Activity size={10} />
           <span>Sistema Operativo</span>
         </div>
-        <h1 className="text-4xl font-light tracking-tighter text-white mb-2">
+        <h1 className="mb-2 text-4xl font-light tracking-tighter text-white">
           Buenos días, Guille.
         </h1>
-        <p className="text-zinc-500 text-sm font-medium">
+        <p className="text-sm font-medium text-zinc-500">
           Selecciona una herramienta para comenzar.
         </p>
       </header>
 
       {/* Module grid */}
       <main className="px-10 pb-16">
-        <p className="text-2xs font-semibold text-zinc-600 uppercase tracking-widest mb-5">
+        <p className="text-2xs mb-5 font-semibold uppercase tracking-widest text-zinc-600">
           Módulos activos
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {modules.map(({ href, label, description, icon: Icon, color, bg, border, dot }) => (
             <Link
               key={href}
               href={href}
-              className={`group relative flex flex-col gap-6 p-7 rounded-2xl border bg-zinc-900/40 ${border} hover:bg-zinc-900/70 transition-all duration-300 hover:scale-[1.01] hover:shadow-xl hover:shadow-black/30`}
+              className={`group relative flex flex-col gap-6 rounded-2xl border bg-zinc-900/40 p-7 ${border} transition-all duration-300 hover:scale-[1.01] hover:bg-zinc-900/70 hover:shadow-xl hover:shadow-black/30`}
             >
               {/* Status dot */}
-              <div className="absolute top-5 right-5 flex items-center gap-1.5">
-                <span className={`w-1.5 h-1.5 rounded-full ${dot} animate-pulse`} />
-                <span className="text-2xs font-medium text-zinc-600 uppercase tracking-widest">Activo</span>
+              <div className="absolute right-5 top-5 flex items-center gap-1.5">
+                <span className={`h-1.5 w-1.5 rounded-full ${dot} animate-pulse`} />
+                <span className="text-2xs font-medium uppercase tracking-widest text-zinc-600">
+                  Activo
+                </span>
               </div>
 
               {/* Icon */}
-              <div className={`w-14 h-14 rounded-2xl ${bg} flex items-center justify-center`}>
+              <div className={`h-14 w-14 rounded-2xl ${bg} flex items-center justify-center`}>
                 <Icon size={26} className={color} />
               </div>
 
               {/* Content */}
               <div className="space-y-2">
-                <h2 className="text-lg font-semibold text-white tracking-tight">{label}</h2>
-                <p className="text-sm text-zinc-500 leading-relaxed">{description}</p>
+                <h2 className="text-lg font-semibold tracking-tight text-white">{label}</h2>
+                <p className="text-sm leading-relaxed text-zinc-500">{description}</p>
               </div>
 
               {/* CTA */}
               <div className={`flex items-center gap-1.5 text-xs font-medium ${color} mt-auto`}>
                 <span>Abrir módulo</span>
-                <ChevronRight size={13} className="group-hover:translate-x-0.5 transition-transform duration-200" />
+                <ChevronRight
+                  size={13}
+                  className="transition-transform duration-200 group-hover:translate-x-0.5"
+                />
               </div>
             </Link>
           ))}

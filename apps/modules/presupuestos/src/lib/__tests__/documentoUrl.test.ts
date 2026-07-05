@@ -7,24 +7,29 @@ import { resolveDocumentoSource } from '../documentoUrl';
 
 describe('resolveDocumentoSource', () => {
   it('con storage_path → fuente firmada', () => {
-    expect(resolveDocumentoSource({ storage_path: 'P-X/123-doc.pdf', archivo_url: '' }))
-      .toEqual({ kind: 'signed', path: 'P-X/123-doc.pdf' });
+    expect(resolveDocumentoSource({ storage_path: 'P-X/123-doc.pdf', archivo_url: '' })).toEqual({
+      kind: 'signed',
+      path: 'P-X/123-doc.pdf',
+    });
   });
 
   it('storage_path tiene prioridad sobre archivo_url legado', () => {
-    expect(resolveDocumentoSource({
-      storage_path: 'P-X/123-doc.pdf',
-      archivo_url: 'https://x/object/public/proyecto-documentos/old.pdf',
-    })).toEqual({ kind: 'signed', path: 'P-X/123-doc.pdf' });
+    expect(
+      resolveDocumentoSource({
+        storage_path: 'P-X/123-doc.pdf',
+        archivo_url: 'https://x/object/public/proyecto-documentos/old.pdf',
+      }),
+    ).toEqual({ kind: 'signed', path: 'P-X/123-doc.pdf' });
   });
 
   it('solo archivo_url (legado) → fallback directo', () => {
-    expect(resolveDocumentoSource({ storage_path: '', archivo_url: 'https://x/old.pdf' }))
-      .toEqual({ kind: 'legacy', url: 'https://x/old.pdf' });
+    expect(resolveDocumentoSource({ storage_path: '', archivo_url: 'https://x/old.pdf' })).toEqual({
+      kind: 'legacy',
+      url: 'https://x/old.pdf',
+    });
   });
 
   it('sin storage_path ni archivo_url → none', () => {
-    expect(resolveDocumentoSource({ storage_path: '', archivo_url: '' }))
-      .toEqual({ kind: 'none' });
+    expect(resolveDocumentoSource({ storage_path: '', archivo_url: '' })).toEqual({ kind: 'none' });
   });
 });

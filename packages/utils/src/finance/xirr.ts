@@ -13,15 +13,15 @@ function aniosDesdeInicio(f0: Date, ft: Date): number {
 export function calcularXIRR(flujos: Flujo[], guess = 0.1): number {
   if (flujos.length < 2) throw new Error('XIRR requiere al menos 2 flujos.');
 
-  const hayNegativo = flujos.some(f => f.importe < 0);
-  const hayPositivo = flujos.some(f => f.importe > 0);
+  const hayNegativo = flujos.some((f) => f.importe < 0);
+  const hayPositivo = flujos.some((f) => f.importe > 0);
   if (!hayNegativo || !hayPositivo) {
     throw new Error('XIRR requiere flujos positivos y negativos.');
   }
 
-  const fechas = flujos.map(f => new Date(f.fecha));
+  const fechas = flujos.map((f) => new Date(f.fecha));
   const f0 = fechas[0]!;
-  const t = fechas.map(d => aniosDesdeInicio(f0, d));
+  const t = fechas.map((d) => aniosDesdeInicio(f0, d));
 
   let r = guess;
 
@@ -33,8 +33,8 @@ export function calcularXIRR(flujos: Flujo[], guess = 0.1): number {
       const cf = flujos[j]!.importe;
       const tj = t[j]!;
       const base = Math.pow(1 + r, tj);
-      fx  += cf / base;
-      dfx -= cf * tj / (base * (1 + r));
+      fx += cf / base;
+      dfx -= (cf * tj) / (base * (1 + r));
     }
 
     if (Math.abs(dfx) < 1e-12) break;

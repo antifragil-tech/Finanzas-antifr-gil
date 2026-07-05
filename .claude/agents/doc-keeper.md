@@ -45,6 +45,7 @@ Si no, compara contra `main`.
 ### Paso 2 — Leer los docs actuales
 
 Lee siempre estos ficheros antes de escribir:
+
 - `docs/ARQUITECTURA.md` — para no duplicar ni contradecir lo existente.
 - `docs/CHANGELOG.md` — para respetar el formato Keep a Changelog.
 - `docs/SESSION.md` — si existe, para entender el estado previo.
@@ -52,6 +53,7 @@ Lee siempre estos ficheros antes de escribir:
 ### Paso 3 — Leer el código afectado
 
 Para cada archivo modificado significativo, léelo o usa Grep para entender:
+
 - ¿Qué tablas SQL se crearon o modificaron?
 - ¿Qué vistas se crearon o corrigieron?
 - ¿Qué nuevos tipos TypeScript se añadieron?
@@ -77,41 +79,50 @@ Sobreescríbelo cada vez que lo actualices. Solo importa el estado actual, no el
 
 ```markdown
 # SESSION — Estado actual de trabajo
+
 > Última actualización: YYYY-MM-DD HH:MM · Rama: `<nombre-rama>`
 
 ## 🎯 Objetivo de la rama actual
+
 [Una frase: qué problema resuelve esta rama y por qué existe]
 
 ## ✅ Completado en esta sesión
+
 - [Lo que se terminó, con referencias a archivos concretos]
 - [Usar verbos pasados: "Corregido bug X en Y", "Añadido selector Z en W"]
 
 ## 🚧 En progreso / Incompleto
+
 - [Lo que se empezó pero no se terminó]
 - [Ser específico: "Falta aplicar migración en Supabase", "Falta test de Y"]
 - [Si no hay nada en progreso, escribir: "Nada. Todo lo planeado está completo."]
 
 ## 📋 Próximos pasos recomendados
+
 1. [El siguiente paso más lógico dado el estado actual]
 2. [...]
-[Ordenar por prioridad. Máximo 5.]
+   [Ordenar por prioridad. Máximo 5.]
 
 ## ⚠️ Decisiones pendientes de Guille
+
 - [Solo si hay algo que requiere input del usuario antes de continuar]
 - [Si no hay nada, omitir esta sección]
 
 ## 🐛 Bugs conocidos / Deuda técnica detectada
+
 - [Problemas conocidos que no se han resuelto en esta sesión]
 - [Si no hay nada, escribir: "Ninguno detectado."]
 
 ## 📁 Archivos clave modificados
-| Archivo | Cambio principal |
-|---------|-----------------|
-| `services/supabase/migrations/YYYYMMDD_*.sql` | [descripción] |
-| `apps/modules/X/src/lib/Y.ts` | [descripción] |
-| `apps/modules/X/src/components/Z.tsx` | [descripción] |
+
+| Archivo                                       | Cambio principal |
+| --------------------------------------------- | ---------------- |
+| `services/supabase/migrations/YYYYMMDD_*.sql` | [descripción]    |
+| `apps/modules/X/src/lib/Y.ts`                 | [descripción]    |
+| `apps/modules/X/src/components/Z.tsx`         | [descripción]    |
 
 ## 🔗 Contexto necesario para continuar
+
 [Máximo 3-5 líneas. Lo que un Claude nuevo necesita saber que NO está en
 ARQUITECTURA.md ni en el código. Ej: decisiones de diseño, restricciones de negocio,
 acuerdos tácitos de la sesión, cosas que se intentaron y no funcionaron.]
@@ -125,6 +136,7 @@ Añade una nueva entrada al bloque `## [Unreleased]` siguiendo el formato
 **Keep a Changelog** que ya usa el proyecto.
 
 **Reglas:**
+
 - Encabezado: `#### [Módulo/área] — [título descriptivo] (YYYY-MM-DD)`
 - Subsecciones: `**Modelo de datos:**`, `**API:**`, `**UI:**`, `**Bugs corregidos:**`, etc.
   Solo las que apliquen.
@@ -178,11 +190,13 @@ Actualiza solo las secciones afectadas. No reescribas todo el documento.
 # Doc Keeper — Actualización completada
 
 **Archivos modificados:**
+
 - `docs/SESSION.md` — [descripción en una línea de lo que capturas]
 - `docs/CHANGELOG.md` — [título de la entrada añadida]
 - `docs/ARQUITECTURA.md` — [secciones tocadas]
 
 **Estado de la rama según el diff:**
+
 - Completado: [lista]
 - En progreso: [lista o "Nada"]
 - Próximos pasos: [lista]
@@ -197,7 +211,7 @@ sin aplicar, tipo-check no ejecutado, archivos modificados sin cambios en tests]
 
 El padre puede invocarte con:
 
-> *"Actualiza la documentación. Hemos terminado la tesorería multi-sociedad:
-> migración 20260604120000, cambios en proyectosApi.ts y Tesoreria.tsx."*
+> _"Actualiza la documentación. Hemos terminado la tesorería multi-sociedad:
+> migración 20260604120000, cambios en proyectosApi.ts y Tesoreria.tsx."_
 
 O sin contexto previo — en ese caso, infiere todo desde `git diff main...HEAD`.
