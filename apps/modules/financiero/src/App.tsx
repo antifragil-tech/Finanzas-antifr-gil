@@ -170,7 +170,7 @@ export function FinancieroDashboard() {
 
   const [selectedSociety, setSelectedSociety] = useState<SocietyOption>({
     id: 'alsari_capital',
-    nombre: 'Alsari Capital',
+    nombre: 'Antifrágil',
     idRef: null,
     variant: 'secondary',
     badge: 'Holding principal',
@@ -316,7 +316,7 @@ export function FinancieroDashboard() {
       });
     societies.push({
       id: 'alsari_capital',
-      nombre: 'Alsari Capital',
+      nombre: 'Antifrágil',
       idRef: null,
       variant: 'secondary',
       badge: 'Consolidado Total',

@@ -869,7 +869,7 @@ function EstructuraTab({
 
       {/* Alsari Capital virtual root */}
       <div className="flex items-center gap-3 rounded-xl border border-blue-500/20 bg-blue-500/5 px-4 py-3">
-        <span className="text-sm font-semibold text-blue-300">Alsari Capital</span>
+        <span className="text-sm font-semibold text-blue-300">Antifrágil</span>
         <span className="text-2xs font-medium text-blue-400/60">
           Entidad virtual consolidada — Pavier + Armia
         </span>

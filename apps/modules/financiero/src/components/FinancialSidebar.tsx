@@ -147,7 +147,7 @@ export function FinancialSidebar({
         <div className="flex flex-1 justify-center">
           <img
             src="/logo.png"
-            alt="Alsari Capital"
+            alt="Antifrágil"
             className="h-7 w-auto object-contain opacity-90 transition-opacity hover:opacity-100"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
