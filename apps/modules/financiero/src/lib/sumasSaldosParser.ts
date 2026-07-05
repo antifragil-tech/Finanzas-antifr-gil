@@ -54,11 +54,7 @@ function parseNum(v: unknown): number {
 
 function norm(v: unknown): string {
   if (typeof v !== 'string' && typeof v !== 'number') return '';
-  return String(v)
-    .toLowerCase()
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .trim();
+  return String(v).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim();
 }
 
 // ── Detección de columnas ─────────────────────────────────────────────────────
@@ -70,7 +66,7 @@ type ColMap = {
   haber: number;
   saldo_deudor: number;
   saldo_acreedor: number;
-  saldo_final: number;   // columna única con saldo positivo/negativo (ej. A3/Sage ES)
+  saldo_final: number; // columna única con saldo positivo/negativo (ej. A3/Sage ES)
 };
 
 function detectHeader(rows: unknown[][]): { rowIdx: number; cols: ColMap } | null {
@@ -78,43 +74,56 @@ function detectHeader(rows: unknown[][]): { rowIdx: number; cols: ColMap } | nul
     const cells = (rows[i] ?? []).map(norm);
 
     // Acepta: 'cuenta', 'subcuenta', 'cta', 'cod', 'codigo'
-    const cuentaIdx = cells.findIndex(c =>
-      c === 'cuenta' || c === 'subcuenta' || c === 'cta' || c === 'cod' ||
-      c === 'codigo' || c.startsWith('cta.') || c.startsWith('cod.') ||
-      c.includes('subcuenta')
+    const cuentaIdx = cells.findIndex(
+      (c) =>
+        c === 'cuenta' ||
+        c === 'subcuenta' ||
+        c === 'cta' ||
+        c === 'cod' ||
+        c === 'codigo' ||
+        c.startsWith('cta.') ||
+        c.startsWith('cod.') ||
+        c.includes('subcuenta'),
     );
     if (cuentaIdx < 0) continue;
 
-    const descIdx = cells.findIndex(c =>
-      c.includes('desc') || c.includes('denominac') || c === 'nombre' ||
-      c === 'titulo' || c === 'title'
+    const descIdx = cells.findIndex(
+      (c) =>
+        c.includes('desc') ||
+        c.includes('denominac') ||
+        c === 'nombre' ||
+        c === 'titulo' ||
+        c === 'title',
     );
 
     // Debe/Haber: acepta 'importe debe', 'mov. debe', 'debe', etc.
-    const debeIdx = cells.findIndex(c =>
-      c === 'debe' || (c.includes('debe') && !c.includes('saldo'))
+    const debeIdx = cells.findIndex(
+      (c) => c === 'debe' || (c.includes('debe') && !c.includes('saldo')),
     );
-    const haberIdx = cells.findIndex(c =>
-      c === 'haber' || (c.includes('haber') && !c.includes('saldo'))
+    const haberIdx = cells.findIndex(
+      (c) => c === 'haber' || (c.includes('haber') && !c.includes('saldo')),
     );
 
     // Saldo Deudor / Saldo Acreedor (formato estándar con dos columnas)
-    const sdIdx = cells.findIndex(c =>
-      c.includes('deudor') || c === 'sd' || c === 's.deudor'
-    );
-    const saIdx = cells.findIndex(c =>
-      c.includes('acreedor') || c === 'sa' || c === 's.acreedor'
+    const sdIdx = cells.findIndex((c) => c.includes('deudor') || c === 'sd' || c === 's.deudor');
+    const saIdx = cells.findIndex(
+      (c) => c.includes('acreedor') || c === 'sa' || c === 's.acreedor',
     );
 
     // Saldo único positivo/negativo (formato A3/Sage ES: última columna 'Saldo')
     // Solo se usa si NO hay columnas separadas de deudor/acreedor
-    const saldoFinalIdx = (sdIdx < 0 && saIdx < 0)
-      ? cells.findIndex(c =>
-          c === 'saldo' ||
-          (c.includes('saldo') && !c.includes('inicial') && !c.includes('anterior') &&
-           !c.includes('deudor') && !c.includes('acreedor'))
-        )
-      : -1;
+    const saldoFinalIdx =
+      sdIdx < 0 && saIdx < 0
+        ? cells.findIndex(
+            (c) =>
+              c === 'saldo' ||
+              (c.includes('saldo') &&
+                !c.includes('inicial') &&
+                !c.includes('anterior') &&
+                !c.includes('deudor') &&
+                !c.includes('acreedor')),
+          )
+        : -1;
 
     // Necesita al menos: cuenta + (debe/haber ó saldo deudor/acreedor ó saldo único)
     const hasNumbers = debeIdx >= 0 || sdIdx >= 0 || saldoFinalIdx >= 0;
@@ -123,13 +132,13 @@ function detectHeader(rows: unknown[][]): { rowIdx: number; cols: ColMap } | nul
     return {
       rowIdx: i,
       cols: {
-        cuenta:         cuentaIdx,
-        desc:           descIdx >= 0 ? descIdx : -1,
-        debe:           debeIdx >= 0 ? debeIdx : -1,
-        haber:          haberIdx >= 0 ? haberIdx : -1,
-        saldo_deudor:   sdIdx >= 0 ? sdIdx : -1,
+        cuenta: cuentaIdx,
+        desc: descIdx >= 0 ? descIdx : -1,
+        debe: debeIdx >= 0 ? debeIdx : -1,
+        haber: haberIdx >= 0 ? haberIdx : -1,
+        saldo_deudor: sdIdx >= 0 ? sdIdx : -1,
         saldo_acreedor: saIdx >= 0 ? saIdx : -1,
-        saldo_final:    saldoFinalIdx >= 0 ? saldoFinalIdx : -1,
+        saldo_final: saldoFinalIdx >= 0 ? saldoFinalIdx : -1,
       },
     };
   }
@@ -139,7 +148,9 @@ function detectHeader(rows: unknown[][]): { rowIdx: number; cols: ColMap } | nul
 // ── Validación de fila de cuenta ─────────────────────────────────────────────
 
 function isAccountRow(row: unknown[], cuentaCol: number): boolean {
-  const val = String(row[cuentaCol] ?? '').trim().replace(/\.$/, '');
+  const val = String(row[cuentaCol] ?? '')
+    .trim()
+    .replace(/\.$/, '');
   if (/^\d{3,10}$/.test(val)) return true;
   // Formato punto: XXXX.NNNNNNN con parte decimal toda dígitos (p.ej. ContaPlus/ERP)
   // Excluye filas de resumen como "1000.      " (espacios tras el punto)
@@ -151,9 +162,9 @@ function isAccountRow(row: unknown[], cuentaCol: number): boolean {
 // como de 8 dígitos (detalle). Solo se conservan las cuentas hoja (sin hijos).
 
 function filterLeaves(lines: BalanceLine[]): BalanceLine[] {
-  const codes = new Set(lines.map(l => l.cuenta));
-  return lines.filter(l =>
-    !Array.from(codes).some(other => other !== l.cuenta && other.startsWith(l.cuenta))
+  const codes = new Set(lines.map((l) => l.cuenta));
+  return lines.filter(
+    (l) => !Array.from(codes).some((other) => other !== l.cuenta && other.startsWith(l.cuenta)),
   );
 }
 
@@ -170,41 +181,57 @@ function filterLeaves(lines: BalanceLine[]): BalanceLine[] {
 // no altera el comportamiento de los formatos que ya funcionan.
 function extractAnchoredLines(raw: unknown[][]): BalanceLine[] {
   const accountRe = /^\d{3,10}$/;
-  const dottedRe  = /^\d{3,4}\.\d+$/;
+  const dottedRe = /^\d{3,4}\.\d+$/;
   const isAcc = (v: unknown) => {
-    const s = String(v ?? '').trim().replace(/\.$/, '');
+    const s = String(v ?? '')
+      .trim()
+      .replace(/\.$/, '');
     return accountRe.test(s) || dottedRe.test(s);
   };
   const maxCol = raw.reduce((m, r) => Math.max(m, r.length), 0);
   if (maxCol === 0) return [];
 
   // 1. Columna de cuenta: la que más códigos contiene
-  let accCol = -1, accBest = 0;
+  let accCol = -1,
+    accBest = 0;
   for (let c = 0; c < maxCol; c++) {
     let n = 0;
     for (const r of raw) if (isAcc(r[c])) n++;
-    if (n > accBest) { accBest = n; accCol = c; }
+    if (n > accBest) {
+      accBest = n;
+      accCol = c;
+    }
   }
   if (accCol < 0 || accBest < 3) return [];
 
-  const accRows = raw.filter(r => isAcc(r[accCol]));
+  const accRows = raw.filter((r) => isAcc(r[accCol]));
 
   // 2. Columna de saldo: numérica, suma ≈ 0, con positivos y negativos
-  let saldoCol = -1, bestScore = Infinity;
+  let saldoCol = -1,
+    bestScore = Infinity;
   for (let c = 0; c < maxCol; c++) {
     if (c === accCol) continue;
-    let sum = 0, gross = 0, neg = 0, pos = 0, cnt = 0;
+    let sum = 0,
+      gross = 0,
+      neg = 0,
+      pos = 0,
+      cnt = 0;
     for (const r of accRows) {
       const v = r[c];
       if (typeof v === 'number' && isFinite(v) && v !== 0) {
-        sum += v; gross += Math.abs(v);
-        if (v < 0) neg++; else pos++;
+        sum += v;
+        gross += Math.abs(v);
+        if (v < 0) neg++;
+        else pos++;
         cnt++;
       }
     }
     if (cnt >= 3 && neg >= 1 && pos >= 1 && gross > 0) {
       const score = Math.abs(sum) / gross;
-      if (score < 0.05 && score < bestScore) { bestScore = score; saldoCol = c; }
+      if (score < 0.05 && score < bestScore) {
+        bestScore = score;
+        saldoCol = c;
+      }
     }
   }
   if (saldoCol < 0) return [];
@@ -212,7 +239,9 @@ function extractAnchoredLines(raw: unknown[][]): BalanceLine[] {
   // 3. Construir líneas
   const lines: BalanceLine[] = [];
   for (const r of accRows) {
-    const cuenta = String(r[accCol] ?? '').trim().replace(/\.$/, '');
+    const cuenta = String(r[accCol] ?? '')
+      .trim()
+      .replace(/\.$/, '');
     let descripcion = '';
     for (let c = 0; c < r.length; c++) {
       if (c === accCol) continue;
@@ -228,7 +257,7 @@ function extractAnchoredLines(raw: unknown[][]): BalanceLine[] {
       descripcion,
       debe: 0,
       haber: 0,
-      saldo_deudor:   saldo > 0 ?  saldo : 0,
+      saldo_deudor: saldo > 0 ? saldo : 0,
       saldo_acreedor: saldo < 0 ? -saldo : 0,
     });
   }
@@ -263,7 +292,12 @@ export function parseSumasSaldos(buffer: ArrayBuffer): BalanceParseResult {
     if (!ws) continue;
     const candidate = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: '' });
     const h = detectHeader(candidate);
-    if (h) { sheetName = name; raw = candidate; found = h; break; }
+    if (h) {
+      sheetName = name;
+      raw = candidate;
+      found = h;
+      break;
+    }
   }
 
   let allLines: BalanceLine[] = [];
@@ -275,28 +309,35 @@ export function parseSumasSaldos(buffer: ArrayBuffer): BalanceParseResult {
       const row = raw[i] ?? [];
       if (!isAccountRow(row, cols.cuenta)) continue;
 
-      const cuenta      = String(row[cols.cuenta] ?? '').trim().replace(/\.$/, '');
+      const cuenta = String(row[cols.cuenta] ?? '')
+        .trim()
+        .replace(/\.$/, '');
       // Algunos exports Excel añaden ' inicial para evitar que la celda se interprete como fórmula
-      const descripcion = cols.desc >= 0 ? String(row[cols.desc] ?? '').trim().replace(/^'/, '') : '';
-      const debe        = cols.debe >= 0 ? parseNum(row[cols.debe]) : 0;
-      const haber       = cols.haber >= 0 ? parseNum(row[cols.haber]) : 0;
+      const descripcion =
+        cols.desc >= 0
+          ? String(row[cols.desc] ?? '')
+              .trim()
+              .replace(/^'/, '')
+          : '';
+      const debe = cols.debe >= 0 ? parseNum(row[cols.debe]) : 0;
+      const haber = cols.haber >= 0 ? parseNum(row[cols.haber]) : 0;
 
       let saldo_deudor: number;
       let saldo_acreedor: number;
 
       if (cols.saldo_deudor >= 0 && cols.saldo_acreedor >= 0) {
         // Formato con columnas separadas (Saldo Deudor | Saldo Acreedor)
-        saldo_deudor   = parseNum(row[cols.saldo_deudor]);
+        saldo_deudor = parseNum(row[cols.saldo_deudor]);
         saldo_acreedor = parseNum(row[cols.saldo_acreedor]);
       } else if (cols.saldo_final >= 0) {
         // Formato A3/Sage ES: una columna 'Saldo' con signo (positivo = deudor, negativo = acreedor)
-        const saldo    = parseNum(row[cols.saldo_final]);
-        saldo_deudor   = saldo > 0 ? saldo : 0;
+        const saldo = parseNum(row[cols.saldo_final]);
+        saldo_deudor = saldo > 0 ? saldo : 0;
         saldo_acreedor = saldo < 0 ? -saldo : 0;
       } else {
         // Fallback: derivar del movimiento debe/haber del período
-        const net      = debe - haber;
-        saldo_deudor   = net > 0 ? net : 0;
+        const net = debe - haber;
+        saldo_deudor = net > 0 ? net : 0;
         saldo_acreedor = net < 0 ? -net : 0;
       }
 
@@ -313,15 +354,19 @@ export function parseSumasSaldos(buffer: ArrayBuffer): BalanceParseResult {
       if (!ws) continue;
       const candidate = XLSX.utils.sheet_to_json<unknown[]>(ws, { header: 1, defval: '' });
       const anchored = extractAnchoredLines(candidate);
-      if (anchored.length > 0) { allLines = anchored; sheetName = name; break; }
+      if (anchored.length > 0) {
+        allLines = anchored;
+        sheetName = name;
+        break;
+      }
     }
   }
 
   if (allLines.length === 0) {
     throw new Error(
       'No se pudo leer el balance.\n' +
-      'Asegúrate de exportar el Balance de Sumas y Saldos en Excel desde tu software contable,\n' +
-      'con una columna de cuenta (códigos numéricos) y una de saldo (o Debe / Haber).'
+        'Asegúrate de exportar el Balance de Sumas y Saldos en Excel desde tu software contable,\n' +
+        'con una columna de cuenta (códigos numéricos) y una de saldo (o Debe / Haber).',
     );
   }
 
@@ -339,7 +384,7 @@ export type KpiLine = Pick<BalanceLine, 'cuenta' | 'saldo_deudor' | 'saldo_acree
 
 export function deriveKpis(rows: KpiLine[]): DerivedKpis {
   const pre = (prefixes: string[]) =>
-    rows.filter(r => prefixes.some(p => r.cuenta.startsWith(p)));
+    rows.filter((r) => prefixes.some((p) => r.cuenta.startsWith(p)));
 
   const sumD = (rs: KpiLine[]) => rs.reduce((s, r) => s + r.saldo_deudor, 0);
   const sumA = (rs: KpiLine[]) => rs.reduce((s, r) => s + r.saldo_acreedor, 0);
@@ -355,7 +400,7 @@ export function deriveKpis(rows: KpiLine[]): DerivedKpis {
   // Deuda bancaria CP: solo entidades de crédito (520x) e intereses bancarios (527x)
   // 523 = Proveedores inmovilizado CP, 524 = Leasing CP, 525-526 = otros → NO son bancarias
   const deuda_bancaria_cp = sumA(pre(['520', '527']));
-  const deuda_bancaria    = deuda_bancaria_lp + deuda_bancaria_cp;
+  const deuda_bancaria = deuda_bancaria_lp + deuda_bancaria_cp;
 
   // Deuda con socios y partes vinculadas (en Alsari, las vinculadas también son
   // socios, p.ej. Construcciones Maygar en Perisur):
@@ -365,9 +410,7 @@ export function deriveKpis(rows: KpiLine[]): DerivedKpis {
   // NO incluye la 555 (partidas pendientes de aplicación, no es deuda de socios)
   // ni la 170 (deuda bancaria, ya contada en deuda_bancaria_lp).
   const deuda_socios =
-    sumA(pre(['550', '551', '552', '553'])) +
-    sumA(pre(['16'])) +
-    sumA(pre(['171']));
+    sumA(pre(['550', '551', '552', '553'])) + sumA(pre(['16'])) + sumA(pre(['171']));
 
   const deuda_financiera_neta = deuda_bancaria - caja_disponible;
 
@@ -376,35 +419,35 @@ export function deriveKpis(rows: KpiLine[]): DerivedKpis {
   // Durante el año, la 12900000 no está cerrada: hay que sumar 7xx ingresos - 6xx gastos.
   const pn_balance = netA(pre(['10', '11', '12', '13']));
   const resultado_periodo =
-    rows.filter(r => /^7/.test(r.cuenta)).reduce((s, r) => s + r.saldo_acreedor, 0) -
-    rows.filter(r => /^6/.test(r.cuenta)).reduce((s, r) => s + r.saldo_deudor, 0);
+    rows.filter((r) => /^7/.test(r.cuenta)).reduce((s, r) => s + r.saldo_acreedor, 0) -
+    rows.filter((r) => /^6/.test(r.cuenta)).reduce((s, r) => s + r.saldo_deudor, 0);
   const patrimonio_neto = pn_balance + resultado_periodo;
 
   // Activo no corriente: grupo 2 — suma con SIGNO para netear amortización acumulada (28x)
   // y deterioros (29x) que tienen saldo acreedor y reducen el valor contable neto.
   const activo_no_corriente = rows
-    .filter(r => /^2/.test(r.cuenta))
+    .filter((r) => /^2/.test(r.cuenta))
     .reduce((s, r) => s + r.saldo_deudor - r.saldo_acreedor, 0);
 
   // Activo corriente: grupos 3, 4, 5 — posición deudora (Max evita que pasivos del grupo
   // 4-5 aporten negativamente; los deterioros de existencias 39x se netean correctamente)
   const activo_corriente = rows
-    .filter(r => /^[345]/.test(r.cuenta))
+    .filter((r) => /^[345]/.test(r.cuenta))
     .reduce((s, r) => s + Math.max(0, r.saldo_deudor - r.saldo_acreedor), 0);
 
   const activo_total = activo_no_corriente + activo_corriente;
 
   // Pasivo no corriente: 14x (provisiones), 15x, 16x, 17x, 18x (posición acreedora neta)
   const pasivo_no_corriente = rows
-    .filter(r => /^1[45678]/.test(r.cuenta))
+    .filter((r) => /^1[45678]/.test(r.cuenta))
     .reduce((s, r) => s + Math.max(0, r.saldo_acreedor - r.saldo_deudor), 0);
 
   // Pasivo corriente: grupos 4, 5 excepto 57x (posición acreedora neta)
   const pasivo_corriente = rows
-    .filter(r => /^[45]/.test(r.cuenta) && !r.cuenta.startsWith('57'))
+    .filter((r) => /^[45]/.test(r.cuenta) && !r.cuenta.startsWith('57'))
     .reduce((s, r) => s + Math.max(0, r.saldo_acreedor - r.saldo_deudor), 0);
 
-  const pasivo_total   = pasivo_no_corriente + pasivo_corriente;
+  const pasivo_total = pasivo_no_corriente + pasivo_corriente;
   const fondo_maniobra = activo_corriente - pasivo_corriente;
 
   return {

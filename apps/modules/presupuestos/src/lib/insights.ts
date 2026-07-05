@@ -14,8 +14,8 @@ export type VeredictoTipo = 'Atractivo' | 'Defensivo' | 'Agresivo' | 'Revisar';
 
 export type Veredicto = {
   tipo: VeredictoTipo;
-  motivo: string;       // una línea en lenguaje simple
-  bullets: string[];    // 3-5 razones
+  motivo: string; // una línea en lenguaje simple
+  bullets: string[]; // 3-5 razones
 };
 
 // ── Calidad del dato ──────────────────────────────────────────────────────────
@@ -27,7 +27,7 @@ export type EstadoCampo = 'completo' | 'estimado' | 'faltante';
 export type CampoCalidad = { label: string; estado: EstadoCampo; critico: boolean };
 
 export type CalidadDato = {
-  score: number;            // 0-100
+  score: number; // 0-100
   nivel: CalidadNivel;
   campos: CampoCalidad[];
   completos: string[];
@@ -52,7 +52,11 @@ export const tieneValor = (v: number | null | undefined): boolean => v != null &
 // Calcula la calidad del dato a partir de la lista de campos del tipo.
 // Puntuación: completo = peso · estimado = 60% del peso · faltante = 0.
 export function evaluarCalidad(a: AnalisisFinanciero, defs: DefCampo[]): CalidadDato {
-  const campos: CampoCalidad[] = defs.map(d => ({ label: d.label, estado: d.estado(a), critico: !!d.critico }));
+  const campos: CampoCalidad[] = defs.map((d) => ({
+    label: d.label,
+    estado: d.estado(a),
+    critico: !!d.critico,
+  }));
 
   const pesoTotal = defs.reduce((s, d) => s + d.peso, 0);
   const pesoObtenido = defs.reduce((s, d) => {
@@ -62,10 +66,12 @@ export function evaluarCalidad(a: AnalisisFinanciero, defs: DefCampo[]): Calidad
   const score = pesoTotal > 0 ? Math.round((pesoObtenido / pesoTotal) * 100) : 0;
   const nivel: CalidadNivel = score >= 80 ? 'Alta' : score >= 55 ? 'Media' : 'Baja';
 
-  const completos = campos.filter(c => c.estado === 'completo').map(c => c.label);
-  const estimados = campos.filter(c => c.estado === 'estimado').map(c => c.label);
-  const faltantes = campos.filter(c => c.estado === 'faltante').map(c => c.label);
-  const faltantesCriticos = campos.filter(c => c.estado === 'faltante' && c.critico).map(c => c.label);
+  const completos = campos.filter((c) => c.estado === 'completo').map((c) => c.label);
+  const estimados = campos.filter((c) => c.estado === 'estimado').map((c) => c.label);
+  const faltantes = campos.filter((c) => c.estado === 'faltante').map((c) => c.label);
+  const faltantesCriticos = campos
+    .filter((c) => c.estado === 'faltante' && c.critico)
+    .map((c) => c.label);
 
   return { score, nivel, campos, completos, estimados, faltantes, faltantesCriticos };
 }
