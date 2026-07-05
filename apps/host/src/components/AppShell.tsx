@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { BootScreen } from './BootScreen';
 import { createClient } from '@/lib/supabase/client';
+import { isSupabaseConfigured } from '@/lib/env/supabaseEnv';
 import { useRouter } from 'next/navigation';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [booting, setBooting] = useState(true);
   const router = useRouter();
-  const supabase = createClient();
 
   useEffect(() => {
     const t = setTimeout(() => setBooting(false), 2500);
@@ -17,6 +17,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   // Exponer token y logout para módulos embebidos vía window
   useEffect(() => {
+    // Sin entorno configurado no hay sesión que sincronizar (build/CI sin secrets)
+    if (!isSupabaseConfigured()) return;
+
+    const supabase = createClient();
     type W = Window & { alsariLogout?: () => void; alsariToken?: string };
     const win = window as W;
 
@@ -38,7 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       else delete win.alsariToken;
     });
     return () => subscription.unsubscribe();
-  }, [supabase.auth, router]);
+  }, [router]);
 
   if (booting) return <BootScreen />;
 

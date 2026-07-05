@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
+import { isSupabaseConfigured } from '@/lib/env/supabaseEnv';
 import { useRouter } from 'next/navigation';
 
 export function LoginForm() {
@@ -11,13 +12,20 @@ export function LoginForm() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const supabase = createClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Sin entorno configurado no hay backend de auth: estado operativo, no error técnico
+    if (!isSupabaseConfigured()) {
+      setError('Módulo pendiente de configuración de entorno. No hay datos cargados.');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
+    const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
