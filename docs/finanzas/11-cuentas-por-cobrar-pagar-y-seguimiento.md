@@ -27,42 +27,42 @@ Una vista operativa unificada de **CxC** (cuentas por cobrar) y **CxP** (cuentas
 
 > Conceptual, no esquema final. Todo apunte de gestión es **append-only**; los importes pendientes son **derivados** (origen − cobros/pagos aplicados), nunca editados a mano.
 
-| Entidad | Qué es |
-|---|---|
-| `compromiso_financiero` | Abstracción común: algo que **se nos debe** (CxC) o que **debemos** (CxP), con importe, contraparte, origen, vencimiento y estado. Extiende la vista `compromisos_tesoreria` existente |
-| `cuenta_por_cobrar` / `cuenta_por_pagar` | Especializaciones del compromiso, con su ciclo de estados propio (§6/§7) |
-| `vencimiento` | Fecha comprometida de cobro/pago. Reutiliza la entidad `vencimientos` existente (`es_entrada`); `vencido` es **derivado** de fecha, no un flag manual |
-| `seguimiento` | El hilo de gestión del compromiso: responsable, próxima acción, fecha límite, último contacto, notas (§8) |
-| `reclamacion` | Evento de seguimiento tipado (aviso, llamada, email): fecha, actor, resultado. Mueve el estado a `reclamado` |
-| `incidencia` | Discrepancia que bloquea (importe no cuadra, disputa, evidencia ausente); con motivo y vuelta al estado previo — mismo patrón que 08 §5 |
-| `cobro_parcial` / `pago_parcial` | Aplicación parcial de dinero a un compromiso. Reutiliza el patrón `factura_pagos` (libro append-only, sobre/infrapago con tolerancia) |
-| `responsable` | Persona dueña del compromiso (rol operativo, no dato sensible) |
-| `evidencia_documental` | Lo que respalda: factura, liquidación, acuerdo de partner, justificante de devolución. "Factura sí/no" del doc 04 §5.2: el pendiente existe aunque el papel falte, pero el hueco documental queda visible |
-| `movimiento_tesoreria` relacionado | El cobro/pago real (FOP-A1) que reduce o cierra el compromiso, con `origen_tipo`/`origen_id` enlazando ambos mundos |
+| Entidad                                  | Qué es                                                                                                                                                                                                    |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `compromiso_financiero`                  | Abstracción común: algo que **se nos debe** (CxC) o que **debemos** (CxP), con importe, contraparte, origen, vencimiento y estado. Extiende la vista `compromisos_tesoreria` existente                    |
+| `cuenta_por_cobrar` / `cuenta_por_pagar` | Especializaciones del compromiso, con su ciclo de estados propio (§6/§7)                                                                                                                                  |
+| `vencimiento`                            | Fecha comprometida de cobro/pago. Reutiliza la entidad `vencimientos` existente (`es_entrada`); `vencido` es **derivado** de fecha, no un flag manual                                                     |
+| `seguimiento`                            | El hilo de gestión del compromiso: responsable, próxima acción, fecha límite, último contacto, notas (§8)                                                                                                 |
+| `reclamacion`                            | Evento de seguimiento tipado (aviso, llamada, email): fecha, actor, resultado. Mueve el estado a `reclamado`                                                                                              |
+| `incidencia`                             | Discrepancia que bloquea (importe no cuadra, disputa, evidencia ausente); con motivo y vuelta al estado previo — mismo patrón que 08 §5                                                                   |
+| `cobro_parcial` / `pago_parcial`         | Aplicación parcial de dinero a un compromiso. Reutiliza el patrón `factura_pagos` (libro append-only, sobre/infrapago con tolerancia)                                                                     |
+| `responsable`                            | Persona dueña del compromiso (rol operativo, no dato sensible)                                                                                                                                            |
+| `evidencia_documental`                   | Lo que respalda: factura, liquidación, acuerdo de partner, justificante de devolución. "Factura sí/no" del doc 04 §5.2: el pendiente existe aunque el papel falte, pero el hueco documental queda visible |
+| `movimiento_tesoreria` relacionado       | El cobro/pago real (FOP-A1) que reduce o cierra el compromiso, con `origen_tipo`/`origen_id` enlazando ambos mundos                                                                                       |
 
 ## 4. Fuentes de CxC (de dónde nace un "nos deben")
 
-| Fuente | Línea | Nota |
-|---|---|---|
-| Sesión realizada **no cobrada** | Reservas (PR #5) + 09 §8 | Incidencia operativa del día que, si no se resuelve, se convierte en CxC con responsable |
-| Bono vendido **pendiente de cobro** | 10 §4 (`borrador`→`vendido` exige cobro; si se entrega sin cobrar, nace CxC) | Excepcional; visible, no normalizado |
-| Factura operativa emitida pendiente de cobro | doc 02 §7 (libro de cobros) | La CxC "clásica" |
-| Partner pendiente de liquidar (Vivofácil, Oasis, Lidomare) | acuerdos B2B (09 B2-P3) | Sin acuerdo documentado, el pendiente se registra con evidencia "pendiente" — no se inventa el importe |
-| Refacturación de coste compartido a tercero | F-Op C1 (doc 12) | Si Antifrágil paga el total y refactura su parte a Lidomare |
-| Cliente con **pago parcial** | libro de cobros | El resto queda `parcialmente_cobrado` |
-| **Deuda antigua migrada** (pre-OS) | alta administrativa | Saldo inicial declarado, marcado `origen_legacy`, sin reconstruir historia ni meter datos reales en el repo (espejo de B3-P8) |
+| Fuente                                                     | Línea                                                                        | Nota                                                                                                                          |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Sesión realizada **no cobrada**                            | Reservas (PR #5) + 09 §8                                                     | Incidencia operativa del día que, si no se resuelve, se convierte en CxC con responsable                                      |
+| Bono vendido **pendiente de cobro**                        | 10 §4 (`borrador`→`vendido` exige cobro; si se entrega sin cobrar, nace CxC) | Excepcional; visible, no normalizado                                                                                          |
+| Factura operativa emitida pendiente de cobro               | doc 02 §7 (libro de cobros)                                                  | La CxC "clásica"                                                                                                              |
+| Partner pendiente de liquidar (Vivofácil, Oasis, Lidomare) | acuerdos B2B (09 B2-P3)                                                      | Sin acuerdo documentado, el pendiente se registra con evidencia "pendiente" — no se inventa el importe                        |
+| Refacturación de coste compartido a tercero                | F-Op C1 (doc 12)                                                             | Si Antifrágil paga el total y refactura su parte a Lidomare                                                                   |
+| Cliente con **pago parcial**                               | libro de cobros                                                              | El resto queda `parcialmente_cobrado`                                                                                         |
+| **Deuda antigua migrada** (pre-OS)                         | alta administrativa                                                          | Saldo inicial declarado, marcado `origen_legacy`, sin reconstruir historia ni meter datos reales en el repo (espejo de B3-P8) |
 
 ## 5. Fuentes de CxP (de dónde nace un "debemos")
 
-| Fuente | Línea | Nota |
-|---|---|---|
-| Liquidación profesional **validada** pendiente de pago | 08 §9 ("entre `validada` y `pagada` la liquidación es una CxP más") | La fuente nueva más importante |
-| Factura recibida `pendiente_pago` | módulo contabilidad existente | Ya maduro; A2 lo agrega, no lo duplica |
-| Nómina del mes pendiente de registrar/pagar | 08 §3.5 | Importe a cargo de Antifrágil (Lidia 400 €, María Moreno); documento privado |
-| Devolución pendiente de ejecutar al cliente | 10 §6.7 | CxP hasta que sale el dinero |
-| Proveedor recurrente (alquiler, software, cuotas) | vencimientos/presupuestos (F-Op A3) | La recurrencia la genera A3; A2 la sigue |
-| Coste compartido con Lidomare | reglas C1 (doc 12) | La parte que Antifrágil debe (o viceversa) según el acuerdo |
-| Impuestos/gestoría | — | **Solo recordatorio documental con vencimiento**; el cálculo fiscal es de la gestoría (D-op-6), el OS no liquida impuestos |
+| Fuente                                                 | Línea                                                               | Nota                                                                                                                       |
+| ------------------------------------------------------ | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Liquidación profesional **validada** pendiente de pago | 08 §9 ("entre `validada` y `pagada` la liquidación es una CxP más") | La fuente nueva más importante                                                                                             |
+| Factura recibida `pendiente_pago`                      | módulo contabilidad existente                                       | Ya maduro; A2 lo agrega, no lo duplica                                                                                     |
+| Nómina del mes pendiente de registrar/pagar            | 08 §3.5                                                             | Importe a cargo de Antifrágil (Lidia 400 €, María Moreno); documento privado                                               |
+| Devolución pendiente de ejecutar al cliente            | 10 §6.7                                                             | CxP hasta que sale el dinero                                                                                               |
+| Proveedor recurrente (alquiler, software, cuotas)      | vencimientos/presupuestos (F-Op A3)                                 | La recurrencia la genera A3; A2 la sigue                                                                                   |
+| Coste compartido con Lidomare                          | reglas C1 (doc 12)                                                  | La parte que Antifrágil debe (o viceversa) según el acuerdo                                                                |
+| Impuestos/gestoría                                     | —                                                                   | **Solo recordatorio documental con vencimiento**; el cálculo fiscal es de la gestoría (D-op-6), el OS no liquida impuestos |
 
 ## 6. Estados CxC
 
@@ -91,17 +91,17 @@ Reglas: `cobrado`/`pagado` solo los produce **dinero real aplicado** (movimiento
 
 ## 8. Seguimiento operativo (la ficha de cada compromiso)
 
-| Campo | Para qué |
-|---|---|
-| `responsable` | Dueño de la gestión (sin dueño no hay reclamación) |
+| Campo                             | Para qué                                                           |
+| --------------------------------- | ------------------------------------------------------------------ |
+| `responsable`                     | Dueño de la gestión (sin dueño no hay reclamación)                 |
 | `proxima_accion` + `fecha_limite` | Qué toca hacer y cuándo (llamar, reenviar factura, programar pago) |
-| `ultimo_contacto` | Última gestión realizada (de la cadena de `reclamacion`) |
-| `nota_operativa` | Contexto libre **no clínico** |
-| `prioridad` | alta/media/baja (por importe y antigüedad, ajustable) |
-| `origen` | De qué nació (sesión, bono, factura, liquidación, partner, legacy) |
-| `importe_pendiente` | Derivado: origen − parciales aplicados |
-| `dias_vencido` | Derivado de fecha |
-| `evidencia` | Documento que respalda (o su ausencia marcada) |
+| `ultimo_contacto`                 | Última gestión realizada (de la cadena de `reclamacion`)           |
+| `nota_operativa`                  | Contexto libre **no clínico**                                      |
+| `prioridad`                       | alta/media/baja (por importe y antigüedad, ajustable)              |
+| `origen`                          | De qué nació (sesión, bono, factura, liquidación, partner, legacy) |
+| `importe_pendiente`               | Derivado: origen − parciales aplicados                             |
+| `dias_vencido`                    | Derivado de fecha                                                  |
+| `evidencia`                       | Documento que respalda (o su ausencia marcada)                     |
 
 ## 9. Vistas de trabajo
 
@@ -146,13 +146,13 @@ Reglas: `cobrado`/`pagado` solo los produce **dinero real aplicado** (movimiento
 
 ## 15. Roles
 
-| Capacidad | CEO | Coordinadora | Recepción | Profesional |
-|---|---|---|---|---|
-| Todo CxC/CxP, importes globales, incobrables, cancelaciones | ✅ | ❌ | ❌ | ❌ |
-| CxC operativa (sesiones/bonos sin cobrar, reclamaciones) y su seguimiento | ✅ | ✅ | ✅ | ❌ |
-| CxP de nóminas/liquidaciones globales | ✅ | ❌ (dato retributivo, 08 §7) | ❌ | ❌ |
-| Sus propias liquidaciones/pagos pendientes | ✅ | ✅ (las suyas) | — | ✅ (las suyas) |
-| Marcar incobrable / cancelar deuda / programar pagos | ✅ (solo CEO) | proponer | proponer | ❌ |
+| Capacidad                                                                 | CEO           | Coordinadora                 | Recepción | Profesional    |
+| ------------------------------------------------------------------------- | ------------- | ---------------------------- | --------- | -------------- |
+| Todo CxC/CxP, importes globales, incobrables, cancelaciones               | ✅            | ❌                           | ❌        | ❌             |
+| CxC operativa (sesiones/bonos sin cobrar, reclamaciones) y su seguimiento | ✅            | ✅                           | ✅        | ❌             |
+| CxP de nóminas/liquidaciones globales                                     | ✅            | ❌ (dato retributivo, 08 §7) | ❌        | ❌             |
+| Sus propias liquidaciones/pagos pendientes                                | ✅            | ✅ (las suyas)               | —         | ✅ (las suyas) |
+| Marcar incobrable / cancelar deuda / programar pagos                      | ✅ (solo CEO) | proponer                     | proponer  | ❌             |
 
 ## 16. KPIs
 
@@ -162,32 +162,32 @@ Reglas: `cobrado`/`pagado` solo los produce **dinero real aplicado** (movimiento
 
 ## 17. Riesgos y salvaguardas
 
-| Riesgo | Salvaguarda |
-|---|---|
-| Confundir caja con pendiente | A2 muestra lo que falta; FOP-A1 lo que hay; nunca la misma cifra |
-| Ocultar deuda pequeña ("ya se cobrará") | Todo compromiso tiene responsable y antigüedad; vista aging sin filtro de importe |
-| No reclamar a tiempo | `proxima_accion` + `fecha_limite` obligatorias en CxC vencida |
-| No registrar parciales | Libro de parciales append-only (patrón `factura_pagos`); el pendiente es derivado |
+| Riesgo                                                         | Salvaguarda                                                                                                        |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Confundir caja con pendiente                                   | A2 muestra lo que falta; FOP-A1 lo que hay; nunca la misma cifra                                                   |
+| Ocultar deuda pequeña ("ya se cobrará")                        | Todo compromiso tiene responsable y antigüedad; vista aging sin filtro de importe                                  |
+| No reclamar a tiempo                                           | `proxima_accion` + `fecha_limite` obligatorias en CxC vencida                                                      |
+| No registrar parciales                                         | Libro de parciales append-only (patrón `factura_pagos`); el pendiente es derivado                                  |
 | **Duplicar CxC desde factura y bono** (mismo dinero dos veces) | Un compromiso por hecho generador; la factura del bono referencia la venta (`origen_tipo/id`), no crea segunda CxC |
-| Pagar liquidaciones sin evidencia | R2 de 08 se hereda: CxP de liquidación bloqueada no es pagable |
-| Usar datos clínicos | D-op-5: cliente id/seudónimo; notas operativas sin contenido asistencial |
-| Mezclar banco y medio de pago | A1-D6 heredada explícitamente (§13) |
-| No asignar responsable | KPI "sin responsable" + alta exige responsable |
-| No diferenciar operativo/precontable/legal | Estados de gestión sobre el documento, nunca en su lugar; el cierre fiscal es de la gestoría |
+| Pagar liquidaciones sin evidencia                              | R2 de 08 se hereda: CxP de liquidación bloqueada no es pagable                                                     |
+| Usar datos clínicos                                            | D-op-5: cliente id/seudónimo; notas operativas sin contenido asistencial                                           |
+| Mezclar banco y medio de pago                                  | A1-D6 heredada explícitamente (§13)                                                                                |
+| No asignar responsable                                         | KPI "sin responsable" + alta exige responsable                                                                     |
+| No diferenciar operativo/precontable/legal                     | Estados de gestión sobre el documento, nunca en su lugar; el cierre fiscal es de la gestoría                       |
 
 ## 18. Pendientes de decisión
 
-| # | Pendiente | Dueño |
-|---|---|---|
-| A2-P1 | Política de reclamación (cadencia de avisos, tono, quién reclama a partners vs clientes) | Guille |
-| A2-P2 | Criterio para marcar `incobrable` (antigüedad, importe, intentos) | Guille |
-| A2-P3 | Quién puede **cancelar** deuda (propuesta: solo CEO, trazado) | Guille |
-| A2-P4 | Tolerancia de céntimos en parciales (heredar la de `factura_pagos`) | Guille |
-| A2-P5 | Tratamiento de la deuda antigua pre-OS (saldo inicial `origen_legacy`) | Guille + recepción |
-| A2-P6 | Recordatorios automáticos sí/no (y por qué canal) | Guille |
-| A2-P7 | Visibilidad de CxC a recepción: ¿toda la operativa o solo la del día? | Guille |
-| A2-P8 | Vencimientos pactados por partner (Lidomare/Vivofácil/Oasis — depende de sus acuerdos, B2-P3) | Guille + partners |
+| #     | Pendiente                                                                                     | Dueño              |
+| ----- | --------------------------------------------------------------------------------------------- | ------------------ |
+| A2-P1 | Política de reclamación (cadencia de avisos, tono, quién reclama a partners vs clientes)      | Guille             |
+| A2-P2 | Criterio para marcar `incobrable` (antigüedad, importe, intentos)                             | Guille             |
+| A2-P3 | Quién puede **cancelar** deuda (propuesta: solo CEO, trazado)                                 | Guille             |
+| A2-P4 | Tolerancia de céntimos en parciales (heredar la de `factura_pagos`)                           | Guille             |
+| A2-P5 | Tratamiento de la deuda antigua pre-OS (saldo inicial `origen_legacy`)                        | Guille + recepción |
+| A2-P6 | Recordatorios automáticos sí/no (y por qué canal)                                             | Guille             |
+| A2-P7 | Visibilidad de CxC a recepción: ¿toda la operativa o solo la del día?                         | Guille             |
+| A2-P8 | Vencimientos pactados por partner (Lidomare/Vivofácil/Oasis — depende de sus acuerdos, B2-P3) | Guille + partners  |
 
 ---
 
-*Diseño documental de FOP-A2. No modifica código productivo, SQL, tipos ni UI. Requiere validación de Guille antes de abrir implementación.*
+_Diseño documental de FOP-A2. No modifica código productivo, SQL, tipos ni UI. Requiere validación de Guille antes de abrir implementación._
