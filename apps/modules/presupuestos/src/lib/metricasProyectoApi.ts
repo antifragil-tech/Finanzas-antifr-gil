@@ -11,7 +11,10 @@ import type { AnalisisFinanciero } from './analisisFinanciero';
 import { sbHeaders as headers, sbUrl } from '@alsari/supabase-client';
 
 async function req<T>(url: string, opts: RequestInit = {}): Promise<T> {
-  const res = await fetch(url, { ...opts, headers: headers(opts.headers as Record<string, string> | undefined) });
+  const res = await fetch(url, {
+    ...opts,
+    headers: headers(opts.headers as Record<string, string> | undefined),
+  });
   if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
   const text = await res.text();
   return (text ? JSON.parse(text) : []) as T;
@@ -24,9 +27,10 @@ async function req<T>(url: string, opts: RequestInit = {}): Promise<T> {
  * Retorna null si el proyecto no existe o no tiene datos.
  */
 export async function getMetricasProyectoResumen(
-  proyectoId: string
+  proyectoId: string,
 ): Promise<MetricasProyectoResumen | null> {
-  const url = sbUrl('metricas_proyecto_resumen') +
+  const url =
+    sbUrl('metricas_proyecto_resumen') +
     `?proyecto_id_ref=eq.${encodeURIComponent(proyectoId)}&limit=1`;
   const rows = await req<MetricasProyectoResumen[]>(url);
   return rows[0] ?? null;
@@ -42,13 +46,14 @@ export async function getFlujosProyectoConsolidados(
     soloReales?: boolean;
     soloPendientes?: boolean;
     fuente?: 'flujo_manual' | 'presupuesto_pago' | 'factura_recibida';
-  }
+  },
 ): Promise<FlujoProyectoConsolidado[]> {
-  let url = sbUrl('flujos_proyecto_consolidados') +
+  let url =
+    sbUrl('flujos_proyecto_consolidados') +
     `?proyecto_id_ref=eq.${encodeURIComponent(proyectoId)}&order=fecha.asc`;
-  if (opciones?.soloReales)     url += '&es_real=eq.true';
+  if (opciones?.soloReales) url += '&es_real=eq.true';
   if (opciones?.soloPendientes) url += '&es_previsto=eq.true';
-  if (opciones?.fuente)         url += `&fuente=eq.${opciones.fuente}`;
+  if (opciones?.fuente) url += `&fuente=eq.${opciones.fuente}`;
   return req<FlujoProyectoConsolidado[]>(url);
 }
 
@@ -57,9 +62,10 @@ export async function getFlujosProyectoConsolidados(
  * Retorna null si no existe registro para ese proyecto.
  */
 export async function getAnalisisFinancieroProyecto(
-  proyectoId: string
+  proyectoId: string,
 ): Promise<AnalisisFinanciero | null> {
-  const url = sbUrl('proyecto_analisis_financiero') +
+  const url =
+    sbUrl('proyecto_analisis_financiero') +
     `?proyecto_id=eq.${encodeURIComponent(proyectoId)}&limit=1`;
   const rows = await req<AnalisisFinanciero[]>(url);
   return rows[0] ?? null;
@@ -71,7 +77,7 @@ export async function getAnalisisFinancieroProyecto(
  */
 export async function upsertAnalisisFinancieroProyecto(
   proyectoId: string,
-  data: Partial<AnalisisFinanciero>
+  data: Partial<AnalisisFinanciero>,
 ): Promise<AnalisisFinanciero> {
   const url = sbUrl('proyecto_analisis_financiero') + '?on_conflict=proyecto_id';
   const payload = { ...data, proyecto_id: proyectoId };

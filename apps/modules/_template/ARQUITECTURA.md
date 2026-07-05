@@ -31,6 +31,7 @@ src/
 ## 🔄 Flujos clave
 
 ### Flujo 1: [Nombre]
+
 ```
 Usuario hace X
   → Componente Y
@@ -46,8 +47,8 @@ Usuario hace X
 ### Tablas usadas
 
 | Tabla | Propósito | RLS |
-|-------|-----------|-----|
-| ... | ... | ... |
+| ----- | --------- | --- |
+| ...   | ...       | ... |
 
 ---
 

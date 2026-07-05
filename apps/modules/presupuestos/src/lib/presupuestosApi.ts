@@ -1,8 +1,15 @@
 /// <reference types="vite/client" />
 import type {
-  Presupuesto, PresupuestoCapitulo, PresupuestoPartida, PresupuestoPago,
-  PresupuestoEstado, PresupuestoTipo, PresupuestoCategoria,
-  PagoEstado, PagoTipoFlujo, RecurrenciaPartida,
+  Presupuesto,
+  PresupuestoCapitulo,
+  PresupuestoPartida,
+  PresupuestoPago,
+  PresupuestoEstado,
+  PresupuestoTipo,
+  PresupuestoCategoria,
+  PagoEstado,
+  PagoTipoFlujo,
+  RecurrenciaPartida,
 } from '@alsari/types';
 
 // ── Supabase client ───────────────────────────────────────────────────────────
@@ -28,7 +35,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`POST ${path}: ${res.status} — ${(await res.text()).slice(0, 200)}`);
-  const rows = await res.json() as T[];
+  const rows = (await res.json()) as T[];
   if (!Array.isArray(rows) || !rows[0]) throw new Error(`POST ${path}: respuesta vacía`);
   return rows[0];
 }
@@ -40,7 +47,10 @@ export async function getPresupuestos(): Promise<Presupuesto[]> {
 }
 
 export async function getPresupuestosByProyecto(proyecto_id_ref: string): Promise<Presupuesto[]> {
-  return req<Presupuesto[]>('GET', `presupuestos?proyecto_id_ref=eq.${encodeURIComponent(proyecto_id_ref)}&select=*&order=created_at.desc`);
+  return req<Presupuesto[]>(
+    'GET',
+    `presupuestos?proyecto_id_ref=eq.${encodeURIComponent(proyecto_id_ref)}&select=*&order=created_at.desc`,
+  );
 }
 
 export async function getPresupuesto(id: string): Promise<Presupuesto> {
@@ -67,11 +77,26 @@ export async function createPresupuesto(data: {
   });
 }
 
-export async function updatePresupuesto(id: string, data: Partial<Pick<
-  Presupuesto,
-  'nombre' | 'tipo' | 'proyecto_id_ref' | 'proyecto_nombre' | 'sociedad_id_ref' | 'estado' |
-  'fecha_inicio' | 'fecha_fin' | 'notas' | 'es_presupuesto_maestro' | 'fecha_aprobacion' | 'aprobado_por'
->>): Promise<void> {
+export async function updatePresupuesto(
+  id: string,
+  data: Partial<
+    Pick<
+      Presupuesto,
+      | 'nombre'
+      | 'tipo'
+      | 'proyecto_id_ref'
+      | 'proyecto_nombre'
+      | 'sociedad_id_ref'
+      | 'estado'
+      | 'fecha_inicio'
+      | 'fecha_fin'
+      | 'notas'
+      | 'es_presupuesto_maestro'
+      | 'fecha_aprobacion'
+      | 'aprobado_por'
+    >
+  >,
+): Promise<void> {
   await req('PATCH', `presupuestos?id=eq.${id}`, { ...data, updated_at: new Date().toISOString() });
 }
 
@@ -82,27 +107,26 @@ export async function updatePresupuesto(id: string, data: Partial<Pick<
  */
 export async function marcarPresupuestoMaestro(
   proyectoIdRef: string,
-  presupuestoId: string
+  presupuestoId: string,
 ): Promise<void> {
   // Paso 1: quitar maestro a todos los presupuestos del proyecto
   await req(
     'PATCH',
     `presupuestos?proyecto_id_ref=eq.${encodeURIComponent(proyectoIdRef)}&es_presupuesto_maestro=eq.true`,
-    { es_presupuesto_maestro: false, updated_at: new Date().toISOString() }
+    { es_presupuesto_maestro: false, updated_at: new Date().toISOString() },
   );
   // Paso 2: marcar el nuevo como maestro
-  await req(
-    'PATCH',
-    `presupuestos?id=eq.${presupuestoId}`,
-    { es_presupuesto_maestro: true, updated_at: new Date().toISOString() }
-  );
+  await req('PATCH', `presupuestos?id=eq.${presupuestoId}`, {
+    es_presupuesto_maestro: true,
+    updated_at: new Date().toISOString(),
+  });
 }
 
 /** Obtiene el presupuesto maestro de un proyecto, o null si no existe. */
 export async function getMaestroPresupuesto(proyectoIdRef: string): Promise<Presupuesto | null> {
   const rows = await req<Presupuesto[]>(
     'GET',
-    `presupuestos?proyecto_id_ref=eq.${encodeURIComponent(proyectoIdRef)}&es_presupuesto_maestro=eq.true&select=*&limit=1`
+    `presupuestos?proyecto_id_ref=eq.${encodeURIComponent(proyectoIdRef)}&es_presupuesto_maestro=eq.true&select=*&limit=1`,
   );
   return rows[0] ?? null;
 }
@@ -113,7 +137,7 @@ export async function deletePresupuesto(id: string): Promise<void> {
 
 export async function updateNombreProyectoEnPresupuestos(
   proyectoIdRef: string,
-  nuevoNombre: string
+  nuevoNombre: string,
 ): Promise<void> {
   await req('PATCH', `presupuestos?proyecto_id_ref=eq.${encodeURIComponent(proyectoIdRef)}`, {
     proyecto_nombre: nuevoNombre,
@@ -137,7 +161,10 @@ export async function createCapitulo(data: {
   return post<PresupuestoCapitulo>('presupuesto_capitulos', data);
 }
 
-export async function updateCapitulo(id: string, data: Partial<Pick<PresupuestoCapitulo, 'nombre' | 'orden'>>): Promise<void> {
+export async function updateCapitulo(
+  id: string,
+  data: Partial<Pick<PresupuestoCapitulo, 'nombre' | 'orden'>>,
+): Promise<void> {
   await req('PATCH', `presupuesto_capitulos?id=eq.${id}`, data);
 }
 
@@ -179,11 +206,9 @@ export async function createPartida(data: {
       data.recurrencia,
     );
     if (fechas.length > 0) {
-      const importePorPeriodo = parseFloat(
-        (data.importe_presupuestado / fechas.length).toFixed(2)
-      );
+      const importePorPeriodo = parseFloat((data.importe_presupuestado / fechas.length).toFixed(2));
       await Promise.all(
-        fechas.map(fecha =>
+        fechas.map((fecha) =>
           createPago({
             presupuesto_id: data.presupuesto_id,
             partida_id: partida.id,
@@ -192,8 +217,8 @@ export async function createPartida(data: {
             fecha_prevista: fecha,
             tipo_flujo: tipo_flujo_recurrencia ?? 'gasto',
             descripcion: `${data.descripcion} (${formatMesAnio(fecha)})`,
-          })
-        )
+          }),
+        ),
       );
     }
   }
@@ -209,7 +234,12 @@ function generarFechasRecurrentes(
   const fechas: string[] = [];
   const d = new Date(inicio);
   const finDate = new Date(fin);
-  const mesesMap: Record<RecurrenciaPartida, number> = { mensual: 1, trimestral: 3, semestral: 6, anual: 12 };
+  const mesesMap: Record<RecurrenciaPartida, number> = {
+    mensual: 1,
+    trimestral: 3,
+    semestral: 6,
+    anual: 12,
+  };
   const mesesAvance = mesesMap[recurrencia];
 
   while (d <= finDate) {
@@ -224,12 +254,27 @@ function formatMesAnio(iso: string): string {
   return d.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
 }
 
-export async function updatePartida(id: string, data: Partial<Pick<
-  PresupuestoPartida,
-  'descripcion' | 'importe_presupuestado' | 'tipo_iva' | 'codigo' | 'proveedor_esperado' | 'notas' |
-  'recurrencia' | 'fecha_inicio_recurrencia' | 'fecha_fin_recurrencia'
->>): Promise<void> {
-  await req('PATCH', `presupuesto_partidas?id=eq.${id}`, { ...data, updated_at: new Date().toISOString() });
+export async function updatePartida(
+  id: string,
+  data: Partial<
+    Pick<
+      PresupuestoPartida,
+      | 'descripcion'
+      | 'importe_presupuestado'
+      | 'tipo_iva'
+      | 'codigo'
+      | 'proveedor_esperado'
+      | 'notas'
+      | 'recurrencia'
+      | 'fecha_inicio_recurrencia'
+      | 'fecha_fin_recurrencia'
+    >
+  >,
+): Promise<void> {
+  await req('PATCH', `presupuesto_partidas?id=eq.${id}`, {
+    ...data,
+    updated_at: new Date().toISOString(),
+  });
 }
 
 export async function deletePartida(id: string): Promise<void> {
@@ -251,10 +296,13 @@ export async function getAllPagos(params?: {
   estado?: PagoEstado;
 }): Promise<PresupuestoPago[]> {
   const filters: string[] = ['order=fecha_prevista.asc'];
-  if (params?.desde)  filters.push(`fecha_prevista=gte.${params.desde}`);
-  if (params?.hasta)  filters.push(`fecha_prevista=lte.${params.hasta}`);
+  if (params?.desde) filters.push(`fecha_prevista=gte.${params.desde}`);
+  if (params?.hasta) filters.push(`fecha_prevista=lte.${params.hasta}`);
   if (params?.estado) filters.push(`estado=eq.${params.estado}`);
-  return req<PresupuestoPago[]>('GET', `presupuesto_pagos?${filters.join('&')}&select=*,presupuesto_partidas!presupuesto_pagos_partida_id_fkey(descripcion),presupuestos!presupuesto_pagos_presupuesto_id_fkey(nombre,proyecto_nombre,sociedad_id_ref)`);
+  return req<PresupuestoPago[]>(
+    'GET',
+    `presupuesto_pagos?${filters.join('&')}&select=*,presupuesto_partidas!presupuesto_pagos_partida_id_fkey(descripcion),presupuestos!presupuesto_pagos_presupuesto_id_fkey(nombre,proyecto_nombre,sociedad_id_ref)`,
+  );
 }
 
 export async function createPago(data: {
@@ -270,11 +318,23 @@ export async function createPago(data: {
   return post<PresupuestoPago>('presupuesto_pagos', { ...data, estado: 'pendiente' as PagoEstado });
 }
 
-export async function updatePago(id: string, data: Partial<Pick<
-  PresupuestoPago,
-  'descripcion' | 'importe' | 'tipo_iva' | 'fecha_prevista' | 'estado' | 'tipo_flujo' |
-  'factura_recibida_id' | 'factura_emitida_id' | 'notas'
->>): Promise<void> {
+export async function updatePago(
+  id: string,
+  data: Partial<
+    Pick<
+      PresupuestoPago,
+      | 'descripcion'
+      | 'importe'
+      | 'tipo_iva'
+      | 'fecha_prevista'
+      | 'estado'
+      | 'tipo_flujo'
+      | 'factura_recibida_id'
+      | 'factura_emitida_id'
+      | 'notas'
+    >
+  >,
+): Promise<void> {
   await req('PATCH', `presupuesto_pagos?id=eq.${id}`, data);
 }
 
@@ -290,7 +350,7 @@ export function calcTotalesPresupuesto(
 ): { total: number; pagado: number; pendiente: number; pct: number } {
   const total = partidas.reduce((s, p) => s + p.importe_presupuestado, 0);
   const pagado = pagos
-    .filter(pg => pg.estado === 'pagado' && pg.tipo_flujo === 'gasto')
+    .filter((pg) => pg.estado === 'pagado' && pg.tipo_flujo === 'gasto')
     .reduce((s, pg) => s + pg.importe, 0);
   const pendiente = total - pagado;
   const pct = total > 0 ? Math.round((pagado / total) * 100) : 0;
