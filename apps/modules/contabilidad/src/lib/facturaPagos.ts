@@ -16,7 +16,10 @@ function round2(n: number): number {
 }
 
 // total_a_pagar = total − retención (retención null/undefined → 0). NO base_imponible.
-export function calcularTotalAPagar(total: number, retencionImporte: number | null | undefined): number {
+export function calcularTotalAPagar(
+  total: number,
+  retencionImporte: number | null | undefined,
+): number {
   return round2((total ?? 0) - (retencionImporte ?? 0));
 }
 

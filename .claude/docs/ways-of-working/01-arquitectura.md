@@ -7,24 +7,30 @@
 ## 🎯 Principios fundamentales
 
 ### 1. Tolerancia a fallos aislados
+
 Si un módulo cae, el resto del OS sigue funcionando. Esto se consigue con:
+
 - **Error Boundaries de React** envolviendo cada módulo en el Host OS.
 - **Datos aislados:** cada módulo gestiona sus propias queries a Supabase.
 - **Despliegues independientes:** un bug en `facturas` no requiere desplegar `financiero`.
 
 ### 2. Convención sobre configuración
+
 Antes de inventar una estructura nueva, busca si ya hay un patrón documentado en este
 proyecto o en la plantilla `apps/modules/_template`. La consistencia ahorra dolor.
 
 ### 3. Tipos primero
+
 TypeScript estricto en todo. Si algo no se puede tipar, es síntoma de que la abstracción
 está mal. Nunca `any` salvo justificación documentada en comentario.
 
 ### 4. Composición sobre herencia
+
 Componentes pequeños y reutilizables. Hooks para lógica. Nada de clases ni jerarquías
 complejas.
 
 ### 5. Boundaries claros
+
 - **`apps/host`** no conoce la lógica interna de los módulos. Solo los carga.
 - **`apps/modules/[x]`** no importan código de otros módulos. Si necesitan algo común,
   va a `packages/`.
@@ -36,18 +42,18 @@ complejas.
 
 ### Stack tecnológico
 
-| Capa | Tecnología | Razón |
-|------|------------|-------|
-| Monorepo | pnpm workspaces + Turborepo | Caché incremental, builds rápidos, estándar 2026 |
-| Host OS | Next.js 15 (App Router) | SSR, routing maduro, ecosistema sólido |
-| Módulos | Vite + React 19 + TypeScript | Builds rápidos, HMR instantáneo, simplicidad |
-| Estilos | Tailwind CSS 3 + shadcn/ui | Design tokens, Dark Mode nativo, sin lock-in |
-| Estado local | React state + Zustand | Ligero, sin Redux overhead |
-| Validación | Zod | Tipos y validación en un solo sitio |
-| Backend | Supabase (Postgres + Auth + RLS + Edge Functions) | Stack que ya conoces |
-| Routing | React Router (en módulos) + Next.js (en Host) | Cada uno donde brilla |
-| Tests | Vitest + Testing Library + Playwright | Stack moderno y rápido |
-| Tipos compartidos | `@alsari/types` | Una fuente de verdad |
+| Capa              | Tecnología                                        | Razón                                            |
+| ----------------- | ------------------------------------------------- | ------------------------------------------------ |
+| Monorepo          | pnpm workspaces + Turborepo                       | Caché incremental, builds rápidos, estándar 2026 |
+| Host OS           | Next.js 15 (App Router)                           | SSR, routing maduro, ecosistema sólido           |
+| Módulos           | Vite + React 19 + TypeScript                      | Builds rápidos, HMR instantáneo, simplicidad     |
+| Estilos           | Tailwind CSS 3 + shadcn/ui                        | Design tokens, Dark Mode nativo, sin lock-in     |
+| Estado local      | React state + Zustand                             | Ligero, sin Redux overhead                       |
+| Validación        | Zod                                               | Tipos y validación en un solo sitio              |
+| Backend           | Supabase (Postgres + Auth + RLS + Edge Functions) | Stack que ya conoces                             |
+| Routing           | React Router (en módulos) + Next.js (en Host)     | Cada uno donde brilla                            |
+| Tests             | Vitest + Testing Library + Playwright             | Stack moderno y rápido                           |
+| Tipos compartidos | `@alsari/types`                                   | Una fuente de verdad                             |
 
 ### Diagrama de dependencias permitidas
 
@@ -104,16 +110,17 @@ Cada entrada del registro define:
 
 ```typescript
 type ModuleEntry = {
-  slug: string;              // "financiero", "facturas", etc.
-  title: string;             // Nombre visible en sidebar
-  icon: LucideIcon;          // Icono
-  description: string;       // Descripción corta
-  loader: () => Promise<ReactComponent>;  // Lazy load del módulo
-  permissions?: string[];    // Opcional: roles que pueden acceder
+  slug: string; // "financiero", "facturas", etc.
+  title: string; // Nombre visible en sidebar
+  icon: LucideIcon; // Icono
+  description: string; // Descripción corta
+  loader: () => Promise<ReactComponent>; // Lazy load del módulo
+  permissions?: string[]; // Opcional: roles que pueden acceder
 };
 ```
 
 El Host renderiza cada módulo dentro de un Error Boundary que:
+
 1. Captura cualquier error de render.
 2. Muestra un panel de fallback elegante.
 3. Permite al usuario navegar a otro módulo sin perder sesión.
@@ -179,12 +186,14 @@ módulos** debe documentarse como ADR (Architecture Decision Record) en
 `docs/decisiones/NNNN-titulo.md`.
 
 Ejemplos que SÍ requieren ADR:
+
 - Cambiar de Supabase a otra BD.
 - Añadir un nuevo lenguaje al stack.
 - Establecer un patrón de autenticación.
 - Decidir entre SSR y CSR para una vista crítica.
 
 Ejemplos que NO requieren ADR:
+
 - Renombrar una variable.
 - Refactor interno de un módulo.
 - Añadir una nueva ruta a un módulo existente.

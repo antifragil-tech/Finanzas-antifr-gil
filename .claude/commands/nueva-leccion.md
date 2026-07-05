@@ -1,6 +1,6 @@
 ---
 description: Registrar una nueva lección aprendida en lessons-learned/log.md siguiendo el formato estándar.
-argument-hint: "[titulo-corto-de-la-leccion]"
+argument-hint: '[titulo-corto-de-la-leccion]'
 ---
 
 # Tarea: Registrar nueva lección aprendida
@@ -37,6 +37,7 @@ El usuario quiere registrar una lección. Sigue este flujo:
 **Lección:** [...]
 
 **Acciones tomadas:**
+
 - [ ] ...
 - [ ] ...
 

@@ -85,6 +85,7 @@ Alsari Capital OS/
 ```
 
 **Distinción importante:**
+
 - **`.claude/docs/`** → para Claude (ways-of-working).
 - **`docs/`** raíz → para personas (tú, socios, devs futuros).
 
@@ -126,17 +127,20 @@ Detalle paso a paso en `docs/GETTING-STARTED.md`.
 Tres capas que se construyen una encima de otra:
 
 ### 1️⃣ Sistema de aprendizaje vivo (`.claude/skills/lessons-learned/`)
+
 Cada corrección de Guille se registra como lección. En 6 meses tienes un corpus
 que evita repetir errores. Detalle en
 `.claude/docs/ways-of-working/09-protocolo-aprendizaje.md`.
 
 ### 2️⃣ Hooks deterministas (`.claude/hooks/`)
+
 Scripts shell que se ejecutan ANTES y DESPUÉS de cada acción de Claude. Bloquean
 comandos peligrosos (`rm -rf`, `git push --force`), formatean código tras editar,
 imprimen contexto del repo al arrancar sesión. Detalle en
 `.claude/hooks/README.md`.
 
 ### 3️⃣ Subagents y slash commands (`.claude/agents/`, `.claude/commands/`)
+
 Subagents especializados (code-reviewer, test-runner, migration-checker) con
 contexto aislado. Slash commands para flujos frecuentes (`/nueva-leccion`,
 `/nuevo-modulo`, `/reporte-semana`).
