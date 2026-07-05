@@ -8,17 +8,17 @@
 
 ## 1. Tabla de PRs financieros vivos
 
-| PR | Rama | Doc | Qué resuelve | Estado |
-|---|---|---|---|---|
-| **#1** Facturación emitida | `docs/finanzas-facturacion-emitida-design` | 02 | Diseño de factura operativa/precontable; decisiones D1 (OS no emite factura legal) y D2 (Clínica sin IVA provisional) | Draft |
-| **#4** Tesorería/Caja A1 | `chore/db-baseline-antifragil-os` | 06 + SQL baseline | Cuentas caja/banco, ledger de efectivo, arqueo | Draft / **NO APPLY** |
-| **#11** Modelo financiero | `docs/finanzas-modelo-operativo` | 00-01, 03-07 | Marco: tres lentes, backlog F-Op A/B/C/D, decisiones D-op-1..7 | Draft |
-| **#13** FOP-B1 Liquidaciones | `docs/finanzas-liquidaciones-equipo` | 08 | Coste de personas: nóminas, compartidas, autónomos por sesión, ciclo de liquidación | Draft |
-| **#15** FOP-B2 Rentabilidad | `docs/finanzas-rentabilidad-operativa` | 09 | Escalera M1-M4, dimensiones centro/canal, vistas devengo/caja | Draft |
-| **#19** FOP-B3 Bonos/devengo | `docs/finanzas-bonos-programas-devengo` | 10 | Ciclo de bonos/programas, devengo sesión a sesión, caducidades, devoluciones. Resuelve B2-P1 | Draft |
-| **#20** FOP-A2 CxC/CxP | `docs/finanzas-fop-a2-cxc-cxp` | 11 | Pendientes de cobro/pago con seguimiento, reclamaciones, parciales, aging | Draft |
-| **#21** FOP-C1 Imputación | `docs/finanzas-fop-c1-imputacion-costes` | 12 | Reglas de imputación versionadas, costes compartidos, cascada de prioridad, no-inventar | Draft |
-| **#22** FOP-D1 Forecast | `docs/finanzas-fop-d1-ingreso-real-presupuesto` | 13 | Previsto vs devengado/cobrado, desviaciones, forecast con banda | Draft |
+| PR                           | Rama                                            | Doc               | Qué resuelve                                                                                                          | Estado               |
+| ---------------------------- | ----------------------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| **#1** Facturación emitida   | `docs/finanzas-facturacion-emitida-design`      | 02                | Diseño de factura operativa/precontable; decisiones D1 (OS no emite factura legal) y D2 (Clínica sin IVA provisional) | Draft                |
+| **#4** Tesorería/Caja A1     | `chore/db-baseline-antifragil-os`               | 06 + SQL baseline | Cuentas caja/banco, ledger de efectivo, arqueo                                                                        | Draft / **NO APPLY** |
+| **#11** Modelo financiero    | `docs/finanzas-modelo-operativo`                | 00-01, 03-07      | Marco: tres lentes, backlog F-Op A/B/C/D, decisiones D-op-1..7                                                        | Draft                |
+| **#13** FOP-B1 Liquidaciones | `docs/finanzas-liquidaciones-equipo`            | 08                | Coste de personas: nóminas, compartidas, autónomos por sesión, ciclo de liquidación                                   | Draft                |
+| **#15** FOP-B2 Rentabilidad  | `docs/finanzas-rentabilidad-operativa`          | 09                | Escalera M1-M4, dimensiones centro/canal, vistas devengo/caja                                                         | Draft                |
+| **#19** FOP-B3 Bonos/devengo | `docs/finanzas-bonos-programas-devengo`         | 10                | Ciclo de bonos/programas, devengo sesión a sesión, caducidades, devoluciones. Resuelve B2-P1                          | Draft                |
+| **#20** FOP-A2 CxC/CxP       | `docs/finanzas-fop-a2-cxc-cxp`                  | 11                | Pendientes de cobro/pago con seguimiento, reclamaciones, parciales, aging                                             | Draft                |
+| **#21** FOP-C1 Imputación    | `docs/finanzas-fop-c1-imputacion-costes`        | 12                | Reglas de imputación versionadas, costes compartidos, cascada de prioridad, no-inventar                               | Draft                |
+| **#22** FOP-D1 Forecast      | `docs/finanzas-fop-d1-ingreso-real-presupuesto` | 13                | Previsto vs devengado/cobrado, desviaciones, forecast con banda                                                       | Draft                |
 
 Todos son **archivos nuevos e independientes** (un doc por PR, sin archivos compartidos): no hay conflictos de merge entre ellos ni con #11. Se pueden mergear en cualquier orden técnico; el orden conceptual (§2) es para leerlos, no para Git.
 
@@ -60,30 +60,30 @@ El triángulo central es **#13 + #19 → #15** (coste + ingreso devengado → ma
 
 ## 5. Huecos pendientes (consolidado de todas las series)
 
-| Bloque | Pendientes |
-|---|---|
-| Roles/permisos detallados | Matrices diseñadas en 08-13; falta el modelo real de roles y su implementación |
-| Acuerdos de partners | Lidomare, Vivofácil, Oasis (B2-P3 = C1-P1..P3): sin documento no hay regla de imputación ni vencimientos de partner |
-| Reglas de no-show | ¿Consume/devenga? ¿cobra el profesional? (B3-P2, B3-P6, B2-P4) |
-| Caducidad de bonos | Criterio fiscal de la gestoría (B3-P1) |
-| Devolución parcial | Penalización sí/no (B3-P3) |
-| Branch protection / CI | PR #14 (quitar auto-merge) y PR #18 (quality gates + doc de protección) — fuera de finanzas, pero condicionan cualquier merge |
-| Implementación | Toda la serie FOP es diseño; ninguna fase abre código sin validación |
+| Bloque                    | Pendientes                                                                                                                    |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| Roles/permisos detallados | Matrices diseñadas en 08-13; falta el modelo real de roles y su implementación                                                |
+| Acuerdos de partners      | Lidomare, Vivofácil, Oasis (B2-P3 = C1-P1..P3): sin documento no hay regla de imputación ni vencimientos de partner           |
+| Reglas de no-show         | ¿Consume/devenga? ¿cobra el profesional? (B3-P2, B3-P6, B2-P4)                                                                |
+| Caducidad de bonos        | Criterio fiscal de la gestoría (B3-P1)                                                                                        |
+| Devolución parcial        | Penalización sí/no (B3-P3)                                                                                                    |
+| Branch protection / CI    | PR #14 (quitar auto-merge) y PR #18 (quality gates + doc de protección) — fuera de finanzas, pero condicionan cualquier merge |
+| Implementación            | Toda la serie FOP es diseño; ninguna fase abre código sin validación                                                          |
 
 ## 6. Roadmap de implementación futura (propuesta, no calendario)
 
-| Fase | Qué | Se apoya en |
-|---|---|---|
-| 0 | Docs mergeados + decisiones pendientes resueltas | este mapa, §7 |
-| 1 | Host shell y navegación | PR #16 y split plan #17 |
-| 2 | Reservas/citas (agenda operativa) | PR #5 canónico |
-| 3 | Cobros y facturación operativa | doc 02 (F4.x por sub-fases) |
-| 4 | Bonos/devengo | doc 10 |
-| 5 | Liquidaciones | doc 08 |
-| 6 | CxC/CxP | doc 11 |
-| 7 | Rentabilidad | doc 09 (necesita 4+5) |
-| 8 | Forecast | doc 13 (necesita 6+7) |
-| 9 | Backend/Supabase real controlado | baseline #4 aprobado y aplicado con autorización expresa |
+| Fase | Qué                                              | Se apoya en                                              |
+| ---- | ------------------------------------------------ | -------------------------------------------------------- |
+| 0    | Docs mergeados + decisiones pendientes resueltas | este mapa, §7                                            |
+| 1    | Host shell y navegación                          | PR #16 y split plan #17                                  |
+| 2    | Reservas/citas (agenda operativa)                | PR #5 canónico                                           |
+| 3    | Cobros y facturación operativa                   | doc 02 (F4.x por sub-fases)                              |
+| 4    | Bonos/devengo                                    | doc 10                                                   |
+| 5    | Liquidaciones                                    | doc 08                                                   |
+| 6    | CxC/CxP                                          | doc 11                                                   |
+| 7    | Rentabilidad                                     | doc 09 (necesita 4+5)                                    |
+| 8    | Forecast                                         | doc 13 (necesita 6+7)                                    |
+| 9    | Backend/Supabase real controlado                 | baseline #4 aprobado y aplicado con autorización expresa |
 
 Cada fase con código exige su propio diseño de implementación validado (regla del backlog); este roadmap ordena, no autoriza.
 
@@ -100,4 +100,4 @@ Cada fase con código exige su propio diseño de implementación validado (regla
 
 ---
 
-*Documento de sincronización. No modifica código productivo, SQL, tipos ni UI. Refleja el estado de los PRs a 2026-07-05. Sucesor operativo del doc 07 para la serie FOP.*
+_Documento de sincronización. No modifica código productivo, SQL, tipos ni UI. Refleja el estado de los PRs a 2026-07-05. Sucesor operativo del doc 07 para la serie FOP._
