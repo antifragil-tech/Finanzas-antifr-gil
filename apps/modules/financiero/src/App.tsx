@@ -268,9 +268,9 @@ export function FinancieroDashboard() {
     }
   };
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     void fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const availableSocieties = useMemo<SocietyOption[]>(() => {
