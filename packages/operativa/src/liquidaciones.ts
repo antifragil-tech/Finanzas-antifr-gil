@@ -104,6 +104,10 @@ export function generarLiquidacion(
 
   const importeCalculado = redondear(lineas.reduce((s, l) => s + l.importe, 0));
   const sinRegularizar = profesional.relacion === 'pendiente_regularizar';
+  const tipoEvidencia =
+    profesional.relacion === 'nomina' || profesional.relacion === 'nomina_compartida'
+      ? ('nomina' as const)
+      : ('factura_autonomo' as const);
 
   return {
     profesionalId: profesional.id,
@@ -115,6 +119,7 @@ export function generarLiquidacion(
     estado: sinRegularizar ? 'bloqueada_por_incidencia' : 'calculada',
     ...(sinRegularizar ? { motivoBloqueo: 'relacion_sin_regularizar' } : {}),
     requiereRevisionCeo,
+    evidencia: { tipo: tipoEvidencia, recibida: false },
     sesionesIncluidas: validadas.map((s) => s.id),
   };
 }
@@ -146,6 +151,8 @@ export function puedeAvanzar(
   if (liq.requiereRevisionCeo && desde >= CICLO.indexOf('calculada') && !opts.revisadaPorCeo) {
     return false;
   }
+  // R2 (doc 08 §4.8): no se valida sin documento — nómina o factura de autónomo.
+  if (destino === 'validada' && !liq.evidencia.recibida) return false;
   if (destino === 'pagada') {
     const pagado = redondear((opts.pagos ?? []).reduce((s, p) => s + p.importe, 0));
     if (pagado < liq.importeFinal) return false;

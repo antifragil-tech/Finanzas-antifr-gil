@@ -83,6 +83,16 @@ export type EstadoLiquidacion =
   | 'revisada'
   | 'bloqueada_por_incidencia';
 
+/** Doc 08 §3.5-3.6: toda liquidación se asocia a su documento justificante. */
+export type TipoEvidenciaLiquidacion = 'nomina' | 'factura_autonomo';
+
+export interface EvidenciaLiquidacion {
+  tipo: TipoEvidenciaLiquidacion;
+  /** true cuando el documento (nómina de gestoría o factura del autónomo) está adjunto. */
+  recibida: boolean;
+  referencia?: string;
+}
+
 export interface AjusteManual {
   importe: number;
   motivo: string;
@@ -110,6 +120,8 @@ export interface LiquidacionMensual {
   motivoBloqueo?: string;
   /** true si alguna regla aplicada no está confirmada: no avanza sin CEO (doc 08 §4.4). */
   requiereRevisionCeo: boolean;
+  /** Documento justificante exigido: nómina o factura de autónomo (R2: sin evidencia no se valida). */
+  evidencia: EvidenciaLiquidacion;
   /** Ids de sesiones incluidas — una sesión pertenece a UNA liquidación (R3). */
   sesionesIncluidas: string[];
 }
