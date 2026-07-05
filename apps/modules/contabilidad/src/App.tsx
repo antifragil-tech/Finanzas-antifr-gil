@@ -14,16 +14,22 @@ import { getReglas, getCurrentUserEmail, getSociedadesContabilidad } from './lib
 import type { ReglaCategorizacion, SociedadContabilidad } from '@alsari/types';
 
 export function ContabilidadDashboard() {
-  const [view, setView]             = useState<ContabilidadView>('dashboard');
+  const [view, setView] = useState<ContabilidadView>('dashboard');
   const [isPrivateMode, setPrivate] = useState(false);
   const [sociedades, setSociedades] = useState<SociedadContabilidad[]>([]);
-  const [reglas, setReglas]         = useState<ReglaCategorizacion[]>([]);
-  const [userEmail, setUserEmail]   = useState<string | null>(null);
+  const [reglas, setReglas] = useState<ReglaCategorizacion[]>([]);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    void getSociedadesContabilidad().then(setSociedades).catch(() => {});
-    void getReglas().then(setReglas).catch(() => {});
-    void getCurrentUserEmail().then(setUserEmail).catch(() => {});
+    void getSociedadesContabilidad()
+      .then(setSociedades)
+      .catch(() => {});
+    void getReglas()
+      .then(setReglas)
+      .catch(() => {});
+    void getCurrentUserEmail()
+      .then(setUserEmail)
+      .catch(() => {});
   }, []);
 
   const shared = { isPrivateMode, sociedades, reglas, userEmail };
@@ -33,16 +39,18 @@ export function ContabilidadDashboard() {
       selectedView={view}
       isPrivateMode={isPrivateMode}
       onViewChange={setView}
-      onTogglePrivacy={() => setPrivate(v => !v)}
+      onTogglePrivacy={() => setPrivate((v) => !v)}
     >
-      {view === 'dashboard'         && <DashboardContabilidad  {...shared} onNavigate={setView} />}
-      {view === 'movimientos'       && <MovimientosBancarios   {...shared} />}
-      {view === 'facturas'          && <Facturas               {...shared} />}
-      {view === 'facturas_emitidas' && <FacturasEmitidas       {...shared} />}
-      {view === 'contactos'         && <Contactos              {...shared} />}
-      {view === 'diario'            && <DiarioBorrador         {...shared} />}
-      {view === 'reconciliacion'    && <Reconciliacion         {...shared} />}
-      {view === 'mis_empresas'      && <MisEmpresas sociedades={sociedades} onSociedadesChange={setSociedades} />}
+      {view === 'dashboard' && <DashboardContabilidad {...shared} onNavigate={setView} />}
+      {view === 'movimientos' && <MovimientosBancarios {...shared} />}
+      {view === 'facturas' && <Facturas {...shared} />}
+      {view === 'facturas_emitidas' && <FacturasEmitidas {...shared} />}
+      {view === 'contactos' && <Contactos {...shared} />}
+      {view === 'diario' && <DiarioBorrador {...shared} />}
+      {view === 'reconciliacion' && <Reconciliacion {...shared} />}
+      {view === 'mis_empresas' && (
+        <MisEmpresas sociedades={sociedades} onSociedadesChange={setSociedades} />
+      )}
     </ContabilidadLayout>
   );
 }

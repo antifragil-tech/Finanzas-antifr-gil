@@ -22,7 +22,9 @@ export function ExportarPDFButton({ analisis, proyecto }: Props) {
         import('../../../pdf/InformeFinancieroProyecto'),
       ]);
       const informe = construirInforme(analisis, proyecto);
-      const elemento = createElement(InformeFinancieroProyecto, { informe }) as unknown as Parameters<typeof pdf>[0];
+      const elemento = createElement(InformeFinancieroProyecto, {
+        informe,
+      }) as unknown as Parameters<typeof pdf>[0];
       const blob = await pdf(elemento).toBlob();
 
       const url = URL.createObjectURL(blob);
@@ -46,10 +48,18 @@ export function ExportarPDFButton({ analisis, proyecto }: Props) {
       onClick={() => void exportar()}
       disabled={estado === 'generando'}
       title="Descargar informe financiero en PDF"
-      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      className="flex items-center gap-1.5 rounded-lg border border-white/10 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-all hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
     >
-      {estado === 'generando' ? <Loader2 size={12} className="animate-spin" /> : <FileDown size={12} />}
-      {estado === 'generando' ? 'Generando…' : estado === 'error' ? 'Error — reintentar' : 'Exportar PDF'}
+      {estado === 'generando' ? (
+        <Loader2 size={12} className="animate-spin" />
+      ) : (
+        <FileDown size={12} />
+      )}
+      {estado === 'generando'
+        ? 'Generando…'
+        : estado === 'error'
+          ? 'Error — reintentar'
+          : 'Exportar PDF'}
     </button>
   );
 }

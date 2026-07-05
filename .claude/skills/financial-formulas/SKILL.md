@@ -28,7 +28,8 @@ description: Fórmulas financieras estándar y específicas de Alsari Capital. C
 ## 📐 Fórmulas de rentabilidad
 
 ### EBITDA
-> *Earnings Before Interest, Taxes, Depreciation and Amortization.*
+
+> _Earnings Before Interest, Taxes, Depreciation and Amortization._
 
 ```
 EBITDA = Ingresos − Costes operativos (excluyendo D&A)
@@ -41,6 +42,7 @@ EBITDA = Beneficio neto + Impuestos + Intereses + Depreciación + Amortización
 **Uso en Alsari:** métrica principal de rentabilidad operativa por entidad y consolidada.
 
 ### EBIT
+
 ```
 EBIT = EBITDA − Depreciación − Amortización
 
@@ -50,11 +52,13 @@ EBIT = Ingresos − Costes operativos (todos)
 ```
 
 ### Margen EBITDA
+
 ```
 Margen EBITDA (%) = (EBITDA / Ingresos) × 100
 ```
 
 ### Margen EBIT
+
 ```
 Margen EBIT (%) = (EBIT / Ingresos) × 100
 ```
@@ -64,6 +68,7 @@ Margen EBIT (%) = (EBIT / Ingresos) × 100
 ## 📈 Fórmulas de inversión
 
 ### ROI (Return on Investment)
+
 ```
 ROI (%) = ((Ganancia − Inversión inicial) / Inversión inicial) × 100
 ```
@@ -72,6 +77,7 @@ ROI (%) = ((Ganancia − Inversión inicial) / Inversión inicial) × 100
 TIR es preferible.
 
 ### ROCE (Return on Capital Employed)
+
 ```
 ROCE (%) = (EBIT / Capital empleado) × 100
 
@@ -81,7 +87,8 @@ Capital empleado = Activos totales − Pasivos corrientes
 ```
 
 ### TIR (Tasa Interna de Retorno) / IRR
-> *Tasa de descuento que hace VAN = 0.*
+
+> _Tasa de descuento que hace VAN = 0._
 
 ```
 0 = Σ [CFt / (1+TIR)^t]   para t = 0, 1, ..., n
@@ -101,7 +108,7 @@ function calculateIRR(cashFlows: number[], guess = 0.1): number {
 
   for (let i = 0; i < MAX_ITER; i++) {
     const npv = cashFlows.reduce((acc, cf, t) => acc + cf / Math.pow(1 + rate, t), 0);
-    const dnpv = cashFlows.reduce((acc, cf, t) => acc - t * cf / Math.pow(1 + rate, t + 1), 0);
+    const dnpv = cashFlows.reduce((acc, cf, t) => acc - (t * cf) / Math.pow(1 + rate, t + 1), 0);
 
     const newRate = rate - npv / dnpv;
     if (Math.abs(newRate - rate) < TOLERANCE) return newRate;
@@ -113,11 +120,13 @@ function calculateIRR(cashFlows: number[], guess = 0.1): number {
 ```
 
 **Casos límite:**
+
 - Si todos los flujos son del mismo signo → no hay TIR. Lanzar error.
 - Múltiples cambios de signo → puede haber múltiples TIRs (rara vez relevante; usar
   TIR modificada o documentar).
 
 ### VAN / NPV (Valor Actual Neto)
+
 ```
 VAN = Σ [CFt / (1+r)^t] − Inversión inicial
 
@@ -128,7 +137,8 @@ r = tasa de descuento (coste de capital)
 **Regla:** VAN > 0 → inversión crea valor. VAN < 0 → destruye valor.
 
 ### TIR Modificada (MIRR)
-> *Versión robusta de la TIR que asume reinversión a una tasa específica.*
+
+> _Versión robusta de la TIR que asume reinversión a una tasa específica._
 
 ```
 MIRR = (Valor terminal de flujos positivos / Valor presente de flujos negativos)^(1/n) − 1
@@ -139,6 +149,7 @@ MIRR = (Valor terminal de flujos positivos / Valor presente de flujos negativos)
 ## 🏦 Fórmulas de tesorería y deuda
 
 ### DSCR (Debt Service Coverage Ratio)
+
 ```
 DSCR = EBITDA / Servicio de la deuda
 
@@ -149,7 +160,8 @@ Servicio de la deuda = Intereses + Amortización de capital del periodo
 **Regla:** bancos suelen exigir DSCR ≥ 1.25. <1 = insuficiente.
 
 ### Loan-to-Value (LTV)
-> *Usado en financiación inmobiliaria.*
+
+> _Usado en financiación inmobiliaria._
 
 ```
 LTV (%) = (Importe del préstamo / Valor del activo) × 100
@@ -158,6 +170,7 @@ LTV (%) = (Importe del préstamo / Valor del activo) × 100
 **Regla:** financiación inmobiliaria estándar suele estar 60-75% LTV.
 
 ### Cash Conversion Cycle (CCC)
+
 ```
 CCC = DSO + DIO − DPO
 
@@ -172,16 +185,19 @@ DPO = Days Payable Outstanding (días de pago a proveedores)
 ## 🏠 Fórmulas específicas de real estate
 
 ### Yield bruto
+
 ```
 Yield bruto (%) = (Renta anual / Precio de compra) × 100
 ```
 
 ### Yield neto
+
 ```
 Yield neto (%) = ((Renta anual − Gastos anuales) / Precio de compra) × 100
 ```
 
 ### Cap Rate
+
 ```
 Cap Rate = NOI (Net Operating Income) / Valor del activo
 
@@ -194,6 +210,7 @@ NOI = Ingresos − Gastos operativos (excluye financiación e impuestos)
 ## 🧮 Reglas de implementación en código
 
 ### Centralización
+
 Todos estos cálculos viven en `packages/utils/finance/`:
 
 ```
@@ -214,6 +231,7 @@ Cada uno con su test correspondiente en `packages/utils/finance/*.test.ts`.
 ### Firma estándar
 
 Todas las funciones de cálculo deben:
+
 1. Validar inputs con Zod (lanzar `FinancialCalculationError` si inválidos).
 2. Devolver el tipo nativo (`number` para ratios, `string` decimal para importes
    grandes).
@@ -242,6 +260,7 @@ export function calculateROI(ganancia: number, inversion: number): number {
 ### Tests obligatorios
 
 Por cada función, cubrir:
+
 - Camino feliz con valor de referencia conocido.
 - Inputs en los bordes (0, negativos, muy grandes).
 - Inputs inválidos (lanza error correcto).
