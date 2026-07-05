@@ -49,6 +49,7 @@ solo necesita saber qué pasa y qué falla.
 ## Fallos
 
 ### 1. [archivo.test.ts > nombre del test]
+
 **Error:** Mensaje breve del assertion fallido.
 **Línea:** archivo.test.ts:42
 **Esperado:** ...
@@ -57,6 +58,7 @@ solo necesita saber qué pasa y qué falla.
 ### 2. [...]
 
 ## Recomendación
+
 [Una frase: ¿es regression de cambios recientes? ¿flaky? ¿requiere fix antes de commit?]
 ```
 
@@ -68,9 +70,11 @@ solo necesita saber qué pasa y qué falla.
 No se pudieron ejecutar tests por errores previos.
 
 ## Errores
+
 - [archivo:línea] Mensaje del error.
 
 ## Recomendación
+
 Arreglar errores de compilación antes de re-intentar.
 ```
 

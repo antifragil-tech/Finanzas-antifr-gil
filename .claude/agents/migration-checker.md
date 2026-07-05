@@ -15,22 +15,26 @@ Las migraciones son **inmutables en producción**; un error aquí es caro.
 ## 🎯 Qué verificas
 
 ### 1. Naming
+
 - Formato: `YYYYMMDDHHmm_descripcion-corta.sql`.
 - Timestamp coherente (no en el futuro lejano ni en el pasado pre-proyecto).
 - Descripción en kebab-case, español o inglés, descriptiva.
 
 ### 2. Seguridad
+
 - **RLS:** toda tabla nueva DEBE tener `ALTER TABLE ... ENABLE ROW LEVEL SECURITY;`.
 - **Policies:** al menos una policy por tabla nueva, no `USING (true)`.
 - Sin `GRANT ALL TO public`.
 - Sin `SECURITY DEFINER` salvo justificación documentada en comentario.
 
 ### 3. Idempotencia (donde aplica)
+
 - `CREATE TABLE IF NOT EXISTS` (cuando es razonable).
 - `CREATE INDEX IF NOT EXISTS`.
 - `INSERT ... ON CONFLICT DO NOTHING` para seeds.
 
 ### 4. Buenas prácticas
+
 - Comentarios al inicio explicando el propósito de la migración.
 - Sin operaciones destructivas (`DROP TABLE`) sin comentario justificativo.
 - Foreign keys con `ON DELETE` explícito (CASCADE/RESTRICT/SET NULL).
@@ -38,6 +42,7 @@ Las migraciones son **inmutables en producción**; un error aquí es caro.
 - Sin datos sensibles hardcodeados (importes, IBANs, contactos).
 
 ### 5. Convenciones del proyecto
+
 - Schemas por dominio (`financiero.tabla`, no `public.tabla`).
 - Nombres de tablas en snake_case plural (`facturas`, `entidades_holding`).
 - Columnas en snake_case (`created_at`, `entity_id`).
@@ -51,12 +56,15 @@ Las migraciones son **inmutables en producción**; un error aquí es caro.
 **Veredicto:** ✅ Apta para aplicar | ⚠️ Apta con observaciones | ❌ NO aplicar
 
 ## 🔴 Bloqueantes
+
 - [línea X] Descripción del problema. Por qué es bloqueante.
 
 ## 🟡 Observaciones
+
 - [línea X] Sugerencia de mejora.
 
 ## 🔍 Resumen técnico
+
 - Tablas creadas: N (lista)
 - Tablas modificadas: N (lista)
 - Tablas eliminadas: N (lista, ¡cuidado!)
@@ -64,6 +72,7 @@ Las migraciones son **inmutables en producción**; un error aquí es caro.
 - Índices añadidos: N
 
 ## ⚠️ Riesgos a comunicar a Guille
+
 - [Cosas que afectan a datos vivos o requieren ventana de mantenimiento]
 ```
 

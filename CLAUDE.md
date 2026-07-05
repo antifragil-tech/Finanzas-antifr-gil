@@ -60,6 +60,7 @@ scripts/          → Automatización (setup, validación, generadores)
 ```
 
 **Distinción clave:**
+
 - **`.claude/docs/`** son instrucciones para Claude.
 - **`docs/`** (raíz) son documentos para personas (tú, socios, futuros devs).
 

@@ -8,10 +8,10 @@
 
 ## 📚 Índice
 
-| Nº | Archivo | Propósito |
-|----|---------|-----------|
-| 01 | (Pendiente) | Modelo de datos del módulo |
-| 02 | (Pendiente) | Reglas de negocio específicas |
+| Nº  | Archivo     | Propósito                     |
+| --- | ----------- | ----------------------------- |
+| 01  | (Pendiente) | Modelo de datos del módulo    |
+| 02  | (Pendiente) | Reglas de negocio específicas |
 
 ---
 
@@ -31,6 +31,7 @@ de cada módulo y colgará el dev server.
 ## 🧭 Cuándo añadir reglas locales
 
 ✅ SÍ:
+
 - Reglas de cálculo financiero particulares (ej. cómo se calcula el yield específico
   para Alsari).
 - Convenciones de naming de entidades (ej. todas las tablas del módulo financiero
@@ -39,5 +40,6 @@ de cada módulo y colgará el dev server.
   específica con configuración estándar).
 
 ❌ NO:
+
 - Reglas que aplican a todo el OS → van al global.
 - Justificaciones de decisiones técnicas → van a un ADR.
