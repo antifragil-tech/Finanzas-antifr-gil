@@ -15,28 +15,16 @@
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ── Enums (fijarán los CHECK del SQL cuando exista) ──────────────────────────
-export type RolClinica =
-  | 'admin'
-  | 'profesional'
-  | 'recepcion'
-  | 'viewer'
-  | 'cliente';
+export type RolClinica = 'admin' | 'profesional' | 'recepcion' | 'viewer' | 'cliente';
 
 export type ModoAgenda = 'huecos_abiertos' | 'bajo_demanda';
 
 export type RecursoRequerido = 'obligatorio' | 'opcional' | 'ninguno';
 
 // Fisioterapia incluye lo deportivo (no se separa en categorías).
-export type CategoriaServicio =
-  | 'fisioterapia'
-  | 'nutricion'
-  | 'entrenamiento_personal';
+export type CategoriaServicio = 'fisioterapia' | 'nutricion' | 'entrenamiento_personal';
 
-export type TipoProfesional =
-  | 'fisioterapeuta'
-  | 'entrenador'
-  | 'nutricionista'
-  | 'otro';
+export type TipoProfesional = 'fisioterapeuta' | 'entrenador' | 'nutricionista' | 'otro';
 
 export type TipoProducto =
   | 'sesion_suelta'
@@ -52,22 +40,11 @@ export type TipoProducto =
 export type CondicionEspecial = 'estandar' | 'founder' | 'vip' | 'ug' | 'especial';
 
 // Condición del cliente (aplica tarifa por defecto).
-export type CondicionCliente =
-  | 'estandar'
-  | 'founder'
-  | 'vip'
-  | 'ug'
-  | 'especial_manual';
+export type CondicionCliente = 'estandar' | 'founder' | 'vip' | 'ug' | 'especial_manual';
 
 export type TipoExcepcionDisponibilidad = 'abre' | 'cierra';
 
-export type TipoBloqueo =
-  | 'vacaciones'
-  | 'reunion'
-  | 'comida'
-  | 'formacion'
-  | 'baja'
-  | 'otro';
+export type TipoBloqueo = 'vacaciones' | 'reunion' | 'comida' | 'formacion' | 'baja' | 'otro';
 
 // ── Filas (contrato de las futuras tablas clinica_*) ─────────────────────────
 

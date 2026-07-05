@@ -36,6 +36,7 @@ que fijarlo antes de construir la cita encima.
 ## Justificación (puntos solicitados)
 
 ### 1. Por qué encaja mejor con el patrón actual del repo
+
 Todo el repo vive en `public` con **prefijo por módulo**: `factura_*`, `presupuesto_*`,
 `proyecto_*`, `movimientos_bancarios`, etc. La capa de acceso (`@alsari/supabase-client`:
 `req`/`post`, `sbUrl`/`sbHeaders`) y los `*Api.ts` (contabilidad, presupuestos) llaman a
@@ -44,6 +45,7 @@ divergir de ese patrón justo en el módulo nuevo. Con prefijo `clinica_`, `clin
 es idéntico en forma a `contabilidadApi`/`presupuestosApi`.
 
 ### 2. Impacto en RLS
+
 **Neutro.** RLS se aplica por tabla, no por esquema. Las políticas son idénticas vivan
 las tablas en `public` o en `clinica` (`alter table … enable row level security` +
 `create policy …`). La seguridad no mejora ni empeora por la elección de esquema: depende
@@ -52,30 +54,35 @@ de las políticas, que aquí son las mismas (v1 permisiva interna; público vía
 esquema.
 
 ### 3. Impacto en PostgREST / Supabase
+
 Es la diferencia operativa real. PostgREST solo expone por defecto el esquema `public`.
 Un esquema `clinica` exigiría:
+
 - añadirlo a **Exposed schemas** en Supabase (Settings → API), y
 - que **cada** petición del cliente mandara cabeceras `Accept-Profile`/`Content-Profile:
-  clinica` (o `.schema('clinica')` en supabase-js).
-Con `public.clinica_*` **no hace falta nada de eso**: funciona con el `sbHeaders` actual,
-sin tocar configuración del proyecto Supabase ni la librería compartida.
+clinica` (o `.schema('clinica')` en supabase-js).
+  Con `public.clinica_*` **no hace falta nada de eso**: funciona con el `sbHeaders` actual,
+  sin tocar configuración del proyecto Supabase ni la librería compartida.
 
 ### 4. Qué perdemos frente a un schema `clinica`
+
 - **Aislamiento de namespace**: con esquema, podrías tener `clinica.clientes` y
   `public.clientes` sin chocar; con prefijo, el nombre largo hace ese trabajo.
 - **`grant`/permisos a nivel de esquema** de un golpe (p. ej. revocar todo `clinica` a un
   rol). Con prefijo se hace por tabla/política.
 - **Orden visual** en herramientas que agrupan por esquema (con prefijo se agrupan por
   nombre, que para eso sirve el prefijo).
-Ninguna de estas pérdidas afecta a funcionalidad ni a seguridad en nuestro caso.
+  Ninguna de estas pérdidas afecta a funcionalidad ni a seguridad en nuestro caso.
 
 ### 5. Qué ganamos en simplicidad
+
 - Cero cambios en `@alsari/supabase-client` ni en el patrón `*Api.ts`.
 - Cero configuración extra en Supabase (exposed schemas, profiles).
 - Coherencia total con los 60+ migraciones y módulos existentes.
 - Menos superficie de error (un olvido de cabecera de esquema = 404 silencioso).
 
 ### 6. Reversibilidad
+
 **Reversible, con coste contenido**, mientras no haya datos reales (hoy: sin SQL en
 el PR — el borrador vive solo en la historia de la rama, sin aplicar). Migrar `public.clinica_*` → esquema `clinica` sería
 `alter table public.clinica_x set schema clinica;` por tabla + exponer el esquema +
