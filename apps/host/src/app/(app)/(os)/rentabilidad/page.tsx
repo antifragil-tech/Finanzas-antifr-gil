@@ -1,4 +1,4 @@
-import { TrendingUp, Coins, HandCoins, Hourglass, Scale } from 'lucide-react';
+import { TrendingUp, Coins, Hourglass } from 'lucide-react';
 import { formatCurrency } from '@alsari/utils';
 import {
   agregarMargen,
@@ -71,6 +71,9 @@ export default function RentabilidadPage() {
   const t = totalesDemo();
   const bonos = resumenesVentasDemo();
 
+  const pctMargen = t.ingresoDevengado > 0 ? (t.margenBruto / t.ingresoDevengado) * 100 : 0;
+  const pctCoste = Math.max(0, Math.min(100, 100 - pctMargen));
+
   return (
     <div className="pb-10">
       <OSPageHeader
@@ -78,29 +81,62 @@ export default function RentabilidadPage() {
         descripcion={`Margen operativo — mes demo ${MES_DEMO}, vista devengo (docs/finanzas/09). Datos ficticios del escenario compartido del MVP.`}
       />
 
-      <div className="grid grid-cols-2 gap-4 px-8 pt-4 lg:grid-cols-5">
+      {/* Resultado total del mes: hero + barra de composición
+          (coste + margen = ingreso devengado; etiquetas directas siempre visibles) */}
+      <div className="glass-panel mx-8 mt-4 rounded-2xl p-6">
+        <div className="flex flex-wrap items-end justify-between gap-6">
+          <div>
+            <p className="text-2xs uppercase tracking-widest text-zinc-500">
+              Margen bruto del mes (M1)
+            </p>
+            <p
+              className={`mt-1 text-4xl font-light tracking-tight ${t.margenBruto >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}
+            >
+              {formatCurrency(t.margenBruto)}
+            </p>
+            <p className="mt-1 text-sm text-zinc-500">
+              {pctMargen.toFixed(1)}% del ingreso devengado
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xs uppercase tracking-widest text-zinc-500">Ingreso devengado</p>
+            <p className="mt-1 text-2xl font-light tracking-tight text-zinc-100">
+              {formatCurrency(t.ingresoDevengado)}
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 flex h-3 w-full gap-[2px] overflow-hidden rounded-full bg-zinc-900">
+          <div
+            className="rounded-l-full bg-zinc-600"
+            style={{ width: `${pctCoste}%` }}
+            title={`Coste profesional: ${formatCurrency(t.costeProfesional)}`}
+          />
+          <div
+            className="rounded-r-full bg-emerald-400"
+            style={{ width: `${pctMargen}%` }}
+            title={`Margen bruto: ${formatCurrency(t.margenBruto)}`}
+          />
+        </div>
+        <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs">
+          <span className="flex items-center gap-2 text-zinc-400">
+            <span className="h-2 w-2 rounded-full bg-zinc-600" />
+            Coste profesional −{formatCurrency(t.costeProfesional)} ({pctCoste.toFixed(1)}%)
+          </span>
+          <span className="flex items-center gap-2 text-zinc-300">
+            <span className="h-2 w-2 rounded-full bg-emerald-400" />
+            Margen bruto {formatCurrency(t.margenBruto)} ({pctMargen.toFixed(1)}%)
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 px-8 pt-4 lg:grid-cols-3">
         <OSKpiCard
-          label="Ingreso devengado"
-          valor={formatCurrency(t.ingresoDevengado)}
-          icon={TrendingUp}
-        />
-        <OSKpiCard
-          label="Ingreso cobrado"
+          label="Ingreso cobrado (caja)"
           valor={formatCurrency(t.ingresoCobrado)}
           hint="vista caja — no se suma al devengo"
           icon={Coins}
           tone="info"
-        />
-        <OSKpiCard
-          label="Coste profesional"
-          valor={formatCurrency(t.costeProfesional)}
-          icon={HandCoins}
-        />
-        <OSKpiCard
-          label="Margen bruto (M1)"
-          valor={formatCurrency(t.margenBruto)}
-          icon={Scale}
-          tone={t.margenBruto >= 0 ? 'ok' : 'warn'}
         />
         <OSKpiCard
           label="Pendiente de devengar"
@@ -108,6 +144,12 @@ export default function RentabilidadPage() {
           hint="bonos cobrados sin consumir"
           icon={Hourglass}
           tone="warn"
+        />
+        <OSKpiCard
+          label="Sesiones del mes"
+          valor={String(hechos.length)}
+          hint={`margen medio ${formatCurrency(hechos.length ? t.margenBruto / hechos.length : 0)}/sesión`}
+          icon={TrendingUp}
         />
       </div>
 
