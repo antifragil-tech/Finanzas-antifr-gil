@@ -22,14 +22,18 @@ lee al inicio de cada sesión.
 ### Dos niveles
 
 #### Nivel global (`.claude/skills/lessons-learned/`)
+
 Aplica a todo el OS. Aquí van las lecciones transversales:
+
 - Preferencias de formato (números, fechas, idioma).
 - Convenciones de naming aprendidas.
 - Patrones técnicos que Guille pidió específicamente.
 - Errores de proceso (ej. "siempre confirmar antes de borrar archivos").
 
 #### Nivel local (`apps/modules/[nombre]/.claude/skills/lessons-learned/`)
+
 Específico de cada módulo:
+
 - Reglas de cálculo financiero particulares de Alsari.
 - Estructuras de datos del módulo que Claude malinterpretó.
 - Flujos de UI que Guille corrigió.
@@ -66,6 +70,7 @@ de continuar con la tarea**:
 **Lección:** [Regla generalizable para el futuro. Esta es la parte más importante.]
 
 **Acciones tomadas:**
+
 - [ ] Aplicada la corrección en la tarea actual.
 - [ ] Documentada en ways-of-working si aplica (referenciar archivo).
 - [ ] Añadido test si el error podría volver (link al test).
@@ -121,12 +126,14 @@ reconstruir. Nunca las borres sin preguntar."
 obsoletos pero son críticos para reproducibilidad.
 
 **Lección:** Categorizar tipos de archivos:
+
 1. **Inmutables históricos:** migraciones SQL, ADRs, CHANGELOG. NUNCA borrar sin
    permiso explícito.
 2. **Generados:** `node_modules`, `dist`, builds. Borrar libremente si hay backup.
 3. **Working files:** todo lo demás. Pedir confirmación si hay duda.
 
 **Acciones tomadas:**
+
 - [x] Restaurados archivos desde git.
 - [x] Añadida regla a `.claude/docs/ways-of-working/05-seguridad.md` sección
       "Cosas que NUNCA hacemos".
@@ -140,20 +147,25 @@ obsoletos pero son críticos para reproducibilidad.
 ## 🔄 Ciclo de vida de las lecciones
 
 ### 1. Captura inmediata
+
 La entrada en `log.md` se añade en la **misma sesión** donde ocurre el error, no
 "después". Si Claude comete un error a las 16:30, la entrada está escrita antes de
 las 16:35.
 
 ### 2. Aplicación inmediata
+
 Si la lección genera una utility, un test, una regla → se crean **en la misma sesión**.
 No se deja para después.
 
 ### 3. Lectura en sesiones futuras
+
 Al inicio de cada nueva sesión, Claude **lee `log.md` completo** como parte del
 contexto. Si crece mucho (>200 entradas), se compacta (ver más abajo).
 
 ### 4. Promoción a regla permanente
+
 Cuando una lección se repite o es estructural, **se promueve** a:
+
 - Una regla en `ways-of-working-*.md`.
 - Una utility en `packages/utils/`.
 - Un test que la previene.
@@ -162,6 +174,7 @@ La entrada original en `log.md` se mantiene (es historia), pero se añade nota:
 `> Promovido a .claude/docs/ways-of-working/02-codigo.md sección "Formato".`
 
 ### 5. Compactación periódica (cuando crezca)
+
 Si `log.md` supera ~150-200 entradas, Claude genera un `compactado.md` que agrupa
 las lecciones por tema y las resume. El `log.md` original se mantiene como historia.
 
@@ -185,16 +198,19 @@ description: Lecciones aprendidas en sesiones anteriores. Léelo al inicio.
 Este skill carga el conocimiento acumulado sesión a sesión.
 
 ## Cómo usarlo
+
 1. Al inicio de cada sesión, lee `log.md` completo.
 2. Si vas a hacer algo que tocó una lección previa, aplícala sin esperar
    a que Guille lo recuerde.
 3. Si cometes un error y Guille corrige, añade entrada nueva ANTES de seguir.
 
 ## Archivos
+
 - `log.md` — Crónica completa de lecciones.
 - `compactado.md` — (Si existe) Resumen agrupado por tema.
 
 ## Reglas de oro
+
 - Reconocer error en una frase, sin disculpas excesivas.
 - Causa raíz, no síntoma.
 - Generalización: ¿qué regla evita este tipo de error en el futuro?
@@ -239,7 +255,7 @@ Cada cierto tiempo (mensual), revisamos:
 
 ## ✅ Resumen ejecutivo
 
-> *"Cada error es un activo si se convierte en regla. Cada regla aplicada es una
+> _"Cada error es un activo si se convierte en regla. Cada regla aplicada es una
 > sesión más rápida y precisa. El sistema mejora solo cuando los errores se
 > registran inmediatamente, se generalizan correctamente, y se promueven a
-> conocimiento permanente."*
+> conocimiento permanente."_

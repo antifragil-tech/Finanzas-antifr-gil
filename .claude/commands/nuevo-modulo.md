@@ -1,6 +1,6 @@
 ---
 description: Crear un nuevo módulo en apps/modules/ clonando _template y personalizándolo.
-argument-hint: "<nombre-del-modulo>"
+argument-hint: '<nombre-del-modulo>'
 ---
 
 # Tarea: Crear nuevo módulo `$1`
@@ -18,6 +18,7 @@ Si algo falla, **detente y pide aclaración**.
 ## 2. Clonado
 
 Ejecuta:
+
 ```bash
 cp -r apps/modules/_template apps/modules/$1
 ```
@@ -27,26 +28,32 @@ cp -r apps/modules/_template apps/modules/$1
 En `apps/modules/$1/`:
 
 ### `package.json`
+
 - Cambiar `"name": "@alsari/template"` → `"name": "@alsari/$1"`.
 - Cambiar el `description` por algo coherente con el módulo.
 
 ### `index.html`
+
 - Cambiar `<title>Alsari Capital | [Nombre del módulo]</title>`
   → `<title>Alsari Capital | $1</title>` (con primera letra mayúscula).
 
 ### `src/App.tsx`
+
 - Cambiar `[Nombre del Módulo]` por una versión legible de `$1`
   (ej. `financiero` → "Financiero", `gestion-clientes` → "Gestión de Clientes").
 
 ### `CLAUDE.md`, `README.md`, `ARQUITECTURA.md`
+
 - Sustituir todos los `[NOMBRE]` y `[NOMBRE-DEL-MODULO]` por `$1`.
 - Sustituir referencias a `template-modulo` por `$1`.
 
 ### `CHANGELOG.md`
+
 - Reemplazar la fecha placeholder por la fecha de hoy en formato ISO.
 - Mantener `Added: Scaffolding inicial del módulo desde la plantilla`.
 
 ### `vite.config.ts`
+
 - Asignar puerto único basado en el nombre del módulo:
   - `financiero` → 5174
   - `facturas` → 5175
@@ -61,6 +68,7 @@ En `apps/modules/$1/`:
 ## 5. Documentación
 
 Actualiza:
+
 - `docs/ARQUITECTURA.md` → tabla "Estado actual de implementación" con el módulo nuevo en estado 🚧.
 - `docs/CHANGELOG.md` → entrada en `[Unreleased]` → `Added` con
   `Módulo $1 creado desde plantilla.`
@@ -73,6 +81,7 @@ Devuelve al usuario:
 ✅ Módulo `$1` creado en `apps/modules/$1/`.
 
 **Próximos pasos:**
+
 1. Cambiar el contenido placeholder en `src/App.tsx` por la implementación real.
 2. Definir el modelo de datos en `ARQUITECTURA.md` del módulo.
 3. Ejecutar `pnpm install` desde la raíz para registrar el workspace.

@@ -19,11 +19,12 @@ export type MovParaHash = {
 // espacios y mayúsculas, concepto colapsado/minúsculas, saldo en céntimos.
 export function canonicalMovimiento(m: MovParaHash): string {
   const centimos = Math.round((Number(m.importe) || 0) * 100);
-  const fecha    = (m.fecha || '').slice(0, 10);
-  const iban     = (m.iban || '').toUpperCase().replace(/\s+/g, '');
+  const fecha = (m.fecha || '').slice(0, 10);
+  const iban = (m.iban || '').toUpperCase().replace(/\s+/g, '');
   const concepto = (m.concepto_normalizado || '').toLowerCase().replace(/\s+/g, ' ').trim();
-  const saldo    = m.saldo === null || m.saldo === undefined ? '' : String(Math.round(Number(m.saldo) * 100));
-  const ref      = (m.referencia || '').trim().toLowerCase();
+  const saldo =
+    m.saldo === null || m.saldo === undefined ? '' : String(Math.round(Number(m.saldo) * 100));
+  const ref = (m.referencia || '').trim().toLowerCase();
   return [m.sociedad_id_ref, iban, fecha, centimos, concepto, saldo, ref].join('|');
 }
 
@@ -31,7 +32,9 @@ export function canonicalMovimiento(m: MovParaHash): string {
 export async function sha256Hex(input: string | ArrayBuffer): Promise<string> {
   const data = typeof input === 'string' ? new TextEncoder().encode(input) : new Uint8Array(input);
   const digest = await globalThis.crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
 }
 
 export function hashMovimiento(m: MovParaHash): Promise<string> {
@@ -53,18 +56,23 @@ export async function xlsxToRows(buf: ArrayBuffer): Promise<string[][]> {
   const sheet = wb.Sheets[first];
   if (!sheet) return [];
   const rows = XLSX.utils.sheet_to_json<unknown[]>(sheet, { header: 1, raw: false, defval: '' });
-  return rows.map(r => (Array.isArray(r) ? r.map(c => String(c ?? '')) : []));
+  return rows.map((r) => (Array.isArray(r) ? r.map((c) => String(c ?? '')) : []));
 }
 
 // Convierte filas a un CSV con cada celda entre comillas (el parser CSV ya maneja
 // comillas y separadores ; / ,). Permite alimentar `parsearExtracto` con XLSX.
 export function rowsToCsv(rows: string[][]): string {
-  return rows.map(r => r.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(';')).join('\n');
+  return rows
+    .map((r) => r.map((c) => `"${String(c ?? '').replace(/"/g, '""')}"`).join(';'))
+    .join('\n');
 }
 
 // ── Rango de fechas y aviso de dedup ──────────────────────────────────────────
 export function rangoFechas(movs: { fecha: string }[]): { min: string | null; max: string | null } {
-  const fechas = movs.map(m => (m.fecha || '').slice(0, 10)).filter(Boolean).sort();
+  const fechas = movs
+    .map((m) => (m.fecha || '').slice(0, 10))
+    .filter(Boolean)
+    .sort();
   return { min: fechas[0] ?? null, max: fechas[fechas.length - 1] ?? null };
 }
 
@@ -73,29 +81,42 @@ export function rangoFechas(movs: { fecha: string }[]): { min: string | null; ma
 export function hayMovimientosSinSaldoNiReferencia(
   movs: { saldo: number | null; referencia?: string | null }[],
 ): boolean {
-  return movs.some(m => (m.saldo === null || m.saldo === undefined) && !m.referencia);
+  return movs.some((m) => (m.saldo === null || m.saldo === undefined) && !m.referencia);
 }
 
 // ── Orquestación: enriquecer + hashear listo para la RPC ──────────────────────
-export type MovimientoParaImportar =
-  Omit<MovimientoBancario, 'id' | 'importado_at' | 'created_at'> & { hash: string };
+export type MovimientoParaImportar = Omit<
+  MovimientoBancario,
+  'id' | 'importado_at' | 'created_at'
+> & { hash: string };
 
 export async function prepararMovimientos(
   raws: MovimientoCsvRaw[],
   ctx: {
-    sociedad_id_ref: string; iban: string; banco: string; fuente: string;
-    cuenta_bancaria_id: string | null; reglas: ReglaCategorizacion[];
+    sociedad_id_ref: string;
+    iban: string;
+    banco: string;
+    fuente: string;
+    cuenta_bancaria_id: string | null;
+    reglas: ReglaCategorizacion[];
   },
 ): Promise<MovimientoParaImportar[]> {
-  const enriched = raws.map(r =>
-    enriquecerMovimiento(r, ctx.sociedad_id_ref, ctx.iban, ctx.banco, ctx.fuente, ctx.reglas));
-  return Promise.all(enriched.map(async m => ({
-    ...m,
-    cuenta_bancaria_id: ctx.cuenta_bancaria_id,
-    hash: await hashMovimiento({
-      sociedad_id_ref: m.sociedad_id_ref, iban: m.iban, fecha: m.fecha,
-      importe: m.importe, concepto_normalizado: m.concepto_normalizado,
-      saldo: m.saldo, referencia: m.referencia,
-    }),
-  })));
+  const enriched = raws.map((r) =>
+    enriquecerMovimiento(r, ctx.sociedad_id_ref, ctx.iban, ctx.banco, ctx.fuente, ctx.reglas),
+  );
+  return Promise.all(
+    enriched.map(async (m) => ({
+      ...m,
+      cuenta_bancaria_id: ctx.cuenta_bancaria_id,
+      hash: await hashMovimiento({
+        sociedad_id_ref: m.sociedad_id_ref,
+        iban: m.iban,
+        fecha: m.fecha,
+        importe: m.importe,
+        concepto_normalizado: m.concepto_normalizado,
+        saldo: m.saldo,
+        referencia: m.referencia,
+      }),
+    })),
+  );
 }

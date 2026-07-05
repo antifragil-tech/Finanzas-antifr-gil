@@ -1,27 +1,32 @@
-import type { ParsedMayor, ParsedEntry } from './mayorParser'
-import type { BalanceKPIs } from './pgcEngine'
+import type { ParsedMayor, ParsedEntry } from './mayorParser';
+import type { BalanceKPIs } from './pgcEngine';
 
 import { sbHeaders, sbUrl } from '@alsari/supabase-client';
 
-async function sbFetch(method: string, path: string, body?: unknown, extra?: Record<string, string>): Promise<Response> {
+async function sbFetch(
+  method: string,
+  path: string,
+  body?: unknown,
+  extra?: Record<string, string>,
+): Promise<Response> {
   const init: RequestInit = { method, headers: sbHeaders(extra) };
   if (body !== undefined) init.body = JSON.stringify(body);
   return fetch(sbUrl(path), init);
 }
 
 export interface SaveResult {
-  batchId: string
-  rowCount: number
-  batchAlreadyExisted: boolean
+  batchId: string;
+  rowCount: number;
+  batchAlreadyExisted: boolean;
 }
 
 export async function saveImport(
   parsed: ParsedMayor,
   entityId: string,
-  kpis?: BalanceKPIs
+  kpis?: BalanceKPIs,
 ): Promise<SaveResult> {
-  let batchId = ''
-  let batchAlreadyExisted = false
+  let batchId = '';
+  let batchAlreadyExisted = false;
 
   // 1. Intentar crear batch — si ya existe para este periodo, seguimos igualmente
   const batchRes = await sbFetch(
@@ -34,11 +39,11 @@ export async function saveImport(
       period_end: ddmmyyyyToISO(parsed.periodEnd),
       row_count: parsed.entries.length,
     },
-    { Prefer: 'return=representation' }
+    { Prefer: 'return=representation' },
   );
 
   if (batchRes.ok) {
-    const rows = await batchRes.json() as Array<{ id: string }>;
+    const rows = (await batchRes.json()) as Array<{ id: string }>;
     batchId = rows[0]?.id ?? '';
 
     // 2. Insertar asientos en chunks de 500 (solo cuando batch es nuevo)
@@ -84,23 +89,23 @@ export async function saveImport(
         id_ref: entityId,
         nombre: parsed.entityName,
         tipo: 'Sociedad',
-        caja_disponible:       kpis.caja,
-        deuda_bancaria_cp:     kpis.deudaBancariaCp,
-        deuda_bancaria_lp:     kpis.deudaBancariaLp,
-        deuda_bancaria:        kpis.deudaBancaria,
-        deuda_socios:          kpis.deudaPartesVinculadas,
+        caja_disponible: kpis.caja,
+        deuda_bancaria_cp: kpis.deudaBancariaCp,
+        deuda_bancaria_lp: kpis.deudaBancariaLp,
+        deuda_bancaria: kpis.deudaBancaria,
+        deuda_socios: kpis.deudaPartesVinculadas,
         deuda_financiera_neta: kpis.deudaFinancieraNeta,
-        activo_corriente:      kpis.activoCorriente,
-        activo_no_corriente:   kpis.activoNoCorriente,
-        activo_total:          kpis.activoTotal,
-        pasivo_corriente:      kpis.pasivoCorriente,
-        pasivo_no_corriente:   kpis.pasivoNoCorriente,
-        pasivo_total:          kpis.pasivoTotal,
-        fondo_maniobra:        kpis.fondoManiobra,
-        patrimonio_neto:       kpis.patrimonioNeto,
-        fecha_actualizacion:   today,
+        activo_corriente: kpis.activoCorriente,
+        activo_no_corriente: kpis.activoNoCorriente,
+        activo_total: kpis.activoTotal,
+        pasivo_corriente: kpis.pasivoCorriente,
+        pasivo_no_corriente: kpis.pasivoNoCorriente,
+        pasivo_total: kpis.pasivoTotal,
+        fondo_maniobra: kpis.fondoManiobra,
+        patrimonio_neto: kpis.patrimonioNeto,
+        fecha_actualizacion: today,
       },
-      { Prefer: 'resolution=merge-duplicates' }
+      { Prefer: 'resolution=merge-duplicates' },
     );
     if (!r.ok) {
       const txt = await r.text().catch(() => '');
@@ -111,11 +116,34 @@ export async function saveImport(
   return { batchId, rowCount: parsed.entries.length, batchAlreadyExisted };
 }
 
-export async function listImports(entityId?: string): Promise<Array<{ id: string; entity_id: string; entity_name: string; period_start: string; period_end: string; row_count: number; imported_at: string }>> {
+export async function listImports(entityId?: string): Promise<
+  Array<{
+    id: string;
+    entity_id: string;
+    entity_name: string;
+    period_start: string;
+    period_end: string;
+    row_count: number;
+    imported_at: string;
+  }>
+> {
   const filter = entityId ? `&entity_id=eq.${encodeURIComponent(entityId)}` : '';
-  const r = await sbFetch('GET', `import_batches?select=id,entity_id,entity_name,period_start,period_end,row_count,imported_at&order=imported_at.desc${filter}`);
+  const r = await sbFetch(
+    'GET',
+    `import_batches?select=id,entity_id,entity_name,period_start,period_end,row_count,imported_at&order=imported_at.desc${filter}`,
+  );
   if (!r.ok) throw new Error(`listImports: HTTP ${r.status}`);
-  return r.json() as Promise<Array<{ id: string; entity_id: string; entity_name: string; period_start: string; period_end: string; row_count: number; imported_at: string }>>;
+  return r.json() as Promise<
+    Array<{
+      id: string;
+      entity_id: string;
+      entity_name: string;
+      period_start: string;
+      period_end: string;
+      row_count: number;
+      imported_at: string;
+    }>
+  >;
 }
 
 function ddmmyyyyToISO(ddmmyyyy: string): string {

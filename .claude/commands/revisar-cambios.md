@@ -1,6 +1,6 @@
 ---
 description: Invocar el subagent code-reviewer sobre los cambios actuales (staged o respecto a main).
-argument-hint: "[staged | main | <commit-hash>]"
+argument-hint: '[staged | main | <commit-hash>]'
 ---
 
 # Tarea: Revisar cambios con code-reviewer
@@ -22,6 +22,7 @@ El usuario quiere una revisión técnica del código modificado. Sigue este fluj
 ## 3. Invocar el subagent code-reviewer
 
 Pasa al subagent:
+
 - El rango del diff a revisar.
 - Una nota: "Aplica TODAS las checks definidas en tu system prompt."
 
@@ -32,9 +33,11 @@ Espera el informe consolidado.
 Muestra el informe del code-reviewer **tal cual** lo devolvió.
 
 Si hay bloqueantes (`❌ Requiere cambios`):
+
 - Pregunta al usuario si quiere que arregles los puntos automáticamente.
 - Si dice sí, arregla uno por uno y vuelve a invocar el reviewer.
 
 Si está apto (`✅` o `⚠️`):
+
 - Sugiere los siguientes pasos: commit + push + PR.
 - Recuerda el formato de Conventional Commits.

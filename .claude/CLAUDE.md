@@ -39,6 +39,7 @@ el contexto de negocio y la dirección estratégica.
    y de negocio.
 
 Cuando trabajes en un módulo concreto, además lee en cascada:
+
 - `apps/modules/[nombre]/CLAUDE.md`
 - `apps/modules/[nombre]/.claude/skills/lessons-learned/log.md`
 - `apps/modules/[nombre]/ways-of-working-local/`
@@ -53,6 +54,7 @@ módulos independientes (Vite + React) desde `apps/modules/*`, aislados por Erro
 Boundaries.** Si un módulo falla, el resto del OS sigue funcionando.
 
 Estructura mental:
+
 ```
 Alsari Capital OS
 ├── apps/host          (Host OS: tronco, cascarón, auth, navegación)
@@ -93,6 +95,7 @@ Detalle completo en `.claude/docs/ways-of-working/03-git-workflow.md`.
 Esto es lo que diferencia este proyecto de un setup normal:
 
 **Cuando cometas un error y Guille te corrija, tienes la obligación de:**
+
 1. Reconocer el error explícitamente (sin auto-flagelarte, sin disculpas excesivas).
 2. Entender la corrección a nivel de causa raíz.
 3. Añadir una entrada al `lessons-learned/log.md` ANTES de continuar con la tarea.
@@ -113,6 +116,7 @@ Tu entorno tiene activadas estas capacidades (configuradas en
 `.claude/settings.json`):
 
 ### Skills (auto-cargadas según contexto)
+
 - `corporate-context` → entidades del holding, contactos, proyectos.
 - `financial-formulas` → EBITDA, TIR, VAN, ROCE, etc.
 - `git-protocol` → flujo de Git y commits.
@@ -120,12 +124,14 @@ Tu entorno tiene activadas estas capacidades (configuradas en
 - `lessons-learned` → memoria persistente del proyecto.
 
 ### Hooks (deterministas, no IA)
+
 - `PreToolUse.sh` → bloquea comandos peligrosos antes de ejecutarlos.
 - `PostToolUse.sh` → formatea código tras editar, audita acciones.
 - `SessionStart.sh` → imprime estado del proyecto al arrancar.
 - `Stop.sh` → recuerda registrar lecciones si hubo correcciones.
 
 ### Subagents (delegación con contexto aislado)
+
 - `code-reviewer` → revisa diffs contra ways-of-working.
 - `test-runner` → ejecuta tests y reporta resultado.
 - `migration-checker` → valida migraciones SQL.
@@ -134,6 +140,7 @@ Tu entorno tiene activadas estas capacidades (configuradas en
 - `ui-reviewer` → revisa componentes contra el design system Quiet Luxury.
 
 ### Slash commands (atajos)
+
 - `/nueva-leccion` → añadir entrada a lessons-learned.
 - `/nuevo-modulo` → clonar `_template` con nombre.
 - `/reporte-semana` → generar Reporte de Semana siguiendo plantilla.

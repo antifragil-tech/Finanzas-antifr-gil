@@ -16,7 +16,7 @@ export function matchSociedadPorNif(
 ): SociedadLite | null {
   const n = normalizeNif(nif);
   if (!n) return null;
-  const matches = sociedades.filter(s => {
+  const matches = sociedades.filter((s) => {
     const c = normalizeNif(s.cif);
     return c !== '' && c === n;
   });

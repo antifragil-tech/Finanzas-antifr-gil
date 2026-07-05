@@ -27,5 +27,15 @@
     "incremental": true,
     "noEmit": true
   },
-  "exclude": ["node_modules", "dist", "build", ".next", ".turbo", "services", "apps/modules/_template", "apps/host", "IGNORE"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    ".turbo",
+    "services",
+    "apps/modules/_template",
+    "apps/host",
+    "IGNORE"
+  ]
 }
