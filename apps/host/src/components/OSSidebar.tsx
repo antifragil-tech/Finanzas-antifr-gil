@@ -32,23 +32,18 @@ export function OSSidebar({ onLogout }: OSSidebarProps) {
   return (
     <>
       {/* Backdrop when expanded */}
-      {expanded && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setExpanded(false)}
-        />
-      )}
+      {expanded && <div className="fixed inset-0 z-40" onClick={() => setExpanded(false)} />}
 
       <aside
-        className={`fixed left-0 top-0 h-screen z-50 flex flex-col bg-zinc-950 border-r border-white/5 transition-all duration-300 ease-in-out overflow-hidden ${
+        className={`fixed left-0 top-0 z-50 flex h-screen flex-col overflow-hidden border-r border-white/5 bg-zinc-950 transition-all duration-300 ease-in-out ${
           expanded ? 'w-56' : 'w-16'
         }`}
       >
         {/* Header / toggle */}
-        <div className="h-14 flex items-center border-b border-white/5 shrink-0 overflow-hidden">
+        <div className="flex h-14 shrink-0 items-center overflow-hidden border-b border-white/5">
           <button
-            onClick={() => setExpanded(v => !v)}
-            className="w-16 h-full flex items-center justify-center text-zinc-600 hover:text-zinc-300 transition-colors shrink-0"
+            onClick={() => setExpanded((v) => !v)}
+            className="flex h-full w-16 shrink-0 items-center justify-center text-zinc-600 transition-colors hover:text-zinc-300"
             title={expanded ? 'Colapsar menú' : 'Expandir menú'}
           >
             <ChevronRight
@@ -57,7 +52,7 @@ export function OSSidebar({ onLogout }: OSSidebarProps) {
             />
           </button>
           {expanded && (
-            <div className="flex-1 flex items-center pr-4">
+            <div className="flex flex-1 items-center pr-4">
               <Image
                 src="/logo.png"
                 alt="Alsari Capital"
@@ -71,38 +66,34 @@ export function OSSidebar({ onLogout }: OSSidebarProps) {
         </div>
 
         {/* Nav items */}
-        <nav className="flex-1 p-2 flex flex-col gap-1 pt-4">
+        <nav className="flex flex-1 flex-col gap-1 p-2 pt-4">
           {navItems.map(({ href, label, icon: Icon, exact }) => {
             const active = isActive(href, exact);
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex items-center gap-3 py-2.5 px-3 rounded-xl transition-all duration-200 whitespace-nowrap ${
+                className={`flex items-center gap-3 whitespace-nowrap rounded-xl px-3 py-2.5 transition-all duration-200 ${
                   active
                     ? 'bg-zinc-800/60 text-white'
-                    : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60'
+                    : 'text-zinc-500 hover:bg-zinc-900/60 hover:text-zinc-300'
                 }`}
               >
                 <Icon size={18} className="shrink-0" />
-                {expanded && (
-                  <span className="text-sm font-semibold">{label}</span>
-                )}
+                {expanded && <span className="text-sm font-semibold">{label}</span>}
               </Link>
             );
           })}
         </nav>
 
         {/* Logout */}
-        <div className="p-2 border-t border-white/5 shrink-0">
+        <div className="shrink-0 border-t border-white/5 p-2">
           <button
             onClick={onLogout}
-            className="flex items-center gap-3 py-2.5 px-3 rounded-xl w-full text-zinc-600 hover:text-zinc-400 hover:bg-zinc-900/60 transition-all duration-200 whitespace-nowrap"
+            className="flex w-full items-center gap-3 whitespace-nowrap rounded-xl px-3 py-2.5 text-zinc-600 transition-all duration-200 hover:bg-zinc-900/60 hover:text-zinc-400"
           >
             <LogOut size={18} className="shrink-0" />
-            {expanded && (
-              <span className="text-sm font-semibold">Salir</span>
-            )}
+            {expanded && <span className="text-sm font-semibold">Salir</span>}
           </button>
         </div>
       </aside>

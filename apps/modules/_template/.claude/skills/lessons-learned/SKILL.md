@@ -15,11 +15,13 @@ description: Lecciones aprendidas específicas de este módulo. Léelo al inicio
 ## 📚 Cómo decidir si una lección va aquí o al global
 
 **Va al global** (`/.claude/skills/lessons-learned/log.md`) si:
+
 - Aplica a múltiples módulos.
 - Es una regla de formato, naming, proceso o estilo del OS.
 - Es una preferencia general de Guille.
 
 **Va aquí** (local) si:
+
 - Es una particularidad de cálculo financiero de este módulo.
 - Es una estructura de datos específica que Claude malinterpretó.
 - Es una regla de UI específica de este módulo.

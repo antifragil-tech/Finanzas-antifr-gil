@@ -1,20 +1,37 @@
 /// <reference types="vite/client" />
 import type {
-  MovimientoBancario, FacturaRecibida, FacturaEmitida,
-  AsientoBorrador, AsientoOficial, PlanCuenta,
-  ReglaCategorizacion, ReconciliacionItem,
-  EstadoFacturaRecibida, ConfiguracionContabilidad,
-  Contacto, SociedadContabilidad, CuentaBancariaSociedad,
-  FacturaAprobacion, AccionAprobacion,
-  FacturaPago, FacturaIncidencia, MetodoPago, TipoPago,
-  ProveedorRegla, ExtractoBancario, ResultadoImportacion,
+  MovimientoBancario,
+  FacturaRecibida,
+  FacturaEmitida,
+  AsientoBorrador,
+  AsientoOficial,
+  PlanCuenta,
+  ReglaCategorizacion,
+  ReconciliacionItem,
+  EstadoFacturaRecibida,
+  ConfiguracionContabilidad,
+  Contacto,
+  SociedadContabilidad,
+  CuentaBancariaSociedad,
+  FacturaAprobacion,
+  AccionAprobacion,
+  FacturaPago,
+  FacturaIncidencia,
+  MetodoPago,
+  TipoPago,
+  ProveedorRegla,
+  ExtractoBancario,
+  ResultadoImportacion,
 } from '@alsari/types';
 
 // ── Supabase client ───────────────────────────────────────────────────────────
 
 import {
-  getJwt, SUPABASE_ANON_KEY, SUPABASE_URL,
-  sbHeaders as headers, sbUrl as url,
+  getJwt,
+  SUPABASE_ANON_KEY,
+  SUPABASE_URL,
+  sbHeaders as headers,
+  sbUrl as url,
 } from '@alsari/supabase-client';
 import { resolveFacturaPdfSource } from './facturaPdf';
 
@@ -37,7 +54,7 @@ async function post<T>(path: string, body: unknown): Promise<T> {
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`POST ${path}: ${res.status} — ${(await res.text()).slice(0, 200)}`);
-  const rows = await res.json() as T[];
+  const rows = (await res.json()) as T[];
   if (!Array.isArray(rows) || !rows[0]) throw new Error(`POST ${path}: respuesta vacía`);
   return rows[0];
 }
@@ -54,13 +71,13 @@ export async function getMovimientos(params?: {
   limit?: number;
 }): Promise<MovimientoBancario[]> {
   const q: string[] = ['select=*', 'order=fecha.desc'];
-  if (params?.sociedad)  q.push(`sociedad_id_ref=eq.${encodeURIComponent(params.sociedad)}`);
-  if (params?.desde)     q.push(`fecha=gte.${params.desde}`);
-  if (params?.hasta)     q.push(`fecha=lte.${params.hasta}`);
+  if (params?.sociedad) q.push(`sociedad_id_ref=eq.${encodeURIComponent(params.sociedad)}`);
+  if (params?.desde) q.push(`fecha=gte.${params.desde}`);
+  if (params?.hasta) q.push(`fecha=lte.${params.hasta}`);
   if (params?.categoria) q.push(`categoria=eq.${encodeURIComponent(params.categoria)}`);
   if (params?.revisado !== undefined) q.push(`revisado=eq.${params.revisado}`);
-  if (params?.extracto)  q.push(`extracto_id=eq.${encodeURIComponent(params.extracto)}`);
-  if (params?.limit)     q.push(`limit=${params.limit}`);
+  if (params?.extracto) q.push(`extracto_id=eq.${encodeURIComponent(params.extracto)}`);
+  if (params?.limit) q.push(`limit=${params.limit}`);
   return req<MovimientoBancario[]>('GET', `movimientos_bancarios?${q.join('&')}`);
 }
 
@@ -88,7 +105,8 @@ export async function importarExtractoBancario(
     headers: headers(),
     body: JSON.stringify({ p_extracto: extracto, p_movimientos: movimientos }),
   });
-  if (!res.ok) throw new Error(`importar_extracto: ${res.status} — ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok)
+    throw new Error(`importar_extracto: ${res.status} — ${(await res.text()).slice(0, 200)}`);
   return res.json() as Promise<ResultadoImportacion>;
 }
 
@@ -100,15 +118,19 @@ export async function getExtractos(sociedad?: string): Promise<ExtractoBancario[
 }
 
 export async function getMovimientosByExtracto(extractoId: string): Promise<MovimientoBancario[]> {
-  return req<MovimientoBancario[]>('GET',
-    `movimientos_bancarios?extracto_id=eq.${encodeURIComponent(extractoId)}&select=*&order=fecha`);
+  return req<MovimientoBancario[]>(
+    'GET',
+    `movimientos_bancarios?extracto_id=eq.${encodeURIComponent(extractoId)}&select=*&order=fecha`,
+  );
 }
 
 // Hashes ya existentes para una sociedad (para estimar nuevos/duplicados en el preview).
 export async function getHashesMovimientos(sociedad: string): Promise<string[]> {
-  const rows = await req<{ hash: string | null }[]>('GET',
-    `movimientos_bancarios?sociedad_id_ref=eq.${encodeURIComponent(sociedad)}&hash=not.is.null&select=hash`);
-  return rows.map(r => r.hash).filter((h): h is string => !!h);
+  const rows = await req<{ hash: string | null }[]>(
+    'GET',
+    `movimientos_bancarios?sociedad_id_ref=eq.${encodeURIComponent(sociedad)}&hash=not.is.null&select=hash`,
+  );
+  return rows.map((r) => r.hash).filter((h): h is string => !!h);
 }
 
 // Deshacer importación: borra los movimientos del extracto y lo marca `deshecho`.
@@ -118,8 +140,9 @@ export async function deshacerImportacionExtracto(extractoId: string): Promise<E
     headers: headers({ Prefer: 'return=representation' }),
     body: JSON.stringify({ p_extracto_id: extractoId }),
   });
-  if (!res.ok) throw new Error(`deshacer_extracto: ${res.status} — ${(await res.text()).slice(0, 200)}`);
-  const data = await res.json() as ExtractoBancario | ExtractoBancario[];
+  if (!res.ok)
+    throw new Error(`deshacer_extracto: ${res.status} — ${(await res.text()).slice(0, 200)}`);
+  const data = (await res.json()) as ExtractoBancario | ExtractoBancario[];
   return Array.isArray(data) ? data[0]! : data;
 }
 
@@ -131,13 +154,25 @@ export async function insertMovimientos(
     headers: headers({ Prefer: 'return=representation' }),
     body: JSON.stringify(items),
   });
-  if (!res.ok) throw new Error(`insertMovimientos: ${res.status} — ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok)
+    throw new Error(`insertMovimientos: ${res.status} — ${(await res.text()).slice(0, 200)}`);
   return res.json() as Promise<MovimientoBancario[]>;
 }
 
 export async function updateMovimiento(
   id: string,
-  data: Partial<Pick<MovimientoBancario, 'categoria' | 'subcategoria' | 'revisado' | 'notas' | 'entidad_contraparte' | 'es_intragrupo' | 'proyecto_id_ref'>>,
+  data: Partial<
+    Pick<
+      MovimientoBancario,
+      | 'categoria'
+      | 'subcategoria'
+      | 'revisado'
+      | 'notas'
+      | 'entidad_contraparte'
+      | 'es_intragrupo'
+      | 'proyecto_id_ref'
+    >
+  >,
 ): Promise<void> {
   await req<void>('PATCH', `movimientos_bancarios?id=eq.${encodeURIComponent(id)}`, data);
 }
@@ -161,17 +196,23 @@ export { resolveFacturaPdfSource };
 export type { FacturaPdfSource } from './facturaPdf';
 
 // Firma una URL temporal para un objeto del bucket privado `facturas`.
-async function createSignedFacturaUrl(path: string, expiresIn = SIGNED_URL_TTL_SECONDS): Promise<string> {
+async function createSignedFacturaUrl(
+  path: string,
+  expiresIn = SIGNED_URL_TTL_SECONDS,
+): Promise<string> {
   const encodedPath = path.split('/').map(encodeURIComponent).join('/');
-  const res = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/${FACTURAS_BUCKET}/${encodedPath}`, {
-    method: 'POST',
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${getJwt()}`,
-      'Content-Type': 'application/json',
+  const res = await fetch(
+    `${SUPABASE_URL}/storage/v1/object/sign/${FACTURAS_BUCKET}/${encodedPath}`,
+    {
+      method: 'POST',
+      headers: {
+        apikey: SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${getJwt()}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ expiresIn }),
     },
-    body: JSON.stringify({ expiresIn }),
-  });
+  );
   if (!res.ok) {
     const txt = await res.text().catch(() => '');
     throw new Error(`Firma de URL: HTTP ${res.status} — ${txt.slice(0, 200)}`);
@@ -200,7 +241,10 @@ export async function getFacturasRecibidas(sociedad?: string): Promise<FacturaRe
 }
 
 export async function getFacturaById(id: string): Promise<FacturaRecibida | null> {
-  const rows = await req<FacturaRecibida[]>('GET', `facturas_recibidas?id=eq.${encodeURIComponent(id)}&select=*&limit=1`);
+  const rows = await req<FacturaRecibida[]>(
+    'GET',
+    `facturas_recibidas?id=eq.${encodeURIComponent(id)}&select=*&limit=1`,
+  );
   return rows[0] ?? null;
 }
 
@@ -215,10 +259,15 @@ export async function cambiarSociedadFactura(
   const res = await fetch(url('rpc/cambiar_sociedad_factura'), {
     method: 'POST',
     headers: headers({ Prefer: 'return=representation' }),
-    body: JSON.stringify({ p_factura_id: facturaId, p_sociedad_id: sociedadId, p_comentario: comentario ?? null }),
+    body: JSON.stringify({
+      p_factura_id: facturaId,
+      p_sociedad_id: sociedadId,
+      p_comentario: comentario ?? null,
+    }),
   });
-  if (!res.ok) throw new Error(`cambiar_sociedad: ${res.status} — ${(await res.text()).slice(0, 200)}`);
-  const data = await res.json() as FacturaRecibida | FacturaRecibida[];
+  if (!res.ok)
+    throw new Error(`cambiar_sociedad: ${res.status} — ${(await res.text()).slice(0, 200)}`);
+  const data = (await res.json()) as FacturaRecibida | FacturaRecibida[];
   return Array.isArray(data) ? data[0]! : data;
 }
 
@@ -232,13 +281,20 @@ export async function updateFacturaRecibida(
   id: string,
   data: Partial<Omit<FacturaRecibida, 'id' | 'created_at' | 'updated_at'>>,
 ): Promise<void> {
-  await req<void>('PATCH', `facturas_recibidas?id=eq.${encodeURIComponent(id)}`,
-    { ...data, updated_at: new Date().toISOString() });
+  await req<void>('PATCH', `facturas_recibidas?id=eq.${encodeURIComponent(id)}`, {
+    ...data,
+    updated_at: new Date().toISOString(),
+  });
 }
 
-export async function deleteFacturaRecibida(id: string, presupuestoPagoId?: string | null): Promise<void> {
+export async function deleteFacturaRecibida(
+  id: string,
+  presupuestoPagoId?: string | null,
+): Promise<void> {
   if (presupuestoPagoId) {
-    await req('DELETE', `presupuesto_pagos?id=eq.${encodeURIComponent(presupuestoPagoId)}`).catch(() => {});
+    await req('DELETE', `presupuesto_pagos?id=eq.${encodeURIComponent(presupuestoPagoId)}`).catch(
+      () => {},
+    );
   }
   await req<void>('DELETE', `facturas_recibidas?id=eq.${encodeURIComponent(id)}`);
 }
@@ -246,13 +302,24 @@ export async function deleteFacturaRecibida(id: string, presupuestoPagoId?: stri
 // ── Sociedades (ficha completa) ───────────────────────────────────────────────
 
 export async function getSociedadesContabilidad(): Promise<SociedadContabilidad[]> {
-  const rows = await req<Array<{
-    id_ref: string; nombre: string; cif: string | null;
-    domicilio: string | null; localidad: string | null;
-    codigo_postal: string | null; pais: string | null;
-    email: string | null; telefono: string | null; logo_url: string | null;
-  }>>('GET', 'sociedades?select=id_ref,nombre,cif,domicilio,localidad,codigo_postal,pais,email,telefono,logo_url&order=nombre');
-  return rows.map(r => ({
+  const rows = await req<
+    Array<{
+      id_ref: string;
+      nombre: string;
+      cif: string | null;
+      domicilio: string | null;
+      localidad: string | null;
+      codigo_postal: string | null;
+      pais: string | null;
+      email: string | null;
+      telefono: string | null;
+      logo_url: string | null;
+    }>
+  >(
+    'GET',
+    'sociedades?select=id_ref,nombre,cif,domicilio,localidad,codigo_postal,pais,email,telefono,logo_url&order=nombre',
+  );
+  return rows.map((r) => ({
     id: r.id_ref,
     nombre: r.nombre,
     cif: r.cif,
@@ -268,14 +335,29 @@ export async function getSociedadesContabilidad(): Promise<SociedadContabilidad[
 
 export async function updateSociedad(
   idRef: string,
-  data: Partial<Pick<SociedadContabilidad, 'nombre' | 'cif' | 'domicilio' | 'localidad' | 'codigo_postal' | 'pais' | 'email' | 'telefono' | 'logo_url'>>,
+  data: Partial<
+    Pick<
+      SociedadContabilidad,
+      | 'nombre'
+      | 'cif'
+      | 'domicilio'
+      | 'localidad'
+      | 'codigo_postal'
+      | 'pais'
+      | 'email'
+      | 'telefono'
+      | 'logo_url'
+    >
+  >,
 ): Promise<void> {
   await req<void>('PATCH', `sociedades?id_ref=eq.${encodeURIComponent(idRef)}`, data);
 }
 
 // ── Cuentas bancarias por sociedad ────────────────────────────────────────────
 
-export async function getCuentasBancarias(sociedadIdRef: string): Promise<CuentaBancariaSociedad[]> {
+export async function getCuentasBancarias(
+  sociedadIdRef: string,
+): Promise<CuentaBancariaSociedad[]> {
   return req<CuentaBancariaSociedad[]>(
     'GET',
     `cuentas_bancarias_sociedad?sociedad_id_ref=eq.${encodeURIComponent(sociedadIdRef)}&activa=eq.true&order=alias`,
@@ -311,13 +393,19 @@ export async function updateFacturaEmitida(
   id: string,
   data: Partial<Omit<FacturaEmitida, 'id' | 'created_at' | 'updated_at'>>,
 ): Promise<void> {
-  await req<void>('PATCH', `facturas_emitidas?id=eq.${encodeURIComponent(id)}`,
-    { ...data, updated_at: new Date().toISOString() });
+  await req<void>('PATCH', `facturas_emitidas?id=eq.${encodeURIComponent(id)}`, {
+    ...data,
+    updated_at: new Date().toISOString(),
+  });
 }
 
 // ── Asientos borrador ─────────────────────────────────────────────────────────
 
-export async function getAsientosBorrador(sociedad?: string, desde?: string, hasta?: string): Promise<AsientoBorrador[]> {
+export async function getAsientosBorrador(
+  sociedad?: string,
+  desde?: string,
+  hasta?: string,
+): Promise<AsientoBorrador[]> {
   const q: string[] = ['select=*', 'order=fecha.desc'];
   if (sociedad) q.push(`sociedad_id_ref=eq.${encodeURIComponent(sociedad)}`);
   if (desde) q.push(`fecha=gte.${desde}`);
@@ -333,15 +421,23 @@ export async function insertAsientoBorrador(
 
 export async function updateAsientoBorrador(
   id: string,
-  data: Partial<Pick<AsientoBorrador, 'estado' | 'lineas' | 'total_debe' | 'total_haber' | 'concepto'>>,
+  data: Partial<
+    Pick<AsientoBorrador, 'estado' | 'lineas' | 'total_debe' | 'total_haber' | 'concepto'>
+  >,
 ): Promise<void> {
-  await req<void>('PATCH', `asientos_borrador?id=eq.${encodeURIComponent(id)}`,
-    { ...data, updated_at: new Date().toISOString() });
+  await req<void>('PATCH', `asientos_borrador?id=eq.${encodeURIComponent(id)}`, {
+    ...data,
+    updated_at: new Date().toISOString(),
+  });
 }
 
 // ── Asientos oficiales ────────────────────────────────────────────────────────
 
-export async function getAsientosOficiales(sociedad?: string, desde?: string, hasta?: string): Promise<AsientoOficial[]> {
+export async function getAsientosOficiales(
+  sociedad?: string,
+  desde?: string,
+  hasta?: string,
+): Promise<AsientoOficial[]> {
   const q: string[] = ['select=*', 'order=fecha.desc'];
   if (sociedad) q.push(`sociedad_id_ref=eq.${encodeURIComponent(sociedad)}`);
   if (desde) q.push(`fecha=gte.${desde}`);
@@ -357,35 +453,51 @@ export async function insertAsientosOficiales(
     headers: headers({ Prefer: 'return=representation' }),
     body: JSON.stringify(items),
   });
-  if (!res.ok) throw new Error(`insertAsientosOficiales: ${res.status} — ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok)
+    throw new Error(`insertAsientosOficiales: ${res.status} — ${(await res.text()).slice(0, 200)}`);
   return res.json() as Promise<AsientoOficial[]>;
 }
 
 // ── Plan de cuentas ───────────────────────────────────────────────────────────
 
 export async function getPlanCuentas(sociedad: string): Promise<PlanCuenta[]> {
-  return req<PlanCuenta[]>('GET', `plan_cuentas?sociedad_id_ref=eq.${encodeURIComponent(sociedad)}&select=*&order=codigo`);
+  return req<PlanCuenta[]>(
+    'GET',
+    `plan_cuentas?sociedad_id_ref=eq.${encodeURIComponent(sociedad)}&select=*&order=codigo`,
+  );
 }
 
-export async function insertCuenta(data: Omit<PlanCuenta, 'id' | 'created_at'>): Promise<PlanCuenta> {
+export async function insertCuenta(
+  data: Omit<PlanCuenta, 'id' | 'created_at'>,
+): Promise<PlanCuenta> {
   return post<PlanCuenta>('plan_cuentas', data);
 }
 
 // ── Reglas de categorización ──────────────────────────────────────────────────
 
 export async function getReglas(): Promise<ReglaCategorizacion[]> {
-  return req<ReglaCategorizacion[]>('GET', 'reglas_categorizacion?select=*&activa=eq.true&order=prioridad.desc');
+  return req<ReglaCategorizacion[]>(
+    'GET',
+    'reglas_categorizacion?select=*&activa=eq.true&order=prioridad.desc',
+  );
 }
 
 export async function incrementarConfirmaciones(id: string, confirmaciones: number): Promise<void> {
-  await req<void>('PATCH', `reglas_categorizacion?id=eq.${encodeURIComponent(id)}`, { confirmaciones });
+  await req<void>('PATCH', `reglas_categorizacion?id=eq.${encodeURIComponent(id)}`, {
+    confirmaciones,
+  });
 }
 
 // ── Reconciliación ────────────────────────────────────────────────────────────
 
-export async function getReconciliacion(sociedad: string, periodo: string): Promise<ReconciliacionItem[]> {
-  return req<ReconciliacionItem[]>('GET',
-    `reconciliacion_log?sociedad_id_ref=eq.${encodeURIComponent(sociedad)}&periodo=eq.${periodo}&select=*&order=created_at.desc`);
+export async function getReconciliacion(
+  sociedad: string,
+  periodo: string,
+): Promise<ReconciliacionItem[]> {
+  return req<ReconciliacionItem[]>(
+    'GET',
+    `reconciliacion_log?sociedad_id_ref=eq.${encodeURIComponent(sociedad)}&periodo=eq.${periodo}&select=*&order=created_at.desc`,
+  );
 }
 
 export async function insertReconciliacionItems(
@@ -399,16 +511,15 @@ export async function insertReconciliacionItems(
 }
 
 export async function resolverItem(id: string, notas: string): Promise<void> {
-  await req<void>('PATCH', `reconciliacion_log?id=eq.${encodeURIComponent(id)}`,
-    { resuelto: true, resolucion_notas: notas });
+  await req<void>('PATCH', `reconciliacion_log?id=eq.${encodeURIComponent(id)}`, {
+    resuelto: true,
+    resolucion_notas: notas,
+  });
 }
 
 // ── OCR + Workflow ────────────────────────────────────────────────────────────
 
-export async function procesarFacturaPdf(
-  file: File,
-  sociedadId: string,
-): Promise<FacturaRecibida> {
+export async function procesarFacturaPdf(file: File, sociedadId: string): Promise<FacturaRecibida> {
   const form = new FormData();
   form.append('file', file);
   form.append('sociedad_id', sociedadId);
@@ -422,7 +533,7 @@ export async function procesarFacturaPdf(
     const txt = await res.text().catch(() => '');
     throw new Error(`procesarFactura: ${res.status} — ${txt.slice(0, 300)}`);
   }
-  const data = await res.json() as { factura: FacturaRecibida };
+  const data = (await res.json()) as { factura: FacturaRecibida };
   return data.factura;
 }
 
@@ -444,10 +555,16 @@ export type ArchivarDriveResultado = {
 export async function archivarFacturaEnDrive(facturaId: string): Promise<ArchivarDriveResultado> {
   const res = await fetch(`${SUPABASE_URL}/functions/v1/archivar-en-drive`, {
     method: 'POST',
-    headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${getJwt()}`, 'Content-Type': 'application/json' },
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${getJwt()}`,
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify({ factura_id: facturaId }),
   });
-  const data = await res.json().catch(() => ({ error: `HTTP ${res.status}` })) as ArchivarDriveResultado;
+  const data = (await res
+    .json()
+    .catch(() => ({ error: `HTTP ${res.status}` }))) as ArchivarDriveResultado;
   if (!res.ok) throw new Error(data.error || `archivar-en-drive: HTTP ${res.status}`);
   return data;
 }
@@ -492,8 +609,9 @@ export async function avanzarEstadoFacturaConAuditoria(args: {
       p_motivo_rechazo: args.motivoRechazo ?? null,
     }),
   });
-  if (!res.ok) throw new Error(`avanzar_estado: ${res.status} — ${(await res.text()).slice(0, 200)}`);
-  const data = await res.json() as FacturaRecibida | FacturaRecibida[];
+  if (!res.ok)
+    throw new Error(`avanzar_estado: ${res.status} — ${(await res.text()).slice(0, 200)}`);
+  const data = (await res.json()) as FacturaRecibida | FacturaRecibida[];
   return Array.isArray(data) ? data[0]! : data;
 }
 
@@ -513,7 +631,12 @@ export async function getFacturaIncidencias(facturaId: string): Promise<FacturaI
   );
 }
 
-export type JustificanteSubido = { storage_path: string; nombre: string; mime: string; size: number };
+export type JustificanteSubido = {
+  storage_path: string;
+  nombre: string;
+  mime: string;
+  size: number;
+};
 
 // Sube el justificante al bucket PRIVADO `facturas` en la ruta acotada por la
 // política RLS: recibidas/{factura_id}/pagos/{pago_id}/{filename}. Sin upsert:
@@ -524,7 +647,8 @@ export async function uploadJustificante(
   file: File,
 ): Promise<JustificanteSubido> {
   const safeName = file.name
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-zA-Z0-9._-]/g, '_');
   const path = `recibidas/${facturaId}/pagos/${pagoId}/${safeName}`;
   const encoded = path.split('/').map(encodeURIComponent).join('/');
@@ -541,7 +665,12 @@ export async function uploadJustificante(
     const txt = await res.text().catch(() => '');
     throw new Error(`Subida de justificante: HTTP ${res.status} — ${txt.slice(0, 200)}`);
   }
-  return { storage_path: path, nombre: file.name, mime: file.type || 'application/octet-stream', size: file.size };
+  return {
+    storage_path: path,
+    nombre: file.name,
+    mime: file.type || 'application/octet-stream',
+    size: file.size,
+  };
 }
 
 // Firma una URL temporal del justificante (bucket privado `facturas`).
@@ -588,7 +717,8 @@ export async function registrarPagoFactura(args: {
       p_comentario: args.comentario ?? null,
     }),
   });
-  if (!res.ok) throw new Error(`registrar_pago: ${res.status} — ${(await res.text()).slice(0, 200)}`);
+  if (!res.ok)
+    throw new Error(`registrar_pago: ${res.status} — ${(await res.text()).slice(0, 200)}`);
   return res.json() as Promise<RegistrarPagoResultado>;
 }
 
@@ -601,15 +731,19 @@ export async function resolverIncidenciaFactura(
     headers: headers({ Prefer: 'return=representation' }),
     body: JSON.stringify({ p_incidencia_id: incidenciaId, p_comentario: comentario ?? null }),
   });
-  if (!res.ok) throw new Error(`resolver_incidencia: ${res.status} — ${(await res.text()).slice(0, 200)}`);
-  const data = await res.json() as FacturaIncidencia | FacturaIncidencia[];
+  if (!res.ok)
+    throw new Error(`resolver_incidencia: ${res.status} — ${(await res.text()).slice(0, 200)}`);
+  const data = (await res.json()) as FacturaIncidencia | FacturaIncidencia[];
   return Array.isArray(data) ? data[0]! : data;
 }
 
 // ── Configuración ─────────────────────────────────────────────────────────────
 
 export async function getConfiguracion(): Promise<ConfiguracionContabilidad> {
-  const rows = await req<ConfiguracionContabilidad[]>('GET', 'configuracion_contabilidad?id=eq.default&select=*');
+  const rows = await req<ConfiguracionContabilidad[]>(
+    'GET',
+    'configuracion_contabilidad?id=eq.default&select=*',
+  );
   if (!rows[0]) throw new Error('No hay configuración en BD');
   return rows[0];
 }
@@ -625,10 +759,7 @@ export async function updateConfiguracion(
 
 // ── Aprendizaje OCR ───────────────────────────────────────────────────────────
 
-export async function registrarCorreccionOcr(
-  campo: string,
-  esCorrecta: boolean,
-): Promise<void> {
+export async function registrarCorreccionOcr(campo: string, esCorrecta: boolean): Promise<void> {
   await fetch(url('rpc/registrar_correccion_ocr'), {
     method: 'POST',
     headers: headers(),
@@ -655,8 +786,10 @@ export async function updateContacto(
   id: string,
   data: Partial<Omit<Contacto, 'id' | 'created_at' | 'updated_at'>>,
 ): Promise<void> {
-  await req<void>('PATCH', `contactos?id=eq.${encodeURIComponent(id)}`,
-    { ...data, updated_at: new Date().toISOString() });
+  await req<void>('PATCH', `contactos?id=eq.${encodeURIComponent(id)}`, {
+    ...data,
+    updated_at: new Date().toISOString(),
+  });
 }
 
 export async function deleteContacto(id: string): Promise<void> {
@@ -666,16 +799,19 @@ export async function deleteContacto(id: string): Promise<void> {
 // ── Reglas de proveedor (PR E) ────────────────────────────────────────────────
 // Config operativa por (contacto, sociedad). SOLO sugerencias: no automatiza nada.
 
-export type NuevaProveedorRegla =
-  Partial<Omit<ProveedorRegla, 'id' | 'created_at' | 'updated_at'>> & { contacto_id: string };
+export type NuevaProveedorRegla = Partial<
+  Omit<ProveedorRegla, 'id' | 'created_at' | 'updated_at'>
+> & { contacto_id: string };
 
 export async function getProveedorReglas(): Promise<ProveedorRegla[]> {
   return req<ProveedorRegla[]>('GET', 'proveedores_reglas?select=*&order=created_at.desc');
 }
 
 export async function getReglasByContacto(contactoId: string): Promise<ProveedorRegla[]> {
-  return req<ProveedorRegla[]>('GET',
-    `proveedores_reglas?contacto_id=eq.${encodeURIComponent(contactoId)}&select=*&order=created_at.desc`);
+  return req<ProveedorRegla[]>(
+    'GET',
+    `proveedores_reglas?contacto_id=eq.${encodeURIComponent(contactoId)}&select=*&order=created_at.desc`,
+  );
 }
 
 export async function insertProveedorRegla(data: NuevaProveedorRegla): Promise<ProveedorRegla> {
@@ -711,19 +847,31 @@ export type PartidaParaVincular = {
 
 export async function searchPartidasPresupuesto(query?: string): Promise<PartidaParaVincular[]> {
   const [partidas, capitulos, presupuestos] = await Promise.all([
-    req<Array<{
-      id: string; presupuesto_id: string; capitulo_id: string;
-      descripcion: string; importe_presupuestado: number;
-      tipo_iva: number; proveedor_esperado: string | null;
-    }>>('GET', 'presupuesto_partidas?select=id,presupuesto_id,capitulo_id,descripcion,importe_presupuestado,tipo_iva,proveedor_esperado&order=created_at.asc&limit=500'),
+    req<
+      Array<{
+        id: string;
+        presupuesto_id: string;
+        capitulo_id: string;
+        descripcion: string;
+        importe_presupuestado: number;
+        tipo_iva: number;
+        proveedor_esperado: string | null;
+      }>
+    >(
+      'GET',
+      'presupuesto_partidas?select=id,presupuesto_id,capitulo_id,descripcion,importe_presupuestado,tipo_iva,proveedor_esperado&order=created_at.asc&limit=500',
+    ),
     req<Array<{ id: string; nombre: string }>>('GET', 'presupuesto_capitulos?select=id,nombre'),
-    req<Array<{ id: string; nombre: string; proyecto_nombre: string | null }>>('GET', 'presupuestos?select=id,nombre,proyecto_nombre'),
+    req<Array<{ id: string; nombre: string; proyecto_nombre: string | null }>>(
+      'GET',
+      'presupuestos?select=id,nombre,proyecto_nombre',
+    ),
   ]);
 
-  const capMap    = new Map(capitulos.map(c => [c.id, c]));
-  const presupMap = new Map(presupuestos.map(p => [p.id, p]));
+  const capMap = new Map(capitulos.map((c) => [c.id, c]));
+  const presupMap = new Map(presupuestos.map((p) => [p.id, p]));
 
-  const results = partidas.map(r => ({
+  const results = partidas.map((r) => ({
     id: r.id,
     presupuesto_id: r.presupuesto_id,
     capitulo_id: r.capitulo_id,
@@ -738,12 +886,13 @@ export async function searchPartidasPresupuesto(query?: string): Promise<Partida
 
   if (!query) return results;
   const q = query.toLowerCase();
-  return results.filter(r =>
-    r.presupuesto_nombre.toLowerCase().includes(q) ||
-    r.descripcion.toLowerCase().includes(q) ||
-    r.capitulo_nombre.toLowerCase().includes(q) ||
-    (r.proyecto_nombre?.toLowerCase().includes(q) ?? false) ||
-    (r.proveedor_esperado?.toLowerCase().includes(q) ?? false),
+  return results.filter(
+    (r) =>
+      r.presupuesto_nombre.toLowerCase().includes(q) ||
+      r.descripcion.toLowerCase().includes(q) ||
+      r.capitulo_nombre.toLowerCase().includes(q) ||
+      (r.proyecto_nombre?.toLowerCase().includes(q) ?? false) ||
+      (r.proveedor_esperado?.toLowerCase().includes(q) ?? false),
   );
 }
 
@@ -751,7 +900,16 @@ export type PagoCreado = { id: string };
 
 export async function crearPagoDesdeFactura(
   partida: PartidaParaVincular,
-  factura: { id: string; base_imponible: number; tipo_iva: number; fecha_factura: string; fecha_vencimiento: string | null; numero_factura: string | null; proveedor_nombre: string; estado: string },
+  factura: {
+    id: string;
+    base_imponible: number;
+    tipo_iva: number;
+    fecha_factura: string;
+    fecha_vencimiento: string | null;
+    numero_factura: string | null;
+    proveedor_nombre: string;
+    estado: string;
+  },
 ): Promise<PagoCreado> {
   const fechaPago = factura.fecha_vencimiento ?? factura.fecha_factura;
   const descripcion = factura.numero_factura
@@ -764,14 +922,14 @@ export async function crearPagoDesdeFactura(
     method: 'POST',
     headers: headers({ Prefer: 'return=representation' }),
     body: JSON.stringify({
-      presupuesto_id:   partida.presupuesto_id,
-      partida_id:       partida.id,
+      presupuesto_id: partida.presupuesto_id,
+      partida_id: partida.id,
       descripcion,
-      importe:          factura.base_imponible,
-      tipo_iva:         factura.tipo_iva,
-      fecha_prevista:   fechaPago,
-      tipo_flujo:       'gasto',
-      estado:           estadoPago,
+      importe: factura.base_imponible,
+      tipo_iva: factura.tipo_iva,
+      fecha_prevista: fechaPago,
+      tipo_flujo: 'gasto',
+      estado: estadoPago,
       factura_recibida_id: factura.id,
     }),
   });
@@ -779,8 +937,9 @@ export async function crearPagoDesdeFactura(
     const txt = await res.text().catch(() => '');
     throw new Error(`POST presupuesto_pagos: ${res.status} — ${txt.slice(0, 300)}`);
   }
-  const rows = await res.json() as PagoCreado[];
-  if (!Array.isArray(rows) || !rows[0]?.id) throw new Error('No se pudo crear el pago (respuesta vacía)');
+  const rows = (await res.json()) as PagoCreado[];
+  if (!Array.isArray(rows) || !rows[0]?.id)
+    throw new Error('No se pudo crear el pago (respuesta vacía)');
   const pago = rows[0];
 
   // Actualizar factura con el FK inverso
@@ -796,7 +955,10 @@ export async function marcarPagoComoPagado(pagoId: string): Promise<void> {
   await req('PATCH', `presupuesto_pagos?id=eq.${pagoId}`, { estado: 'pagado' });
 }
 
-export async function desvincularFacturaDePresupuesto(facturaId: string, pagoId: string): Promise<void> {
+export async function desvincularFacturaDePresupuesto(
+  facturaId: string,
+  pagoId: string,
+): Promise<void> {
   await Promise.all([
     req('PATCH', `facturas_recibidas?id=eq.${facturaId}`, {
       presupuesto_pago_id: null,
@@ -814,7 +976,7 @@ export async function getCurrentUserEmail(): Promise<string | null> {
       headers: { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${getJwt()}` },
     });
     if (!res.ok) return null;
-    const user = await res.json() as { email?: string };
+    const user = (await res.json()) as { email?: string };
     return user.email ?? null;
   } catch {
     return null;
