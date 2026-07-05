@@ -20,7 +20,7 @@ export const BONOS: BonoMock[] = [
   {
     id: 'b1',
     cliente_id: 'cl1',
-    cliente: 'María López',
+    cliente: 'Cliente Demo 01',
     tipo: 'bono',
     nombre: 'Bono Fisio 5',
     sesiones_contratadas: 5,
@@ -32,7 +32,7 @@ export const BONOS: BonoMock[] = [
   {
     id: 'b2',
     cliente_id: 'cl5',
-    cliente: 'Inés Vega',
+    cliente: 'Cliente Demo 05',
     tipo: 'programa',
     nombre: 'Programa Nutrición 12',
     sesiones_contratadas: 12,
@@ -44,7 +44,7 @@ export const BONOS: BonoMock[] = [
   {
     id: 'b3',
     cliente_id: 'cl6',
-    cliente: 'Lola Prieto',
+    cliente: 'Cliente Demo 06',
     tipo: 'bono',
     nombre: 'Bono Fisio 10',
     sesiones_contratadas: 10,
@@ -56,7 +56,7 @@ export const BONOS: BonoMock[] = [
   {
     id: 'b4',
     cliente_id: 'cl10',
-    cliente: 'Andrea Soler',
+    cliente: 'Cliente Demo 11',
     tipo: 'bono',
     nombre: 'Bono Entreno 8',
     sesiones_contratadas: 8,
@@ -68,7 +68,7 @@ export const BONOS: BonoMock[] = [
   {
     id: 'b5',
     cliente_id: 'cl7',
-    cliente: 'Sergio Mora',
+    cliente: 'Cliente Demo 07',
     tipo: 'programa',
     nombre: 'Programa Activo 20',
     sesiones_contratadas: 20,
@@ -80,7 +80,7 @@ export const BONOS: BonoMock[] = [
   {
     id: 'b6',
     cliente_id: 'cl3',
-    cliente: 'Hugo Santos',
+    cliente: 'Cliente Demo 03',
     tipo: 'bono',
     nombre: 'Bono Fisio 5',
     sesiones_contratadas: 5,
@@ -92,7 +92,7 @@ export const BONOS: BonoMock[] = [
   {
     id: 'b7',
     cliente_id: 'cl12',
-    cliente: 'Pablo Reyes',
+    cliente: 'Cliente Demo 14',
     tipo: 'programa',
     nombre: 'Programa Fuerza 16',
     sesiones_contratadas: 16,

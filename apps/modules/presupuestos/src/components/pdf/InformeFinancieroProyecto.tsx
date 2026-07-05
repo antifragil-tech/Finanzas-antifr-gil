@@ -444,7 +444,7 @@ export function InformeFinancieroProyecto({ informe: r }: { informe: InformeFina
   const faltantes = r.calidadCampos.filter((c) => c.estado === 'faltante');
 
   return (
-    <Document title={`Informe financiero — ${r.nombreProyecto}`} author="Alsari Capital">
+    <Document title={`Informe financiero — ${r.nombreProyecto}`} author="Antifrágil">
       {/* ── Portada (página completa, oscura) ── */}
       <Page size="A4" style={s.cover}>
         <View style={s.coverFrame}>

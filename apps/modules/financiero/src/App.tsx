@@ -14,7 +14,7 @@ import { AlertTriangle, RefreshCw, Layers } from 'lucide-react';
 import { sbHeaders, sbUrl } from '@alsari/supabase-client';
 import { BalanceView } from './components/views/BalanceView';
 
-const CACHE_KEY = 'alsari_dashboard_cache_v2';
+const CACHE_KEY = 'antifragil_dashboard_cache_v1';
 
 function loadCache(): DashboardData | null {
   try {
@@ -386,7 +386,7 @@ export function FinancieroDashboard() {
           alt="Cargando..."
           className="mb-4 h-24 w-auto animate-pulse object-contain"
         />
-        <p className="text-sm font-medium tracking-wider text-zinc-500">NEURAL FINANCE V3.0</p>
+        <p className="text-sm font-medium tracking-wider text-zinc-500">ANTIFRÁGIL OS</p>
       </div>
     );
   }

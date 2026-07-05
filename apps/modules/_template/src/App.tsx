@@ -8,7 +8,7 @@ export function App() {
       <main className="mx-auto max-w-7xl px-6 py-12">
         <header className="animate-fade-in mb-12">
           <p className="mb-2 text-xs uppercase tracking-widest text-zinc-500">
-            Alsari Capital · Módulo
+            Antifrágil · Módulo
           </p>
           <h1 className="text-4xl font-light tracking-tight text-zinc-100">[Nombre del Módulo]</h1>
           <p className="mt-3 text-zinc-400">

@@ -13,6 +13,11 @@ import type { AccionCita } from '../spike/CitaModal';
 const pad = (x: number) => String(x).padStart(2, '0');
 const hoyLocal = () => {
   const d = new Date();
+  // Las citas mock se generan de lunes a viernes: en fin de semana anclamos
+  // "hoy" al lunes siguiente para que la agenda de la demo nunca salga vacía.
+  const dia = d.getDay();
+  if (dia === 6) d.setDate(d.getDate() + 2);
+  if (dia === 0) d.setDate(d.getDate() + 1);
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 };
 const ahora = () => new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });

@@ -41,15 +41,6 @@ importers:
 
   apps/host:
     dependencies:
-      '@alsari/contabilidad':
-        specifier: workspace:*
-        version: link:../modules/contabilidad
-      '@alsari/financiero':
-        specifier: workspace:*
-        version: link:../modules/financiero
-      '@alsari/presupuestos':
-        specifier: workspace:*
-        version: link:../modules/presupuestos
       '@alsari/reservas':
         specifier: workspace:*
         version: link:../modules/reservas
@@ -62,6 +53,9 @@ importers:
       '@alsari/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@antifragil/operativa':
+        specifier: workspace:*
+        version: link:../../packages/operativa
       '@supabase/ssr':
         specifier: ^0.10.3
         version: 0.10.3(@supabase/supabase-js@2.105.4)
@@ -409,6 +403,15 @@ importers:
         version: 5.4.21(@types/node@22.19.19)
 
   packages/config: {}
+
+  packages/operativa:
+    devDependencies:
+      typescript:
+        specifier: ^5.6.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.9
+        version: 2.1.9(@types/node@22.19.19)
 
   packages/supabase-client:
     devDependencies:

@@ -11,10 +11,8 @@
     "clean": "rimraf .next .turbo"
   },
   "dependencies": {
-    "@alsari/contabilidad": "workspace:*",
-    "@alsari/presupuestos": "workspace:*",
-    "@alsari/financiero": "workspace:*",
     "@alsari/reservas": "workspace:*",
+    "@antifragil/operativa": "workspace:*",
     "@alsari/types": "workspace:*",
     "@alsari/ui": "workspace:*",
     "@alsari/utils": "workspace:*",

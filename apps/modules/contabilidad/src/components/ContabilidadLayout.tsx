@@ -40,7 +40,7 @@ export function ContabilidadLayout({
       <main className="relative ml-64 h-full flex-1 overflow-y-auto bg-zinc-900">
         <header className="sticky top-0 z-40 border-b border-white/[0.08] bg-zinc-900/80 px-10 py-6 backdrop-blur-xl">
           <div className="text-2xs mb-1.5 flex items-center gap-2 font-medium uppercase tracking-widest text-zinc-500">
-            <span>ALSARI CAPITAL</span>
+            <span>ANTIFRÁGIL</span>
             <ChevronRight size={10} className="text-zinc-700" />
             <span className="text-zinc-400">Contabilidad</span>
             <ChevronRight size={10} className="text-zinc-700" />
