@@ -1,3 +1,4 @@
+import { OSGlobalProvider } from '@/components/os/context';
 import { OSShell } from '@/components/os/OSShell';
 
 // Route group (os): las rutas nuevas del shell Antifrágil OS (reservas,
@@ -8,5 +9,9 @@ import { OSShell } from '@/components/os/OSShell';
 // AppShell existentes siguen aplicando sin cambios.
 
 export default function OSLayout({ children }: { children: React.ReactNode }) {
-  return <OSShell>{children}</OSShell>;
+  return (
+    <OSGlobalProvider>
+      <OSShell>{children}</OSShell>
+    </OSGlobalProvider>
+  );
 }
