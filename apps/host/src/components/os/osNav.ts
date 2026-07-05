@@ -35,14 +35,14 @@ export const OS_NAV: OSNavGroup[] = [
     items: [
       { href: '/dashboard', label: 'Panel', icon: LayoutDashboard },
       { href: '/reservas', label: 'Reservas', icon: CalendarDays },
-      { href: '/liquidaciones', label: 'Liquidaciones', icon: HandCoins, placeholder: true },
+      { href: '/liquidaciones', label: 'Liquidaciones', icon: HandCoins },
     ],
   },
   {
     titulo: 'Finanzas operativas',
     items: [
       { href: '/tesoreria', label: 'Tesorería', icon: Wallet, placeholder: true },
-      { href: '/rentabilidad', label: 'Rentabilidad', icon: TrendingUp, placeholder: true },
+      { href: '/rentabilidad', label: 'Rentabilidad', icon: TrendingUp },
     ],
   },
   {

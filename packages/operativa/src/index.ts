@@ -18,3 +18,13 @@ export type { DimensionMargen } from './margen';
 export { diasVencido, tramoAging, estaVencida, importePendiente, cxpDeLiquidaciones } from './cxcp';
 export { PROFESIONALES, getProfesional, costePorSesion } from './mocks/profesionales';
 export { PRODUCTOS, CENTROS, CANALES } from './mocks/catalogo';
+export {
+  MES_DEMO,
+  sesionesDemo,
+  hechosDemo,
+  VENTAS_DEMO,
+  EVENTOS_DEMO,
+  resumenesVentasDemo,
+  liquidacionesDemo,
+  totalesDemo,
+} from './mocks/escenario';

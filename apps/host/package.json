@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@alsari/reservas": "workspace:*",
+    "@antifragil/operativa": "workspace:*",
     "@alsari/types": "workspace:*",
     "@alsari/ui": "workspace:*",
     "@alsari/utils": "workspace:*",

@@ -53,6 +53,9 @@ importers:
       '@alsari/utils':
         specifier: workspace:*
         version: link:../../packages/utils
+      '@antifragil/operativa':
+        specifier: workspace:*
+        version: link:../../packages/operativa
       '@supabase/ssr':
         specifier: ^0.10.3
         version: 0.10.3(@supabase/supabase-js@2.105.4)
