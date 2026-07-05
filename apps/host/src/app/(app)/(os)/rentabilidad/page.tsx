@@ -8,6 +8,9 @@ import {
   getProfesional,
   CENTROS,
   MES_DEMO,
+  escaleraMargen,
+  ingresosDemo,
+  gastosDemo,
 } from '@antifragil/operativa';
 import { OSPageHeader, OSSection, OSKpiCard, OSStatusBadge } from '@/components/os/ui';
 
@@ -62,6 +65,56 @@ function TablaMargen({
           </tbody>
         </table>
       </div>
+    </OSSection>
+  );
+}
+
+function EscaleraM1M3() {
+  const e = escaleraMargen(ingresosDemo(), gastosDemo());
+  const filas: { etiqueta: string; importe: number; esMargen?: boolean }[] = [
+    { etiqueta: 'Ingreso devengado', importe: e.ingresoDevengado },
+    { etiqueta: '− Coste profesional variable', importe: -e.costeProfesionalVariable },
+    { etiqueta: 'M1 · Margen bruto', importe: e.m1, esMargen: true },
+    { etiqueta: '− Otros costes directos (TPV, material)', importe: -e.otrosCostesDirectos },
+    { etiqueta: 'M2 · Margen de contribución', importe: e.m2, esMargen: true },
+    { etiqueta: '− Costes fijos (nóminas, SS, clínica, compartidos)', importe: -e.costesFijos },
+    { etiqueta: 'M3 · Margen operativo', importe: e.m3, esMargen: true },
+  ];
+  return (
+    <OSSection
+      titulo="Escalera de márgenes M1 → M3"
+      nota="Margen real: facturado por sesiones − pagos a trabajadores − costes propios de la clínica (doc 09)"
+    >
+      <div className="glass-panel rounded-2xl px-5 py-2">
+        {filas.map((f) => (
+          <div
+            key={f.etiqueta}
+            className={`flex items-baseline justify-between border-b border-white/5 py-2.5 last:border-0 ${f.esMargen ? '' : 'pl-4'}`}
+          >
+            <span className={f.esMargen ? 'text-sm text-zinc-200' : 'text-xs text-zinc-500'}>
+              {f.etiqueta}
+            </span>
+            <span
+              className={
+                f.esMargen
+                  ? `text-base font-medium ${f.importe >= 0 ? 'text-emerald-300' : 'text-rose-300'}`
+                  : 'text-xs text-zinc-400'
+              }
+            >
+              {formatCurrency(f.importe)}
+            </span>
+          </div>
+        ))}
+      </div>
+      <p className="text-2xs mt-3 px-1 text-zinc-500">
+        Amortizables/inversiones fuera del M3 mensual: {formatCurrency(e.amortizablesFueraDeM3)}.
+        {e.provisional
+          ? ' Resultado PROVISIONAL: hay conceptos pendientes de confirmar (UG/PM, formaciones, GEA/AFDH).'
+          : ''}
+        {e.gastosBloqueados > 0
+          ? ` Pagos bloqueados sin documento: ${formatCurrency(e.gastosBloqueados)}.`
+          : ''}
+      </p>
     </OSSection>
   );
 }
@@ -156,6 +209,8 @@ export default function RentabilidadPage() {
       <p className="text-2xs mx-8 mt-4 rounded-xl border border-white/5 bg-white/[0.02] px-4 py-2.5 uppercase tracking-widest text-zinc-500">
         Caja no es rentabilidad · Cobrado no es devengado · Coste pagado no es coste devengado
       </p>
+
+      <EscaleraM1M3 />
 
       <TablaMargen
         titulo="Por profesional"
