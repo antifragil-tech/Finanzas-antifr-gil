@@ -14,7 +14,7 @@
 Nombre de producto: **FOP-B2 — Rentabilidad operativa**. Encaje con el backlog (`05-backlog-finanzas-operativas.md`, PR #11):
 
 - Implementa **F-Op B — Rentabilidad Clínica** del backlog, generalizada a "rentabilidad operativa" porque el eje ya no es solo la Clínica: entran **canal** y **centro** como dimensiones nuevas (§6), y el modelo es multi-proyecto (doc 01 §6).
-- Continúa la serie de producto iniciada en el doc 08: **FOP-B1** (Liquidaciones) implementó C2 + parte de C1 del backlog; **FOP-B2** implementa la letra B. La colisión de letras producto↔backlog ya quedó documentada en 08 §0; cuando el PR #11 se mergee, el backlog reconcilia ambas nomenclaturas (una línea en 05 y otra en 07; ver §13).
+- Continúa la serie de producto iniciada en el doc 08: **FOP-B1** (Liquidaciones) implementó C2 + parte de C1 del backlog; **FOP-B2** implementa la letra B. La colisión de letras producto↔backlog ya quedó documentada en 08 §0; cuando el PR #11 se mergee, el backlog reconcilia ambas nomenclaturas (una línea en 05 y otra en 07; ver §14).
 - Sigue **gated** como en el backlog: el margen por sesión necesita las sesiones de la línea Clínica/Reservas. Aquí se diseña completo para implementarlo cuando exista el dato.
 
 ---
@@ -118,6 +118,29 @@ Cuatro peldaños, del más fino al más agregado. Cada nivel de §5 se lee en el
 
 > **Métrica derivada (no reparto):** para comparar personas con relación distinta, el panel por profesional muestra el **coste efectivo por sesión** = coste fijo mensual / sesiones del mes (§5.2). Es una lectura, no una imputación: no altera M1 ni M2.
 
+### 4.3 Fórmula base (común a todos los niveles)
+
+```text
+margen operativo = ingresos devengados (o cobrados, según vista §4.4)
+                 − costes directos   (profesional por sesión, material, comisiones)
+                 − costes asignados  (fijos del proyecto/centro; compartidos vía C1)
+```
+
+Tres distinciones que el modelo **nunca** mezcla:
+
+- **Ingreso devengado ≠ ingreso cobrado.** Una sesión realizada puede no estar cobrada (CxC); un bono cobrado entero aún no está devengado.
+- **Coste devengado ≠ coste pagado.** La sesión de la autónoma es coste del mes de la sesión aunque su liquidación se pague al mes siguiente (08 §8).
+- **Margen bruto ≠ beneficio neto.** M1/M2 no incluyen fijos ni generales; M4 es resultado operativo de gestión, no resultado fiscal (D-op-6).
+
+### 4.4 Dos vistas: devengo y caja
+
+| Vista | Qué cuenta | Para qué sirve |
+|---|---|---|
+| **Devengo** (principal) | Lo realizado en el periodo, cobrado o no; los costes del mes aunque no estén pagados | Medir el margen real de operar (todos los niveles de §5 se leen aquí por defecto) |
+| **Caja** (control) | Lo efectivamente cobrado y pagado en el periodo (libro de cobros + pagos de liquidación) | Contraste con tesorería FOP-A1; detectar desfases: mucho margen devengado con poca caja = CxC creciendo o liquidaciones atrasadas |
+
+Las dos vistas se muestran **etiquetadas y por separado**, nunca sumadas (invariante anti-doble-conteo). La vista caja no sustituye a la tesorería: es la misma rentabilidad releída por fecha de cobro/pago.
+
 ---
 
 ## 5. Niveles de rentabilidad
@@ -141,11 +164,36 @@ Sesión de fisioterapia suelta atendida por María Solís (autónoma, 30 €/ses
 
 La misma sesión dentro de un **programa de 5 sesiones (225 €)** devenga 45 €/sesión → M1 = 15 €. El mismo servicio con **Cecilia (20 €/sesión)** → M1 = 25 € sobre 45 € devengados. El panel por sesión existe para auditar casos concretos; la gestión diaria se hace en los niveles agregados.
 
+**Ficha económica de la sesión** (lo que el panel muestra por sesión):
+
+| Campo | Fuente | Ejemplo |
+|---|---|---|
+| Ingreso previsto | tarifa/catálogo de la cita | 55 € |
+| Ingreso devengado | §4.1 (suelta, o porción de bono/plan) | 55 € / 45 € |
+| Ingreso cobrado | libro de cobros (doc 02 §7) | 55 € · 0 € si pendiente |
+| Estado de cobro | CxC operativo (F-Op A2) | cobrada · pendiente · parcial |
+| Coste profesional directo | regla de liquidación vigente (08 §4) | 30 € |
+| Estado de liquidación | ciclo FOP-B1 (08 §5) | pendiente_calculo … pagada |
+| Margen bruto M1 | devengado − coste directo | 25 € |
+
+Los estados de cobro y liquidación **no cambian el margen devengado**: cambian su lectura en la vista caja (§4.4) y su fiabilidad (una sesión sin validar no entra; una liquidación bloqueada marca el margen como provisional).
+
 ### 5.2 Por profesional
 
-Σ de sus sesiones del periodo + su coste fijo si su relación es de nómina.
+Σ de sus sesiones del periodo + su coste fijo si su relación es de nómina. Las **cuatro relaciones** de FOP-B1 (08 §3.2) se leen distinto:
 
-- **Autónomos (María Solís, Cecilia, Marta, Carlos):** margen = Σ ingresos devengados de sus sesiones − Σ coste por sesión (su liquidación FOP-B1). Directamente comparable con lo que se le paga.
+- **Autónomos por sesión (María Solís 30 €, Cecilia 20 €, Marta 35 €/suelta o 30 €/mes·cliente en plan):** margen = Σ ingresos devengados de sus sesiones − Σ coste por sesión (su liquidación FOP-B1). Directamente comparable con lo que se le paga. Ejemplo de mes tipo:
+
+```text
+María Solís (autónoma, 30 €/sesión), mes tipo:
+  Ingresos devengados por sus sesiones:  40 sesiones ≈ 2.000 €  (mix sueltas 55 € y bonos 45 €)
+  Coste liquidado (FOP-B1):              40 × 30 € = 1.200 €
+  ────────────────────────────────────────────────
+  Margen bruto antes de indirectos:        800 €
+```
+
+- **Colaborador con regla pendiente (Carlos, 25 €/sesión):** su coste se devenga igual con la regla provisional y su margen se marca **provisional** mientras la relación siga `pendiente_regularizar` (08 §4.5). Nunca margen "sin coste" por falta de papeles.
+- **Profesional compartido con tercero (Lidia, recepción — 400 €/mes parte Antifrágil, resto Lidomare):** no genera sesiones con ingreso; su parte Antifrágil es coste fijo/compartido que entra en M3 del proyecto/centro vía regla C1, no en el margen de ningún profesional asistencial.
 - **Nómina (María Moreno):** sus sesiones aportan M1 = ingreso completo (coste directo 0); su nómina entra como fijo en M3. Para leer su rentabilidad individual: margen aportado = Σ ingresos de sus sesiones − nómina del mes; y coste efectivo por sesión = nómina / nº sesiones (si además coordina, parte de su coste es estructura — ⚠️ B2-P6).
 - **Respuesta a "¿qué parte del coste viene de nóminas y qué parte de autónomos?":** el panel de coste de personas separa por `tipo` de relación (08 §3.2): Σ nóminas + parte compartida vs Σ liquidaciones por sesión, por mes y por proyecto/centro.
 - Un profesional con margen bajo no es automáticamente "no rentable": puede estar en un centro con peor acuerdo o atender más bonos que sesiones sueltas. El panel debe permitir cruzar profesional × servicio × centro antes de concluir.
@@ -162,6 +210,7 @@ La misma sesión dentro de un **programa de 5 sesiones (225 €)** devenga 45 �
 
 **Dimensión nueva en la serie.** El canal es **cómo llegó el cliente** (captación): recomendación, Instagram/redes, Google/web, partner B2B (Vivofácil, seguros, empresas), walk-in del centro (Lidomare/Oasis), campaña concreta.
 
+- **Catálogo inicial propuesto (⚠️ B2-P5):** `orgánico/walk-in` · `recomendación` · `campaña` (Instagram/Google/otras, una etiqueta por campaña) · `partner B2B` (Vivofácil, seguros, empresas) · `derivación de centro` (Lidomare, Oasis) · `9AM` (cruce entre proyectos propios).
 - **Atribución:** el canal se asigna al **cliente** en su alta (primer contacto) y hereda a todas sus compras; opcionalmente una venta puntual puede llevar canal propio (una campaña que reactiva a un cliente antiguo). Regla simple primero: **último canal antes del alta**; nada de modelos multi-touch en v1.
 - **Margen por canal** = Σ margen de contribución de los clientes atribuidos al canal en el periodo. Como el cliente es id/seudónimo (D-op-5), el panel por canal es agregado y no expone identidades.
 - Responde "¿qué canal trae clientes rentables?" mirando margen **acumulado por cliente** (no solo la primera compra): un canal que trae bonos recurrentes vale más que uno de sesiones sueltas aunque el ticket inicial sea igual.
@@ -173,6 +222,7 @@ La misma sesión dentro de un **programa de 5 sesiones (225 €)** devenga 45 �
 El nivel que **ya existe** (`metricas_proyecto_resumen`) y se mejora: hoy es ingreso real − gasto real (caja); pasa a leerse **por devengo** con la escalera M1→M3.
 
 - Proyectos según doc 01 §2/§6: **Clínica Antifrágil Playamar** (activo), **9AM/Eventos** (siguiente, diferido), Lido Pro y Antifrágil OG (diferidos). Multi-proyecto genuino: nada hardcodeado a la Clínica.
+- **La lista de proyectos la decide negocio, no este doc.** Candidatos que el modelo soporta con un simple alta en `proyectos` (sin rediseño): "Lidomare x Antifrágil" o "Vivofácil" si dejan de ser centros y adquieren P&L propio (B2-P2), "9AM Club", un "Proyecto digital" (programas/venta online), o elevar un servicio (nutrición, entrenamiento) a proyecto si se gestiona como línea independiente.
 - M3 del proyecto = Σ M2 de sus sesiones/ventas − fijos imputados del proyecto (nóminas, alquiler, software, parte Antifrágil de compartidos vía C1).
 - El resultado global M4 (Antifrágil = la SL, doc 01) = Σ M3 − generales. Es la cifra "¿ganamos dinero operando?" — siempre etiquetada como operativa, no fiscal.
 
@@ -183,7 +233,7 @@ El nivel que **ya existe** (`metricas_proyecto_resumen`) y se mejora: hoy es ing
 - **Centro ≠ proyecto.** Decisión de este doc (⚠️ validar, B2-P2): los centros arrancan como **dimensión del proyecto Clínica**, no como proyectos propios. Si un centro adquiere P&L propio (equipo, alquiler y catálogo propios), se eleva a proyecto dándolo de alta en `proyectos` — el modelo lo permite sin rediseño.
 - Cada centro puede tener **economía distinta**, y ahí está el valor de la dimensión: tarifa distinta, coste de espacio distinto (alquiler propio en Playamar; cesión/%/renta en los demás — ⚠️ acuerdos por confirmar, B2-P3), costes compartidos distintos (la recepción de Lidia es compartida precisamente con **Lidomare**, 08 §4.2 — su regla C1 imputa al centro).
 - **"¿Qué margen deja Lidomare vs clínica propia?"** = comparar M3 por centro: mismo servicio y profesional pueden dejar margen distinto según el acuerdo del centro. El panel por centro muestra ingreso devengado, coste directo, coste del acuerdo (renta/%, cuando se confirme) y M3.
-- **Vivofácil** puede ser a la vez **canal** (trae clientes B2B) y **centro** (se presta servicio en/para su red). Son dos dimensiones ortogonales y se etiquetan por separado; el panel puede cruzarlas (margen de sesiones en centro Vivofácil vs margen de clientes captados por canal Vivofácil).
+- **Una misma marca puede etiquetar tres dimensiones sin ambigüedad.** Lidomare, Vivofácil u Oasis pueden aparecer como **centro** (dónde se presta la sesión), como **canal** (quién trajo al cliente) y — si negocio lo decide — como **proyecto** (P&L propio, 5.5). El modelo las separa siempre: "¿qué margen deja Vivofácil?" tiene tres respuestas distintas (sesiones prestadas en su red · clientes que trae · su línea de negocio) y el panel puede cruzarlas. Lo que **no** se hace es tratarlos como "servicios": el servicio es qué se presta (fisioterapia, nutrición, entrenamiento, bonos/programas, eventos), no con quién.
 - ⚠️ Los términos económicos de Lidomare, Vivofácil y Oasis **no están documentados** en ningún doc de la serie; este diseño no los inventa. Quedan como pendientes B2-P3 con el modelo listo para recibirlos como reglas C1 (%, renta fija o driver).
 
 ### 5.7 Por cliente y por programa
@@ -272,7 +322,16 @@ Lecturas que este cuadro habilita: fisio suelta margina más que el programa por
 
 ## 9. KPIs y paneles (para la futura UI)
 
-- **Panel dirección (mensual):** M4 global; M3 por proyecto y por centro; top/bottom servicios y profesionales por margen; % coste de personas sobre ingreso, partido nóminas vs autónomos.
+**KPIs prioritarios**, agrupados por lo que miden:
+
+- **Ingreso:** ingresos devengados · ingresos cobrados · cobros pendientes (CxC) · sesiones no cobradas.
+- **Actividad:** ocupación de agenda · no-shows · sesiones realizadas/validadas · sesiones pendientes de liquidar.
+- **Coste:** coste profesional directo (partido **nóminas vs autónomos**) · coste fijo mensual · liquidaciones pendientes de pago (CxP).
+- **Margen:** margen bruto M1 · margen operativo M3/M4 · margen por sesión, servicio, profesional, canal, centro y proyecto · **punto de equilibrio** del proyecto (fijos del mes ÷ margen de contribución medio por sesión = sesiones necesarias para cubrir fijos).
+
+**Paneles:**
+
+- **Panel dirección (mensual):** M4 global; M3 por proyecto y por centro; top/bottom servicios y profesionales por margen; % coste de personas sobre ingreso, partido nóminas vs autónomos; punto de equilibrio y distancia a él.
 - **Panel servicio:** margen unitario y total, mix de tipo_venta, ticket devengado, evolución.
 - **Panel profesional (solo CEO):** margen aportado, coste efectivo por sesión, nº sesiones, mix de servicios y centros.
 - **Panel canal:** clientes nuevos, margen acumulado por cohorte de alta, margen medio por cliente.
@@ -290,9 +349,11 @@ El margen por profesional **revela retribuciones** (coste = lo que cobra la pers
 | Márgenes por profesional (implican coste/retribución de terceros) | ✅ | ❌ | ❌ | ❌ |
 | Márgenes por servicio/canal/centro/proyecto (agregados, sin desglose por persona) | ✅ | ✅ | ❌ | ❌ |
 | Su propio margen aportado (ingresos de sus sesiones − su coste) | ✅ | ✅ (el suyo) | ✅ (el suyo) | — |
-| Datos operativos que alimentan la capa (sesiones, validaciones) | ✅ | ✅ | los suyos | ✅ |
+| Datos operativos que alimentan la capa (sesiones, validaciones, ocupación, incidencias) | ✅ | ✅ | los suyos | ✅ |
+| Cobros pendientes, citas no cobradas, errores administrativos (gestión CxC del día) | ✅ | ✅ | ❌ | ✅ |
+| Costes fijos y comparativas entre proyectos/centros | ✅ | ❌ (salvo permiso expreso) | ❌ | ❌ |
 
-Principio: la coordinadora gestiona **mix y volumen** (servicios, centros, agenda) sin ver retribuciones de terceros; cada profesional puede ver lo que aporta, nunca lo de los demás.
+Principio: la coordinadora gestiona **rendimiento operativo** (mix, volumen, ocupación, incidencias, productividad) sin ver retribuciones de terceros ni la rentabilidad global sensible salvo permiso; recepción gestiona el **cobro del día** sin ver márgenes ni nóminas; cada profesional ve lo que aporta y su liquidación, nunca el margen del negocio.
 
 ---
 
@@ -302,17 +363,37 @@ Principio: la coordinadora gestiona **mix y volumen** (servicios, centros, agend
 |---|---|---|
 | **Facturación operativa** (doc 02, PR #1) | Ingreso documental, desglose fiscal futuro, libro de cobros | No emite ni redefine facturas; no usa fecha de emisión como devengo |
 | **Liquidaciones FOP-B1** (doc 08, PR #13) | Coste por sesión y fijo de personas, con sus estados | No recalcula liquidaciones; si una liquidación cambia, el margen se recalcula |
+| **Reservas/Agenda** (PR #5, versión canónica) | Sesiones/citas realizadas y validadas: el hecho generador | No gestiona agenda ni catálogo; solo consume sesiones validadas |
 | **Tesorería FOP-A1** (doc 06, PR #4 — NO APPLY) | Medio de cobro (para comisiones) | No mezcla caja con margen; no toca SQL del baseline |
 | **F-Op C1** (backlog) | Reglas de imputación de compartidos y acuerdos de centro | No decide los repartos; los consume cuando existan |
 | **F-Op A2 CxC** | Destino de los impagos | No gestiona cobros pendientes |
 | **F-Op D** (presupuesto vs real) | — (es su consumidor futuro) | No compara contra presupuesto |
 | **Línea Clínica/Reservas** | Sesiones, catálogo, tipo_venta, cliente-id | No define catálogo ni precios; no accede a datos clínicos |
 
+**Lectura de los estados de liquidación (08 §5) en esta capa:** cada `sesion_liquidable` genera coste y la liquidación mensual los agrupa; con la liquidación `pendiente_calculo`/`calculada` el coste **ya está devengado** (la sesión existe); `validada`/`pendiente_pago` → coste firme y CxP viva en tesorería; `pagada` → solo mueve la vista caja (§4.4); `bloqueada_por_incidencia` → el margen se marca provisional, pero el devengo no se borra ni el pago avanza.
+
 **Gating honesto (como en el backlog):** sin sesiones de agenda no hay margen por sesión. Lo implementable **antes** de Clínica: catálogos de centro y canal, `ingreso_devengado` para ventas manuales, y el partido nóminas/autónomos del coste de personas (que FOP-B1 ya trae). El margen fino llega cuando llegue el dato.
 
 ---
 
-## 12. Pendientes de confirmación
+## 12. Riesgos y salvaguardas
+
+| Riesgo | Salvaguarda en el modelo |
+|---|---|
+| **Confundir cobrado con rentable** | Dos vistas separadas (§4.4); la principal es devengo. Un mes de muchos bonos cobrados puede ser un mes de margen mediocre |
+| **No devengar costes profesionales** (margen inflado hasta que llega la factura del autónomo) | El coste nace de la sesión validada, no de la factura (08 §8); factura tardía no retrasa el devengo |
+| **No imputar nóminas** (los autónomos parecen caros y la nómina "gratis") | Fijos de personas en M3 + coste efectivo por sesión como métrica comparativa (§4.2) |
+| **Usar pagos no documentados** | Herencia FOP-B1: `pendiente_regularizar` bloquea y aflora; ningún coste opaco entra "por fuera" |
+| **Mezclar rentabilidad con historia clínica** | D-op-5: cliente id/seudónimo; ningún dato clínico es dimensión ni aparece en paneles; la finalidad terapéutica no se usa para explicar margen |
+| **No separar canal / centro / proyecto** | Tres dimensiones ortogonales (§6.1); la misma marca puede etiquetar las tres sin ambigüedad (§5.6) |
+| **Mezclar caja y banco** | Territorio FOP-A1 (D-op-3); esta capa no toca saldos ni medios, solo lee la comisión del cobro |
+| **Duplicar sesiones liquidadas** (doble coste) | Invariante R3 de 08 (una sesión ∈ una liquidación) + `ingreso_devengado` append-only (§6.2) |
+| **Confundir margen bruto con beneficio neto** | Escalera M1-M4 siempre etiquetada; M4 es operativo, no resultado fiscal (D-op-6) |
+| **Reparto artificial de generales que distorsiona** | Contribución primero (D-op-7); los generales se restan al global, no se prorratean por defecto |
+
+---
+
+## 13. Pendientes de confirmación
 
 | # | Pendiente | Dueño | Efecto mientras tanto |
 |---|---|---|---|
@@ -327,7 +408,7 @@ Principio: la coordinadora gestiona **mix y volumen** (servicios, centros, agend
 
 ---
 
-## 13. Sincronización con PRs y docs (sin editar otros PRs)
+## 14. Sincronización con PRs y docs (sin editar otros PRs)
 
 Este PR **solo añade este archivo**. Cambios que deben hacerse en otros documentos **después** de sus merges:
 
@@ -339,11 +420,11 @@ Este PR **solo añade este archivo**. Cambios que deben hacerse en otros documen
 | `02-diseno-facturacion-emitida.md` | PR #1 | Referencia cruzada opcional: el devengo del ingreso facturado/cobrado se diseña en el 09 |
 | `docs/integration/01-orden-prs.md` | PR #10 | Añadir este PR al bloque "finanzas docs" (archivo nuevo, sin dependencias duras de merge) |
 
-Dependencias conceptuales (no de merge): PR #11 (backlog F-Op), PR #13 (coste), PR #1 (ingreso documental), PR #4 (tesorería, NO APPLY), línea Clínica/Reservas (sesiones). Archivo nuevo sin colisiones: no exige orden de merge.
+Dependencias conceptuales (no de merge): PR #11 (backlog F-Op y marco general), PR #13 (coste profesional), PR #1 (facturas operativas), PR #4 (tesorería A1, NO APPLY), PR #5 (Reservas: fuente de sesiones/citas), PR #10 (orden de entrada en integración). Archivo nuevo sin colisiones: no exige orden de merge.
 
 ---
 
-## 14. Criterio de "hecho" (para la futura implementación, no para este PR)
+## 15. Criterio de "hecho" (para la futura implementación, no para este PR)
 
 - [ ] Existen los catálogos de **centro** y **canal**, y cada sesión/venta queda etiquetada con proyecto, servicio, profesional, centro y canal.
 - [ ] Los bonos/programas devengan ingreso sesión a sesión según el criterio confirmado en B2-P1, y el cobro entra **una sola vez** en caja (invariante anti-doble-conteo).
