@@ -60,6 +60,7 @@
 ---
 
 ## Resultado
+
 - ✅ **Todos** los ítems aplicables marcados → se puede proponer el merge (lo ejecuta quien tenga ese rol, no este documento).
 - ❌ **Cualquier** ítem fallido → **no se mergea**; se devuelve a la rama origen con el motivo.
 

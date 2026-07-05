@@ -36,40 +36,40 @@ Un dato clínico en el OS no es un feature: **es un bug de compliance** y se tra
 
 ## 2. Datos permitidos
 
-| Categoría | Ejemplos de campos |
-|---|---|
-| **Agenda** | citas, fecha/hora, duración, profesional asignado, sala, servicio del catálogo, estado de cita (reservada/confirmada/asistida/no-show/cancelada), asistencia/no asistencia |
+| Categoría                    | Ejemplos de campos                                                                                                                                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Agenda**                   | citas, fecha/hora, duración, profesional asignado, sala, servicio del catálogo, estado de cita (reservada/confirmada/asistida/no-show/cancelada), asistencia/no asistencia                                   |
 | **Clientes administrativos** | nombre, datos de contacto, datos de facturación, origen (cómo nos conoció), derivador (quién lo deriva), partner (Vivofácil, Oasis, Lidomare), fecha de alta, preferencias administrativas (horario, idioma) |
-| **Servicios generales** | catálogo comercial de servicios, tarifas, bonos (saldo de sesiones), programas (sesiones consumidas/restantes) |
-| **Económico** | cobros, método de pago, facturación/cierres, caja, banco, tesorería |
-| **Gestión** | profesionales (datos laborales/administrativos), rentabilidad, KPIs, proyectos, finanzas |
-| **Enlace externo** | `referencia_externa` (ID/URL a Notion/Salonized/sistema clínico), sin contenido |
+| **Servicios generales**      | catálogo comercial de servicios, tarifas, bonos (saldo de sesiones), programas (sesiones consumidas/restantes)                                                                                               |
+| **Económico**                | cobros, método de pago, facturación/cierres, caja, banco, tesorería                                                                                                                                          |
+| **Gestión**                  | profesionales (datos laborales/administrativos), rentabilidad, KPIs, proyectos, finanzas                                                                                                                     |
+| **Enlace externo**           | `referencia_externa` (ID/URL a Notion/Salonized/sistema clínico), sin contenido                                                                                                                              |
 
 ## 3. Datos prohibidos
 
-| Categoría | Nunca en el OS |
-|---|---|
-| Historia clínica | ficha clínica, cualquier réplica parcial de ella |
-| Diagnóstico | diagnósticos, sospechas diagnósticas, códigos CIE |
-| Lesión / patología | lesiones, condiciones, "motivo clínico concreto" de la visita |
-| Evolución | notas de evolución, progreso terapéutico, escalas clínicas |
-| Antecedentes | historial médico, cirugías, alergias |
-| Medicación | fármacos, pautas, dosis |
-| Tratamiento | plan de tratamiento, técnicas aplicadas, ejercicios prescritos |
-| Documentación | informes, pruebas (analíticas, imagen), documentos sanitarios |
-| Multimedia | audios clínicos, imágenes clínicas, vídeos de valoración |
+| Categoría          | Nunca en el OS                                                 |
+| ------------------ | -------------------------------------------------------------- |
+| Historia clínica   | ficha clínica, cualquier réplica parcial de ella               |
+| Diagnóstico        | diagnósticos, sospechas diagnósticas, códigos CIE              |
+| Lesión / patología | lesiones, condiciones, "motivo clínico concreto" de la visita  |
+| Evolución          | notas de evolución, progreso terapéutico, escalas clínicas     |
+| Antecedentes       | historial médico, cirugías, alergias                           |
+| Medicación         | fármacos, pautas, dosis                                        |
+| Tratamiento        | plan de tratamiento, técnicas aplicadas, ejercicios prescritos |
+| Documentación      | informes, pruebas (analíticas, imagen), documentos sanitarios  |
+| Multimedia         | audios clínicos, imágenes clínicas, vídeos de valoración       |
 
 ## 4. Ejemplos concretos (la línea en la práctica)
 
-| ✅ Permitido | ❌ Prohibido (versión clínica de lo mismo) |
-|---|---|
-| Cita: "Fisioterapia — sesión 55'" con estado "asistida" | Cita: "rehab post-quirúrgica LCA rodilla dcha, 3ª semana" |
-| Cliente: origen = "derivado por Dr. X (traumatología)" | Cliente: "derivado por Dr. X por rotura fibrilar isquios" |
-| Bono: "Programa 5 sesiones — quedan 2" | Bono: "5 sesiones para tendinopatía rotuliana — evoluciona bien" |
-| Observación admin: "prefiere tardes; avisar por WhatsApp" | Observación: "dolor lumbar irradiado, evitar carga axial" |
-| No-show: "no asistió, se recupera la sesión el jueves" | No-show: "no vino por brote de ciática" |
-| Enlace: `notion.so/<id-ficha>` (solo referencia) | Pegar el contenido de la ficha de Notion en el OS |
-| Factura: concepto "Nutrición — consulta seguimiento" | Factura: concepto "dieta para diabetes tipo II" |
+| ✅ Permitido                                              | ❌ Prohibido (versión clínica de lo mismo)                       |
+| --------------------------------------------------------- | ---------------------------------------------------------------- |
+| Cita: "Fisioterapia — sesión 55'" con estado "asistida"   | Cita: "rehab post-quirúrgica LCA rodilla dcha, 3ª semana"        |
+| Cliente: origen = "derivado por Dr. X (traumatología)"    | Cliente: "derivado por Dr. X por rotura fibrilar isquios"        |
+| Bono: "Programa 5 sesiones — quedan 2"                    | Bono: "5 sesiones para tendinopatía rotuliana — evoluciona bien" |
+| Observación admin: "prefiere tardes; avisar por WhatsApp" | Observación: "dolor lumbar irradiado, evitar carga axial"        |
+| No-show: "no asistió, se recupera la sesión el jueves"    | No-show: "no vino por brote de ciática"                          |
+| Enlace: `notion.so/<id-ficha>` (solo referencia)          | Pegar el contenido de la ficha de Notion en el OS                |
+| Factura: concepto "Nutrición — consulta seguimiento"      | Factura: concepto "dieta para diabetes tipo II"                  |
 
 ## 5. Reglas para campos libres (la vía de contaminación nº1)
 
@@ -79,8 +79,8 @@ por donde entra el contenido clínico sin que nadie lo decida. Reglas:
 1. **Naming no clínico:** los campos se llaman `notas_admin`, `observaciones_agenda` — nunca
    `notas` a secas ni nada que invite a escribir clínica.
 2. **Microcopy de aviso:** todo campo libre lleva helper text visible:
-   *"Solo información administrativa. No escribir información clínica (síntomas, diagnóstico,
-   evolución…): eso va en la ficha externa."*
+   _"Solo información administrativa. No escribir información clínica (síntomas, diagnóstico,
+   evolución…): eso va en la ficha externa."_
 3. **Minimización:** antes de añadir un campo libre, justificar por qué no basta un
    select/estado/etiqueta cerrada. Cada campo libre nuevo se aprueba en revisión de PR.
 4. **Revisión periódica:** auditoría muestral de campos libres antes de producción y después
@@ -93,6 +93,7 @@ por donde entra el contenido clínico sin que nadie lo decida. Reglas:
 ## 6. Implicaciones por módulo
 
 ### Agenda / Reservas
+
 - La cita referencia un **servicio del catálogo comercial** (p.ej. "Fisioterapia — sesión"),
   jamás un motivo clínico. Si recepción necesita contexto, el enlace externo lleva a la ficha.
 - Estados de cita = administrativos (reservada, confirmada, asistida, no-show, cancelada,
@@ -101,6 +102,7 @@ por donde entra el contenido clínico sin que nadie lo decida. Reglas:
   **citas** (fechas y servicios), origen/derivador, cobros. Nunca contenido clínico.
 
 ### Finanzas / Facturación
+
 - Conceptos de factura/prefactura = **nombre comercial del servicio del catálogo**. La factura
   de una clínica no necesita (ni debe) describir la condición del paciente.
 - La rentabilidad se mide por servicio/profesional/proyecto — métricas agregadas, sin datos
@@ -109,6 +111,7 @@ por donde entra el contenido clínico sin que nadie lo decida. Reglas:
   D3), no requiere datos clínicos del paciente en el OS.
 
 ### Clientes administrativos
+
 - La ficha de cliente es **administrativa**: identificación, contacto, facturación, origen,
   derivador, partner, bonos, historial de citas y cobros.
 - `derivador` es un dato comercial (quién nos manda clientes) — se guarda la entidad/profesional
@@ -132,5 +135,5 @@ por donde entra el contenido clínico sin que nadie lo decida. Reglas:
 
 ---
 
-*Cualquier excepción a este documento requiere decisión explícita de Guille + validación legal,
-y se registra como ADR en `docs/decisiones/`.*
+_Cualquier excepción a este documento requiere decisión explícita de Guille + validación legal,
+y se registra como ADR en `docs/decisiones/`._

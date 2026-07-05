@@ -32,6 +32,7 @@ Regla general: **primero lo que define cómo trabajamos (0-1), luego docs y camb
 (2-3), luego el producto real (4-5), luego la base técnica (6-7), y al final lo transversal (8-9).**
 
 Reglas duras durante toda la secuencia:
+
 - **Una sola rama en integración a la vez** y el resto de líneas pausan git — los 13 worktrees
   comparten el mismo `.git` (riesgo R1): un merge/rebase mal hecho impacta a todas a la vez.
 - Tras cada merge: `pnpm install` (si tocó deps) + lint + type-check + build host + smoke.
@@ -123,15 +124,15 @@ Reglas duras durante toda la secuencia:
 
 ## Matriz de dependencias
 
-| PR / Línea | Depende de | Bloquea a |
-|---|---|---|
-| 0. Governance (este) | — | Es prerequisito de proceso para todos |
-| 1. QA suite | Governance | Marca el "Ready" de los demás |
-| 2. Docs finanzas (modelo operativo, facturación PR #1) | — | Diseños de F-Op y F4.x |
-| 3. Rebrand visible | — | — |
-| 4. Reservas F1 (GATE) | Governance (proceso) | 5a-5d, Reservas F2, archivo del spike |
-| 5a-5d. Demo partido | **PR 4** (5a) y secuencial 5a→5b→5c→5d | Extracción del shell del OS |
-| 6. Baseline/A1 | Governance | 7 (Clínica), fase Supabase, todo backend real |
-| 7. Clínica tipos | **PR 6** (su SQL se refleja en el baseline) | Módulo Clínica/Reservas F2 |
-| 8. Rebrand global (diferido) | 2-7 integrados | — |
-| 9. supabase-client + proyecto nuevo (diferido) | 6 mergeado + decisión + rotación R5 | Backend real de todos los módulos |
+| PR / Línea                                             | Depende de                                  | Bloquea a                                     |
+| ------------------------------------------------------ | ------------------------------------------- | --------------------------------------------- |
+| 0. Governance (este)                                   | —                                           | Es prerequisito de proceso para todos         |
+| 1. QA suite                                            | Governance                                  | Marca el "Ready" de los demás                 |
+| 2. Docs finanzas (modelo operativo, facturación PR #1) | —                                           | Diseños de F-Op y F4.x                        |
+| 3. Rebrand visible                                     | —                                           | —                                             |
+| 4. Reservas F1 (GATE)                                  | Governance (proceso)                        | 5a-5d, Reservas F2, archivo del spike         |
+| 5a-5d. Demo partido                                    | **PR 4** (5a) y secuencial 5a→5b→5c→5d      | Extracción del shell del OS                   |
+| 6. Baseline/A1                                         | Governance                                  | 7 (Clínica), fase Supabase, todo backend real |
+| 7. Clínica tipos                                       | **PR 6** (su SQL se refleja en el baseline) | Módulo Clínica/Reservas F2                    |
+| 8. Rebrand global (diferido)                           | 2-7 integrados                              | —                                             |
+| 9. supabase-client + proyecto nuevo (diferido)         | 6 mergeado + decisión + rotación R5         | Backend real de todos los módulos             |

@@ -35,7 +35,7 @@
   `ANTIFRAGIL_DEMO_MODE` con **doble guarda anti-producción** (la flag se ignora si
   `NODE_ENV=production`; sin la flag, el host se comporta idéntico a `main`).
 - **Fuera de alcance:** datos reales, backend, merge directo a `main`, y **su copia de
-  `apps/modules/reservas/**`** (es el spike-ancestro sin modificar: se descarta al integrar).
+  `apps/modules/reservas/**`\*\* (es el spike-ancestro sin modificar: se descarta al integrar).
 - **Rama esperada:** `demo/local-antifragil-os` (PR #3 Draft, marcado NO MERGE).
 - **Criterios de cierre:** NO se mergea entera (decisión D8) — se integra **partida en 4 PRs**
   tras Reservas: **5a** cableado host (`/reservas`, `ssr:false`) → **5b** shell + panel + mock →
@@ -136,7 +136,7 @@
 ## Facturación emitida (diseño → construcción futura)
 
 - **Objetivo:** facturación/prefacturación del OS como motor **precontable** (decisión D1:
-  la emisión fiscal oficial se delega en gestoría/software homologado; no Veri*factu propio en v1).
+  la emisión fiscal oficial se delega en gestoría/software homologado; no Veri\*factu propio en v1).
 - **Alcance actual:** diseño (doc `docs/finanzas/02`); decisiones D1-D3 firmes; pendientes
   F4-A (quién emite), F4-B (cuenta de ingreso 705), F4-C (mapa exención con gestoría),
   F4-E (serie propia clínica).

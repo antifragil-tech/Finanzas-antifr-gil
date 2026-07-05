@@ -2,7 +2,7 @@
 
 > Rellenar a mano por quien revisa el PR antes de aprobarlo. Complementa `docs/integration/04-checklist-merge.md`.
 
-**PR:** ____________  **Rama origen:** ____________  **Destino:** `main`  **Revisor:** ____________
+**PR:** ****\_\_\_\_**** **Rama origen:** ****\_\_\_\_**** **Destino:** `main` **Revisor:** ****\_\_\_\_****
 
 ## Alcance del diff
 
@@ -47,4 +47,4 @@
 ## Resultado
 
 - [ ] **APROBADO para salir de Draft** (todos los aplicables en verde)
-- [ ] **DEVUELTO** a la rama origen — motivo: ___________________________________________
+- [ ] **DEVUELTO** a la rama origen — motivo: ********************\_\_\_********************

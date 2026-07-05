@@ -366,6 +366,7 @@ Plantilla para copiar:
 **Lección:** Antes de escribir documentación de governance/estado (tracker, workstreams, órdenes de integración) sobre un repo con trabajo de otros agentes/sesiones: (1) listar TODAS las ramas y sus diffs (`git diff --stat main..rama`), (2) LEER los documentos que esas ramas aportan (`git show rama:ruta`), especialmente cualquier plan/decision-log previo, y (3) citar la fuente (rama y doc) en lo que se escriba. Si ya existe un plan (como el del Chat 4), el documento nuevo lo RESUME y REFERENCIA; no lo reinventa de memoria. Corolario demostrado en la misma sesión: los estados caducan en horas (los PRs #4-#6 nacieron en paralelo mientras escribía el tracker) — verificar contra `origin`/`gh` justo antes de publicar, no al principio de la sesión.
 
 **Acciones tomadas:**
+
 - [x] Estudiadas las 9 ramas de trabajo (integration plan completo, baseline + A1, QA, finanzas 00-06, clínica, rebrand, demo, reservas)
 - [x] Corregidos tracker, workstreams, integration-order y SESSION.md con el contenido real (spike=archivar, audit=subsumida, demo partido 5a-5d, clínica solo-tipos, rebrand visible temprano)
 - [x] Elevado a Guille el riesgo R5 (rotación de anon key legacy pendiente)
