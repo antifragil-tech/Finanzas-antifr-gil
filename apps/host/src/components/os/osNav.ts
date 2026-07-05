@@ -1,12 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
-  BarChart2,
-  BookOpen,
   CalendarDays,
-  FileText,
-  FolderKanban,
   HandCoins,
-  Home,
   LayoutDashboard,
   Settings,
   TrendingUp,
@@ -23,7 +18,10 @@ export type OSNavItem = {
   label: string;
   icon: LucideIcon;
   exact?: boolean;
+  /** En preparación: la ruta existe con contenido provisional. */
   placeholder?: boolean;
+  /** Módulo heredado en adaptación a Antifrágil OS. */
+  heredado?: boolean;
 };
 
 export type OSNavGroup = {
@@ -35,21 +33,16 @@ export const OS_NAV: OSNavGroup[] = [
   {
     titulo: 'Operativa',
     items: [
-      { href: '/', label: 'Inicio', icon: Home, exact: true },
-      { href: '/dashboard', label: 'Panel', icon: LayoutDashboard, placeholder: true },
+      { href: '/dashboard', label: 'Panel', icon: LayoutDashboard },
       { href: '/reservas', label: 'Reservas', icon: CalendarDays },
-      { href: '/financiero', label: 'Finanzas', icon: BarChart2 },
-      { href: '/facturas', label: 'Facturación', icon: FileText },
-      { href: '/tesoreria', label: 'Tesorería', icon: Wallet, placeholder: true },
-      { href: '/rentabilidad', label: 'Rentabilidad', icon: TrendingUp, placeholder: true },
       { href: '/liquidaciones', label: 'Liquidaciones', icon: HandCoins, placeholder: true },
     ],
   },
   {
-    titulo: 'Heredado',
+    titulo: 'Finanzas operativas',
     items: [
-      { href: '/contabilidad', label: 'Contabilidad', icon: BookOpen },
-      { href: '/presupuestos', label: 'Proyectos', icon: FolderKanban },
+      { href: '/tesoreria', label: 'Tesorería', icon: Wallet, placeholder: true },
+      { href: '/rentabilidad', label: 'Rentabilidad', icon: TrendingUp, placeholder: true },
     ],
   },
   {
@@ -57,6 +50,10 @@ export const OS_NAV: OSNavGroup[] = [
     items: [{ href: '/configuracion', label: 'Configuración', icon: Settings, placeholder: true }],
   },
 ];
+// Los módulos heredados del holding (financiero, facturas, contabilidad,
+// proyectos) quedaron FUERA del menú y del runtime del MVP (cirugía
+// 2026-07-05): sus URLs sirven un placeholder limpio bajo el shell del OS.
+// Clientes, Cobros y Bonos viven como pestañas dentro de Reservas.
 
 export function tituloDeRuta(pathname: string): string {
   for (const grupo of OS_NAV) {

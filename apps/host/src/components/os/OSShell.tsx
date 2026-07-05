@@ -17,9 +17,16 @@ export function OSShell({ children }: { children: React.ReactNode }) {
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       {/* Sidebar */}
       <aside className="fixed left-0 top-0 z-40 flex h-screen w-60 flex-col border-r border-white/5 bg-zinc-950">
-        <div className="flex h-14 shrink-0 items-center gap-2 border-b border-white/5 px-5">
-          <span className="h-2 w-2 rounded-full bg-[#F5F0E1]" />
-          <span className="text-sm font-semibold tracking-tight text-zinc-100">Antifrágil OS</span>
+        <div className="flex h-14 shrink-0 flex-col justify-center border-b border-white/5 px-5">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-[#F5F0E1]" />
+            <span className="text-sm font-semibold tracking-tight text-zinc-100">
+              Antifrágil OS
+            </span>
+          </div>
+          <p className="text-2xs mt-0.5 pl-4 uppercase tracking-[0.2em] text-zinc-600">
+            Clínica · Operativa · Finanzas
+          </p>
         </div>
 
         <nav className="flex-1 overflow-y-auto p-3">
@@ -29,7 +36,7 @@ export function OSShell({ children }: { children: React.ReactNode }) {
                 {grupo.titulo}
               </p>
               <div className="flex flex-col gap-1">
-                {grupo.items.map(({ href, label, icon: Icon, exact, placeholder }) => {
+                {grupo.items.map(({ href, label, icon: Icon, exact, placeholder, heredado }) => {
                   const active = exact ? pathname === href : pathname.startsWith(href);
                   return (
                     <Link
@@ -43,10 +50,18 @@ export function OSShell({ children }: { children: React.ReactNode }) {
                     >
                       <Icon size={17} className="shrink-0" />
                       <span className="flex-1 text-sm font-medium">{label}</span>
+                      {heredado && (
+                        <span
+                          className="text-2xs rounded border border-white/10 px-1 uppercase tracking-wide text-zinc-600"
+                          title="Módulo heredado en adaptación a Antifrágil OS"
+                        >
+                          adaptación
+                        </span>
+                      )}
                       {placeholder && (
                         <span
                           className="h-1.5 w-1.5 rounded-full bg-amber-400/70"
-                          title="En construcción"
+                          title="En preparación"
                         />
                       )}
                     </Link>

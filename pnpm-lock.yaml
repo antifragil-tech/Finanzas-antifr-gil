@@ -41,15 +41,6 @@ importers:
 
   apps/host:
     dependencies:
-      '@alsari/contabilidad':
-        specifier: workspace:*
-        version: link:../modules/contabilidad
-      '@alsari/financiero':
-        specifier: workspace:*
-        version: link:../modules/financiero
-      '@alsari/presupuestos':
-        specifier: workspace:*
-        version: link:../modules/presupuestos
       '@alsari/reservas':
         specifier: workspace:*
         version: link:../modules/reservas
