@@ -27,20 +27,20 @@ export function Modal({ open, onClose, title, children, maxWidth = 'max-w-lg' }:
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+      className="animate-fade-in fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className={`w-full ${maxWidth} bg-zinc-900 border border-white/10 rounded-2xl shadow-xl overflow-hidden`}
-        onClick={e => e.stopPropagation()}
+        className={`w-full ${maxWidth} overflow-hidden rounded-2xl border border-white/10 bg-zinc-900 shadow-xl`}
+        onClick={(e) => e.stopPropagation()}
       >
         {title && (
-          <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+          <div className="flex items-center justify-between border-b border-white/5 px-5 py-4">
             <h2 className="text-sm font-semibold text-zinc-100">{title}</h2>
             <button
               onClick={onClose}
               aria-label="Cerrar"
-              className="text-zinc-500 hover:text-zinc-200 transition-colors rounded-md p-1 hover:bg-white/5"
+              className="rounded-md p-1 text-zinc-500 transition-colors hover:bg-white/5 hover:text-zinc-200"
             >
               <X size={16} />
             </button>

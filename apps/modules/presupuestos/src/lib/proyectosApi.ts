@@ -1,12 +1,22 @@
 /// <reference types="vite/client" />
-import type { ProyectoObjetivo, ProyectoKR, ProyectoTarea, TareaColumna, TareaRecurrencia, ObjetivoEstado } from '@alsari/types';
+import type {
+  ProyectoObjetivo,
+  ProyectoKR,
+  ProyectoTarea,
+  TareaColumna,
+  TareaRecurrencia,
+  ObjetivoEstado,
+} from '@alsari/types';
 
 // ── Auth / Supabase client ─────────────────────────────────────────────────────
 
 import { sbHeaders as headers, sbUrl } from '@alsari/supabase-client';
 
 async function req<T>(url: string, opts: RequestInit = {}): Promise<T> {
-  const res = await fetch(url, { ...opts, headers: headers(opts.headers as Record<string, string> | undefined) });
+  const res = await fetch(url, {
+    ...opts,
+    headers: headers(opts.headers as Record<string, string> | undefined),
+  });
   if (!res.ok) throw new Error(`${res.status} ${await res.text()}`);
   const text = await res.text();
   return (text ? JSON.parse(text) : []) as T;
@@ -26,7 +36,9 @@ export type ProyectoRow = {
 };
 
 export async function getProyectos(): Promise<ProyectoRow[]> {
-  const url = sbUrl('proyectos') + '?select=id_ref,nombre,sociedad_tenedora,estado,fecha_inicio,fecha_prevista_salida,tipo_activo,ubicacion&order=nombre.asc';
+  const url =
+    sbUrl('proyectos') +
+    '?select=id_ref,nombre,sociedad_tenedora,estado,fecha_inicio,fecha_prevista_salida,tipo_activo,ubicacion&order=nombre.asc';
   return req<ProyectoRow[]>(url);
 }
 
@@ -38,19 +50,25 @@ export type ProyectoSociedadRow = {
   porcentaje: number;
 };
 
-export async function getParticipacionesByProyecto(proyectoIdRef: string): Promise<ProyectoSociedadRow[]> {
-  const url = sbUrl('proyecto_sociedades') + `?proyecto_id_ref=eq.${encodeURIComponent(proyectoIdRef)}&order=porcentaje.desc`;
+export async function getParticipacionesByProyecto(
+  proyectoIdRef: string,
+): Promise<ProyectoSociedadRow[]> {
+  const url =
+    sbUrl('proyecto_sociedades') +
+    `?proyecto_id_ref=eq.${encodeURIComponent(proyectoIdRef)}&order=porcentaje.desc`;
   return req<ProyectoSociedadRow[]>(url);
 }
 
 export async function setParticipaciones(
   proyectoIdRef: string,
-  participaciones: { sociedad_id_ref: string; porcentaje: number }[]
+  participaciones: { sociedad_id_ref: string; porcentaje: number }[],
 ): Promise<void> {
   // Borra las existentes y vuelve a insertar (upsert completo)
-  await req(sbUrl(`proyecto_sociedades?proyecto_id_ref=eq.${encodeURIComponent(proyectoIdRef)}`), { method: 'DELETE' });
+  await req(sbUrl(`proyecto_sociedades?proyecto_id_ref=eq.${encodeURIComponent(proyectoIdRef)}`), {
+    method: 'DELETE',
+  });
   if (participaciones.length > 0) {
-    const rows = participaciones.map(p => ({ proyecto_id_ref: proyectoIdRef, ...p }));
+    const rows = participaciones.map((p) => ({ proyecto_id_ref: proyectoIdRef, ...p }));
     await req(sbUrl('proyecto_sociedades'), {
       method: 'POST',
       body: JSON.stringify(rows),
@@ -82,7 +100,10 @@ export async function createProyecto(data: ProyectoCreate): Promise<ProyectoRow>
   return item!;
 }
 
-export async function updateProyecto(idRef: string, data: Partial<Omit<ProyectoCreate, 'id_ref'>>): Promise<void> {
+export async function updateProyecto(
+  idRef: string,
+  data: Partial<Omit<ProyectoCreate, 'id_ref'>>,
+): Promise<void> {
   await req(sbUrl(`proyectos?id_ref=eq.${encodeURIComponent(idRef)}`), {
     method: 'PATCH',
     body: JSON.stringify(data),
@@ -151,7 +172,8 @@ export async function getTotalesByProyecto(): Promise<TotalesProyecto[]> {
 // ── Objetivos OKR ─────────────────────────────────────────────────────────────
 
 export async function getObjetivos(proyecto_id: string): Promise<ProyectoObjetivo[]> {
-  const url = sbUrl('proyecto_objetivos') +
+  const url =
+    sbUrl('proyecto_objetivos') +
     `?proyecto_id=eq.${encodeURIComponent(proyecto_id)}&order=orden.asc,created_at.asc`;
   return req<ProyectoObjetivo[]>(url);
 }
@@ -172,13 +194,16 @@ export async function createObjetivo(data: {
   return item!;
 }
 
-export async function updateObjetivo(id: string, data: Partial<{
-  titulo: string;
-  descripcion: string;
-  fecha_objetivo: string;
-  estado: ObjetivoEstado;
-  orden: number;
-}>): Promise<void> {
+export async function updateObjetivo(
+  id: string,
+  data: Partial<{
+    titulo: string;
+    descripcion: string;
+    fecha_objetivo: string;
+    estado: ObjetivoEstado;
+    orden: number;
+  }>,
+): Promise<void> {
   await req(sbUrl(`proyecto_objetivos?id=eq.${id}`), {
     method: 'PATCH',
     body: JSON.stringify(data),
@@ -193,14 +218,14 @@ export async function deleteObjetivo(id: string): Promise<void> {
 // ── Key Results ───────────────────────────────────────────────────────────────
 
 export async function getKRs(objetivo_id: string): Promise<ProyectoKR[]> {
-  const url = sbUrl('proyecto_kr') +
-    `?objetivo_id=eq.${objetivo_id}&order=orden.asc,created_at.asc`;
+  const url =
+    sbUrl('proyecto_kr') + `?objetivo_id=eq.${objetivo_id}&order=orden.asc,created_at.asc`;
   return req<ProyectoKR[]>(url);
 }
 
 export async function getKRsByProyecto(proyecto_id: string): Promise<ProyectoKR[]> {
-  const url = sbUrl('proyecto_kr') +
-    `?proyecto_id=eq.${encodeURIComponent(proyecto_id)}&order=orden.asc`;
+  const url =
+    sbUrl('proyecto_kr') + `?proyecto_id=eq.${encodeURIComponent(proyecto_id)}&order=orden.asc`;
   return req<ProyectoKR[]>(url);
 }
 
@@ -221,14 +246,17 @@ export async function createKR(data: {
   return item!;
 }
 
-export async function updateKR(id: string, data: Partial<{
-  titulo: string;
-  unidad: string;
-  valor_objetivo: number;
-  valor_actual: number;
-  completado: boolean;
-  orden: number;
-}>): Promise<void> {
+export async function updateKR(
+  id: string,
+  data: Partial<{
+    titulo: string;
+    unidad: string;
+    valor_objetivo: number;
+    valor_actual: number;
+    completado: boolean;
+    orden: number;
+  }>,
+): Promise<void> {
   await req(sbUrl(`proyecto_kr?id=eq.${id}`), {
     method: 'PATCH',
     body: JSON.stringify({ ...data, updated_at: new Date().toISOString() }),
@@ -243,7 +271,8 @@ export async function deleteKR(id: string): Promise<void> {
 // ── Tareas Kanban ─────────────────────────────────────────────────────────────
 
 export async function getTareas(proyecto_id: string): Promise<ProyectoTarea[]> {
-  const url = sbUrl('proyecto_tareas') +
+  const url =
+    sbUrl('proyecto_tareas') +
     `?proyecto_id=eq.${encodeURIComponent(proyecto_id)}&order=orden.asc,created_at.asc`;
   return req<ProyectoTarea[]>(url);
 }
@@ -266,15 +295,18 @@ export async function createTarea(data: {
   return item!;
 }
 
-export async function updateTarea(id: string, data: Partial<{
-  titulo: string;
-  descripcion: string;
-  columna: TareaColumna;
-  categoria: string;
-  fecha_limite: string;
-  recurrencia: TareaRecurrencia;
-  orden: number;
-}>): Promise<void> {
+export async function updateTarea(
+  id: string,
+  data: Partial<{
+    titulo: string;
+    descripcion: string;
+    columna: TareaColumna;
+    categoria: string;
+    fecha_limite: string;
+    recurrencia: TareaRecurrencia;
+    orden: number;
+  }>,
+): Promise<void> {
   await req(sbUrl(`proyecto_tareas?id=eq.${id}`), {
     method: 'PATCH',
     body: JSON.stringify({ ...data, updated_at: new Date().toISOString() }),
@@ -332,7 +364,7 @@ export type CompromisoTesoreria = {
  * - Con sociedadIds: filtra por IN; usa PostgREST in.(v1,v2).
  */
 export async function getCompromisosTesoreria(
-  sociedadIds?: string[]
+  sociedadIds?: string[],
 ): Promise<CompromisoTesoreria[]> {
   let url = sbUrl('compromisos_tesoreria') + '?select=*&order=fecha.asc';
   if (sociedadIds && sociedadIds.length > 0) {
@@ -359,8 +391,12 @@ export async function getSociedades(): Promise<SociedadRow[]> {
 import type { AnalisisFinanciero } from './analisisFinanciero';
 export type { AnalisisFinanciero } from './analisisFinanciero';
 
-export async function getAnalisisFinanciero(proyectoId: string): Promise<AnalisisFinanciero | null> {
-  const url = sbUrl('proyecto_analisis_financiero') + `?proyecto_id=eq.${encodeURIComponent(proyectoId)}&limit=1`;
+export async function getAnalisisFinanciero(
+  proyectoId: string,
+): Promise<AnalisisFinanciero | null> {
+  const url =
+    sbUrl('proyecto_analisis_financiero') +
+    `?proyecto_id=eq.${encodeURIComponent(proyectoId)}&limit=1`;
   const rows = await req<AnalisisFinanciero[]>(url);
   return rows[0] ?? null;
 }
@@ -370,13 +406,16 @@ export async function getAnalisisFinanciero(proyectoId: string): Promise<Analisi
 //   PGRST204 "Could not find the 'X' column of '...' in the schema cache"
 //   42703    "column \"X\" of relation ... does not exist"
 function columnaDesconocida(msg: string): string | null {
-  const m = msg.match(/Could not find the '([^']+)' column/)
-    ?? msg.match(/column "?([\w-]+)"? of/i)
-    ?? msg.match(/'([\w-]+)' column/);
+  const m =
+    msg.match(/Could not find the '([^']+)' column/) ??
+    msg.match(/column "?([\w-]+)"? of/i) ??
+    msg.match(/'([\w-]+)' column/);
   return m?.[1] ?? null;
 }
 
-export async function upsertAnalisisFinanciero(data: AnalisisFinanciero): Promise<AnalisisFinanciero> {
+export async function upsertAnalisisFinanciero(
+  data: AnalisisFinanciero,
+): Promise<AnalisisFinanciero> {
   const url = sbUrl('proyecto_analisis_financiero') + '?on_conflict=proyecto_id';
   const mk = (body: Record<string, unknown>): RequestInit => ({
     method: 'POST',

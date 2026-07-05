@@ -28,7 +28,7 @@ function normProveedor(f: FacturaRecibida): string {
 }
 
 export function detectarDuplicados(facturas: FacturaRecibida[]): Map<string, InfoDuplicado> {
-  const activas = facturas.filter(f => f.estado !== 'rechazada');
+  const activas = facturas.filter((f) => f.estado !== 'rechazada');
 
   const porNumero = new Map<string, FacturaRecibida[]>();
   const porImporteFecha = new Map<string, FacturaRecibida[]>();
@@ -55,11 +55,11 @@ export function detectarDuplicados(facturas: FacturaRecibida[]): Map<string, Inf
     if (grupo.length < 2) return;
     for (const f of grupo) {
       if (result.has(f.id)) continue; // 'numero' (más fuerte) tiene prioridad
-      const otras = grupo.filter(o => o.id !== f.id);
+      const otras = grupo.filter((o) => o.id !== f.id);
       result.set(f.id, {
         otras,
         motivo,
-        algunaVinculada: otras.some(o => o.presupuesto_pago_id !== null),
+        algunaVinculada: otras.some((o) => o.presupuesto_pago_id !== null),
       });
     }
   };

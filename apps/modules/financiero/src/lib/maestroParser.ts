@@ -59,4 +59,3 @@ export type KpisProjRow = {
   margen_latente_salida_pct: number | null;
   fecha_actualizacion: string | null;
 };
-

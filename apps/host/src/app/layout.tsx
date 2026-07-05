@@ -4,8 +4,8 @@ import { GeistMono } from 'geist/font/mono';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Alsari Capital OS',
-  description: 'Sistema operativo corporativo del holding Alsari Capital',
+  title: 'Antifrágil OS',
+  description: 'Sistema operativo interno de Antifrágil',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
