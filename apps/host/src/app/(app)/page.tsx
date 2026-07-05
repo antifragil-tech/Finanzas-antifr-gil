@@ -40,14 +40,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       {/* Header */}
       <header className="px-10 pb-10 pt-14">
-        <Image
-          src="/logo.png"
-          alt="Alsari Capital"
-          width={160}
-          height={46}
-          className="mb-8 object-contain opacity-70"
-          priority
-        />
+        <p className="mb-8 text-xl font-light uppercase tracking-[0.35em] text-zinc-200 opacity-80">Antifrágil</p>
         <div className="text-2xs mb-3 flex items-center gap-2 font-medium uppercase tracking-widest text-zinc-600">
           <Activity size={10} />
           <span>Sistema Operativo</span>

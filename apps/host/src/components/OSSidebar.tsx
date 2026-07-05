@@ -53,14 +53,7 @@ export function OSSidebar({ onLogout }: OSSidebarProps) {
           </button>
           {expanded && (
             <div className="flex flex-1 items-center pr-4">
-              <Image
-                src="/logo.png"
-                alt="Alsari Capital"
-                width={96}
-                height={28}
-                className="object-contain opacity-80"
-                priority
-              />
+              <span className="text-sm font-light uppercase tracking-[0.3em] text-zinc-200">Antifrágil</span>
             </div>
           )}
         </div>

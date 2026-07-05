@@ -878,8 +878,8 @@ function buildInvoiceHtml(p: Omit<PreviewProps, 'isPrivateMode' | 'onClose'>): s
   <!-- HEADER BAND -->
   <div style="background:#111827;padding:32px 40px;display:flex;align-items:flex-start;justify-content:space-between">
     <div>
-      <img src="${p.logoUrl ?? ''}" alt="Alsari Capital" style="height:40px;margin-bottom:14px;object-fit:contain;filter:brightness(0) invert(1);opacity:.9" onerror="this.style.display='none'" />
-      <div style="font-size:20px;font-weight:800;color:#fff;line-height:1.2">${p.emisorNombre || 'Alsari Capital'}</div>
+      <img src="${p.logoUrl ?? ''}" alt="Antifrágil" style="height:40px;margin-bottom:14px;object-fit:contain;filter:brightness(0) invert(1);opacity:.9" onerror="this.style.display='none'" />
+      <div style="font-size:20px;font-weight:800;color:#fff;line-height:1.2">${p.emisorNombre || 'Antifrágil'}</div>
       ${p.emisorCif ? `<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px">CIF: ${p.emisorCif}</div>` : ''}
       ${p.emisorDomicilio ? `<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px">${p.emisorDomicilio}${p.emisorLocalidad ? `, ${p.emisorLocalidad}` : ''}</div>` : ''}
       ${p.emisorEmail ? `<div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px">${p.emisorEmail}</div>` : ''}
@@ -956,7 +956,7 @@ function buildInvoiceHtml(p: Omit<PreviewProps, 'isPrivateMode' | 'onClose'>): s
 
   <!-- FOOTER BAND -->
   <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 40px;display:flex;align-items:center;justify-content:space-between">
-    <div style="font-size:11px;color:#9ca3af">Generado con <span style="font-weight:700;color:#6b7280">Alsari Capital OS</span> · alsari.net</div>
+    <div style="font-size:11px;color:#9ca3af">Generado con <span style="font-weight:700;color:#6b7280">Antifrágil OS</span></div>
     <div style="font-size:11px;color:#9ca3af">Nº ${p.numero || '—'}</div>
   </div>
 
@@ -1078,14 +1078,14 @@ function FacturaPreview({
             <div>
               <img
                 src="/logo.png"
-                alt="Alsari Capital"
+                alt="Antifrágil"
                 className="mb-3 h-10 object-contain opacity-90 brightness-0 invert"
                 onError={(e) => {
                   (e.target as HTMLImageElement).style.display = 'none';
                 }}
               />
               <p className="text-xl font-extrabold leading-tight text-white">
-                {emisorNombre || 'Alsari Capital'}
+                {emisorNombre || 'Antifrágil'}
               </p>
               {emisorCif && <p className="mt-0.5 text-xs text-zinc-400">CIF: {emisorCif}</p>}
               {emisorDomicilio && (
@@ -1253,8 +1253,7 @@ function FacturaPreview({
           {/* Footer band */}
           <div className="flex items-center justify-between border-t border-zinc-100 bg-zinc-50 px-10 py-4">
             <p className="text-xs text-zinc-400">
-              Generado con <span className="font-semibold text-zinc-500">Alsari Capital OS</span> ·
-              alsari.net
+              Generado con <span className="font-semibold text-zinc-500">Antifrágil OS</span>
             </p>
             <p className="font-mono text-xs text-zinc-400">Nº {numero || '—'}</p>
           </div>

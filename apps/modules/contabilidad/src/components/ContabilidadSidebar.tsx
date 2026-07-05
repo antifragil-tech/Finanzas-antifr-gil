@@ -132,15 +132,12 @@ export function ContabilidadSidebar({
         >
           <Home size={13} />
         </button>
-        <img
-          src="/logo.png"
-          alt="Alsari Capital"
-          className="h-6 w-auto cursor-pointer object-contain opacity-70 transition-opacity hover:opacity-90"
+        <span
           onClick={handleHome}
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-          }}
-        />
+          className="cursor-pointer text-xs font-light uppercase tracking-[0.3em] text-zinc-300 opacity-80 transition-opacity hover:opacity-100"
+        >
+          Antifrágil
+        </span>
       </div>
 
       <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">

@@ -42,18 +42,9 @@ export function LoginForm() {
     <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
       <div className="w-full max-w-sm">
         <div className="mb-10 flex flex-col items-center">
-          <Image
-            src="/logo.png"
-            width={64}
-            height={64}
-            alt="Alsari Capital"
-            className="mb-6 object-contain"
-          />
-          <h1 className="text-brand text-xl font-semibold uppercase tracking-widest">
-            Alsari Capital OS
-          </h1>
-          <p className="mt-1 text-xs uppercase tracking-widest text-zinc-500">
-            Neural Finance V3.0
+          <h1 className="text-brand text-2xl font-light uppercase tracking-[0.35em]">Antifrágil</h1>
+          <p className="mt-2 text-xs uppercase tracking-widest text-zinc-500">
+            Sistema operativo interno de Antifrágil
           </p>
         </div>
 
@@ -90,6 +81,10 @@ export function LoginForm() {
             {loading ? 'Accediendo...' : 'Acceder'}
           </button>
         </form>
+
+        <p className="text-2xs mt-8 text-center uppercase tracking-widest text-zinc-600">
+          Acceso privado · Operativa, reservas y finanzas
+        </p>
       </div>
     </div>
   );

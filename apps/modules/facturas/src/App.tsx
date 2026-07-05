@@ -368,7 +368,7 @@ export function FacturasApp() {
 
       <header className="sticky top-0 z-40 border-b border-white/5 bg-zinc-950/80 px-8 py-5 backdrop-blur-xl">
         <div className="text-2xs mb-1 flex items-center gap-2 font-medium uppercase tracking-widest text-zinc-500">
-          <span>ALSARI CAPITAL</span>
+          <span>ANTIFRÁGIL</span>
           <ChevronRight size={10} />
           <span className="text-blue-400">Facturas</span>
         </div>
