@@ -67,7 +67,14 @@ export default function LiquidacionesPage() {
           <table className="w-full min-w-[860px] text-left text-xs">
             <thead className="text-2xs border-b border-white/5 uppercase tracking-widest text-zinc-500">
               <tr>
-                {['Profesional', 'Regla aplicada', 'Sesiones', 'Importe', 'Estado'].map((h) => (
+                {[
+                  'Profesional',
+                  'Regla aplicada',
+                  'Sesiones',
+                  'Importe',
+                  'Documento',
+                  'Estado',
+                ].map((h) => (
                   <th key={h} className="px-4 py-3 font-medium">
                     {h}
                   </th>
@@ -94,6 +101,12 @@ export default function LiquidacionesPage() {
                       {formatCurrency(liq.importeFinal)}
                     </td>
                     <td className="px-4 py-3">
+                      <OSStatusBadge tone={liq.evidencia.recibida ? 'ok' : 'warn'}>
+                        {liq.evidencia.tipo === 'nomina' ? 'Nómina' : 'Factura autónomo'}
+                        {liq.evidencia.recibida ? ' · recibida' : ' · pendiente'}
+                      </OSStatusBadge>
+                    </td>
+                    <td className="px-4 py-3">
                       <OSStatusBadge tone={badge.tone}>{badge.texto}</OSStatusBadge>
                     </td>
                   </tr>
@@ -103,9 +116,10 @@ export default function LiquidacionesPage() {
           </table>
         </div>
         <p className="text-2xs mt-3 px-1 text-zinc-500">
-          El coste se devenga en la fecha de la sesión aunque se pague después. Una liquidación
-          validada es cuenta por pagar hasta su pago. Las reglas sin confirmar y las relaciones sin
-          regularizar bloquean el avance: nunca se ocultan.
+          Toda liquidación se asocia a su documento: nómina (gestoría) o factura de autónomo — sin
+          documento no se valida (R2). El coste se devenga en la fecha de la sesión aunque se pague
+          después. Una liquidación validada es cuenta por pagar hasta su pago. Las reglas sin
+          confirmar y las relaciones sin regularizar bloquean el avance: nunca se ocultan.
         </p>
       </OSSection>
     </div>

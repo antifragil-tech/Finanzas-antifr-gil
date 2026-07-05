@@ -85,6 +85,24 @@ describe('liquidaciones mensuales (doc 08)', () => {
     expect(conAjuste.importeFinal).toBe(90);
   });
 
+  it('R2: sin documento no se valida; con nómina/factura recibida sí (§4.8)', () => {
+    const liq = {
+      ...generarLiquidacion(prof('prof-maria-solis'), '2026-07', sesiones('prof-maria-solis', 5)),
+      estado: 'pendiente_documento' as const,
+    };
+    expect(liq.evidencia.tipo).toBe('factura_autonomo');
+    expect(puedeAvanzar(liq, 'validada')).toBe(false);
+    const conFactura = { ...liq, evidencia: { ...liq.evidencia, recibida: true } };
+    expect(puedeAvanzar(conFactura, 'validada')).toBe(true);
+  });
+
+  it('el tipo de documento sigue a la relación: nómina para Lidia, factura para Cecilia', () => {
+    expect(generarLiquidacion(prof('prof-lidia'), '2026-07', []).evidencia.tipo).toBe('nomina');
+    expect(generarLiquidacion(prof('prof-cecilia'), '2026-07', []).evidencia.tipo).toBe(
+      'factura_autonomo',
+    );
+  });
+
   it('pagada exige pagos que cubran el importe final (§5)', () => {
     const liq = {
       ...generarLiquidacion(prof('prof-cecilia'), '2026-07', sesiones('prof-cecilia', 5)),

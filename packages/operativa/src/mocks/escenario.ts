@@ -185,7 +185,13 @@ export function liquidacionesDemo(): LiquidacionMensual[] {
       clientesActivosPlan: prof.id === 'prof-marta' ? 3 : 0,
     });
     // Estados de demo: Solís ya validada (CxP viva), el resto según cálculo.
-    if (prof.id === 'prof-maria-solis') return { ...liq, estado: 'validada' as const };
+    if (prof.id === 'prof-maria-solis') {
+      return {
+        ...liq,
+        estado: 'validada' as const,
+        evidencia: { ...liq.evidencia, recibida: true, referencia: 'FAC-DEMO-2026-031' },
+      };
+    }
     return liq;
   });
 }
