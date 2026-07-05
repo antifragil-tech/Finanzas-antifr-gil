@@ -16,17 +16,17 @@
 
 ## 2. Qué aporta el PR #5 (verificado contra la rama, 32 archivos)
 
-| Pieza | Archivos | Qué es |
-|---|---|---|
-| **Agenda Hoy** | `clinica/agenda/AgendaHoy.tsx`, `lanes.ts`, `AgendaNav.tsx` | Vista operativa de recepción por franjas/lanes |
-| **Pendientes** | `clinica/Pendientes.tsx` | Cola de validación de asistencia/cobro |
-| **Cobros** | `clinica/Cobros.tsx` | Registro de cobros de sesión (mock) |
-| **Vivofácil** | `clinica/Vivofacil.tsx` | Cierre mensual de derivaciones B2B (estados abierto→cobrado) |
-| **Clientes administrativos** | `clinica/Clientes.tsx`, `mock/clientes.ts` | Ficha administrativa, sin datos clínicos |
-| **Bonos/Programas** | `clinica/Bonos.tsx`, `mock/bonos.ts` | Consumo de bonos por sesión |
-| **CitaPanel + store** | `clinica/CitaPanel.tsx`, `clinica/CitasStore.tsx`, `Subvista.tsx`, `badges.tsx` | Panel de cita y provider de estado propio |
-| **Spike calendario** | `spike/CalendarioSpike.tsx` (+DayPilot en `index.css`) | Vista calendario; **revisar peso del bundle (R13)** |
-| **Infra del módulo** | `package.json` (`@alsari/reservas`), `vite.config`, `tailwind.config`, `index.css`, `main.tsx`, `App.tsx` | Módulo Vite independiente + entrada `pnpm-lock.yaml` |
+| Pieza                        | Archivos                                                                                                  | Qué es                                                       |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| **Agenda Hoy**               | `clinica/agenda/AgendaHoy.tsx`, `lanes.ts`, `AgendaNav.tsx`                                               | Vista operativa de recepción por franjas/lanes               |
+| **Pendientes**               | `clinica/Pendientes.tsx`                                                                                  | Cola de validación de asistencia/cobro                       |
+| **Cobros**                   | `clinica/Cobros.tsx`                                                                                      | Registro de cobros de sesión (mock)                          |
+| **Vivofácil**                | `clinica/Vivofacil.tsx`                                                                                   | Cierre mensual de derivaciones B2B (estados abierto→cobrado) |
+| **Clientes administrativos** | `clinica/Clientes.tsx`, `mock/clientes.ts`                                                                | Ficha administrativa, sin datos clínicos                     |
+| **Bonos/Programas**          | `clinica/Bonos.tsx`, `mock/bonos.ts`                                                                      | Consumo de bonos por sesión                                  |
+| **CitaPanel + store**        | `clinica/CitaPanel.tsx`, `clinica/CitasStore.tsx`, `Subvista.tsx`, `badges.tsx`                           | Panel de cita y provider de estado propio                    |
+| **Spike calendario**         | `spike/CalendarioSpike.tsx` (+DayPilot en `index.css`)                                                    | Vista calendario; **revisar peso del bundle (R13)**          |
+| **Infra del módulo**         | `package.json` (`@alsari/reservas`), `vite.config`, `tailwind.config`, `index.css`, `main.tsx`, `App.tsx` | Módulo Vite independiente + entrada `pnpm-lock.yaml`         |
 
 ## 3. Qué necesita el Host
 
@@ -48,16 +48,16 @@
 
 ## 5. Riesgos
 
-| Riesgo | Mitigación |
-|---|---|
-| Copiar la versión vieja del PR #3 | Prohibido por plan (PR #17 §4.1); el PR de 5F parte de main con #5 ya mergeado |
-| Conflicto de lockfile | La entrada de `@alsari/reservas` se añade en un único PR, tras #5, con lockfile regenerado mínimo |
-| CSS global cruzado | Import único y explícito del tema del módulo; nunca ruta relativa cross-módulo desde el root layout |
+| Riesgo                                    | Mitigación                                                                                                         |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Copiar la versión vieja del PR #3         | Prohibido por plan (PR #17 §4.1); el PR de 5F parte de main con #5 ya mergeado                                     |
+| Conflicto de lockfile                     | La entrada de `@alsari/reservas` se añade en un único PR, tras #5, con lockfile regenerado mínimo                  |
+| CSS global cruzado                        | Import único y explícito del tema del módulo; nunca ruta relativa cross-módulo desde el root layout                |
 | Doble provider / duplicar estado de citas | `CitasStore` es el único estado de citas; el contexto global 5C no duplica datos de citas, solo centro/periodo/rol |
-| Romper auth | El montaje no toca `middleware.ts` ni `AppShell`; smoke test de login tras integrar |
-| Datos clínicos | El módulo es administrativo; grep clínico en el PR de integración; frontera compliance vigente |
-| Bundle grande (DayPilot) | `next/dynamic` para el calendario; medir con `next build` |
-| Rutas duplicadas | `/reservas` es la única ruta; el placeholder se elimina en el mismo PR |
+| Romper auth                               | El montaje no toca `middleware.ts` ni `AppShell`; smoke test de login tras integrar                                |
+| Datos clínicos                            | El módulo es administrativo; grep clínico en el PR de integración; frontera compliance vigente                     |
+| Bundle grande (DayPilot)                  | `next/dynamic` para el calendario; medir con `next build`                                                          |
+| Rutas duplicadas                          | `/reservas` es la única ruta; el placeholder se elimina en el mismo PR                                             |
 
 ## 6. Checklist de integración futura (copiable al PR 5F)
 
@@ -81,4 +81,4 @@
 
 ---
 
-*Documento 5F-READY. No modifica código. El PR de integración se abrirá solo con autorización del cockpit cuando los prerequisitos se cumplan.*
+_Documento 5F-READY. No modifica código. El PR de integración se abrirá solo con autorización del cockpit cuando los prerequisitos se cumplan._
