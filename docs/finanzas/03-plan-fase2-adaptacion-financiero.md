@@ -14,33 +14,33 @@ Dejar el módulo `financiero` reflejando **"Antifrágil = una SL con varios proy
 
 **Naturaleza del trabajo:** poda + renombrado visible + simplificación de la consolidación. **NO se toca** el motor PGC, cashflow, vencimientos ni presupuestos, **ni** los paquetes `@alsari/*` (sin rebrand, decisión de Guille).
 
-*(Líneas exactas: ver el anexo del audit `00`; aquí se listan los archivos confirmados por búsqueda en código.)*
+_(Líneas exactas: ver el anexo del audit `00`; aquí se listan los archivos confirmados por búsqueda en código.)_
 
 ---
 
 ## A. Jubilar — quitar de la navegación
 
-| Archivo | Qué es | Acción |
-|---|---|---|
-| `src/components/views/PersonaView.tsx` | Patrimonio personal de los socios (Javier/Iván) | **Quitar** de rutas/sidebar |
-| `src/components/CorporateMap.tsx` | Mapa societario familiar (personas → holdings → filiales) | **Quitar** (con 1 SL no aplica) |
-| `src/components/views/PatrimonioView.tsx` | Gestión de activos patrimoniales (personales + societarios) | **Ocultar** por defecto; revisar si la SL tiene algún activo que interese conservar |
-| `src/components/views/NAVSection.tsx` | Valoración NAV / TIR-MOIC de salida de proyectos de inversión | **Ocultar** para proyectos operativos |
+| Archivo                                   | Qué es                                                        | Acción                                                                              |
+| ----------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `src/components/views/PersonaView.tsx`    | Patrimonio personal de los socios (Javier/Iván)               | **Quitar** de rutas/sidebar                                                         |
+| `src/components/CorporateMap.tsx`         | Mapa societario familiar (personas → holdings → filiales)     | **Quitar** (con 1 SL no aplica)                                                     |
+| `src/components/views/PatrimonioView.tsx` | Gestión de activos patrimoniales (personales + societarios)   | **Ocultar** por defecto; revisar si la SL tiene algún activo que interese conservar |
+| `src/components/views/NAVSection.tsx`     | Valoración NAV / TIR-MOIC de salida de proyectos de inversión | **Ocultar** para proyectos operativos                                               |
 
 ## B. Simplificar — quitar lógica de doble holding (sociedad única)
 
-| Archivo | Cambio |
-|---|---|
-| `src/App.tsx` | Quitar detección `pavier`/`armia` por nombre, IDs `javier_alarcon`/`ivan_alarcon` y el consolidado "Alsari Capital". Selector = la SL + sus proyectos |
-| `src/components/views/Overview.tsx` | Quitar `flattenSociety` / look-through de %. KPIs directos de la SL + **desglose por proyecto** |
-| `src/components/DashboardLayout.tsx` | Quitar `PERSONA_IDS`. Header visible → "Antifrágil" |
-| `src/components/views/EntidadesView.tsx`, `.../SociedadDetail.tsx`, `.../MaestroView.tsx`, `src/lib/maestroParser.ts` | Quitar columnas/lógica `pct_pavier`, `pct_armia`, `parent_sociedad_id` con % |
-| **SQL** `cashflow_consolidado`, `flujos_proyecto_consolidados`, `vencimiento_sociedades` | Con 1 sociedad, la distribución por % deja de tener sentido → **simplificar las vistas** (migración aparte, aplicada a mano por Dashboard) |
+| Archivo                                                                                                               | Cambio                                                                                                                                                |
+| --------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/App.tsx`                                                                                                         | Quitar detección `pavier`/`armia` por nombre, IDs `javier_alarcon`/`ivan_alarcon` y el consolidado "Alsari Capital". Selector = la SL + sus proyectos |
+| `src/components/views/Overview.tsx`                                                                                   | Quitar `flattenSociety` / look-through de %. KPIs directos de la SL + **desglose por proyecto**                                                       |
+| `src/components/DashboardLayout.tsx`                                                                                  | Quitar `PERSONA_IDS`. Header visible → "Antifrágil"                                                                                                   |
+| `src/components/views/EntidadesView.tsx`, `.../SociedadDetail.tsx`, `.../MaestroView.tsx`, `src/lib/maestroParser.ts` | Quitar columnas/lógica `pct_pavier`, `pct_armia`, `parent_sociedad_id` con %                                                                          |
+| **SQL** `cashflow_consolidado`, `flujos_proyecto_consolidados`, `vencimiento_sociedades`                              | Con 1 sociedad, la distribución por % deja de tener sentido → **simplificar las vistas** (migración aparte, aplicada a mano por Dashboard)            |
 
 ## C. Renombrar visible (solo UI — NO `@alsari/*`)
 
-| De | A |
-|---|---|
+| De                                                                                   | A                                                |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------ |
 | "Alsari Capital" / "ALSARI CAPITAL" (header, breadcrumb, sociedad por defecto, logo) | "Antifrágil" / "Grupo Empresarial Antifrágil SL" |
 
 ## D. Conservar intactos (no tocar)
@@ -52,10 +52,11 @@ Dejar el módulo `financiero` reflejando **"Antifrágil = una SL con varios proy
 ## Datos (frontera Fase 2/3)
 
 Dar de alta en BD (migración manual por Dashboard, según lección del repo):
+
 1. **`sociedades`** → `Grupo Empresarial Antifrágil SL` (CIF real, único registro de sociedad de Antifrágil).
 2. **`proyectos`** → `Clínica Antifrágil Playamar`, `sociedad_tenedora` = la SL anterior, `estado='activo'`.
 
-*(9 A.M./Eventos, Lido Pro, Antifrágil OG: no se dan de alta todavía; el modelo los admite cuando toque.)*
+_(9 A.M./Eventos, Lido Pro, Antifrágil OG: no se dan de alta todavía; el modelo los admite cuando toque.)_
 
 ---
 
@@ -85,4 +86,4 @@ Se diseña/implementa en **Fase 3**, pero se anota aquí porque condiciona el PG
 
 ---
 
-*Plan de Fase 2. No modifica código productivo todavía. Requiere validación de Guille antes de ejecutar.*
+_Plan de Fase 2. No modifica código productivo todavía. Requiere validación de Guille antes de ejecutar._

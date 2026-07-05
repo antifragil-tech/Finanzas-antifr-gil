@@ -17,27 +17,27 @@ Cuatro fases operativas (F-Op A/B/C/D), cada una dividida en **lotes** pequeños
 
 ### Secuencia recomendada (resumen)
 
-| Orden | Fase / lote | Disponibilidad | Por qué este orden |
-|---|---|---|---|
-| 1 | **F-Op A1** Efectivo vs banco + arqueo | 🟢 | Verdad de caja; nada lo bloquea. Hueco prioridad nº1 |
-| 2 | **F-Op A2** CxP / CxC con seguimiento | 🟢 | Control de pendientes; agrega lo existente. Hueco nº2 |
-| 3 | **F-Op A3** Recurrencia + vencimientos | 🟢 | Previsión de caja; mejora lo que ya hay |
-| 4 | **F-Op C1** Reglas de imputación + costes compartidos | 🟢 (diseño) / 🟠 (sesión) | Base de costes; parte independiente de Clínica |
-| 5 | **F-Op C2** Coste de personas (asalariados/autónomos) | 🟠 | "Por sesión" necesita datos de Clínica |
-| 6 | **F-Op B** Rentabilidad Clínica | 🟠 | Necesita el schema `clinica` (otra línea) |
-| 7 | **F-Op D** Ingreso real vs presupuestado | 🟠 | Necesita ingreso real fluyendo (B / facturación emitida) |
+| Orden | Fase / lote                                           | Disponibilidad            | Por qué este orden                                       |
+| ----- | ----------------------------------------------------- | ------------------------- | -------------------------------------------------------- |
+| 1     | **F-Op A1** Efectivo vs banco + arqueo                | 🟢                        | Verdad de caja; nada lo bloquea. Hueco prioridad nº1     |
+| 2     | **F-Op A2** CxP / CxC con seguimiento                 | 🟢                        | Control de pendientes; agrega lo existente. Hueco nº2    |
+| 3     | **F-Op A3** Recurrencia + vencimientos                | 🟢                        | Previsión de caja; mejora lo que ya hay                  |
+| 4     | **F-Op C1** Reglas de imputación + costes compartidos | 🟢 (diseño) / 🟠 (sesión) | Base de costes; parte independiente de Clínica           |
+| 5     | **F-Op C2** Coste de personas (asalariados/autónomos) | 🟠                        | "Por sesión" necesita datos de Clínica                   |
+| 6     | **F-Op B** Rentabilidad Clínica                       | 🟠                        | Necesita el schema `clinica` (otra línea)                |
+| 7     | **F-Op D** Ingreso real vs presupuestado              | 🟠                        | Necesita ingreso real fluyendo (B / facturación emitida) |
 
 > Las fases 🟢 pueden arrancar tras Fase 2 (adaptación de `financiero`) sin esperar a la Clínica. Las 🟠 se diseñan ahora pero se implementan cuando exista el dato.
 
 ---
 
-## F-Op A — Tesorería operativa  🟢
+## F-Op A — Tesorería operativa 🟢
 
 Cubre: efectivo vs banco · arqueo de caja · pagos pendientes · cobros pendientes · vencimientos · gastos recurrentes · cobros recurrentes · estados pagado/cobrado/reclamado/parcial/vencido.
 
 Se parte en tres lotes: **A1** (efectivo/banco+arqueo), **A2** (CxP/CxC+estados), **A3** (recurrencia+vencimientos).
 
-### F-Op A1 — Efectivo vs banco + arqueo de caja  🟢  · 🟦🟩🟨
+### F-Op A1 — Efectivo vs banco + arqueo de caja 🟢 · 🟦🟩🟨
 
 > **Estado real (2026-07-04):** A1 ya tiene **draft SQL en el PR #4** (`chore/db-baseline-antifragil-os`, head `27f6392`, **Draft / NO APPLY**): cuenta de tesorería (caja/banco), ledger de movimiento de caja, arqueo y vista de tesorería. El puente `factura_pago → movimiento_tesoreria` queda **diferido a A1b**. **Nada aplicado en Supabase.** Detalle en [06 §10](06-fop-a1-efectivo-banco-arqueo.md).
 
@@ -51,7 +51,7 @@ Se parte en tres lotes: **A1** (efectivo/banco+arqueo), **A2** (CxP/CxC+estados)
 8. **Tipo:** 🟦 SQL (medio + arqueo) · 🟩 tipos · 🟨 UI (dos saldos + pantalla de arqueo).
 9. **Hecho cuando:** el dashboard muestra Efectivo y Banco por separado (y total); cada cobro/pago lleva `medio`; existe un cierre de caja diario con descuadre registrado y auditable.
 
-### F-Op A2 — Cuentas por pagar / por cobrar + estados de seguimiento  🟢  · 🟦🟩🟨
+### F-Op A2 — Cuentas por pagar / por cobrar + estados de seguimiento 🟢 · 🟦🟩🟨
 
 1. **Objetivo:** una vista operativa unificada de **pendientes de pagar (CxP)** y **pendientes de cobrar (CxC)** con seguimiento de gestión.
 2. **Problema que resuelve:** lo pendiente vive disperso (facturas `pendiente_pago`, vencimientos, `presupuesto_pagos`, futuras emitidas) y sin estado de gestión (responsable, reclamación, incobrable).
@@ -63,7 +63,7 @@ Se parte en tres lotes: **A1** (efectivo/banco+arqueo), **A2** (CxP/CxC+estados)
 8. **Tipo:** 🟦 SQL (vista + estados) · 🟩 tipos · 🟨 UI (tablero CxP/CxC).
 9. **Hecho cuando:** existe una pantalla que lista todo lo pendiente de cobrar y de pagar, con importe, responsable y estado de gestión, y permite marcar reclamado/parcial/cobrado/incobrable y pagado/parcial.
 
-### F-Op A3 — Recurrencia (gastos y cobros) + vencimientos  🟢  · 🟦🟨
+### F-Op A3 — Recurrencia (gastos y cobros) + vencimientos 🟢 · 🟦🟨
 
 1. **Objetivo:** gestionar **gastos y cobros recurrentes** (alquileres, cuotas, partners) y su previsión de caja.
 2. **Problema que resuelve:** la recurrencia actual es **acotada** (genera los pagos del rango `fecha_inicio→fecha_fin` repartiendo el importe **total** entre periodos) y no hay recurrencia indefinida ni concepto de cuota/partner.
@@ -77,7 +77,7 @@ Se parte en tres lotes: **A1** (efectivo/banco+arqueo), **A2** (CxP/CxC+estados)
 
 ---
 
-## F-Op B — Rentabilidad Clínica  🟠 (gated por schema `clinica`)
+## F-Op B — Rentabilidad Clínica 🟠 (gated por schema `clinica`)
 
 Cubre: servicio · profesional · producto/tarifa · cliente sin exponer datos sensibles · coste directo por sesión · coste fijo imputado · bonos/programas devengados sesión a sesión · margen por servicio/profesional/proyecto.
 
@@ -93,13 +93,13 @@ Cubre: servicio · profesional · producto/tarifa · cliente sin exponer datos s
 
 ---
 
-## F-Op C — Personas y costes compartidos  🟢 (diseño) / 🟠 (parte "por sesión")
+## F-Op C — Personas y costes compartidos 🟢 (diseño) / 🟠 (parte "por sesión")
 
 Cubre: asalariados · autónomos por sesión · recepción compartida · reglas de imputación · retenciones si aplica · pagos pendientes a profesionales.
 
 Se parte en dos lotes: **C1** (reglas de imputación + costes compartidos, en buena parte independiente) y **C2** (coste de personas concreto, parte gated por Clínica).
 
-### F-Op C1 — Reglas de imputación y costes compartidos  🟢 (diseño)  · 🟦🟩
+### F-Op C1 — Reglas de imputación y costes compartidos 🟢 (diseño) · 🟦🟩
 
 1. **Objetivo:** modelar cómo un **coste compartido** se reparte (recepción compartida con otra empresa, suministros, software) mediante una **regla de imputación** (% fijo o driver).
 2. **Problema que resuelve:** hoy no existe `tipo_coste` (directo/compartido/fijo/general) ni clave de reparto; un coste compartido no se puede partir entre proyectos/empresas.
@@ -111,7 +111,7 @@ Se parte en dos lotes: **C1** (reglas de imputación + costes compartidos, en bu
 8. **Tipo:** 🟦 SQL · 🟩 tipos (📄 mientras no se decida F-2).
 9. **Hecho cuando:** un coste compartido (p. ej. recepción al X%) se reparte automáticamente a Antifrágil y queda claro qué parte asume y, si aplica, qué se refactura a la otra empresa.
 
-### F-Op C2 — Coste de personas: asalariados y autónomos por sesión  🟠 · 🟦🟩🟨
+### F-Op C2 — Coste de personas: asalariados y autónomos por sesión 🟠 · 🟦🟩🟨
 
 1. **Objetivo:** imputar el **coste de las personas por devengo** — asalariado (coste fijo mensual al mes del servicio), autónomo (coste por sesión completada, pago al mes siguiente).
 2. **Problema que resuelve:** no hay modelo de coste de personal; no se distingue fecha de pago vs mes del coste; falta seguimiento de **pagos pendientes a profesionales** y de **retenciones IRPF** (cuenta `475`, resumen trimestral).
@@ -125,7 +125,7 @@ Se parte en dos lotes: **C1** (reglas de imputación + costes compartidos, en bu
 
 ---
 
-## F-Op D — Ingreso real vs presupuestado  🟠 (gated por ingreso real fluyendo)
+## F-Op D — Ingreso real vs presupuestado 🟠 (gated por ingreso real fluyendo)
 
 Cubre: comparar ingreso real con previsión · desviaciones · forecast mensual · alertas.
 
@@ -143,15 +143,15 @@ Cubre: comparar ingreso real con previsión · desviaciones · forecast mensual 
 
 ## Resumen de dependencias y tipo de trabajo
 
-| Fase / lote | Disponibilidad | SQL | Tipos | UI | Depende de |
-|---|---|---|---|---|---|
-| A1 Efectivo/banco + arqueo | 🟢 | ✔ | ✔ | ✔ | Fase 2 (mismo dashboard) |
-| A2 CxP/CxC + estados | 🟢 | ✔ | ✔ | ✔ | saldar deuda de estados |
-| A3 Recurrencia + vencimientos | 🟢 | (✔) | — | ✔ | decisión F-5 |
-| C1 Reglas imputación | 🟢 diseño | ✔ | ✔ | — | decisión F-2 |
-| C2 Coste personas | 🟠 | ✔ | ✔ | ✔ | Clínica (por sesión) · decisión F-3 |
-| B Rentabilidad Clínica | 🟠 | ✔ | ✔ | ✔ | **schema `clinica`** |
-| D Ingreso real vs ppto | 🟠 | ✔ | (✔) | ✔ | ingreso real (B / facturación emitida) |
+| Fase / lote                   | Disponibilidad | SQL | Tipos | UI  | Depende de                             |
+| ----------------------------- | -------------- | --- | ----- | --- | -------------------------------------- |
+| A1 Efectivo/banco + arqueo    | 🟢             | ✔   | ✔     | ✔   | Fase 2 (mismo dashboard)               |
+| A2 CxP/CxC + estados          | 🟢             | ✔   | ✔     | ✔   | saldar deuda de estados                |
+| A3 Recurrencia + vencimientos | 🟢             | (✔) | —     | ✔   | decisión F-5                           |
+| C1 Reglas imputación          | 🟢 diseño      | ✔   | ✔     | —   | decisión F-2                           |
+| C2 Coste personas             | 🟠             | ✔   | ✔     | ✔   | Clínica (por sesión) · decisión F-3    |
+| B Rentabilidad Clínica        | 🟠             | ✔   | ✔     | ✔   | **schema `clinica`**                   |
+| D Ingreso real vs ppto        | 🟠             | ✔   | (✔)   | ✔   | ingreso real (B / facturación emitida) |
 
 **Decisiones de Guille que desbloquean fases:** F-2 (recepción compartida), F-3 (asalariados/nóminas), F-4 (generales: contribución vs prorrateo), F-5 (recurrencia acotada vs indefinida). Recogidas en [04](04-finanzas-operativas-mapa-y-gaps.md) §10.
 
@@ -171,4 +171,4 @@ Aplican a **todas** las fases de este backlog mientras no haya autorización exp
 
 ---
 
-*Backlog de diseño. No modifica código, SQL, tipos ni UI. Cada fase requiere su propio diseño validado antes de implementarse.*
+_Backlog de diseño. No modifica código, SQL, tipos ni UI. Cada fase requiere su propio diseño validado antes de implementarse._

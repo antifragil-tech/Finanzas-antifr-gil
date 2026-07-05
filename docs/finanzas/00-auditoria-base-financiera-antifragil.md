@@ -28,13 +28,13 @@ Por eso la estrategia es: **conservar el esqueleto genérico** (sociedades, proy
 
 ## 1. Qué módulos financieros/contables existen
 
-| Módulo (`apps/modules/`) | Qué hace | Madurez | Veredicto rápido |
-|---|---|---|---|
-| **financiero** | Dashboard ejecutivo: KPIs consolidados (caja, deuda, fondo de maniobra, patrimonio), balance vía PGC, cashflow, vencimientos, patrimonio, mapa societario | Alta | Núcleo reutilizable; quitar carcasa Alsari |
-| **contabilidad** | Facturas recibidas (OCR + aprobación + pago + Drive), facturas emitidas, contactos, movimientos bancarios, diario/asientos, reconciliación, fichas de sociedad | Recibidas **90 %** · Emitidas **35 %** | Conservar recibidas; **ampliar emitidas** |
-| **presupuestos** | Proyectos (CRUD + detalle), presupuestos gasto/ingreso con partidas y recurrencia, tareas (Kanban), objetivos (OKR), análisis financiero de inversión, informe PDF | Media-alta | Presupuestos OK; el **análisis es inmobiliario** |
-| **reservas** | Spike de calendario clínica (DayPilot) — **solo UI mock, sin backend** | Spike | **NO TOCAR** (otra línea de trabajo) |
-| **facturas** (antiguo) | Módulo legacy archivado; `/facturas` redirige a `/contabilidad` | Deprecado | Ignorar |
+| Módulo (`apps/modules/`) | Qué hace                                                                                                                                                           | Madurez                                | Veredicto rápido                                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------- | ------------------------------------------------ |
+| **financiero**           | Dashboard ejecutivo: KPIs consolidados (caja, deuda, fondo de maniobra, patrimonio), balance vía PGC, cashflow, vencimientos, patrimonio, mapa societario          | Alta                                   | Núcleo reutilizable; quitar carcasa Alsari       |
+| **contabilidad**         | Facturas recibidas (OCR + aprobación + pago + Drive), facturas emitidas, contactos, movimientos bancarios, diario/asientos, reconciliación, fichas de sociedad     | Recibidas **90 %** · Emitidas **35 %** | Conservar recibidas; **ampliar emitidas**        |
+| **presupuestos**         | Proyectos (CRUD + detalle), presupuestos gasto/ingreso con partidas y recurrencia, tareas (Kanban), objetivos (OKR), análisis financiero de inversión, informe PDF | Media-alta                             | Presupuestos OK; el **análisis es inmobiliario** |
+| **reservas**             | Spike de calendario clínica (DayPilot) — **solo UI mock, sin backend**                                                                                             | Spike                                  | **NO TOCAR** (otra línea de trabajo)             |
+| **facturas** (antiguo)   | Módulo legacy archivado; `/facturas` redirige a `/contabilidad`                                                                                                    | Deprecado                              | Ignorar                                          |
 
 **Backend (`services/supabase/migrations/`):** ~66 migraciones. Tablas canónicas en schema `public`: `sociedades`, `proyectos`, `proyecto_sociedades`, `facturas_recibidas`, `facturas_emitidas`, `factura_pagos`, `factura_aprobaciones`, `contactos`, `proveedores_reglas`, `movimientos_bancarios`, `extractos_bancarios`, `asientos_*`, `presupuestos*`, `vencimientos`, `vencimiento_sociedades`, `activos_patrimonio`. Vistas clave: `flujos_proyecto_consolidados` y `cashflow_consolidado`.
 
@@ -61,14 +61,14 @@ Por eso la estrategia es: **conservar el esqueleto genérico** (sociedades, proy
 
 ## 3. Qué es demasiado específico de Alsari (a adaptar o jubilar)
 
-| Pieza | Por qué es de Alsari | Acción para Antifrágil |
-|---|---|---|
-| Detección de holdings "Pavier"/"Armia" **por nombre** (`financiero/App.tsx`, `Overview.tsx`, `CorporateMap.tsx`) | Asume 2 holdings cabecera fijos | Parametrizar; con 1–2 sociedades, simplificar o eliminar el look-through dual |
-| IDs de socios `javier_alarcon` / `ivan_alarcon`, columnas `pct_pavier` / `pct_armia` | Personas físicas y % de tenencia concretos | Renombrar a genérico o no usar; Antifrágil opera por sociedad, no por patrimonio personal |
-| `PersonaView`, `PatrimonioView` personal, `CorporateMap` familiar | Patrimonio personal de la familia Alarcón | Probablemente **fuera de alcance**; ocultar/jubilar |
+| Pieza                                                                                                                                                                     | Por qué es de Alsari                            | Acción para Antifrágil                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Detección de holdings "Pavier"/"Armia" **por nombre** (`financiero/App.tsx`, `Overview.tsx`, `CorporateMap.tsx`)                                                          | Asume 2 holdings cabecera fijos                 | Parametrizar; con 1–2 sociedades, simplificar o eliminar el look-through dual                                                            |
+| IDs de socios `javier_alarcon` / `ivan_alarcon`, columnas `pct_pavier` / `pct_armia`                                                                                      | Personas físicas y % de tenencia concretos      | Renombrar a genérico o no usar; Antifrágil opera por sociedad, no por patrimonio personal                                                |
+| `PersonaView`, `PatrimonioView` personal, `CorporateMap` familiar                                                                                                         | Patrimonio personal de la familia Alarcón       | Probablemente **fuera de alcance**; ocultar/jubilar                                                                                      |
 | **Análisis de inversión** (`presupuestos/.../analisisFinanciero.ts`): compra-venta, renta, cap-rate de salida, valor terminal, horizonte 10 años, `fecha_prevista_salida` | Diseñado para comprar/reformar/vender inmuebles | **No usar sobre la clínica.** Para líneas operativas usar lectura de explotación (ingresos–costes–EBITDA–margen), no appraisal de salida |
-| Roles `guille/javi/alicia` y umbral de aprobación, categorías de movimiento inmobiliarias | Operativa contable de Alsari | Adaptar a roles/categorías de Antifrágil (matriz rol→acción flexible) |
-| Naming de paquetes `@alsari/*` | Marca antigua | **No rebrandear ahora** (decisión de Guille); estrategia futura aparte |
+| Roles `guille/javi/alicia` y umbral de aprobación, categorías de movimiento inmobiliarias                                                                                 | Operativa contable de Alsari                    | Adaptar a roles/categorías de Antifrágil (matriz rol→acción flexible)                                                                    |
+| Naming de paquetes `@alsari/*`                                                                                                                                            | Marca antigua                                   | **No rebrandear ahora** (decisión de Guille); estrategia futura aparte                                                                   |
 
 ---
 
@@ -76,15 +76,16 @@ Por eso la estrategia es: **conservar el esqueleto genérico** (sociedades, proy
 
 Esta es la separación conceptual que pide Guille, mapeada sobre lo que ya existe:
 
-| Capa | Pregunta que responde | Dónde vive hoy | Acción |
-|---|---|---|---|
-| **1. Contabilidad global** (fiscal/documental) | Qué facturamos/recibimos, qué IVA/exención, qué evidencia documental, qué está pagado | módulo **contabilidad** | Conservar recibidas; **ampliar emitidas**; adaptar roles/categorías |
-| **2. Finanzas globales** (visión ejecutiva) | Caja, ingresos, gastos, margen, evolución, salud financiera, comparación entre proyectos | módulo **financiero** (Overview + PGC) | Quitar carcasa holding; añadir **comparativa por proyecto/línea** |
-| **3. Tesorería / cashflow** (caja real/prevista) | Cuánto entra/sale y cuándo; pendiente de cobro/pago; caja a 7/15/30/60/90 días | `cashflow_consolidado` + Cashflow/Vencimientos | Maduro. Añadir **4ª fuente = cobros de la clínica** (Fase 3) |
-| **4. Facturación** (documento fiscal) | Factura: emisión, cliente, base, IVA/exención, PDF, fecha emisión ≠ cobro ≠ servicio | `facturas_emitidas` (inmaduro) | **Diseñar y construir** emisión + exención IVA sanitaria + asiento de venta |
-| **5. Rentabilidad analítica por proyecto** (margen) | Qué factura cada proyecto/servicio/profesional, qué costes directos, qué margen | parte en presupuestos; **lectura operativa no existe** | Crear **capa analítica operativa** (devengo + costes directos), separada de la fiscal |
+| Capa                                                | Pregunta que responde                                                                    | Dónde vive hoy                                         | Acción                                                                                |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| **1. Contabilidad global** (fiscal/documental)      | Qué facturamos/recibimos, qué IVA/exención, qué evidencia documental, qué está pagado    | módulo **contabilidad**                                | Conservar recibidas; **ampliar emitidas**; adaptar roles/categorías                   |
+| **2. Finanzas globales** (visión ejecutiva)         | Caja, ingresos, gastos, margen, evolución, salud financiera, comparación entre proyectos | módulo **financiero** (Overview + PGC)                 | Quitar carcasa holding; añadir **comparativa por proyecto/línea**                     |
+| **3. Tesorería / cashflow** (caja real/prevista)    | Cuánto entra/sale y cuándo; pendiente de cobro/pago; caja a 7/15/30/60/90 días           | `cashflow_consolidado` + Cashflow/Vencimientos         | Maduro. Añadir **4ª fuente = cobros de la clínica** (Fase 3)                          |
+| **4. Facturación** (documento fiscal)               | Factura: emisión, cliente, base, IVA/exención, PDF, fecha emisión ≠ cobro ≠ servicio     | `facturas_emitidas` (inmaduro)                         | **Diseñar y construir** emisión + exención IVA sanitaria + asiento de venta           |
+| **5. Rentabilidad analítica por proyecto** (margen) | Qué factura cada proyecto/servicio/profesional, qué costes directos, qué margen          | parte en presupuestos; **lectura operativa no existe** | Crear **capa analítica operativa** (devengo + costes directos), separada de la fiscal |
 
 **Principio innegociable (regla de Guille):** estas capas **no se mezclan**. La misma operación se ve distinta en cada una. Ejemplo del bono de fisio de 225 €:
+
 - **Cashflow:** entran 225 € el día que se cobra (una sola vez).
 - **Rentabilidad:** se imputan ~45 €/sesión a medida que se consumen las 5 sesiones (devengo), menos coste del profesional/sala.
 - **Facturación:** una factura de 225 € con su fecha de emisión, su tratamiento fiscal (posible exención sanitaria) y su estado de cobro.
@@ -164,14 +165,14 @@ Reserva / cita / bono  (schema clinica — otra línea de trabajo)
 
 ## 9. Propuesta de fases
 
-| Fase | Objetivo | Entregable | Toca código productivo |
-|---|---|---|---|
-| **0 — Auditoría** *(este documento)* | Entender lo existente y cómo adaptarlo | Este informe | No |
-| **1 — Modelo conceptual Antifrágil** | Definir empresa global, proyectos, categorías analíticas, centros de coste, separación de las 5 capas | Documento de modelo + ADR | No (diseño) |
-| **2 — Adaptación mínima de UI** | Renombrar lo visible a Antifrágil **sin** romper arquitectura ni paquetes `@alsari/*`; simplificar la carcasa de holding | PR pequeño de UI | Sí (mínimo) |
-| **3 — Conexión con Clínica** | Cuando Clínica esté lista: cobros/citas/bonos → cashflow y rentabilidad por proyecto | Capa `clinica.pagos_cita` → cashflow | Sí |
-| **4 — Facturación emitida** | Emisión oficial desde actividad clínica: número, fecha, IVA/exención, asiento, PDF | Flujo de factura emitida | Sí |
-| **5 — Dashboards** | Dashboard global de Antifrágil + dashboard por proyecto (Clínica, Lido Pro, Eventos/9AM, ...) | Vistas de dashboard | Sí |
+| Fase                                 | Objetivo                                                                                                                 | Entregable                           | Toca código productivo |
+| ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ | ---------------------- |
+| **0 — Auditoría** _(este documento)_ | Entender lo existente y cómo adaptarlo                                                                                   | Este informe                         | No                     |
+| **1 — Modelo conceptual Antifrágil** | Definir empresa global, proyectos, categorías analíticas, centros de coste, separación de las 5 capas                    | Documento de modelo + ADR            | No (diseño)            |
+| **2 — Adaptación mínima de UI**      | Renombrar lo visible a Antifrágil **sin** romper arquitectura ni paquetes `@alsari/*`; simplificar la carcasa de holding | PR pequeño de UI                     | Sí (mínimo)            |
+| **3 — Conexión con Clínica**         | Cuando Clínica esté lista: cobros/citas/bonos → cashflow y rentabilidad por proyecto                                     | Capa `clinica.pagos_cita` → cashflow | Sí                     |
+| **4 — Facturación emitida**          | Emisión oficial desde actividad clínica: número, fecha, IVA/exención, asiento, PDF                                       | Flujo de factura emitida             | Sí                     |
+| **5 — Dashboards**                   | Dashboard global de Antifrágil + dashboard por proyecto (Clínica, Lido Pro, Eventos/9AM, ...)                            | Vistas de dashboard                  | Sí                     |
 
 **Regla de proceso:** ninguna fase con código se abre sin que la anterior de diseño esté validada por Guille. **No se hace PR funcional hasta cerrar Fase 0/1.**
 
@@ -200,4 +201,4 @@ Reserva / cita / bono  (schema clinica — otra línea de trabajo)
 
 ---
 
-*Documento de auditoría. No modifica código productivo. Sujeto a validación de Guille antes de abrir Fase 1.*
+_Documento de auditoría. No modifica código productivo. Sujeto a validación de Guille antes de abrir Fase 1._

@@ -15,7 +15,7 @@ Antifrágil necesita gestionar el dinero operativo del día a día: **qué entra
 
 1. **Efectivo vs banco** (hoy se mezclan en "caja disponible"; falta el arqueo de caja diario).
 2. **Rentabilidad por servicio/profesional** (hoy solo hay margen por proyecto, no por lo que deja una sesión de fisio de un profesional concreto).
-3. **El coste de las personas** según *cuándo se devenga* — no según cuándo se paga (una asalariada, un autónomo que cobra al mes siguiente, una recepción que pagamos a medias con otra empresa).
+3. **El coste de las personas** según _cuándo se devenga_ — no según cuándo se paga (una asalariada, un autónomo que cobra al mes siguiente, una recepción que pagamos a medias con otra empresa).
 
 Este documento **separa tres lentes** que miran el mismo dinero de forma distinta y que **no deben mezclarse**: **Tesorería/cashflow** (caja), **Rentabilidad analítica** (margen) y **Precontabilidad/facturación** (papeles y fechas fiscales). Para cada lente dice qué hay, qué falta y qué casos reales debe resolver (María Moreno asalariada, autónomos por sesión, recepción compartida, alquileres, cobros pendientes, cobros recurrentes). Y ordena los huecos por prioridad para decidir las siguientes fases.
 
@@ -25,7 +25,7 @@ Este documento **separa tres lentes** que miran el mismo dinero de forma distint
 
 ## 1. Propósito y alcance
 
-**Propósito:** definir *cómo debe funcionar* Antifrágil OS a nivel financiero **operativo**, sobre la base que ya existe, de forma que se puedan decidir y priorizar las fases de implementación.
+**Propósito:** definir _cómo debe funcionar_ Antifrágil OS a nivel financiero **operativo**, sobre la base que ya existe, de forma que se puedan decidir y priorizar las fases de implementación.
 
 **Dentro de alcance:** tesorería operativa (banco/efectivo/caja, pagos/cobros reales y pendientes, vencimientos, conciliación, arqueo), rentabilidad analítica operativa (margen por servicio/profesional/producto/proyecto, costes directos/compartidos/fijos, devengo de bonos), y precontabilidad (facturas recibidas, pagos, documentos para la gestoría, trazabilidad).
 
@@ -39,21 +39,21 @@ Este documento **separa tres lentes** que miran el mismo dinero de forma distint
 
 El mismo hecho económico se lee de tres formas. **No se suman entre sí.**
 
-| Lente | Pregunta que responde | Fecha que manda | Unidad |
-|---|---|---|---|
-| **1. Tesorería / cashflow** | ¿Cuánto dinero entra/sale y cuándo? ¿Qué queda pendiente? | Fecha de **cobro / pago** | Movimiento de caja (banco o efectivo) |
-| **2. Rentabilidad analítica** | ¿Qué deja cada servicio/profesional/proyecto? | Fecha de **prestación** (devengo) | Margen |
-| **3. Precontabilidad / facturación** | ¿Qué documento lo respalda? ¿Qué necesita la gestoría? | Fecha de **factura / documento** | Documento fiscal |
+| Lente                                | Pregunta que responde                                     | Fecha que manda                   | Unidad                                |
+| ------------------------------------ | --------------------------------------------------------- | --------------------------------- | ------------------------------------- |
+| **1. Tesorería / cashflow**          | ¿Cuánto dinero entra/sale y cuándo? ¿Qué queda pendiente? | Fecha de **cobro / pago**         | Movimiento de caja (banco o efectivo) |
+| **2. Rentabilidad analítica**        | ¿Qué deja cada servicio/profesional/proyecto?             | Fecha de **prestación** (devengo) | Margen                                |
+| **3. Precontabilidad / facturación** | ¿Qué documento lo respalda? ¿Qué necesita la gestoría?    | Fecha de **factura / documento**  | Documento fiscal                      |
 
 **Invariante anti-doble-conteo (regla de Guille):** un ingreso entra **una vez** en caja, se reconoce **progresivamente** en rentabilidad y se documenta **una vez** en factura. Tres lecturas del mismo hecho, no tres ingresos.
 
 **Ejemplo canónico — bono de fisio de 225 € (5 sesiones):**
 
-| Lente | Cómo lo ve | Cuándo |
-|---|---|---|
-| Tesorería | +225 € de caja (efectivo o banco), **una sola vez** | día de cobro |
-| Rentabilidad | ~45 €/sesión − coste del profesional/sala, a medida que se consumen | a lo largo de las 5 sesiones |
-| Precontabilidad | 1 factura de 225 € (si procede), con su IVA/exención y estado de cobro | día de emisión |
+| Lente           | Cómo lo ve                                                             | Cuándo                       |
+| --------------- | ---------------------------------------------------------------------- | ---------------------------- |
+| Tesorería       | +225 € de caja (efectivo o banco), **una sola vez**                    | día de cobro                 |
+| Rentabilidad    | ~45 €/sesión − coste del profesional/sala, a medida que se consumen    | a lo largo de las 5 sesiones |
+| Precontabilidad | 1 factura de 225 € (si procede), con su IVA/exención y estado de cobro | día de emisión               |
 
 ---
 
@@ -63,14 +63,14 @@ El mismo hecho económico se lee de tres formas. **No se suman entre sí.**
 
 ### 3.1 Qué existe ya (reutilizable)
 
-| Pieza | Dónde | Estado |
-|---|---|---|
-| Cashflow por capas (real / comprometido / previsto) y por fuente (factura / presupuesto / vencimiento / manual) | vistas `cashflow_consolidado`, `flujos_proyecto_consolidados`; `CashflowView.tsx` | ✅ sirve |
-| Vencimientos (entradas/salidas, recurrencia informativa, estado pendiente/gestionado) | `vencimientos` (+ `es_entrada`, `recurrencia`); `VencimientosView.tsx` | ✅ sirve |
-| Pagos reales de facturas (libro append-only, pagos parciales, sobre/infrapago, método de pago) | `factura_pagos` (`metodo_pago` incluye `efectivo`); RPC `registrar_pago_factura` | ✅ sirve |
-| Pendientes consolidados (CxP/CxC embrionario) | vista `compromisos_tesoreria` | 🟡 parcial |
-| Importación de extractos bancarios (atómica, dedup por hash) | `extractos_bancarios`, `movimientos_bancarios`; RPC `importar_extracto_bancario` | ✅ sirve |
-| Conciliación banco ↔ contabilidad | `reconciliacion_log` (+ FKs `movimiento_id` en factura) | 🟡 log manual, sin auto-match |
+| Pieza                                                                                                           | Dónde                                                                             | Estado                        |
+| --------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------- |
+| Cashflow por capas (real / comprometido / previsto) y por fuente (factura / presupuesto / vencimiento / manual) | vistas `cashflow_consolidado`, `flujos_proyecto_consolidados`; `CashflowView.tsx` | ✅ sirve                      |
+| Vencimientos (entradas/salidas, recurrencia informativa, estado pendiente/gestionado)                           | `vencimientos` (+ `es_entrada`, `recurrencia`); `VencimientosView.tsx`            | ✅ sirve                      |
+| Pagos reales de facturas (libro append-only, pagos parciales, sobre/infrapago, método de pago)                  | `factura_pagos` (`metodo_pago` incluye `efectivo`); RPC `registrar_pago_factura`  | ✅ sirve                      |
+| Pendientes consolidados (CxP/CxC embrionario)                                                                   | vista `compromisos_tesoreria`                                                     | 🟡 parcial                    |
+| Importación de extractos bancarios (atómica, dedup por hash)                                                    | `extractos_bancarios`, `movimientos_bancarios`; RPC `importar_extracto_bancario`  | ✅ sirve                      |
+| Conciliación banco ↔ contabilidad                                                                               | `reconciliacion_log` (+ FKs `movimiento_id` en factura)                           | 🟡 log manual, sin auto-match |
 
 ### 3.2 Cómo debe funcionar (diseño)
 
@@ -97,16 +97,16 @@ Más finos que el `pendiente/pagado` contable. **Decisión conceptual** de este 
 
 ### 4.1 Qué existe ya
 
-| Pieza | Dónde | Estado |
-|---|---|---|
-| Margen **por proyecto** (ingreso real − gasto real) | vista `metricas_proyecto_resumen` (`saldo_neto_real`) | ✅ a nivel proyecto |
-| Desviación presupuesto vs real (si hay presupuesto maestro) | `proyecto_escenarios` / métricas fase 1 | 🟡 parcial |
+| Pieza                                                                                  | Dónde                                                                                               | Estado                                       |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| Margen **por proyecto** (ingreso real − gasto real)                                    | vista `metricas_proyecto_resumen` (`saldo_neto_real`)                                               | ✅ a nivel proyecto                          |
+| Desviación presupuesto vs real (si hay presupuesto maestro)                            | `proyecto_escenarios` / métricas fase 1                                                             | 🟡 parcial                                   |
 | Análisis de **explotación** parametrizado (EBITDA, costes variables/fijos, break-even) | `proyecto_analisis_financiero` (tipo `explotacion`); `analisisFinanciero.ts`, `ExplotacionView.tsx` | 🟡 **parámetros manuales, no flujos reales** |
-| Análisis de **inversión** (TIR/VAN/cap-rate/valor de salida) | `proyecto_analisis_financiero` (tipos `compra_venta`/`renta`/`alternativo`) | ⛔ **no usar** sobre proyectos operativos |
+| Análisis de **inversión** (TIR/VAN/cap-rate/valor de salida)                           | `proyecto_analisis_financiero` (tipos `compra_venta`/`renta`/`alternativo`)                         | ⛔ **no usar** sobre proyectos operativos    |
 
 ### 4.2 Qué falta (el corazón del hueco analítico)
 
-- **Eje analítico por debajo del proyecto.** Hoy no hay forma de imputar un ingreso/coste a **servicio, profesional, producto/tarifa o cliente**. `presupuesto_partidas`/`presupuesto_pagos` no tienen ese eje; la única "categoría" analítica existente es la de *tareas* (general/obra/legal/financiero), inservible aquí.
+- **Eje analítico por debajo del proyecto.** Hoy no hay forma de imputar un ingreso/coste a **servicio, profesional, producto/tarifa o cliente**. `presupuesto_partidas`/`presupuesto_pagos` no tienen ese eje; la única "categoría" analítica existente es la de _tareas_ (general/obra/legal/financiero), inservible aquí.
 - **Distinción coste directo / compartido / fijo / general.** No existe `tipo_coste` ni centro de coste ni clave de reparto. El margen por proyecto se calcula como ingreso−gasto **sin** desagregar.
 - **Margen por sesión.** Requiere imputar a cada sesión su ingreso devengado y su coste directo (profesional + sala/recurso). Depende del eje analítico y de los datos de la clínica (futuro schema `clinica`).
 - **Devengo de bonos/programas.** Un bono cobrado es **ingreso anticipado** (pasivo por servicios no prestados). En rentabilidad se reconoce **sesión a sesión**; en caja entró entero. Hoy no hay modelo de devengo.
@@ -127,13 +127,13 @@ Más finos que el `pendiente/pagado` contable. **Decisión conceptual** de este 
 
 ### 5.1 Qué existe ya (lo más maduro del repo)
 
-| Pieza | Dónde | Estado |
-|---|---|---|
-| Factura recibida completa (base, IVA, IRPF, `cuenta_gasto`, proyecto/sociedad, OCR, estados, Drive) | `facturas_recibidas`; módulo `contabilidad` | ✅ ~90% |
-| Workflow de aprobación auditado (append-only) | `factura_aprobaciones`; RPC `avanzar_estado_factura_con_auditoria` | ✅ patrón a copiar |
-| Pagos asociados (parciales, método, justificante, trazabilidad operador) | `factura_pagos`; RPC `registrar_pago_factura` | ✅ sirve |
-| Proveedores/contactos + reglas de auto-sugerencia (cuenta, IVA, IRPF, proyecto) | `contactos`, `proveedores_reglas` | ✅ v1 (sugerencias) |
-| Asientos borrador + plan de cuentas + reglas de categorización | `asientos_borrador`, `plan_cuentas`, `reglas_categorizacion` | 🟡 falta semilla de cuentas de personal |
+| Pieza                                                                                               | Dónde                                                              | Estado                                  |
+| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | --------------------------------------- |
+| Factura recibida completa (base, IVA, IRPF, `cuenta_gasto`, proyecto/sociedad, OCR, estados, Drive) | `facturas_recibidas`; módulo `contabilidad`                        | ✅ ~90%                                 |
+| Workflow de aprobación auditado (append-only)                                                       | `factura_aprobaciones`; RPC `avanzar_estado_factura_con_auditoria` | ✅ patrón a copiar                      |
+| Pagos asociados (parciales, método, justificante, trazabilidad operador)                            | `factura_pagos`; RPC `registrar_pago_factura`                      | ✅ sirve                                |
+| Proveedores/contactos + reglas de auto-sugerencia (cuenta, IVA, IRPF, proyecto)                     | `contactos`, `proveedores_reglas`                                  | ✅ v1 (sugerencias)                     |
+| Asientos borrador + plan de cuentas + reglas de categorización                                      | `asientos_borrador`, `plan_cuentas`, `reglas_categorizacion`       | 🟡 falta semilla de cuentas de personal |
 
 ### 5.2 Cómo debe funcionar (diseño)
 
@@ -154,29 +154,35 @@ Más finos que el `pendiente/pagado` contable. **Decisión conceptual** de este 
 Cada caso se lee en las tres lentes. La clave recurrente: **caja ≠ rentabilidad ≠ documento**.
 
 ### 6.1 María Moreno — asalariada (coste fijo mensual, imputado a Clínica)
+
 - **Rentabilidad:** coste **fijo mensual** imputado al **mes del servicio** (devengo), repartido como coste de estructura del proyecto Clínica (o directo si solo atiende clínica). No depende de cuándo se pague la nómina.
 - **Tesorería:** la salida de caja ocurre el día del pago de nómina (banco), que puede caer en otro mes → **no confundir** la fecha de pago con el coste del mes.
 - **Precontabilidad:** nómina (no factura). Cuentas de personal `640/465/476` (hoy ausentes). Probable origen del dato: importado/manual desde la gestoría, no un módulo de RR.HH. completo. ⚠️ DUDA F-3.
 
 ### 6.2 Autónomos por sesión (coste por sesión completada, pago al mes siguiente)
+
 - **Rentabilidad:** el coste se genera **al completar la sesión** y se imputa al **mes del servicio**, como coste directo del servicio/profesional.
 - **Tesorería:** el pago suele ser **al mes siguiente** → aparece como **CxP pendiente** hasta que se paga; la salida de caja cae en el mes posterior.
 - **Precontabilidad:** factura del autónomo (con su IRPF). Puede llegar **después** de la sesión → "factura no (todavía)" + documento pendiente. La retención alimenta el `475` (futuro).
 
 ### 6.3 Recepción asalariada **compartida** con otra empresa
+
 - **Coste compartido:** Antifrágil asume **solo una parte**; otra empresa asume el resto. Debe existir una **regla de imputación / porcentaje** (clave de reparto). ⚠️ DUDA F-2 (¿% fijo o driver variable?; ¿quién es la otra empresa y cómo se liquida?).
 - **Rentabilidad:** solo la parte de Antifrágil entra como coste compartido del proyecto.
 - **Tesorería:** según cómo se pague (¿Antifrágil paga el total y refactura a la otra empresa? ¿cada una paga su parte?) cambia el movimiento de caja y puede generar una **CxC** contra la otra empresa.
 
 ### 6.4 Alquileres (gasto recurrente, vencimiento, imputado a proyecto)
+
 - **Tesorería:** gasto **recurrente** con **vencimiento** mensual y estado **pendiente/pagado**, por banco normalmente.
 - **Rentabilidad:** coste **fijo** imputado al proyecto (o repartido si la sede es compartida).
 - **Hoy:** modelable como vencimiento recurrente o partida recurrente, **pero** la recurrencia es **acotada** (se generan los pagos del rango `fecha_inicio→fecha_fin` repartiendo el importe total entre periodos: para 1.500 €/mes hay que meter `importe = 1.500 × nº meses` con fecha fin). No hay recurrencia **indefinida** ni generación continua. ⚠️ DUDA F-5.
 
 ### 6.5 Cobros pendientes (importes a reclamar, con responsable y estado)
+
 - **Tesorería / CxC:** cada cobro pendiente lleva **importe, responsable y estado** del ciclo `pendiente → reclamado → parcial → cobrado → incobrable` (§3.3). Hoy lo pendiente existe pero **sin** ese seguimiento operativo (responsable, reclamación, incobrable).
 
 ### 6.6 Cobros recurrentes (cuotas, partners, servicios recurrentes, previsión)
+
 - **Tesorería:** cuotas/partners como **cobros recurrentes** que alimentan la **previsión** de caja.
 - **Hoy:** mismo motor de recurrencia acotada que los gastos (§6.4); aplica a `tipo_flujo='ingreso'`. Falta recurrencia abierta y el concepto de "partner/cuota" como tal. ⚠️ DUDA F-5 / F-6.
 
@@ -196,11 +202,11 @@ Lo que hace que las tres lentes cuadren sin contabilidades paralelas es **etique
 
 ## 8. Qué se reutiliza / adapta / crea (resumen)
 
-| Bloque | Reutilizar ✅ | Adaptar 🔧 | Crear ❌ |
-|---|---|---|---|
-| Tesorería | cashflow consolidado, vencimientos, factura_pagos, importación extractos | separar 570/572 en PGC; vínculo pago↔movimiento | `medio` efectivo/banco, arqueo de caja, CxP/CxC con seguimiento, auto-match conciliación |
-| Rentabilidad | margen por proyecto | usar explotación (no inversión) | eje analítico (servicio/profesional/producto), `tipo_coste`, reparto compartidos, devengo de bonos, margen por sesión |
-| Precontabilidad | facturas recibidas, aprobación auditada, pagos, proveedores/reglas | semilla de cuentas de personal; roles/categorías Antifrágil | "factura sí/no" + documentos pendientes, paquete gestoría explícito, modelo colaborador/nómina |
+| Bloque          | Reutilizar ✅                                                            | Adaptar 🔧                                                  | Crear ❌                                                                                                              |
+| --------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Tesorería       | cashflow consolidado, vencimientos, factura_pagos, importación extractos | separar 570/572 en PGC; vínculo pago↔movimiento             | `medio` efectivo/banco, arqueo de caja, CxP/CxC con seguimiento, auto-match conciliación                              |
+| Rentabilidad    | margen por proyecto                                                      | usar explotación (no inversión)                             | eje analítico (servicio/profesional/producto), `tipo_coste`, reparto compartidos, devengo de bonos, margen por sesión |
+| Precontabilidad | facturas recibidas, aprobación auditada, pagos, proveedores/reglas       | semilla de cuentas de personal; roles/categorías Antifrágil | "factura sí/no" + documentos pendientes, paquete gestoría explícito, modelo colaborador/nómina                        |
 
 ---
 
@@ -219,15 +225,17 @@ Lo que hace que las tres lentes cuadren sin contabilidades paralelas es **etique
 ## 10. Decisiones conceptuales tomadas · dudas abiertas
 
 ### Decisiones tomadas en este documento (sujetas a validación)
+
 - **D-op-1.** Tres lentes separadas (tesorería/rentabilidad/precontabilidad) con invariante anti-doble-conteo. La fecha que manda es distinta en cada una.
 - **D-op-2.** Rentabilidad se mide por **devengo** (fecha de prestación); el coste de personas se imputa al **mes del servicio**, no al mes de pago.
-- **D-op-3.** La tesorería separa **efectivo y banco** como **cuentas de tesorería distintas** y exige **arqueo de caja** para el efectivo. *Precisión posterior (PR #4, ver [06 §9](06-fop-a1-efectivo-banco-arqueo.md)): `banco` **no** es un valor de `medio_pago` — el medio (efectivo/tarjeta/transferencia/bizum/domiciliación) describe cómo se mueve el dinero; caja/banco son tipos de cuenta donde vive.*
+- **D-op-3.** La tesorería separa **efectivo y banco** como **cuentas de tesorería distintas** y exige **arqueo de caja** para el efectivo. _Precisión posterior (PR #4, ver [06 §9](06-fop-a1-efectivo-banco-arqueo.md)): `banco` **no** es un valor de `medio_pago` — el medio (efectivo/tarjeta/transferencia/bizum/domiciliación) describe cómo se mueve el dinero; caja/banco son tipos de cuenta donde vive._
 - **D-op-4.** Estados de seguimiento operativo CxC/CxP por encima del estado contable (§3.3).
 - **D-op-5.** Las dimensiones finas (servicio/profesional/cliente/producto) viven en `clinica` y **agregan por `proyecto_id_ref`**; la capa global recibe agregados, no pacientes.
 - **D-op-6.** El OS es el **libro operativo / precontabilidad**; el cierre fiscal y la emisión oficial **se delegan en la gestoría / software homologado** (✅ ya decidido — F4-D, 2026-06-26, doc `02` / PR #1: el OS no emite factura legal oficial todavía; Veri\*factu fuera del OS).
 - **D-op-7.** **Margen de contribución primero** (costes directos por proyecto; generales al resultado global) como punto de partida.
 
 ### Dudas abiertas para Guille
+
 - **⚠️ F-1 — Efectivo real:** ¿qué volumen de efectivo maneja la clínica y qué nivel de arqueo necesitamos (diario estricto vs cuadre semanal)?
 - **⚠️ F-2 — Recepción compartida:** ¿% fijo o driver variable? ¿quién es la otra empresa y cómo se liquida (Antifrágil paga el total y refactura, o cada una su parte)?
 - **⚠️ F-3 — Asalariados:** ¿se modela el coste de personal en el OS (coste mensual importado/manual desde la gestoría) o se trae solo el agregado? ¿Hace falta algún día un módulo de nóminas, o basta el coste imputado?
@@ -251,4 +259,4 @@ Cada fase con código requiere su propio diseño validado y se coordina con las 
 
 ---
 
-*Documento de diseño. No modifica código productivo, SQL, tipos ni UI. Sujeto a validación de Guille antes de abrir cualquier fase de implementación.*
+_Documento de diseño. No modifica código productivo, SQL, tipos ni UI. Sujeto a validación de Guille antes de abrir cualquier fase de implementación._

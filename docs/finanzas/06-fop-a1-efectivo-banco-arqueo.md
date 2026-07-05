@@ -30,11 +30,11 @@
 
 ### 1.3 Dónde se mezclan efectivo y banco
 
-| Capa | Dónde | Cómo se mezclan |
-|---|---|---|
-| Balance / KPI | [pgcEngine.ts:34](apps/modules/financiero/src/lib/pgcEngine.ts#L34) | La regla `5700–5799 → 'caja'` agrupa 570 (caja euros), 571 (caja divisa) **y** 572–576 (bancos) en un único saldo `caja` |
-| Transaccional | `movimientos_bancarios` + ausencia de ledger de caja | El banco tiene ledger; el efectivo **no tiene ningún sitio** → no se puede separar lo que no se registra |
-| Pago de facturas | `factura_pagos.metodo_pago` | El medio se anota, pero no impacta saldo alguno de caja/banco |
+| Capa             | Dónde                                                               | Cómo se mezclan                                                                                                          |
+| ---------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Balance / KPI    | [pgcEngine.ts:34](apps/modules/financiero/src/lib/pgcEngine.ts#L34) | La regla `5700–5799 → 'caja'` agrupa 570 (caja euros), 571 (caja divisa) **y** 572–576 (bancos) en un único saldo `caja` |
+| Transaccional    | `movimientos_bancarios` + ausencia de ledger de caja                | El banco tiene ledger; el efectivo **no tiene ningún sitio** → no se puede separar lo que no se registra                 |
+| Pago de facturas | `factura_pagos.metodo_pago`                                         | El medio se anota, pero no impacta saldo alguno de caja/banco                                                            |
 
 ---
 
@@ -55,51 +55,57 @@
 > Conceptual, no esquema final. Nombres y campos son tentativos para decidir; las columnas exactas se fijan en la fase de implementación con su migración.
 
 ### 3.1 `medio_pago` (enum / dimensión)
-Valores: `efectivo · tarjeta · transferencia · bizum · domiciliacion · otro`. **`banco` NO es un medio de pago** (✅ A1-D6, §9): el *medio* describe **cómo** se mueve el dinero; banco/caja son **tipos de cuenta** (`cuenta_tesoreria.tipo`), es decir, **dónde** vive.
+
+Valores: `efectivo · tarjeta · transferencia · bizum · domiciliacion · otro`. **`banco` NO es un medio de pago** (✅ A1-D6, §9): el _medio_ describe **cómo** se mueve el dinero; banco/caja son **tipos de cuenta** (`cuenta_tesoreria.tipo`), es decir, **dónde** vive.
+
 - Amplía el enum actual de `factura_pagos.metodo_pago` (que hoy no tiene `bizum`).
 - **Agrupación derivada:** cada medio cae en una **clase de cuenta** → `efectivo` ⇒ caja física; `tarjeta/transferencia/bizum/domiciliacion` ⇒ banco. En el lado banco, el extracto importado no trae medio → el `medio_pago` de un movimiento bancario puede ser `NULL`. `tarjeta`/`datáfono` puede llevar subtipo si se quiere medir comisión (futuro, no A1).
 
 ### 3.2 `cuenta_tesoreria` (nueva — la clave del diseño)
+
 Una cuenta donde "vive" dinero. Generaliza banco + caja:
 
-| Campo (tentativo) | Para qué |
-|---|---|
-| `id`, `sociedad_id_ref` | identidad + sociedad |
-| `tipo` | `caja` (física) \| `banco` |
-| `nombre` / `alias` | "Caja clínica Playamar", "BBVA principal" |
-| `cuenta_bancaria_id` | FK opcional a [`cuentas_bancarias_sociedad`](services/supabase/migrations/20260522120000_sociedades_ficha_bancaria.sql#L20) cuando `tipo='banco'` |
-| `cuenta_pgc` | mapeo contable: 570/571 para caja, 572–576 para banco |
-| `activa` | alta/baja |
+| Campo (tentativo)       | Para qué                                                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `id`, `sociedad_id_ref` | identidad + sociedad                                                                                                                              |
+| `tipo`                  | `caja` (física) \| `banco`                                                                                                                        |
+| `nombre` / `alias`      | "Caja clínica Playamar", "BBVA principal"                                                                                                         |
+| `cuenta_bancaria_id`    | FK opcional a [`cuentas_bancarias_sociedad`](services/supabase/migrations/20260522120000_sociedades_ficha_bancaria.sql#L20) cuando `tipo='banco'` |
+| `cuenta_pgc`            | mapeo contable: 570/571 para caja, 572–576 para banco                                                                                             |
+| `activa`                | alta/baja                                                                                                                                         |
 
 - **Banco se apoya en lo que ya existe** (`cuentas_bancarias_sociedad`); **caja física es lo nuevo** (hoy no existe).
 - El saldo de cada cuenta es **derivado** (suma de sus movimientos), no un campo mutable, para evitar descuadres.
 
 ### 3.3 `movimiento_tesoreria` (entrada/salida de una cuenta)
+
 El hecho de que entra o sale dinero de una `cuenta_tesoreria`:
 
-| Campo (tentativo) | Para qué |
-|---|---|
-| `id`, `cuenta_tesoreria_id` | a qué caja/banco afecta |
-| `fecha`, `importe` (con signo), `concepto` | el movimiento |
-| `medio_pago` | medio (§3.1) |
-| `origen_tipo` / `origen_id` | de dónde viene: `factura_pago` \| `cobro` \| `vencimiento` \| `manual` \| `arqueo_ajuste` |
-| `proyecto_id_ref`, `sociedad_id_ref` | etiquetado dimensional |
-| `movimiento_bancario_id` | FK opcional para conciliar con el extracto (banco) |
+| Campo (tentativo)                          | Para qué                                                                                  |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| `id`, `cuenta_tesoreria_id`                | a qué caja/banco afecta                                                                   |
+| `fecha`, `importe` (con signo), `concepto` | el movimiento                                                                             |
+| `medio_pago`                               | medio (§3.1)                                                                              |
+| `origen_tipo` / `origen_id`                | de dónde viene: `factura_pago` \| `cobro` \| `vencimiento` \| `manual` \| `arqueo_ajuste` |
+| `proyecto_id_ref`, `sociedad_id_ref`       | etiquetado dimensional                                                                    |
+| `movimiento_bancario_id`                   | FK opcional para conciliar con el extracto (banco)                                        |
 
 ✅ **DECISIÓN RESUELTA A1-D1 (arquitectura del ledger) → opción (b); ver §9.** Opciones consideradas —
+
 - **(a) Ledger único** `movimiento_tesoreria` para caja **y** banco; `movimientos_bancarios` queda como fuente de importación que "alimenta" el ledger.
-- **(b) Dos ledgers + vista** *(elegida)*: se **conserva** `movimientos_bancarios` como ledger de banco (ya maduro: import + dedup) y se crea un ledger **solo de caja** para el efectivo; una **vista `tesoreria`** unifica ambos y calcula los dos saldos. Menor riesgo, no toca el import de extractos.
+- **(b) Dos ledgers + vista** _(elegida)_: se **conserva** `movimientos_bancarios` como ledger de banco (ya maduro: import + dedup) y se crea un ledger **solo de caja** para el efectivo; una **vista `tesoreria`** unifica ambos y calcula los dos saldos. Menor riesgo, no toca el import de extractos.
 
 ### 3.4 `arqueo_caja` (control, no movimiento)
+
 Cierre/cuadre de una caja física en una fecha:
 
-| Campo (tentativo) | Para qué |
-|---|---|
-| `id`, `cuenta_tesoreria_id` (tipo=caja), `fecha` | qué caja y cuándo |
-| `saldo_teorico` | **derivado**: saldo de la caja según sus movimientos hasta la fecha |
-| `saldo_contado` | introducido a mano (recuento físico) |
-| `descuadre` | `saldo_contado − saldo_teorico` |
-| `resuelto`, `registrado_por_email`, `notas` | gestión + trazabilidad |
+| Campo (tentativo)                                | Para qué                                                            |
+| ------------------------------------------------ | ------------------------------------------------------------------- |
+| `id`, `cuenta_tesoreria_id` (tipo=caja), `fecha` | qué caja y cuándo                                                   |
+| `saldo_teorico`                                  | **derivado**: saldo de la caja según sus movimientos hasta la fecha |
+| `saldo_contado`                                  | introducido a mano (recuento físico)                                |
+| `descuadre`                                      | `saldo_contado − saldo_teorico`                                     |
+| `resuelto`, `registrado_por_email`, `notas`      | gestión + trazabilidad                                              |
 
 - El **descuadre** puede generar (opcionalmente) un `movimiento_tesoreria` de ajuste con `origen_tipo='arqueo_ajuste'`, para que el saldo refleje la realidad sin borrar historia (append-only).
 
@@ -123,29 +129,29 @@ arqueo_caja (solo cajas)        cashflow_consolidado (sin doble conteo)
 
 ## 4. Qué reutilizar del repo
 
-| Pieza | Reutilización en A1 |
-|---|---|
-| [`facturas_recibidas`](services/supabase/migrations/20260521090100_facturas.sql) | sin cambios; su pago sigue igual, solo que el pago genera/clasifica un movimiento de tesorería |
+| Pieza                                                                                                         | Reutilización en A1                                                                                                        |
+| ------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| [`facturas_recibidas`](services/supabase/migrations/20260521090100_facturas.sql)                              | sin cambios; su pago sigue igual, solo que el pago genera/clasifica un movimiento de tesorería                             |
 | [`factura_pagos`](services/supabase/migrations/202606192100_factura_pagos.sql) + RPC `registrar_pago_factura` | patrón append-only + actor por `auth.jwt()`; se replica para movimientos/arqueo. El `metodo_pago` se amplía a `medio_pago` |
-| `movimientos_bancarios` | ledger de banco existente (opción b: se conserva como fuente del lado banco) |
-| `cuentas_bancarias_sociedad` | sustrato de cuentas de banco para `cuenta_tesoreria.tipo='banco'` |
-| `cashflow_consolidado` / `flujos_proyecto_consolidados` | se mantienen; A1 añade desglose por `medio`, no nueva fuente |
-| `pgcEngine.ts` (570/572) | se conserva el motor; solo se **parte la regla** del grupo 57 (§5) |
-| Vistas `CashflowView` / dashboard de `financiero` | base para mostrar los dos saldos |
+| `movimientos_bancarios`                                                                                       | ledger de banco existente (opción b: se conserva como fuente del lado banco)                                               |
+| `cuentas_bancarias_sociedad`                                                                                  | sustrato de cuentas de banco para `cuenta_tesoreria.tipo='banco'`                                                          |
+| `cashflow_consolidado` / `flujos_proyecto_consolidados`                                                       | se mantienen; A1 añade desglose por `medio`, no nueva fuente                                                               |
+| `pgcEngine.ts` (570/572)                                                                                      | se conserva el motor; solo se **parte la regla** del grupo 57 (§5)                                                         |
+| Vistas `CashflowView` / dashboard de `financiero`                                                             | base para mostrar los dos saldos                                                                                           |
 
 ---
 
 ## 5. Qué habría que adaptar
 
-| Área | Adaptación |
-|---|---|
-| **Campos** | enum `medio_pago` (añadir `bizum`, normalizar `domiciliacion`/`tarjeta`); `medio` en cobros y en todo pago, no solo `factura_pagos` |
-| **PGC** | partir la regla [pgcEngine.ts:34](apps/modules/financiero/src/lib/pgcEngine.ts#L34) en **efectivo** (`5700–5719`) y **banco** (`5720–5769`), exponiendo dos KPIs en `BalanceKPIs` (`efectivo`, `banco`) sin romper `activoCorriente`/`fondoManiobra` (que siguen sumando ambos) |
-| **Vistas** | nueva vista `tesoreria` que une caja + banco y deriva saldos; ampliar el cashflow para filtrar por `medio`/cuenta |
-| **UI** | dashboard con **dos saldos** (Efectivo / Banco / Total); pantalla de **arqueo de caja**; selector de `medio` y `cuenta_tesoreria` al registrar cobro/pago |
-| **Tipos** | `@alsari/types`: `MedioPago`, `CuentaTesoreria`, `MovimientoTesoreria`, `ArqueoCaja`; ampliar `BalanceKPIs` con `efectivo`/`banco` |
-| **Migraciones futuras** | crear `cuenta_tesoreria`, ledger de caja (opción b) y `arqueo_caja`; ampliar enum de medio; **aplicadas a mano por Dashboard** |
-| **Validaciones** | reglas duras de §6 (medio obligatorio, coherencia tipo cuenta ↔ medio, arqueo no es movimiento) |
+| Área                    | Adaptación                                                                                                                                                                                                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Campos**              | enum `medio_pago` (añadir `bizum`, normalizar `domiciliacion`/`tarjeta`); `medio` en cobros y en todo pago, no solo `factura_pagos`                                                                                                                                             |
+| **PGC**                 | partir la regla [pgcEngine.ts:34](apps/modules/financiero/src/lib/pgcEngine.ts#L34) en **efectivo** (`5700–5719`) y **banco** (`5720–5769`), exponiendo dos KPIs en `BalanceKPIs` (`efectivo`, `banco`) sin romper `activoCorriente`/`fondoManiobra` (que siguen sumando ambos) |
+| **Vistas**              | nueva vista `tesoreria` que une caja + banco y deriva saldos; ampliar el cashflow para filtrar por `medio`/cuenta                                                                                                                                                               |
+| **UI**                  | dashboard con **dos saldos** (Efectivo / Banco / Total); pantalla de **arqueo de caja**; selector de `medio` y `cuenta_tesoreria` al registrar cobro/pago                                                                                                                       |
+| **Tipos**               | `@alsari/types`: `MedioPago`, `CuentaTesoreria`, `MovimientoTesoreria`, `ArqueoCaja`; ampliar `BalanceKPIs` con `efectivo`/`banco`                                                                                                                                              |
+| **Migraciones futuras** | crear `cuenta_tesoreria`, ledger de caja (opción b) y `arqueo_caja`; ampliar enum de medio; **aplicadas a mano por Dashboard**                                                                                                                                                  |
+| **Validaciones**        | reglas duras de §6 (medio obligatorio, coherencia tipo cuenta ↔ medio, arqueo no es movimiento)                                                                                                                                                                                 |
 
 ---
 
@@ -185,12 +191,12 @@ arqueo_caja (solo cajas)        cashflow_consolidado (sin doble conteo)
 
 ## 9. Decisiones resueltas (Guille, 2026-06-26)
 
-- **✅ A1-D1 — Arquitectura del ledger → opción (b).** Se **mantiene `movimientos_bancarios`** como ledger de banco, se **crea un ledger separado para caja/efectivo**, y ambos se **unifican mediante una vista de tesorería**. *Motivo:* menor riesgo y no rompe la importación de extractos.
+- **✅ A1-D1 — Arquitectura del ledger → opción (b).** Se **mantiene `movimientos_bancarios`** como ledger de banco, se **crea un ledger separado para caja/efectivo**, y ambos se **unifican mediante una vista de tesorería**. _Motivo:_ menor riesgo y no rompe la importación de extractos.
 - **✅ A1-D2 — Alcance del efectivo → una caja inicial, modelo multi-caja.** Se empieza con **una sola caja: `Caja Clínica Playamar`**, pero `cuenta_tesoreria` (tipo caja) se diseña **preparada para varias cajas** futuras (sin hardcodear una única).
 - **✅ A1-D3 — Frecuencia de arqueo → diario con efectivo, semanal si no.** **Arqueo diario** los días con movimientos en efectivo; si no hay efectivo, **mínimo semanal**. (Liga con ⚠️ F-1 del doc 04.)
 - **✅ A1-D4 — Tarjeta/datáfono → en A1 solo el medio `tarjeta`.** Las **comisiones del datáfono quedan fuera de A1** y se tratarán más adelante como **gasto financiero/operativo** (no se separa el subtipo ni la comisión en este lote).
 - **✅ A1-D5 — Saldo de banco → dos saldos etiquetados.** Para **gestión diaria manda el saldo operativo** (suma de `movimientos_bancarios`); para **cierre/gestoría manda el saldo contable/conciliado** (PGC 572). **Ambos pueden coexistir, pero deben mostrarse etiquetados de forma distinta** (no presentarse como una única cifra).
-- **✅ A1-D6 — `medio_pago` SIN `banco` (fijado en el draft SQL del PR #4).** `banco` no es un valor de `medio_pago`; banco y caja son **tipos** de `cuenta_tesoreria`. El medio describe *cómo* se mueve el dinero (efectivo/tarjeta/transferencia/bizum/domiciliación/otro); el tipo de cuenta, *dónde* vive. §3.1 y §6 de este documento quedan alineados con esa decisión.
+- **✅ A1-D6 — `medio_pago` SIN `banco` (fijado en el draft SQL del PR #4).** `banco` no es un valor de `medio_pago`; banco y caja son **tipos** de `cuenta_tesoreria`. El medio describe _cómo_ se mueve el dinero (efectivo/tarjeta/transferencia/bizum/domiciliación/otro); el tipo de cuenta, _dónde_ vive. §3.1 y §6 de este documento quedan alineados con esa decisión.
 
 ---
 
@@ -206,4 +212,4 @@ Este mini-diseño ya tiene **implementación draft en SQL** en el **PR #4** — 
 
 ---
 
-*Mini-diseño técnico de F-Op A1. No modifica código, SQL, tipos ni UI. Requiere validación de Guille antes de abrir implementación.*
+_Mini-diseño técnico de F-Op A1. No modifica código, SQL, tipos ni UI. Requiere validación de Guille antes de abrir implementación._

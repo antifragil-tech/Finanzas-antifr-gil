@@ -8,12 +8,12 @@
 
 ## 1. Mapa de líneas de trabajo
 
-| Línea | Dónde vive | Estado real (2026-07-04) |
-|---|---|---|
-| **Modelo operativo financiero** (esta rama) | docs `00`, `01`, `03`, `04`, `05`, `06` en `docs/finanzas/` | Documental; contrato de diseño de las fases F-Op |
-| **DB baseline + A1 Tesorería/Caja** | **PR #4** — rama `chore/db-baseline-antifragil-os`, head `27f6392` | **Draft / NO APPLY.** Draft SQL revisable; **nada ejecutado** en Supabase |
-| **Facturación emitida** | **PR #1** — rama `docs/finanzas-facturacion-emitida-design`, doc `02-diseno-facturacion-emitida.md` | Diseño documental; decisiones D1/D2 registradas (OS precontable, Clínica sin IVA provisional) |
-| **Clínica / reservas** | Otra línea (schema `clinica` futuro) | Fuera de alcance aquí; las dimensiones finas agregan por `proyecto_id_ref` |
+| Línea                                       | Dónde vive                                                                                          | Estado real (2026-07-04)                                                                      |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Modelo operativo financiero** (esta rama) | docs `00`, `01`, `03`, `04`, `05`, `06` en `docs/finanzas/`                                         | Documental; contrato de diseño de las fases F-Op                                              |
+| **DB baseline + A1 Tesorería/Caja**         | **PR #4** — rama `chore/db-baseline-antifragil-os`, head `27f6392`                                  | **Draft / NO APPLY.** Draft SQL revisable; **nada ejecutado** en Supabase                     |
+| **Facturación emitida**                     | **PR #1** — rama `docs/finanzas-facturacion-emitida-design`, doc `02-diseno-facturacion-emitida.md` | Diseño documental; decisiones D1/D2 registradas (OS precontable, Clínica sin IVA provisional) |
+| **Clínica / reservas**                      | Otra línea (schema `clinica` futuro)                                                                | Fuera de alcance aquí; las dimensiones finas agregan por `proyecto_id_ref`                    |
 
 ---
 
@@ -40,7 +40,7 @@ El mini-diseño **F-Op A1** ([06](06-fop-a1-efectivo-banco-arqueo.md)) ya tiene 
 
 1. **Tesorería no es contabilidad completa.** Es la verdad de caja operativa; el cierre fiscal es de la gestoría.
 2. **Caja y banco son fuentes de movimiento**, cada una con su ledger: la caja con `movimiento_caja` (nuevo), el banco con `movimientos_bancarios` (extractos importados). Una vista los unifica; los saldos son **derivados**, nunca almacenados.
-3. **Medio de pago NO es banco.** El medio (`efectivo · tarjeta · transferencia · bizum · domiciliación · otro`) describe *cómo* se mueve el dinero; caja/banco son **tipos de cuenta** donde vive (A1-D6).
+3. **Medio de pago NO es banco.** El medio (`efectivo · tarjeta · transferencia · bizum · domiciliación · otro`) describe _cómo_ se mueve el dinero; caja/banco son **tipos de cuenta** donde vive (A1-D6).
 4. **La caja requiere arqueos.** Diario los días con movimiento de efectivo, semanal como mínimo si no (A1-D3). El arqueo es un control, no un movimiento.
 5. **El banco vendrá de movimientos bancarios.** El saldo operativo sale del ledger de extractos; el contable (PGC 572) manda para cierre/gestoría; ambos se muestran etiquetados, nunca como una sola cifra (A1-D5). La conexión directa con la entidad bancaria queda **diferida**.
 6. **Facturas y cobros se reconcilian con tesorería en fases posteriores** (A1b para el puente de pagos; conciliación con auto-match en lotes posteriores). A1 solo separa y clasifica, no añade importes.
@@ -55,4 +55,4 @@ Recogidos en detalle en [05 — Riesgos y salvaguardas transversales](05-backlog
 
 ---
 
-*Documento de sincronización. No modifica código productivo, SQL, tipos ni UI. Refleja el estado de los PRs a 2026-07-04.*
+_Documento de sincronización. No modifica código productivo, SQL, tipos ni UI. Refleja el estado de los PRs a 2026-07-04._
