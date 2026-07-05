@@ -5,11 +5,7 @@ import alsariPreset from '@alsari/config/tailwind-preset';
 // módulos. No se redefinen tokens en local.
 const config: Config = {
   presets: [alsariPreset],
-  content: [
-    './index.html',
-    './src/**/*.{ts,tsx}',
-    '../../../packages/ui/src/**/*.{ts,tsx}',
-  ],
+  content: ['./index.html', './src/**/*.{ts,tsx}', '../../../packages/ui/src/**/*.{ts,tsx}'],
 };
 
 export default config;
