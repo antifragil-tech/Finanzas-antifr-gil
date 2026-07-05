@@ -53,6 +53,7 @@ Aplica el procedimiento **antes de continuar**:
 **Lección:** [Regla generalizable para el futuro.]
 
 **Acciones tomadas:**
+
 - [ ] Aplicada en la tarea actual.
 - [ ] Documentada en ways-of-working si aplica (con referencia).
 - [ ] Test añadido si aplica.
@@ -68,7 +69,7 @@ Aplica el procedimiento **antes de continuar**:
 1. **Captura inmediata.** La entrada se escribe en la misma sesión, no "después".
 2. **Causa raíz, no síntoma.** "Faltaba el €" es síntoma; "no había utility centralizada
    de formato monetario" es causa raíz.
-3. **Generalización.** ¿Cómo evito este *tipo* de error en el futuro, no solo este
+3. **Generalización.** ¿Cómo evito este _tipo_ de error en el futuro, no solo este
    error concreto?
 4. **Acción concreta.** Si la lección no genera un cambio (código, doc, test), no se
    ha aprendido nada.
@@ -88,17 +89,20 @@ Aplica el procedimiento **antes de continuar**:
 ## 🚦 Cuándo promover una lección a regla permanente
 
 Si una lección:
+
 - Se repite en formas similares, o
 - Es estructural (afecta a cómo se construye el OS), o
 - Genera una utility/test reutilizable,
 
 → **Promuévela** a:
+
 - Una regla en `.claude/docs/ways-of-working/NN-archivo.md`, o
 - Una utility en `packages/utils/`, o
 - Un ADR en `docs/decisiones/`,
 
 y deja una nota en la entrada original:
-> *"Promovido a `.claude/docs/ways-of-working/02-codigo.md` sección Formato."*
+
+> _"Promovido a `.claude/docs/ways-of-working/02-codigo.md` sección Formato."_
 
 ---
 

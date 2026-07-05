@@ -66,6 +66,7 @@ git push -u origin <nombre-rama>
 `types`, `config`, `db`, `docs`.
 
 **Ejemplos correctos:**
+
 ```
 feat(financiero): añadir cálculo de TIR con tests
 fix(host): evitar fuga de memoria en error boundary
@@ -90,6 +91,7 @@ refactor(ui): extraer GlassPanel a componente reutilizable
 ## 🧹 Antes de pedir merge
 
 Checklist mental:
+
 - [ ] He probado en local que arranca.
 - [ ] Tests pasan (`pnpm test`).
 - [ ] Type-check pasa (`pnpm type-check`).
@@ -104,6 +106,7 @@ Checklist mental:
 ## 🆘 Recuperación de errores comunes
 
 ### "Commiteé en main por error"
+
 ```powershell
 git branch feat/lo-que-hice            # Salvaguarda el cambio
 git reset --hard HEAD~1                # Saca el commit de main (¡cuidado si ya pusheaste!)
@@ -111,6 +114,7 @@ git checkout feat/lo-que-hice
 ```
 
 ### "Push rechazado por estar desfasado"
+
 ```powershell
 git fetch origin
 git rebase origin/main
@@ -119,6 +123,7 @@ git push --force-with-lease            # Solo a TU rama, NUNCA main
 ```
 
 ### "Necesito deshacer último commit ya pusheado"
+
 ```powershell
 git revert HEAD                        # Crea commit que deshace
 git push
@@ -129,6 +134,7 @@ git push
 ## 📌 Nota sobre Guille trabajando solo
 
 Mientras Guille sea el único contribuidor activo:
+
 - Las ramas `feat/` se pueden mergear con commits normales (sin squash obligatorio).
 - No usamos `develop` intermedio; `main` ↔ ramas de feature directamente.
 - Los PRs son ligeros pero **siguen siendo obligatorios** para mantener disciplina

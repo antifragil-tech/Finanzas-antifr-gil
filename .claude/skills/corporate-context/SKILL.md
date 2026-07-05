@@ -14,19 +14,23 @@ description: Contexto corporativo de Alsari Capital. Entidades del holding, proy
 ## 🏢 Estructura del holding
 
 ### Sociedad matriz
+
 - **Alsari Capital** — Holding operativo central. Aglutina las líneas de negocio.
 
 ### Sociedades de socios
+
 - **Pavier Legacy Group S.L.** — Propiedad de Javier Alarcón Rivera. Vehículo de
   gestión patrimonial.
 - **Armia Group S.L.** — Propiedad de Iván Alarcón Rivera. Vehículo de gestión
   patrimonial.
 
 ### Otras sociedades operativas
+
 - **Alsari Inversiones** — Sociedad de inversiones.
 - **Rialsa Obras S.L.** — Empresa vinculada (tenant confirmado del activo de Campanillas).
 
 ### Proyectos independientes (con otros socios)
+
 - **CENS** — Proyecto sector salud. Otros socios de capital fuera del holding.
 - **Antifrágil** — Proyecto independiente. Otros socios.
 
@@ -34,36 +38,38 @@ description: Contexto corporativo de Alsari Capital. Entidades del holding, proy
 
 ## 🏗️ Activos y proyectos inmobiliarios
 
-| Proyecto / Activo | Ubicación | Estado | Notas |
-|-------------------|-----------|--------|-------|
-| **Las Mesas / Le Toit Grand 10** | Estepona | Activo | Promoción residencial |
-| **Laguna Park / Perisur** | (Por confirmar) | Activo | Proyecto en curso |
-| **Alborán Living / Capellanía** | (Por confirmar) | Activo | Vinculado a Proinco |
-| **Campanillas** | Málaga | Activo logístico | ~398K€ plot, tenant: Rialsa Obras |
-| **King's Haven** | (Por confirmar) | Villa de lujo | Activo del holding |
-| **Veracruz** | — | Embarcación | Gestionada por el grupo |
+| Proyecto / Activo                | Ubicación       | Estado           | Notas                             |
+| -------------------------------- | --------------- | ---------------- | --------------------------------- |
+| **Las Mesas / Le Toit Grand 10** | Estepona        | Activo           | Promoción residencial             |
+| **Laguna Park / Perisur**        | (Por confirmar) | Activo           | Proyecto en curso                 |
+| **Alborán Living / Capellanía**  | (Por confirmar) | Activo           | Vinculado a Proinco               |
+| **Campanillas**                  | Málaga          | Activo logístico | ~398K€ plot, tenant: Rialsa Obras |
+| **King's Haven**                 | (Por confirmar) | Villa de lujo    | Activo del holding                |
+| **Veracruz**                     | —               | Embarcación      | Gestionada por el grupo           |
 
 ---
 
 ## 👥 Contactos clave
 
 ### Internos (toma de decisiones)
-| Persona | Rol |
-|---------|-----|
-| **Guille** | Director General / Delegado Ejecutivo (interlocutor de Claude) |
-| **Javier Alarcón Rivera** | Socio principal (vía Pavier Legacy Group) |
-| **Iván Alarcón Rivera** | Socio principal (vía Armia Group) |
+
+| Persona                   | Rol                                                            |
+| ------------------------- | -------------------------------------------------------------- |
+| **Guille**                | Director General / Delegado Ejecutivo (interlocutor de Claude) |
+| **Javier Alarcón Rivera** | Socio principal (vía Pavier Legacy Group)                      |
+| **Iván Alarcón Rivera**   | Socio principal (vía Armia Group)                              |
 
 ### Externos (proveedores de servicios)
-| Persona / Entidad | Función |
-|-------------------|---------|
-| **FMC Legal / Mariano de la Huerga** | Asesoría legal |
-| **CaixaBank / Víctor Manuel Navarro** | Banca CaixaBank |
-| **Banco Sabadell** | Banca alternativa |
-| **Santander** | Banca (fondos pignorados liberándose 2025-2029) |
-| **Asesoría MM / Ramón** | Contabilidad externa |
-| **Proinco** | Contratista (Alborán Living) |
-| **Evariste S.A.S.** | Empresa con earn-out pendiente (tied to Rialsa 2025 EBIT) |
+
+| Persona / Entidad                     | Función                                                   |
+| ------------------------------------- | --------------------------------------------------------- |
+| **FMC Legal / Mariano de la Huerga**  | Asesoría legal                                            |
+| **CaixaBank / Víctor Manuel Navarro** | Banca CaixaBank                                           |
+| **Banco Sabadell**                    | Banca alternativa                                         |
+| **Santander**                         | Banca (fondos pignorados liberándose 2025-2029)           |
+| **Asesoría MM / Ramón**               | Contabilidad externa                                      |
+| **Proinco**                           | Contratista (Alborán Living)                              |
+| **Evariste S.A.S.**                   | Empresa con earn-out pendiente (tied to Rialsa 2025 EBIT) |
 
 ---
 
@@ -91,20 +97,22 @@ description: Contexto corporativo de Alsari Capital. Entidades del holding, proy
 
 ## 🔐 Sensibilidad de datos
 
-| Tipo de dato | Sensibilidad | Reglas |
-|--------------|-------------|--------|
-| CIFs, IBANs, importes | Alta | RLS obligatorio, sin logs |
-| Contactos personales | Media | RLS, no exposición pública |
-| Nombres de proyectos | Baja-Media | Públicos internamente, no en repos públicos |
-| Estructura societaria | Media | Solo admins |
-| Earn-outs, préstamos intragrupo | Muy alta | Solo socios y Guille |
+| Tipo de dato                    | Sensibilidad | Reglas                                      |
+| ------------------------------- | ------------ | ------------------------------------------- |
+| CIFs, IBANs, importes           | Alta         | RLS obligatorio, sin logs                   |
+| Contactos personales            | Media        | RLS, no exposición pública                  |
+| Nombres de proyectos            | Baja-Media   | Públicos internamente, no en repos públicos |
+| Estructura societaria           | Media        | Solo admins                                 |
+| Earn-outs, préstamos intragrupo | Muy alta     | Solo socios y Guille                        |
 
 ---
 
 ## 📊 Tipos de reportes recurrentes
 
 ### Reporte de Semana
+
 Documento ejecutivo semanal que Guille produce para los socios. Cubre:
+
 - Hitos cerrados.
 - Activos en seguimiento.
 - Banca y tesorería.
@@ -119,6 +127,7 @@ como ciudadano de primera clase.
 ## 🧭 Cómo usar este contexto
 
 Cuando construyas:
+
 - **Módulo financiero:** considera todas las entidades del holding como contexto
   multientidad. Las queries deben filtrar por `entity_id`.
 - **Módulo de facturas:** entidades emisoras/receptoras son las del holding + externas.
@@ -132,6 +141,7 @@ Cuando construyas:
 ## 🔄 Mantenimiento de este skill
 
 Cuando aparezcan nuevas entidades, proyectos o contactos clave:
+
 1. Añadir aquí.
 2. Commit: `docs(claude-skill): añadir [entidad/proyecto/contacto] a corporate-context`.
 

@@ -30,6 +30,7 @@ src/
 ## 🔄 Flujos clave
 
 ### Carga inicial
+
 ```
 FacturasApp monta
   → fetchInvoices() → GET /api/invoices
@@ -38,6 +39,7 @@ FacturasApp monta
 ```
 
 ### Filtrado en cliente
+
 ```
 Usuario escribe en búsqueda o cambia estado
   → useMemo recalcula filtered[]
@@ -45,6 +47,7 @@ Usuario escribe en búsqueda o cambia estado
 ```
 
 ### Detalle de factura
+
 ```
 Click en fila
   → setSelected(inv) o setSelected(null) si ya estaba seleccionada
@@ -55,8 +58,8 @@ Click en fila
 
 ## 📊 Fuente de datos
 
-| Endpoint | Propósito |
-|----------|-----------|
+| Endpoint            | Propósito                              |
+| ------------------- | -------------------------------------- |
 | `GET /api/invoices` | Lista completa de facturas del holding |
 
 Respuesta: `{ success: boolean, data: Invoice[] }`.

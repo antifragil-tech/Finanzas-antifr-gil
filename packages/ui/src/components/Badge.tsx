@@ -23,8 +23,7 @@ const tones: Record<BadgeTone, string> = {
 export function Badge({ tone = 'zinc', children, className = '' }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full border
-        text-2xs font-medium uppercase tracking-wide ${tones[tone]} ${className}`}
+      className={`text-2xs inline-flex items-center gap-1 rounded-full border px-2 py-0.5 font-medium uppercase tracking-wide ${tones[tone]} ${className}`}
     >
       {children}
     </span>
