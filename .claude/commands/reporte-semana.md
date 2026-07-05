@@ -1,6 +1,6 @@
 ---
 description: Generar borrador del Reporte de Semana de Alsari Capital siguiendo el formato ejecutivo para los socios.
-argument-hint: "[fecha-de-inicio-opcional YYYY-MM-DD]"
+argument-hint: '[fecha-de-inicio-opcional YYYY-MM-DD]'
 ---
 
 # Tarea: Generar Reporte de Semana de Alsari Capital
@@ -21,10 +21,13 @@ tiene info de una sección, márcala como "Sin novedades esta semana".
 Secciones a cubrir:
 
 ### a) Hitos cerrados
+
 Logros concretos de la semana (firmas, cierres, entregas, decisiones).
 
 ### b) Activos y proyectos en seguimiento
+
 Estado actual de los activos inmobiliarios y proyectos clave:
+
 - Las Mesas / Le Toit Grand 10
 - Laguna Park / Perisur
 - Alborán Living / Capellanía
@@ -34,20 +37,24 @@ Estado actual de los activos inmobiliarios y proyectos clave:
 - (otros que aparezcan)
 
 ### c) Banca y tesorería
+
 - Movimientos relevantes con CaixaBank, Sabadell, Santander.
 - Estado de los fondos pignorados.
 - Earn-out de Evariste (si hay novedades).
 - Préstamos intragrupo.
 
 ### d) Asuntos legales y contables
+
 - Avances con FMC Legal (Mariano de la Huerga).
 - Avances con Asesoría MM (Ramón).
 - Vencimientos próximos.
 
 ### e) Riesgos y alertas
+
 Cosas a vigilar la próxima semana.
 
 ### f) Próximos pasos
+
 3-5 acciones priorizadas para la semana siguiente.
 
 ## 3. Generar el documento
@@ -65,26 +72,32 @@ este formato:
 ---
 
 ## 1. Hitos cerrados esta semana
+
 [...]
 
 ## 2. Activos y proyectos en seguimiento
+
 [...]
 
 ## 3. Banca y tesorería
+
 [...]
 
 ## 4. Asuntos legales y contables
+
 [...]
 
 ## 5. Riesgos y alertas
+
 [...]
 
 ## 6. Próximos pasos
+
 [...]
 
 ---
 
-*Reporte generado el [fecha] · Alsari Capital · Confidencial.*
+_Reporte generado el [fecha] · Alsari Capital · Confidencial._
 ```
 
 ## 4. Sensibilidad de datos
@@ -98,6 +111,7 @@ este formato:
 ## 5. Confirmación
 
 Muéstrale el borrador completo al usuario y pregunta:
+
 1. ¿Falta algo?
 2. ¿Algún dato sensible que retirar antes de enviar?
 3. ¿Quieres que lo convierta a Word/PDF para enviar?

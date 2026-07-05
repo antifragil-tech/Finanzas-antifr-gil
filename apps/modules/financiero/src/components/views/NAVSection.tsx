@@ -13,7 +13,7 @@ type Props = {
 type ProjectEntry = {
   id: string;
   nombre: string;
-  origen: string;      // "Propio" | sociedad name for sub-contributions
+  origen: string; // "Propio" | sociedad name for sub-contributions
   valoracion: number;
   capitalExpuesto: number;
   margenPct: number;
@@ -33,7 +33,7 @@ function normPct(val: number | null | undefined): number {
 }
 
 function findFin(finanzas: DashboardData['finanzas_proyectos'], projectId: string) {
-  return finanzas.find(f => f?.['ID-Ref']?.toString().trim() === projectId);
+  return finanzas.find((f) => f?.['ID-Ref']?.toString().trim() === projectId);
 }
 
 /**
@@ -87,11 +87,12 @@ function flattenProjects(
     if (soc.parent_sociedad_id !== societyId) continue;
     const childPct = normPct(soc.pct_en_sociedad_padre);
     if (childPct <= 0) continue;
-    const childOrigen = origen === 'Propio'
-      ? soc['Nombre de la Sociedad']
-      : `${origen} › ${soc['Nombre de la Sociedad']}`;
+    const childOrigen =
+      origen === 'Propio'
+        ? soc['Nombre de la Sociedad']
+        : `${origen} › ${soc['Nombre de la Sociedad']}`;
     results.push(
-      ...flattenProjects(soc['ID-Ref'], data, effectivePct * childPct, childOrigen, next)
+      ...flattenProjects(soc['ID-Ref'], data, effectivePct * childPct, childOrigen, next),
     );
   }
 
@@ -115,7 +116,13 @@ function flattenHoldingProjects(
     const pct = normPct(parseCurrency(soc[weightCol]));
     if (pct <= 0) continue;
     results.push(
-      ...flattenProjects(soc['ID-Ref'], data, pct, soc['Nombre de la Sociedad'], new Set([holdingId]))
+      ...flattenProjects(
+        soc['ID-Ref'],
+        data,
+        pct,
+        soc['Nombre de la Sociedad'],
+        new Set([holdingId]),
+      ),
     );
   }
   return results;
@@ -129,13 +136,18 @@ function totals(entries: ProjectEntry[]): NAVTotals & { margenPct: number } {
   return { valoracion, capital, deuda, margenPct };
 }
 
-function weightedDebt(societyId: string | null, isHolding: boolean, weightCol: '% Pavier' | '% Armia', data: DashboardData): number {
+function weightedDebt(
+  societyId: string | null,
+  isHolding: boolean,
+  weightCol: '% Pavier' | '% Armia',
+  data: DashboardData,
+): number {
   return (data.finanzas_sociedades ?? []).reduce((sum, fin) => {
     const socId = fin['ID-Ref'] as string | undefined;
     const deuda = parseCurrency(fin['Deuda Bancaria']);
     if (societyId === null) return sum + deuda;
     if (isHolding) {
-      const soc = data.sociedades?.find(s => s['ID-Ref'] === socId);
+      const soc = data.sociedades?.find((s) => s['ID-Ref'] === socId);
       return sum + deuda * normPct(parseCurrency(soc?.[weightCol] ?? 0));
     }
     if (socId === societyId) return sum + deuda;
@@ -146,10 +158,15 @@ function weightedDebt(societyId: string | null, isHolding: boolean, weightCol: '
 }
 
 /** Returns true if `candidateId` is a descendant (direct or indirect) of `ancestorId`. */
-function isDescendant(candidateId: string, ancestorId: string, data: DashboardData, visited = new Set<string>()): boolean {
+function isDescendant(
+  candidateId: string,
+  ancestorId: string,
+  data: DashboardData,
+  visited = new Set<string>(),
+): boolean {
   if (visited.has(candidateId)) return false;
   visited.add(candidateId);
-  const soc = data.sociedades?.find(s => s['ID-Ref'] === candidateId);
+  const soc = data.sociedades?.find((s) => s['ID-Ref'] === candidateId);
   if (!soc?.parent_sociedad_id) return false;
   if (soc.parent_sociedad_id === ancestorId) return true;
   return isDescendant(soc.parent_sociedad_id, ancestorId, data, visited);
@@ -162,18 +179,18 @@ export function NAVSection({ data, selectedSociety, isPrivateMode }: Props) {
     const isGroup = selectedSociety.idRef === null;
 
     // Detect top-level holdings dynamically by name — same logic as App.tsx sidebar
-    const pavierSoc = data.sociedades?.find(s =>
-      s?.['Nombre de la Sociedad']?.toString().toLowerCase().includes('pavier')
+    const pavierSoc = data.sociedades?.find((s) =>
+      s?.['Nombre de la Sociedad']?.toString().toLowerCase().includes('pavier'),
     );
-    const armiaSoc = data.sociedades?.find(s =>
-      s?.['Nombre de la Sociedad']?.toString().toLowerCase().includes('armia')
+    const armiaSoc = data.sociedades?.find((s) =>
+      s?.['Nombre de la Sociedad']?.toString().toLowerCase().includes('armia'),
     );
     const PAVIER_ID = pavierSoc?.['ID-Ref'] ?? '';
-    const ARMIA_ID  = armiaSoc?.['ID-Ref'] ?? '';
+    const ARMIA_ID = armiaSoc?.['ID-Ref'] ?? '';
 
-    const isHolding = !!selectedSociety.idRef && (
-      selectedSociety.idRef === PAVIER_ID || selectedSociety.idRef === ARMIA_ID
-    );
+    const isHolding =
+      !!selectedSociety.idRef &&
+      (selectedSociety.idRef === PAVIER_ID || selectedSociety.idRef === ARMIA_ID);
     const weightCol: '% Pavier' | '% Armia' =
       selectedSociety.idRef === ARMIA_ID ? '% Armia' : '% Pavier';
 
@@ -189,14 +206,17 @@ export function NAVSection({ data, selectedSociety, isPrivateMode }: Props) {
         const valoracion = parseCurrency(fin?.Valoración);
         const capitalExpuesto = parseCurrency(fin?.['Capital Expuesto']);
         if (valoracion === 0 && capitalExpuesto === 0) continue;
-        const soc = data.sociedades?.find(s => s['ID-Ref'] === (project.clean_tenedora ?? project['Sociedad-Ref'] ?? ''));
+        const soc = data.sociedades?.find(
+          (s) => s['ID-Ref'] === (project.clean_tenedora ?? project['Sociedad-Ref'] ?? ''),
+        );
         allEntries.push({
           id: projectId,
           nombre: project.clean_nombre ?? project.Nombre ?? '',
           origen: soc?.['Nombre de la Sociedad'] ?? '',
           valoracion,
           capitalExpuesto,
-          margenPct: capitalExpuesto > 0 ? ((valoracion - capitalExpuesto) / capitalExpuesto) * 100 : 0,
+          margenPct:
+            capitalExpuesto > 0 ? ((valoracion - capitalExpuesto) / capitalExpuesto) * 100 : 0,
           pctEfectivo: 1.0,
         });
       }
@@ -210,13 +230,15 @@ export function NAVSection({ data, selectedSociety, isPrivateMode }: Props) {
     if (allEntries.length === 0) return null;
 
     // ── Propio vs consolidado ────────────────────────────────────────────────
-    const hasChildren = !isGroup && !isHolding &&
-      (data.sociedades ?? []).some(s => s.parent_sociedad_id === selectedSociety.idRef);
+    const hasChildren =
+      !isGroup &&
+      !isHolding &&
+      (data.sociedades ?? []).some((s) => s.parent_sociedad_id === selectedSociety.idRef);
 
-    const propioEntries   = allEntries.filter(e => e.origen === 'Propio');
+    const propioEntries = allEntries.filter((e) => e.origen === 'Propio');
     const allConsolidated = allEntries;
 
-    const tPropio      = hasChildren ? totals(propioEntries) : null;
+    const tPropio = hasChildren ? totals(propioEntries) : null;
     const tConsolidado = totals(allConsolidated);
 
     const deuda = weightedDebt(selectedSociety.idRef, isHolding, weightCol, data);
@@ -224,7 +246,9 @@ export function NAVSection({ data, selectedSociety, isPrivateMode }: Props) {
 
     return {
       propioEntries,
-      allEntries: [...allConsolidated].sort((a, b) => b.valoracion * b.pctEfectivo - a.valoracion * a.pctEfectivo),
+      allEntries: [...allConsolidated].sort(
+        (a, b) => b.valoracion * b.pctEfectivo - a.valoracion * a.pctEfectivo,
+      ),
       tPropio,
       tConsolidado,
       deuda,
@@ -237,44 +261,49 @@ export function NAVSection({ data, selectedSociety, isPrivateMode }: Props) {
 
   if (!nav) return null;
 
-  const mask = (val: number) => isPrivateMode ? '••••' : formatCurrency(val);
-  const { allEntries, tPropio, tConsolidado, deuda, navNeto, hasChildren, isHolding, isGroup } = nav;
+  const mask = (val: number) => (isPrivateMode ? '••••' : formatCurrency(val));
+  const { allEntries, tPropio, tConsolidado, deuda, navNeto, hasChildren, isHolding, isGroup } =
+    nav;
 
-  const showOrigen  = isGroup || isHolding || hasChildren;
-  const showPct     = isHolding || hasChildren;
+  const showOrigen = isGroup || isHolding || hasChildren;
+  const showPct = isHolding || hasChildren;
 
   const footerCols = 1 + (showOrigen ? 1 : 0) + (showPct ? 1 : 0);
 
   // ── KPI Cards ──────────────────────────────────────────────────────────────
   // When a society has both propio and consolidated, show them split via secondaryValue
-  const valorKPI   = tConsolidado.valoracion;
+  const valorKPI = tConsolidado.valoracion;
   const capitalKPI = tConsolidado.capital;
   const plusvaliaKPI = valorKPI - capitalKPI;
-  const margenKPI  = tConsolidado.margenPct;
+  const margenKPI = tConsolidado.margenPct;
 
   const label = isGroup
-    ? 'Grupo Alsari Capital — valoración bruta AUM'
+    ? 'Grupo Antifrágil — valoración bruta AUM'
     : isHolding
-    ? `Cartera ${selectedSociety.nombre} — participación efectiva`
-    : hasChildren
-    ? `${selectedSociety.nombre} — consolidado`
-    : selectedSociety.nombre;
+      ? `Cartera ${selectedSociety.nombre} — participación efectiva`
+      : hasChildren
+        ? `${selectedSociety.nombre} — consolidado`
+        : selectedSociety.nombre;
 
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-2xl font-semibold text-white uppercase tracking-tight flex items-center gap-3">
+        <h2 className="flex items-center gap-3 text-2xl font-semibold uppercase tracking-tight text-white">
           <PieChart className="text-violet-400" size={24} />
           Valor Neto de Activos (NAV)
         </h2>
-        <p className="text-xs text-zinc-500 mt-1 font-medium">
-          Valoración a mercado · {label}
-        </p>
+        <p className="mt-1 text-xs font-medium text-zinc-500">Valoración a mercado · {label}</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
         <KPICard
-          title={isGroup ? 'Valor de Cartera (AUM)' : hasChildren ? 'Valor Consolidado' : 'Valor de Cartera'}
+          title={
+            isGroup
+              ? 'Valor de Cartera (AUM)'
+              : hasChildren
+                ? 'Valor Consolidado'
+                : 'Valor de Cartera'
+          }
           value={mask(valorKPI)}
           secondaryValue={tPropio ? mask(tPropio.valoracion) : undefined}
           secondaryTitle={tPropio ? 'Propio' : undefined}
@@ -284,10 +313,10 @@ export function NAVSection({ data, selectedSociety, isPrivateMode }: Props) {
             isGroup
               ? 'Suma de valoraciones a mercado sin ponderar (AUM total gestionado)'
               : isHolding
-              ? 'Suma de valoraciones ponderadas por % de participación efectiva'
-              : hasChildren
-              ? 'Consolidado incluye participaciones en filiales ponderadas'
-              : 'Valoración de mercado actual de los activos directos'
+                ? 'Suma de valoraciones ponderadas por % de participación efectiva'
+                : hasChildren
+                  ? 'Consolidado incluye participaciones en filiales ponderadas'
+                  : 'Valoración de mercado actual de los activos directos'
           }
         />
         <KPICard
@@ -320,65 +349,99 @@ export function NAVSection({ data, selectedSociety, isPrivateMode }: Props) {
       {/* ── Tabla de desglose ────────────────────────────────────────────── */}
       <div className="glass-panel overflow-hidden rounded-[2rem] border border-white/5 shadow-2xl">
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+          <table className="w-full border-collapse text-left">
             <thead>
-              <tr className="bg-white/[0.02] border-b border-white/5">
-                <th className="px-8 py-5 text-2xs font-semibold text-zinc-500 uppercase tracking-widest">Proyecto</th>
+              <tr className="border-b border-white/5 bg-white/[0.02]">
+                <th className="text-2xs px-8 py-5 font-semibold uppercase tracking-widest text-zinc-500">
+                  Proyecto
+                </th>
                 {showOrigen && (
-                  <th className="px-8 py-5 text-2xs font-semibold text-zinc-500 uppercase tracking-widest">Origen</th>
+                  <th className="text-2xs px-8 py-5 font-semibold uppercase tracking-widest text-zinc-500">
+                    Origen
+                  </th>
                 )}
                 {showPct && (
-                  <th className="px-8 py-5 text-2xs font-semibold text-zinc-500 uppercase tracking-widest text-center">Part.</th>
+                  <th className="text-2xs px-8 py-5 text-center font-semibold uppercase tracking-widest text-zinc-500">
+                    Part.
+                  </th>
                 )}
-                <th className="px-8 py-5 text-2xs font-semibold text-zinc-500 uppercase tracking-widest text-right">Capital</th>
-                <th className="px-8 py-5 text-2xs font-semibold text-zinc-500 uppercase tracking-widest text-right">Valoración</th>
+                <th className="text-2xs px-8 py-5 text-right font-semibold uppercase tracking-widest text-zinc-500">
+                  Capital
+                </th>
+                <th className="text-2xs px-8 py-5 text-right font-semibold uppercase tracking-widest text-zinc-500">
+                  Valoración
+                </th>
                 {(isHolding || hasChildren) && (
-                  <th className="px-8 py-5 text-2xs font-semibold text-zinc-500 uppercase tracking-widest text-right">Val. Efectiva</th>
+                  <th className="text-2xs px-8 py-5 text-right font-semibold uppercase tracking-widest text-zinc-500">
+                    Val. Efectiva
+                  </th>
                 )}
-                <th className="px-8 py-5 text-2xs font-semibold text-zinc-500 uppercase tracking-widest text-right">Margen</th>
+                <th className="text-2xs px-8 py-5 text-right font-semibold uppercase tracking-widest text-zinc-500">
+                  Margen
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/[0.02]">
               {allEntries.map((e) => {
-                const mc = e.margenPct > 0 ? 'text-emerald-400' : e.margenPct < 0 ? 'text-rose-400' : 'text-zinc-400';
+                const mc =
+                  e.margenPct > 0
+                    ? 'text-emerald-400'
+                    : e.margenPct < 0
+                      ? 'text-rose-400'
+                      : 'text-zinc-400';
                 const isOwn = e.origen === 'Propio';
                 return (
-                  <tr key={`${e.id}-${e.origen}`} className="group hover:bg-white/[0.01] transition-colors">
-                    <td className="px-8 py-5 text-sm text-white font-medium group-hover:text-violet-400 transition-colors">
+                  <tr
+                    key={`${e.id}-${e.origen}`}
+                    className="group transition-colors hover:bg-white/[0.01]"
+                  >
+                    <td className="px-8 py-5 text-sm font-medium text-white transition-colors group-hover:text-violet-400">
                       {e.nombre}
                     </td>
                     {showOrigen && (
                       <td className="px-8 py-5 text-xs font-medium">
-                        {isOwn
-                          ? <span className="text-zinc-400">Propio</span>
-                          : <span className="text-violet-400/80">{e.origen}</span>
-                        }
+                        {isOwn ? (
+                          <span className="text-zinc-400">Propio</span>
+                        ) : (
+                          <span className="text-violet-400/80">{e.origen}</span>
+                        )}
                       </td>
                     )}
                     {showPct && (
                       <td className="px-8 py-5 text-center">
-                        <span className={`px-2 py-1 rounded-md text-xs font-semibold ${
-                          isOwn
-                            ? 'bg-blue-500/10 border border-blue-500/20 text-blue-400'
-                            : 'bg-violet-500/10 border border-violet-500/20 text-violet-400'
-                        }`}>
+                        <span
+                          className={`rounded-md px-2 py-1 text-xs font-semibold ${
+                            isOwn
+                              ? 'border border-blue-500/20 bg-blue-500/10 text-blue-400'
+                              : 'border border-violet-500/20 bg-violet-500/10 text-violet-400'
+                          }`}
+                        >
                           {e.pctEfectivo >= 0.999 ? '100%' : `${(e.pctEfectivo * 100).toFixed(1)}%`}
                         </span>
                       </td>
                     )}
-                    <td className={`px-8 py-5 text-right font-mono text-sm text-zinc-400 ${isPrivateMode ? 'blur-sm select-none' : ''}`}>
+                    <td
+                      className={`px-8 py-5 text-right font-mono text-sm text-zinc-400 ${isPrivateMode ? 'select-none blur-sm' : ''}`}
+                    >
                       {formatCurrency(e.capitalExpuesto)}
                     </td>
-                    <td className={`px-8 py-5 text-right font-mono text-sm text-white font-medium ${isPrivateMode ? 'blur-sm select-none' : ''}`}>
+                    <td
+                      className={`px-8 py-5 text-right font-mono text-sm font-medium text-white ${isPrivateMode ? 'select-none blur-sm' : ''}`}
+                    >
                       {formatCurrency(e.valoracion)}
                     </td>
                     {(isHolding || hasChildren) && (
-                      <td className={`px-8 py-5 text-right font-mono text-sm text-violet-300 font-medium ${isPrivateMode ? 'blur-sm select-none' : ''}`}>
+                      <td
+                        className={`px-8 py-5 text-right font-mono text-sm font-medium text-violet-300 ${isPrivateMode ? 'select-none blur-sm' : ''}`}
+                      >
                         {formatCurrency(e.valoracion * e.pctEfectivo)}
                       </td>
                     )}
-                    <td className={`px-8 py-5 text-right font-mono text-sm font-semibold ${mc} ${isPrivateMode ? 'blur-sm select-none' : ''}`}>
-                      {e.margenPct > 0 ? '+' : ''}{e.margenPct.toFixed(1)}%
+                    <td
+                      className={`px-8 py-5 text-right font-mono text-sm font-semibold ${mc} ${isPrivateMode ? 'select-none blur-sm' : ''}`}
+                    >
+                      {e.margenPct > 0 ? '+' : ''}
+                      {e.margenPct.toFixed(1)}%
                     </td>
                   </tr>
                 );
@@ -386,22 +449,34 @@ export function NAVSection({ data, selectedSociety, isPrivateMode }: Props) {
             </tbody>
             <tfoot>
               <tr className="border-t border-white/10 bg-white/[0.02]">
-                <td className="px-8 py-5 text-xs font-semibold text-zinc-400 uppercase tracking-widest" colSpan={footerCols}>
+                <td
+                  className="px-8 py-5 text-xs font-semibold uppercase tracking-widest text-zinc-400"
+                  colSpan={footerCols}
+                >
                   TOTAL CONSOLIDADO
                 </td>
-                <td className={`px-8 py-5 text-right font-mono text-sm text-zinc-300 font-semibold ${isPrivateMode ? 'blur-sm select-none' : ''}`}>
+                <td
+                  className={`px-8 py-5 text-right font-mono text-sm font-semibold text-zinc-300 ${isPrivateMode ? 'select-none blur-sm' : ''}`}
+                >
                   {mask(allEntries.reduce((s, e) => s + e.capitalExpuesto, 0))}
                 </td>
-                <td className={`px-8 py-5 text-right font-mono text-sm text-white font-semibold ${isPrivateMode ? 'blur-sm select-none' : ''}`}>
+                <td
+                  className={`px-8 py-5 text-right font-mono text-sm font-semibold text-white ${isPrivateMode ? 'select-none blur-sm' : ''}`}
+                >
                   {mask(allEntries.reduce((s, e) => s + e.valoracion, 0))}
                 </td>
                 {(isHolding || hasChildren) && (
-                  <td className={`px-8 py-5 text-right font-mono text-sm text-violet-300 font-semibold ${isPrivateMode ? 'blur-sm select-none' : ''}`}>
+                  <td
+                    className={`px-8 py-5 text-right font-mono text-sm font-semibold text-violet-300 ${isPrivateMode ? 'select-none blur-sm' : ''}`}
+                  >
                     {mask(tConsolidado.valoracion)}
                   </td>
                 )}
-                <td className={`px-8 py-5 text-right font-mono text-sm font-semibold ${tConsolidado.margenPct >= 0 ? 'text-emerald-400' : 'text-rose-400'} ${isPrivateMode ? 'blur-sm select-none' : ''}`}>
-                  {tConsolidado.margenPct > 0 ? '+' : ''}{tConsolidado.margenPct.toFixed(1)}%
+                <td
+                  className={`px-8 py-5 text-right font-mono text-sm font-semibold ${tConsolidado.margenPct >= 0 ? 'text-emerald-400' : 'text-rose-400'} ${isPrivateMode ? 'select-none blur-sm' : ''}`}
+                >
+                  {tConsolidado.margenPct > 0 ? '+' : ''}
+                  {tConsolidado.margenPct.toFixed(1)}%
                 </td>
               </tr>
             </tfoot>
@@ -410,11 +485,17 @@ export function NAVSection({ data, selectedSociety, isPrivateMode }: Props) {
       </div>
 
       {deuda > 0 && (
-        <p className="text-xs text-zinc-600 text-right">
+        <p className="text-right text-xs text-zinc-600">
           Deuda financiera:{' '}
-          <span className={`font-medium text-zinc-400 ${isPrivateMode ? 'blur-sm' : ''}`}>{formatCurrency(deuda)}</span>
-          {' '}· NAV neto:{' '}
-          <span className={`font-medium ${navNeto >= 0 ? 'text-emerald-400' : 'text-rose-400'} ${isPrivateMode ? 'blur-sm' : ''}`}>{formatCurrency(navNeto)}</span>
+          <span className={`font-medium text-zinc-400 ${isPrivateMode ? 'blur-sm' : ''}`}>
+            {formatCurrency(deuda)}
+          </span>{' '}
+          · NAV neto:{' '}
+          <span
+            className={`font-medium ${navNeto >= 0 ? 'text-emerald-400' : 'text-rose-400'} ${isPrivateMode ? 'blur-sm' : ''}`}
+          >
+            {formatCurrency(navNeto)}
+          </span>
         </p>
       )}
     </div>

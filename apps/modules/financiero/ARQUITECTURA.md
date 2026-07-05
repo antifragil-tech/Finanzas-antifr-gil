@@ -39,6 +39,7 @@ src/
 ## 🔄 Flujos clave
 
 ### Carga inicial
+
 ```
 App.tsx monta
   → fetchData() → GET http://127.0.0.1:8787/api/data
@@ -47,6 +48,7 @@ App.tsx monta
 ```
 
 ### Navegación entre vistas
+
 ```
 Click en FinancialSidebar
   → setActiveView('overview' | 'map' | 'project' | 'contabilidad' | 'workspace')
@@ -54,6 +56,7 @@ Click en FinancialSidebar
 ```
 
 ### Workspace semanal
+
 ```
 WorkspaceView monta
   → fetchWorkspace(year, week) → GET /api/workspace/:year/:week
@@ -64,10 +67,10 @@ WorkspaceView monta
 
 ## 📊 Fuente de datos
 
-| Endpoint | Propósito |
-|----------|-----------|
-| `GET /api/data` | Estado completo del holding (entidades, proyectos, contabilidad) |
-| `GET /api/workspace/:year/:week` | Workspace de una semana concreta |
+| Endpoint                         | Propósito                                                        |
+| -------------------------------- | ---------------------------------------------------------------- |
+| `GET /api/data`                  | Estado completo del holding (entidades, proyectos, contabilidad) |
+| `GET /api/workspace/:year/:week` | Workspace de una semana concreta                                 |
 
 Fuente real: Google Sheets del holding, leída via JWT del service account GCP.
 No usa Supabase para datos (trabajo de Fase futura).

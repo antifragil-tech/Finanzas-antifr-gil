@@ -6,9 +6,10 @@
 
 ## 🎯 Filosofía
 
-> *"Testea lo que más duele si se rompe. Lo demás, cuando sea barato hacerlo."*
+> _"Testea lo que más duele si se rompe. Lo demás, cuando sea barato hacerlo."_
 
 No buscamos el 100% de cobertura. Buscamos **confianza en lo crítico**:
+
 - Cálculos financieros → cobertura alta (>90%).
 - Lógica de negocio compleja → cobertura alta (>80%).
 - Componentes de UI → cobertura media (>50%, foco en estados clave).
@@ -18,15 +19,15 @@ No buscamos el 100% de cobertura. Buscamos **confianza en lo crítico**:
 
 ## 🧰 Stack
 
-| Tipo de test | Herramienta | Cuándo se ejecuta |
-|--------------|-------------|-------------------|
-| Unit | **Vitest** | En cada commit (pre-commit hook) y en CI |
-| Component | **Vitest + Testing Library** | En cada commit y CI |
-| Integration | **Vitest** | En CI |
-| E2E | **Playwright** | En CI + manual antes de releases |
-| Visual regression | **Playwright screenshots** | Manual + CI en releases |
-| Type checking | **tsc --noEmit** | En cada commit y CI |
-| Lint | **ESLint** | En cada commit y CI |
+| Tipo de test      | Herramienta                  | Cuándo se ejecuta                        |
+| ----------------- | ---------------------------- | ---------------------------------------- |
+| Unit              | **Vitest**                   | En cada commit (pre-commit hook) y en CI |
+| Component         | **Vitest + Testing Library** | En cada commit y CI                      |
+| Integration       | **Vitest**                   | En CI                                    |
+| E2E               | **Playwright**               | En CI + manual antes de releases         |
+| Visual regression | **Playwright screenshots**   | Manual + CI en releases                  |
+| Type checking     | **tsc --noEmit**             | En cada commit y CI                      |
+| Lint              | **ESLint**                   | En cada commit y CI                      |
 
 ---
 
@@ -98,6 +99,7 @@ Funciones puras que reciben datos y devuelven datos. Son las más fáciles de te
 y las más críticas si fallan (un cálculo de EBITDA mal afecta a todos los reportes).
 
 Casos a cubrir:
+
 - Camino feliz (input típico).
 - Bordes (input vacío, mínimo, máximo).
 - Errores (input inválido).
@@ -136,6 +138,7 @@ it('KPICard muestra trend positivo en verde', () => {
 ```
 
 **Reglas:**
+
 - Consulta por roles (`getByRole`) y texto (`getByText`), no por clases o IDs.
 - Simula interacciones reales con `userEvent`, no `fireEvent` (más realista).
 - No testees implementaciones internas (`useState` específicos, etc.).
@@ -148,6 +151,7 @@ it('KPICard muestra trend positivo en verde', () => {
 ### E2E (flujos críticos)
 
 Pocos tests, pero los que importan:
+
 - Login → llegar al dashboard.
 - Crear factura → aparece en el listado.
 - Cálculo de KPI principal en cada módulo.
@@ -183,6 +187,7 @@ pnpm lint:fix
 ### Pipeline (GitHub Actions, `.github/workflows/ci.yml`)
 
 En cada PR a `main`:
+
 1. Install dependencies (con caché).
 2. Type-check (`tsc --noEmit`).
 3. Lint (`eslint`).
@@ -198,14 +203,14 @@ En cada PR a `main`:
 
 Mínimos exigidos para mergear a `main`:
 
-| Categoría | Cobertura mínima |
-|-----------|------------------|
-| `packages/utils/` (cálculos financieros) | 90% |
-| `src/lib/` de módulos | 80% |
-| `src/hooks/` | 70% |
-| `src/components/` | 50% |
-| `src/api/` | 60% |
-| Global del módulo | 60% |
+| Categoría                                | Cobertura mínima |
+| ---------------------------------------- | ---------------- |
+| `packages/utils/` (cálculos financieros) | 90%              |
+| `src/lib/` de módulos                    | 80%              |
+| `src/hooks/`                             | 70%              |
+| `src/components/`                        | 50%              |
+| `src/api/`                               | 60%              |
+| Global del módulo                        | 60%              |
 
 Los umbrales se configuran en `vitest.config.ts` y CI los aplica.
 
