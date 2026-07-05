@@ -1,0 +1,203 @@
+/*
+ * Tema "Quiet Luxury" para DayPilot Lite.
+ * Re-viste el tema por defecto para que el calendario se sienta parte del OS:
+ * fondos zinc/negro, bordes muy suaves, cabeceras oscuras (nada blanco), y
+ * eventos con info operativa. Todo scopeado bajo .dp-quiet.
+ *
+ * Este archivo es importable por el host (export "./styles"): SOLO reglas
+ * scopeadas. La altura del viewport standalone vive en standalone.css.
+ */
+
+.dp-quiet,
+.dp-quiet .calendar_default_main,
+.dp-quiet .month_default_main {
+  --soft: rgba(255, 255, 255, 0.045); /* línea de rejilla suave */
+  --soft2: rgba(255, 255, 255, 0.07); /* borde de cabecera */
+  background-color: #14141e; /* zinc-950 */
+  color: #d4d4d8;
+  font-family: inherit;
+  border: none !important;
+}
+
+/* ── Rejilla (celdas, líneas suaves, poco contraste) ──────────────── */
+.dp-quiet .calendar_default_cell,
+.dp-quiet .calendar_default_cell_inner,
+.dp-quiet .calendar_default_cell_business .calendar_default_cell_inner {
+  background-color: #14141e;
+  border-color: var(--soft) !important;
+}
+.dp-quiet .calendar_default_cell_business .calendar_default_cell_inner {
+  background-color: #16161f;
+}
+
+/* ── TODAS las cabeceras en oscuro (corner, columnas, all-day, horas) ── */
+.dp-quiet .calendar_default_corner,
+.dp-quiet .calendar_default_corner_inner,
+.dp-quiet .calendar_default_colheader,
+.dp-quiet .calendar_default_colheader_inner,
+.dp-quiet .calendar_default_alldayheader,
+.dp-quiet .calendar_default_alldayheader_inner,
+.dp-quiet .calendar_default_rowheader,
+.dp-quiet .calendar_default_rowheader_inner,
+.dp-quiet .calendar_default_splitter {
+  background-color: #1b1c26 !important; /* zinc-900 tenue */
+  color: #d4d4d8 !important;
+  border-color: var(--soft2) !important;
+}
+.dp-quiet .calendar_default_colheader_inner {
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+  color: #e8e8ea !important;
+}
+.dp-quiet .calendar_default_rowheader_inner {
+  color: #71717a !important; /* horas en zinc-500 */
+  font-size: 11px;
+  padding-right: 6px;
+}
+
+/* ── Eventos: contenedor + bar ────────────────────────────────────── */
+.dp-quiet .calendar_default_event,
+.dp-quiet .month_default_event {
+  border-radius: 9px;
+}
+.dp-quiet .calendar_default_event_inner,
+.dp-quiet .month_default_event_inner {
+  border-radius: 9px;
+  border-style: solid;
+  border-width: 1px;
+  padding: 4px 9px;
+  box-shadow: none; /* sin sombra: evita que se "pisen" tarjetas vecinas */
+  overflow: hidden;
+  box-sizing: border-box; /* el ancho del carril incluye padding+borde: nunca desborda */
+  left: 1px;
+  right: 2px; /* pequeño gap entre columnas concurrentes */
+}
+.dp-quiet .calendar_default_event_bar {
+  width: 3px;
+  border-radius: 3px;
+  opacity: 0.9;
+}
+.dp-quiet .dp-cancelada .calendar_default_event_inner,
+.dp-quiet .dp-cancelada .month_default_event_inner {
+  opacity: 0.6;
+}
+.dp-quiet .dp-cancelada .dp-ev-cli {
+  text-decoration: line-through;
+}
+
+/* ── Tarjeta de cita (legible; color=profesional, borde=servicio) ──── */
+.dp-quiet .dp-ev {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  line-height: 1.25;
+  height: 100%;
+  min-width: 0; /* permite que los hijos encojan en carriles estrechos */
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.dp-quiet .dp-ev-cli {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #f4f4f5;
+  min-width: 0; /* sin esto, el flex no deja truncar al hijo de texto */
+}
+/* El texto (hora · cliente) debe poder encoger y cortarse con ellipsis. La
+   clave es flex:1 + min-width:0; el punto de estado mantiene su tamaño. */
+.dp-quiet .dp-ev-cli > span {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dp-quiet .dp-ev-time {
+  color: #b8b8c0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.dp-quiet .dp-ev-estado {
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+.dp-quiet .dp-ev-sub {
+  font-size: 11px;
+  color: #a1a1aa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dp-quiet .dp-ev-pago {
+  font-size: 10px;
+  color: #8a8a93;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: auto;
+}
+
+/* Vista Semana: tarjeta compacta (estilo Salonized). Carriles estrechos, así que
+   menos densidad y SIN línea de pago: solo hora · cliente (+ punto de estado) y
+   servicio truncado. Lo que no entra por altura se recorta (overflow del inner). */
+.dp-quiet .dp-ev--sm {
+  gap: 0;
+}
+.dp-quiet .dp-ev--sm .dp-ev-cli {
+  font-size: 11px;
+}
+.dp-quiet .dp-ev--sm .dp-ev-sub {
+  font-size: 10px;
+}
+
+/* Servicio = forma del borde (textura), no color */
+.dp-quiet .dp-serv-fisioterapia .calendar_default_event_inner {
+  border-style: solid;
+}
+.dp-quiet .dp-serv-fisioterapia_deportiva .calendar_default_event_inner {
+  border-style: double;
+  border-width: 3px;
+}
+.dp-quiet .dp-serv-entrenamiento_personal .calendar_default_event_inner {
+  border-style: dashed;
+}
+.dp-quiet .dp-serv-nutricion .calendar_default_event_inner {
+  border-style: dotted;
+}
+
+/* ── Selección de franja + marca de "ahora" ───────────────────────── */
+.dp-quiet .calendar_default_shadow_inner {
+  background-color: rgba(96, 165, 250, 0.16);
+  border: 1px solid rgba(96, 165, 250, 0.4);
+  border-radius: 9px;
+}
+.dp-quiet .calendar_default_now {
+  border-top: 2px solid rgba(245, 240, 225, 0.9); /* línea de "ahora" más visible */
+  box-shadow: 0 0 6px rgba(245, 240, 225, 0.25);
+}
+
+/* ── Vista MES ────────────────────────────────────────────────────── */
+.dp-quiet .month_default_cell,
+.dp-quiet .month_default_cell_inner {
+  background-color: #14141e;
+  border-color: var(--soft) !important;
+}
+.dp-quiet .month_default_cell_business {
+  background-color: #16161f;
+}
+.dp-quiet .month_default_cell_header {
+  color: #a1a1aa;
+  font-size: 11px;
+}
+.dp-quiet .month_default_colheader_inner {
+  background-color: #1b1c26;
+  color: #e8e8ea;
+  border-color: var(--soft2) !important;
+  font-weight: 500;
+}
