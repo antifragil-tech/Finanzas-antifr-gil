@@ -1,3 +1,11 @@
+import { formatCurrency } from '@alsari/utils';
+import {
+  escaleraMargen,
+  estadoValidacion,
+  gastosDemo,
+  ingresosDemo,
+  liquidacionesDemo,
+} from '@antifragil/operativa';
 import type { CentroId, PeriodoId, RolId } from '../context/osGlobalOptions';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -56,6 +64,14 @@ function n(base: number, periodo: PeriodoId, centro: CentroId): string {
   return String(Math.round(base * FACTOR[periodo] * PESO_CENTRO[centro]));
 }
 
+const ESCALERA = escaleraMargen(ingresosDemo(), gastosDemo());
+const GASTOS_BLOQUEADOS = gastosDemo().filter(
+  (g) => estadoValidacion(g) === 'bloqueado_sin_documento',
+).length;
+const LIQ_BLOQUEADAS = liquidacionesDemo().filter(
+  (l) => l.estado === 'bloqueada_por_incidencia' || !l.evidencia.recibida,
+).length;
+
 export function getResumenOperativo(centro: CentroId, periodo: PeriodoId): MockKpi[] {
   return [
     {
@@ -99,9 +115,10 @@ export function getResumenOperativo(centro: CentroId, periodo: PeriodoId): MockK
     },
     {
       id: 'margen',
-      label: 'Margen estimado',
-      valor: 'n/d',
-      hint: 'sin datos — FOP-B2 no conectado',
+      label: 'Margen operativo (M3)',
+      valor: formatCurrency(ESCALERA.m3 * FACTOR[periodo] * PESO_CENTRO[centro]),
+      hint: ESCALERA.provisional ? 'provisional · conceptos por confirmar' : 'escenario demo',
+      tone: ESCALERA.m3 >= 0 ? 'ok' : 'warn',
       roles: ['ceo'],
     },
   ];
@@ -220,6 +237,12 @@ export const MODULOS_CONECTADOS: MockModulo[] = [
 ];
 
 export const ALERTAS: MockAlerta[] = [
+  {
+    id: 'documentos-pendientes',
+    texto: `${GASTOS_BLOQUEADOS} pagos bloqueados sin documento y ${LIQ_BLOQUEADAS} liquidaciones sin nómina/factura`,
+    tone: 'warn',
+    roles: ['ceo'],
+  },
   {
     id: 'sesiones-cobro',
     texto: 'Hay sesiones pendientes de cobro',

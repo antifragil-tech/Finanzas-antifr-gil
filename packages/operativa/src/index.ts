@@ -28,3 +28,13 @@ export {
   liquidacionesDemo,
   totalesDemo,
 } from './mocks/escenario';
+export * from './finanzas';
+export {
+  ingresosDemo,
+  gastosDemo,
+  gastosProfesionalesDemo,
+  GASTOS_DEMO,
+  facturasEmitidasDemo,
+  facturasRecibidasDemo,
+  CONCEPTOS_PENDIENTES,
+} from './mocks/finanzasDemo';
