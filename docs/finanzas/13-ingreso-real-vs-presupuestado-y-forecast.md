@@ -25,17 +25,17 @@ Comparar **previsto vs realizado** con la cifra correcta en cada vista — deven
 
 ## 3. Fuentes
 
-| Fuente | Aporta | Línea |
-|---|---|---|
-| Presupuesto/objetivo de ingresos | la vara de medir (versionada, ver riesgo §16) | armazón `presupuestos` existente |
-| Citas realizadas/validadas | devengo de sesiones sueltas y consumo de bonos | Reservas (PR #5) |
-| Bonos vendidos | caja del mes + pendiente de devengar | 10 (PR #19) |
-| Ingresos devengados | el "real" principal | `devengo_registrado` (10 §3) |
-| Cobros | el "real" de caja | libro de cobros (02 §7) / FOP-A1 |
-| Facturas operativas | documentación/precontable | 02 (PR #1) |
-| CxC | cobro esperado de lo ya prestado | 11 (PR #20) |
-| Cancelaciones y no-shows | corrección de la previsión | Reservas + 10 §5 |
-| Devoluciones | menos ingreso (caja) / menos pendiente | 10 §6.7 |
+| Fuente                           | Aporta                                         | Línea                            |
+| -------------------------------- | ---------------------------------------------- | -------------------------------- |
+| Presupuesto/objetivo de ingresos | la vara de medir (versionada, ver riesgo §16)  | armazón `presupuestos` existente |
+| Citas realizadas/validadas       | devengo de sesiones sueltas y consumo de bonos | Reservas (PR #5)                 |
+| Bonos vendidos                   | caja del mes + pendiente de devengar           | 10 (PR #19)                      |
+| Ingresos devengados              | el "real" principal                            | `devengo_registrado` (10 §3)     |
+| Cobros                           | el "real" de caja                              | libro de cobros (02 §7) / FOP-A1 |
+| Facturas operativas              | documentación/precontable                      | 02 (PR #1)                       |
+| CxC                              | cobro esperado de lo ya prestado               | 11 (PR #20)                      |
+| Cancelaciones y no-shows         | corrección de la previsión                     | Reservas + 10 §5                 |
+| Devoluciones                     | menos ingreso (caja) / menos pendiente         | 10 §6.7                          |
 
 ## 4. Métricas principales
 
@@ -55,14 +55,14 @@ Comparar **previsto vs realizado** con la cifra correcta en cada vista — deven
 
 ## 6. Forecast (métodos, del más simple al más fino)
 
-| Método | Cómo | Cuándo sirve |
-|---|---|---|
-| `lineal_por_dias` | devengado hasta hoy ÷ días transcurridos × días del mes | arranque; meses estables |
-| `run_rate_sesiones` | sesiones/día recientes × devengo medio por sesión × días restantes | actividad como driver |
-| `por_agenda_futura` | + citas ya reservadas del resto del mes (con % histórico de cancelación/no-show) | cuando Reservas fluya; el más útil |
-| `por_bonos_pendientes` | + consumo esperado del pendiente de devengar (ritmo histórico de consumo) | complementa agenda |
-| `conservador` / `optimista` | banda: agenda confirmada sola vs agenda + reservas típicas de última hora | decisiones con rango, no con un número |
-| `ajustado_manual` | corrección del CEO **con motivo, autor y fecha** (trazada, no sobrescribe el calculado) | eventos conocidos que el dato no ve |
+| Método                      | Cómo                                                                                    | Cuándo sirve                           |
+| --------------------------- | --------------------------------------------------------------------------------------- | -------------------------------------- |
+| `lineal_por_dias`           | devengado hasta hoy ÷ días transcurridos × días del mes                                 | arranque; meses estables               |
+| `run_rate_sesiones`         | sesiones/día recientes × devengo medio por sesión × días restantes                      | actividad como driver                  |
+| `por_agenda_futura`         | + citas ya reservadas del resto del mes (con % histórico de cancelación/no-show)        | cuando Reservas fluya; el más útil     |
+| `por_bonos_pendientes`      | + consumo esperado del pendiente de devengar (ritmo histórico de consumo)               | complementa agenda                     |
+| `conservador` / `optimista` | banda: agenda confirmada sola vs agenda + reservas típicas de última hora               | decisiones con rango, no con un número |
+| `ajustado_manual`           | corrección del CEO **con motivo, autor y fecha** (trazada, no sobrescribe el calculado) | eventos conocidos que el dato no ve    |
 
 El forecast **descuenta siempre** cancelaciones/no-shows históricos y **nunca** cuenta la venta de bonos como ingreso del mes (solo su consumo esperado).
 
@@ -107,12 +107,12 @@ El forecast **descuenta siempre** cancelaciones/no-shows históricos y **nunca**
 
 ## 14. Roles
 
-| Capacidad | CEO | Coordinadora | Recepción | Profesional |
-|---|---|---|---|---|
-| Objetivos, forecast, desviaciones, margen | ✅ | ❌ (salvo permiso) | ❌ | ❌ |
-| Cumplimiento operativo (sesiones, ocupación, agenda vs plan) | ✅ | ✅ | ❌ | ❌ |
-| Cobros pendientes y agenda del día | ✅ | ✅ | ✅ | ❌ |
-| Métricas propias (sus sesiones vs su plan, si se decide D1-P2) | ✅ | ✅ (las suyas) | — | ✅ (las suyas) |
+| Capacidad                                                      | CEO | Coordinadora       | Recepción | Profesional    |
+| -------------------------------------------------------------- | --- | ------------------ | --------- | -------------- |
+| Objetivos, forecast, desviaciones, margen                      | ✅  | ❌ (salvo permiso) | ❌        | ❌             |
+| Cumplimiento operativo (sesiones, ocupación, agenda vs plan)   | ✅  | ✅                 | ❌        | ❌             |
+| Cobros pendientes y agenda del día                             | ✅  | ✅                 | ✅        | ❌             |
+| Métricas propias (sus sesiones vs su plan, si se decide D1-P2) | ✅  | ✅ (las suyas)     | —         | ✅ (las suyas) |
 
 ## 15. KPIs
 
@@ -125,32 +125,32 @@ El forecast **descuenta siempre** cancelaciones/no-shows históricos y **nunca**
 
 ## 16. Riesgos y salvaguardas
 
-| Riesgo | Salvaguarda |
-|---|---|
-| Perseguir caja y no margen | Cumplimiento sobre devengo; caja etiquetada aparte; D2 cruza con coste |
-| Inflar el forecast con ventas de bonos | La venta no devenga (10 §2); solo cuenta el consumo esperado |
-| No descontar cancelaciones/no-shows | Tasas históricas obligatorias en `por_agenda_futura` |
-| No meter coste profesional en el margen forecast | Sesiones previstas × regla 08 + nóminas fijas |
-| Usar datos clínicos | Solo ids y volúmenes administrativos (D-op-5) |
-| Objetivos irreales que queman al equipo | Objetivo versionado con autor; revisión periódica (D1-P8); el panel muestra objetivo vs histórico |
-| No separar centro/canal/proyecto | Dimensiones de 09/12; cada cifra lleva su etiqueta |
-| Doble conteo factura + cobro | El real es devengo o caja, nunca factura + cobro sumados (invariante anti-doble-conteo) |
-| No versionar el presupuesto | Cambiar el objetivo crea versión con fecha/autor; lo publicado no se reescribe |
-| Ajustar el forecast a mano sin traza | `ajustado_manual` exige motivo/autor/fecha y convive con el calculado (no lo sustituye) |
+| Riesgo                                           | Salvaguarda                                                                                       |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------- |
+| Perseguir caja y no margen                       | Cumplimiento sobre devengo; caja etiquetada aparte; D2 cruza con coste                            |
+| Inflar el forecast con ventas de bonos           | La venta no devenga (10 §2); solo cuenta el consumo esperado                                      |
+| No descontar cancelaciones/no-shows              | Tasas históricas obligatorias en `por_agenda_futura`                                              |
+| No meter coste profesional en el margen forecast | Sesiones previstas × regla 08 + nóminas fijas                                                     |
+| Usar datos clínicos                              | Solo ids y volúmenes administrativos (D-op-5)                                                     |
+| Objetivos irreales que queman al equipo          | Objetivo versionado con autor; revisión periódica (D1-P8); el panel muestra objetivo vs histórico |
+| No separar centro/canal/proyecto                 | Dimensiones de 09/12; cada cifra lleva su etiqueta                                                |
+| Doble conteo factura + cobro                     | El real es devengo o caja, nunca factura + cobro sumados (invariante anti-doble-conteo)           |
+| No versionar el presupuesto                      | Cambiar el objetivo crea versión con fecha/autor; lo publicado no se reescribe                    |
+| Ajustar el forecast a mano sin traza             | `ajustado_manual` exige motivo/autor/fecha y convive con el calculado (no lo sustituye)           |
 
 ## 17. Pendientes de decisión
 
-| # | Pendiente | Dueño |
-|---|---|---|
-| D1-P1 | Cómo se fijan los objetivos (histórico + crecimiento, capacidad de agenda, o manual) | Guille |
-| D1-P2 | ¿Objetivo por profesional? (sensible: puede tensionar al equipo) | Guille |
-| D1-P3 | ¿Objetivo por centro? (depende de acuerdos C1-P1..P3) | Guille |
-| D1-P4 | ¿Objetivo por servicio? | Guille |
+| #     | Pendiente                                                                             | Dueño  |
+| ----- | ------------------------------------------------------------------------------------- | ------ |
+| D1-P1 | Cómo se fijan los objetivos (histórico + crecimiento, capacidad de agenda, o manual)  | Guille |
+| D1-P2 | ¿Objetivo por profesional? (sensible: puede tensionar al equipo)                      | Guille |
+| D1-P3 | ¿Objetivo por centro? (depende de acuerdos C1-P1..P3)                                 | Guille |
+| D1-P4 | ¿Objetivo por servicio?                                                               | Guille |
 | D1-P5 | Método de forecast principal para el panel (propuesta: `por_agenda_futura` con banda) | Guille |
-| D1-P6 | ¿El forecast incluye agenda no confirmada? (propuesta: solo en la banda optimista) | Guille |
-| D1-P7 | Umbrales de alerta del semáforo (% de desviación por dimensión) | Guille |
-| D1-P8 | Frecuencia de revisión (propuesta: semanal operativa, mensual de dirección) | Guille |
+| D1-P6 | ¿El forecast incluye agenda no confirmada? (propuesta: solo en la banda optimista)    | Guille |
+| D1-P7 | Umbrales de alerta del semáforo (% de desviación por dimensión)                       | Guille |
+| D1-P8 | Frecuencia de revisión (propuesta: semanal operativa, mensual de dirección)           | Guille |
 
 ---
 
-*Diseño documental de FOP-D1. No modifica código productivo, SQL, tipos ni UI. Gated por B3/A2/Reservas; requiere validación de Guille antes de abrir implementación.*
+_Diseño documental de FOP-D1. No modifica código productivo, SQL, tipos ni UI. Gated por B3/A2/Reservas; requiere validación de Guille antes de abrir implementación._
