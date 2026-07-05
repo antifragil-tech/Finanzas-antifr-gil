@@ -18,16 +18,23 @@ const PERSONA_IDS: Record<string, string> = {
 };
 
 // Global modules: header shows module name, not entity name
-const GLOBAL_VIEWS = new Set(['entidades', 'map', 'cashflow', 'patrimonio', 'vencimientos', 'maestro']);
+const GLOBAL_VIEWS = new Set([
+  'entidades',
+  'map',
+  'cashflow',
+  'patrimonio',
+  'vencimientos',
+  'maestro',
+]);
 
 const VIEW_NAMES: Record<string, string> = {
-  entidades:    'Entidades',
-  map:          'Mapa Corporativo',
-  cashflow:     'Cashflow',
-  patrimonio:   'Activos Patrimoniales',
+  entidades: 'Entidades',
+  map: 'Mapa Corporativo',
+  cashflow: 'Cashflow',
+  patrimonio: 'Activos Patrimoniales',
   vencimientos: 'Vencimientos',
-  maestro:      'Datos Maestros',
-  overview:     'Vista Global',
+  maestro: 'Datos Maestros',
+  overview: 'Vista Global',
 };
 
 type DashboardLayoutProps = {
@@ -58,11 +65,14 @@ export function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const isGlobalView = GLOBAL_VIEWS.has(selectedView);
-  const viewLabel    = VIEW_NAMES[selectedView] ?? availableViews.find(v => v.id === selectedView)?.nombre ?? selectedView;
-  const headerTitle  = isGlobalView ? viewLabel : selectedSociety.nombre;
+  const viewLabel =
+    VIEW_NAMES[selectedView] ??
+    availableViews.find((v) => v.id === selectedView)?.nombre ??
+    selectedView;
+  const headerTitle = isGlobalView ? viewLabel : selectedSociety.nombre;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100 font-sans">
+    <div className="flex h-screen overflow-hidden bg-zinc-950 font-sans text-zinc-100">
       <FinancialSidebar
         selectedSociety={selectedSociety}
         selectedView={selectedView}
@@ -71,16 +81,18 @@ export function DashboardLayout({
         isOpen={sidebarOpen}
         onViewChange={onViewChange}
         onTogglePrivacy={onTogglePrivacy}
-        onToggleSidebar={() => setSidebarOpen(v => !v)}
+        onToggleSidebar={() => setSidebarOpen((v) => !v)}
       />
-      <main className={`flex-1 h-full overflow-y-auto relative bg-zinc-950 transition-[margin] duration-200 ${sidebarOpen ? 'ml-72' : 'ml-0'}`}>
-        <header className="sticky top-0 z-40 bg-zinc-950/80 backdrop-blur-xl border-b border-white/5 px-10 py-6">
-          <div className="flex items-center gap-2 text-2xs text-zinc-500 font-medium uppercase tracking-widest mb-1.5">
+      <main
+        className={`relative h-full flex-1 overflow-y-auto bg-zinc-950 transition-[margin] duration-200 ${sidebarOpen ? 'ml-72' : 'ml-0'}`}
+      >
+        <header className="sticky top-0 z-40 border-b border-white/5 bg-zinc-950/80 px-10 py-6 backdrop-blur-xl">
+          <div className="text-2xs mb-1.5 flex items-center gap-2 font-medium uppercase tracking-widest text-zinc-500">
             {!sidebarOpen && (
               <button
                 onClick={() => setSidebarOpen(true)}
                 title="Mostrar panel"
-                className="mr-1 p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-white/[0.04] transition-all"
+                className="mr-1 rounded-lg p-1.5 text-zinc-600 transition-all hover:bg-white/[0.04] hover:text-zinc-300"
               >
                 <PanelLeftOpen size={14} />
               </button>
@@ -89,7 +101,10 @@ export function DashboardLayout({
             {!isGlobalView && (
               <>
                 <ChevronRight size={10} className="text-zinc-700" />
-                <button onClick={() => onViewChange('entidades')} className="text-zinc-400 hover:text-zinc-200 transition-colors">
+                <button
+                  onClick={() => onViewChange('entidades')}
+                  className="text-zinc-400 transition-colors hover:text-zinc-200"
+                >
                   Entidades
                 </button>
                 <ChevronRight size={10} className="text-zinc-700" />
@@ -97,11 +112,13 @@ export function DashboardLayout({
               </>
             )}
             <ChevronRight size={10} className="text-zinc-700" />
-            <span className="text-blue-400 uppercase">{viewLabel}</span>
+            <span className="uppercase text-blue-400">{viewLabel}</span>
           </div>
           <h1 className="text-4xl font-light tracking-tighter text-white">{headerTitle}</h1>
           {!isGlobalView && selectedSociety.cif && (
-            <p className="text-sm font-medium text-zinc-500 mt-1 tracking-wider">CIF: {selectedSociety.cif}</p>
+            <p className="mt-1 text-sm font-medium tracking-wider text-zinc-500">
+              CIF: {selectedSociety.cif}
+            </p>
           )}
         </header>
 
@@ -111,7 +128,10 @@ export function DashboardLayout({
               data={data}
               availableSocieties={availableSocieties}
               isPrivateMode={isPrivateMode}
-              onSelectSociety={(s) => { onSocietyChange(s); onViewChange('overview'); }}
+              onSelectSociety={(s) => {
+                onSocietyChange(s);
+                onViewChange('overview');
+              }}
               {...(onRefreshData ? { onRefresh: onRefreshData } : {})}
               onNavigateToPatrimonio={() => onViewChange('patrimonio')}
             />
@@ -119,14 +139,19 @@ export function DashboardLayout({
             <CorporateMap
               data={data}
               onSelectSociety={(id) => {
-                let society = availableSocieties.find(s => s.id === id || s.idRef === id);
+                let society = availableSocieties.find((s) => s.id === id || s.idRef === id);
                 if (!society) {
                   const searchName = id.replace(/^S-/, '').replace(/_/g, ' ').toLowerCase();
-                  society = availableSocieties.find(s =>
-                    s.nombre.toLowerCase().includes(searchName) || searchName.includes(s.nombre.toLowerCase())
+                  society = availableSocieties.find(
+                    (s) =>
+                      s.nombre.toLowerCase().includes(searchName) ||
+                      searchName.includes(s.nombre.toLowerCase()),
                   );
                 }
-                if (society) { onSocietyChange(society); onViewChange('overview'); }
+                if (society) {
+                  onSocietyChange(society);
+                  onViewChange('overview');
+                }
               }}
               onClose={() => onViewChange('entidades')}
             />
@@ -136,13 +161,21 @@ export function DashboardLayout({
               holdingNombre={selectedSociety.nombre}
               isPrivateMode={isPrivateMode}
               onViewHolding={() => {
-                const holding = availableSocieties.find(s => s.idRef === selectedSociety.idRef && s.id !== selectedSociety.id);
-                if (holding) { onSocietyChange(holding); }
+                const holding = availableSocieties.find(
+                  (s) => s.idRef === selectedSociety.idRef && s.id !== selectedSociety.id,
+                );
+                if (holding) {
+                  onSocietyChange(holding);
+                }
               }}
             />
           ) : selectedView === 'overview' ? (
             <div className="space-y-12">
-              <Overview data={data} selectedSociety={selectedSociety} isPrivateMode={isPrivateMode} />
+              <Overview
+                data={data}
+                selectedSociety={selectedSociety}
+                isPrivateMode={isPrivateMode}
+              />
               {selectedSociety.idRef && (
                 <ActivosSociedadSection
                   sociedadIdRef={selectedSociety.idRef}
@@ -152,11 +185,18 @@ export function DashboardLayout({
               )}
             </div>
           ) : selectedView === 'cashflow' ? (
-            <CashflowView data={data} selectedSociety={selectedSociety} isPrivateMode={isPrivateMode} />
+            <CashflowView
+              data={data}
+              selectedSociety={selectedSociety}
+              isPrivateMode={isPrivateMode}
+            />
           ) : selectedView === 'vencimientos' ? (
             <VencimientosView
               isPrivateMode={isPrivateMode}
-              sociedadOptions={data.sociedades.map(s => ({ id: s['ID-Ref'], nombre: s['Nombre de la Sociedad'] }))}
+              sociedadOptions={data.sociedades.map((s) => ({
+                id: s['ID-Ref'],
+                nombre: s['Nombre de la Sociedad'],
+              }))}
             />
           ) : selectedView === 'maestro' ? (
             <MaestroView
@@ -166,7 +206,10 @@ export function DashboardLayout({
           ) : selectedView === 'patrimonio' ? (
             <PatrimonioView
               isPrivateMode={isPrivateMode}
-              sociedadOptions={data.sociedades.map(s => ({ id: s['ID-Ref'], nombre: s['Nombre de la Sociedad'] }))}
+              sociedadOptions={data.sociedades.map((s) => ({
+                id: s['ID-Ref'],
+                nombre: s['Nombre de la Sociedad'],
+              }))}
             />
           ) : (
             <ProjectView data={data} projectId={selectedView} isPrivateMode={isPrivateMode} />

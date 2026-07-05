@@ -36,9 +36,7 @@ export function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex items-center justify-center transition-colors duration-200
-        disabled:opacity-50 disabled:pointer-events-none
-        ${variants[variant]} ${sizes[size]} ${className}`}
+      className={`inline-flex items-center justify-center transition-colors duration-200 disabled:pointer-events-none disabled:opacity-50 ${variants[variant]} ${sizes[size]} ${className}`}
       {...rest}
     >
       {Icon && <Icon size={size === 'sm' ? 14 : 16} className="shrink-0" />}

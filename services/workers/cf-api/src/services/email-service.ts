@@ -1,56 +1,56 @@
 /**
  * Email Notification Service
  * Sends workflow notifications via Gmail SMTP.
- * 
+ *
  * Calls the email sidecar service (Node.js + Nodemailer on port 8788)
  * which handles the actual SMTP connection to smtp.gmail.com.
  */
 
 interface SmtpConfig {
-    user: string;     // Gmail address (used as "from")
-    pass: string;     // Not used directly — sidecar handles auth
-    dashboardUrl: string;
+  user: string; // Gmail address (used as "from")
+  pass: string; // Not used directly — sidecar handles auth
+  dashboardUrl: string;
 }
 
 interface InvoiceEmailData {
-    provider: string;
-    amount: number;
-    date: string;
-    invoiceId: string;
+  provider: string;
+  amount: number;
+  date: string;
+  invoiceId: string;
 }
 
 interface EmailAttachment {
-    filename: string;
-    content: string; // base64
-    contentType: string;
+  filename: string;
+  content: string; // base64
+  contentType: string;
 }
 
 // Test mode: all emails go to this address
 const TEST_RECIPIENT = 'guillevilapt@gmail.com';
 
 const RECIPIENTS = {
-    javi: TEST_RECIPIENT,
-    alicia: TEST_RECIPIENT,
-    gestoria: TEST_RECIPIENT, // Production: gestoría real email
+  javi: TEST_RECIPIENT,
+  alicia: TEST_RECIPIENT,
+  gestoria: TEST_RECIPIENT, // Production: gestoría real email
 };
 
 // Email sidecar URL
 const EMAIL_SIDECAR_URL = 'http://localhost:8788';
 
 function formatMoney(amount: number): string {
-    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
+  return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(amount);
 }
 
 function buildEmailHTML(params: {
-    greeting: string;
-    body: string;
-    invoice: InvoiceEmailData;
-    dashboardUrl: string;
-    extraContent?: string;
+  greeting: string;
+  body: string;
+  invoice: InvoiceEmailData;
+  dashboardUrl: string;
+  extraContent?: string;
 }): string {
-    const { greeting, body, invoice, dashboardUrl, extraContent } = params;
+  const { greeting, body, invoice, dashboardUrl, extraContent } = params;
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -147,135 +147,137 @@ function buildEmailHTML(params: {
 }
 
 export class EmailService {
-    private config: SmtpConfig;
-    private logs: string[] = [];
+  private config: SmtpConfig;
+  private logs: string[] = [];
 
-    constructor(config: SmtpConfig) {
-        this.config = config;
+  constructor(config: SmtpConfig) {
+    this.config = config;
+  }
+
+  private log(msg: string) {
+    this.logs.push(`[EMAIL] ${msg}`);
+  }
+
+  getLogs(): string[] {
+    return this.logs;
+  }
+
+  /**
+   * Send simple HTML email via sidecar
+   */
+  private async send(to: string, subject: string, html: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${EMAIL_SIDECAR_URL}/send`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: `"Alsari Capital" <${this.config.user}>`,
+          to,
+          subject,
+          html,
+        }),
+      });
+
+      const result = (await response.json()) as any;
+
+      if (result.success) {
+        this.log(`✅ Email enviado a ${to} (${result.messageId})`);
+        return true;
+      } else {
+        this.log(`❌ Error email: ${result.error}`);
+        return false;
+      }
+    } catch (err: any) {
+      this.log(`❌ Error conectando al servicio de email: ${err.message}`);
+      return false;
     }
+  }
 
-    private log(msg: string) {
-        this.logs.push(`[EMAIL] ${msg}`);
+  /**
+   * Send email with file attachments via sidecar
+   */
+  private async sendWithAttachments(
+    to: string,
+    subject: string,
+    html: string,
+    attachments: EmailAttachment[],
+  ): Promise<boolean> {
+    try {
+      const response = await fetch(`${EMAIL_SIDECAR_URL}/send-with-attachments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: `"Alsari Capital" <${this.config.user}>`,
+          to,
+          subject,
+          html,
+          attachments,
+        }),
+      });
+
+      const result = (await response.json()) as any;
+
+      if (result.success) {
+        this.log(
+          `✅ Email con ${attachments.length} adjuntos enviado a ${to} (${result.messageId})`,
+        );
+        return true;
+      } else {
+        this.log(`❌ Error email con adjuntos: ${result.error}`);
+        return false;
+      }
+    } catch (err: any) {
+      this.log(`❌ Error conectando al servicio de email: ${err.message}`);
+      return false;
     }
+  }
 
-    getLogs(): string[] {
-        return this.logs;
-    }
+  /**
+   * Notify Javi (Propiedad) that Dirección accepted an invoice
+   */
+  async notifyPropiedad(invoice: InvoiceEmailData): Promise<boolean> {
+    const subject = `Nueva factura de ${invoice.provider} por ${formatMoney(invoice.amount)} pendiente`;
 
-    /**
-     * Send simple HTML email via sidecar
-     */
-    private async send(to: string, subject: string, html: string): Promise<boolean> {
-        try {
-            const response = await fetch(`${EMAIL_SIDECAR_URL}/send`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    from: `"Alsari Capital" <${this.config.user}>`,
-                    to,
-                    subject,
-                    html,
-                }),
-            });
+    const html = buildEmailHTML({
+      greeting: 'Hola Javi,',
+      body: `<strong>Dirección</strong> ha validado una nueva factura de <strong>${invoice.provider}</strong>. Tienes pendiente tu aprobación en el Dashboard.`,
+      invoice,
+      dashboardUrl: this.config.dashboardUrl,
+    });
 
-            const result = await response.json() as any;
+    this.log(`📧 Enviando notificación a Propiedad (Javi) → ${RECIPIENTS.javi}`);
+    return this.send(RECIPIENTS.javi, subject, html);
+  }
 
-            if (result.success) {
-                this.log(`✅ Email enviado a ${to} (${result.messageId})`);
-                return true;
-            } else {
-                this.log(`❌ Error email: ${result.error}`);
-                return false;
-            }
-        } catch (err: any) {
-            this.log(`❌ Error conectando al servicio de email: ${err.message}`);
-            return false;
-        }
-    }
+  /**
+   * Notify Alicia (Finanzas) that Propiedad approved an invoice
+   */
+  async notifyFinanzas(invoice: InvoiceEmailData): Promise<boolean> {
+    const subject = `Nueva factura de ${invoice.provider} por ${formatMoney(invoice.amount)} pendiente`;
 
-    /**
-     * Send email with file attachments via sidecar
-     */
-    private async sendWithAttachments(
-        to: string,
-        subject: string,
-        html: string,
-        attachments: EmailAttachment[],
-    ): Promise<boolean> {
-        try {
-            const response = await fetch(`${EMAIL_SIDECAR_URL}/send-with-attachments`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    from: `"Alsari Capital" <${this.config.user}>`,
-                    to,
-                    subject,
-                    html,
-                    attachments,
-                }),
-            });
+    const html = buildEmailHTML({
+      greeting: 'Hola Alicia,',
+      body: `<strong>Javi</strong> ha aprobado una factura de <strong>${invoice.provider}</strong>. Ya puedes subir el comprobante y proceder al pago.`,
+      invoice,
+      dashboardUrl: this.config.dashboardUrl,
+    });
 
-            const result = await response.json() as any;
+    this.log(`📧 Enviando notificación a Finanzas (Alicia) → ${RECIPIENTS.alicia}`);
+    return this.send(RECIPIENTS.alicia, subject, html);
+  }
 
-            if (result.success) {
-                this.log(`✅ Email con ${attachments.length} adjuntos enviado a ${to} (${result.messageId})`);
-                return true;
-            } else {
-                this.log(`❌ Error email con adjuntos: ${result.error}`);
-                return false;
-            }
-        } catch (err: any) {
-            this.log(`❌ Error conectando al servicio de email: ${err.message}`);
-            return false;
-        }
-    }
+  /**
+   * Notify Gestoría that an invoice has been paid and archived.
+   * Includes the invoice PDF and payment proof as attachments.
+   */
+  async notifyGestoria(
+    invoice: InvoiceEmailData,
+    attachments: EmailAttachment[],
+    driveLinks: { invoiceLink: string; proofLink: string; folderLink: string },
+  ): Promise<boolean> {
+    const subject = `Nueva Factura Pagada - Alsari Capital`;
 
-    /**
-     * Notify Javi (Propiedad) that Dirección accepted an invoice
-     */
-    async notifyPropiedad(invoice: InvoiceEmailData): Promise<boolean> {
-        const subject = `Nueva factura de ${invoice.provider} por ${formatMoney(invoice.amount)} pendiente`;
-
-        const html = buildEmailHTML({
-            greeting: 'Hola Javi,',
-            body: `<strong>Dirección</strong> ha validado una nueva factura de <strong>${invoice.provider}</strong>. Tienes pendiente tu aprobación en el Dashboard.`,
-            invoice,
-            dashboardUrl: this.config.dashboardUrl,
-        });
-
-        this.log(`📧 Enviando notificación a Propiedad (Javi) → ${RECIPIENTS.javi}`);
-        return this.send(RECIPIENTS.javi, subject, html);
-    }
-
-    /**
-     * Notify Alicia (Finanzas) that Propiedad approved an invoice
-     */
-    async notifyFinanzas(invoice: InvoiceEmailData): Promise<boolean> {
-        const subject = `Nueva factura de ${invoice.provider} por ${formatMoney(invoice.amount)} pendiente`;
-
-        const html = buildEmailHTML({
-            greeting: 'Hola Alicia,',
-            body: `<strong>Javi</strong> ha aprobado una factura de <strong>${invoice.provider}</strong>. Ya puedes subir el comprobante y proceder al pago.`,
-            invoice,
-            dashboardUrl: this.config.dashboardUrl,
-        });
-
-        this.log(`📧 Enviando notificación a Finanzas (Alicia) → ${RECIPIENTS.alicia}`);
-        return this.send(RECIPIENTS.alicia, subject, html);
-    }
-
-    /**
-     * Notify Gestoría that an invoice has been paid and archived.
-     * Includes the invoice PDF and payment proof as attachments.
-     */
-    async notifyGestoria(
-        invoice: InvoiceEmailData,
-        attachments: EmailAttachment[],
-        driveLinks: { invoiceLink: string; proofLink: string; folderLink: string },
-    ): Promise<boolean> {
-        const subject = `Nueva Factura Pagada - Alsari Capital`;
-
-        const driveSection = `
+    const driveSection = `
             <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#09090b;border-radius:12px;border:1px solid rgba(255,255,255,0.08);margin-bottom:20px;">
                 <tr>
                     <td style="padding:16px 20px;">
@@ -287,15 +289,17 @@ export class EmailService {
                 </tr>
             </table>`;
 
-        const html = buildEmailHTML({
-            greeting: 'Nueva Factura Pagada',
-            body: `La factura de <strong>${invoice.provider}</strong> por <strong>${formatMoney(invoice.amount)}</strong> ha sido pagada y archivada. Adjuntamos la factura original y el justificante de pago.`,
-            invoice,
-            dashboardUrl: this.config.dashboardUrl,
-            extraContent: driveSection,
-        });
+    const html = buildEmailHTML({
+      greeting: 'Nueva Factura Pagada',
+      body: `La factura de <strong>${invoice.provider}</strong> por <strong>${formatMoney(invoice.amount)}</strong> ha sido pagada y archivada. Adjuntamos la factura original y el justificante de pago.`,
+      invoice,
+      dashboardUrl: this.config.dashboardUrl,
+      extraContent: driveSection,
+    });
 
-        this.log(`📧 Enviando notificación a Gestoría → ${RECIPIENTS.gestoria} (${attachments.length} adjuntos)`);
-        return this.sendWithAttachments(RECIPIENTS.gestoria, subject, html, attachments);
-    }
+    this.log(
+      `📧 Enviando notificación a Gestoría → ${RECIPIENTS.gestoria} (${attachments.length} adjuntos)`,
+    );
+    return this.sendWithAttachments(RECIPIENTS.gestoria, subject, html, attachments);
+  }
 }

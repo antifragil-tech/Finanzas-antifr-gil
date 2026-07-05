@@ -3,31 +3,64 @@
 // Detalle (desglose operativo, valor de continuidad, supuestos) desplegable.
 import type { AnalisisFinanciero, KpisExplotacion } from '../../../../lib/analisisFinanciero';
 import {
-  calcKpisExplotacion, semaforoMargenEbitda, semaforoPayback, semaforoTir,
+  calcKpisExplotacion,
+  semaforoMargenEbitda,
+  semaforoPayback,
+  semaforoTir,
 } from '../../../../lib/analisisFinanciero';
-import { evaluarCalidadExplotacion, evaluarVeredictoExplotacion } from '../../../../lib/explotacionInsights';
+import {
+  evaluarCalidadExplotacion,
+  evaluarVeredictoExplotacion,
+} from '../../../../lib/explotacionInsights';
 import type { ProyectoRow } from '../../../../lib/proyectosApi';
-import { VeredictoBlock, CalidadBlock, EscenariosResumenTabla, type EscenarioFila } from './ejecutivo';
+import {
+  VeredictoBlock,
+  CalidadBlock,
+  EscenariosResumenTabla,
+  type EscenarioFila,
+} from './ejecutivo';
 import { KpiCard, KpiGrid, Collapsible, SectionHint, fmt, fmtPct, fmtAno, safe } from './shared';
 
 type Props = { analisis: AnalisisFinanciero; proyecto: ProyectoRow };
 
 const EXPL_FILAS: EscenarioFila[] = [
-  { label: 'Ingresos',  key: 'ingresosAnuales',   render: fmt },
-  { label: 'EBITDA',    key: 'ebitdaAnual',        render: fmt },
-  { label: 'Caja anual', key: 'fcfAnual',          render: fmt },
-  { label: 'Payback',   key: 'paybackOperativo',   render: fmtAno },
-  { label: 'VAN',       key: 'van',                render: fmt },
-  { label: 'TIR',       key: 'tir',                render: fmtPct },
+  { label: 'Ingresos', key: 'ingresosAnuales', render: fmt },
+  { label: 'EBITDA', key: 'ebitdaAnual', render: fmt },
+  { label: 'Caja anual', key: 'fcfAnual', render: fmt },
+  { label: 'Payback', key: 'paybackOperativo', render: fmtAno },
+  { label: 'VAN', key: 'van', render: fmt },
+  { label: 'TIR', key: 'tir', render: fmtPct },
 ];
 
 // ── Desglose (fila) ───────────────────────────────────────────────────────────
 
-function Row({ label, value, bold, isSub, negativo }: { label: string; value: string; bold?: boolean; isSub?: boolean; negativo?: boolean }) {
+function Row({
+  label,
+  value,
+  bold,
+  isSub,
+  negativo,
+}: {
+  label: string;
+  value: string;
+  bold?: boolean;
+  isSub?: boolean;
+  negativo?: boolean;
+}) {
   return (
-    <div className={`flex items-center justify-between py-1.5 ${bold ? 'border-y border-white/[0.06] my-1' : 'border-b border-white/[0.03] last:border-0'}`}>
-      <span className={`${bold ? 'text-zinc-200 font-semibold' : isSub ? 'text-zinc-600 pl-3' : 'text-zinc-500'} text-xs`}>{label}</span>
-      <span className={`text-xs tabular-nums ${bold ? 'font-semibold text-zinc-100' : negativo ? 'text-rose-400/90' : 'text-zinc-300'}`}>{value}</span>
+    <div
+      className={`flex items-center justify-between py-1.5 ${bold ? 'my-1 border-y border-white/[0.06]' : 'border-b border-white/[0.03] last:border-0'}`}
+    >
+      <span
+        className={`${bold ? 'font-semibold text-zinc-200' : isSub ? 'pl-3 text-zinc-600' : 'text-zinc-500'} text-xs`}
+      >
+        {label}
+      </span>
+      <span
+        className={`text-xs tabular-nums ${bold ? 'font-semibold text-zinc-100' : negativo ? 'text-rose-400/90' : 'text-zinc-300'}`}
+      >
+        {value}
+      </span>
     </div>
   );
 }
@@ -50,13 +83,18 @@ function DesgloseBlock({ analisis, k }: { analisis: AnalisisFinanciero; k: KpisE
         <Row label="Costes fijos" value={fmt(-costesFijos)} isSub negativo />
         <Row label="EBITDA anual" value={safe(k.ebitdaAnual, fmt)} bold />
         {capex > 0 && <Row label="CAPEX de mantenimiento" value={fmt(-capex)} isSub negativo />}
-        {k.fiscalidadAplicada
-          ? <Row label="Impuestos estimados" value={fmt(-(k.impuestosAnual ?? 0))} isSub negativo />
-          : <Row label="Impuestos" value="No aplicados" isSub />}
+        {k.fiscalidadAplicada ? (
+          <Row label="Impuestos estimados" value={fmt(-(k.impuestosAnual ?? 0))} isSub negativo />
+        ) : (
+          <Row label="Impuestos" value="No aplicados" isSub />
+        )}
         <Row label="Caja libre anual (FCF)" value={safe(k.fcfAnual, fmt)} bold />
       </div>
       {!k.fiscalidadAplicada && (
-        <SectionHint>Análisis antes de impuestos. Actívalos en "Editar parámetros" → bloque "Fiscalidad" para ver la caja libre después de impuestos.</SectionHint>
+        <SectionHint>
+          Análisis antes de impuestos. Actívalos en "Editar parámetros" → bloque "Fiscalidad" para
+          ver la caja libre después de impuestos.
+        </SectionHint>
       )}
     </Collapsible>
   );
@@ -66,23 +104,55 @@ function ValorContinuidadBlock({ k }: { k: KpisExplotacion }) {
   return (
     <Collapsible
       title="Valor de continuidad"
-      subtitle={k.valorTerminalAplicado ? (k.metodoTerminalLabel ?? 'Aplicado') : 'No aplicado — supuesto conservador'}
-      badge={<span className={`text-2xs font-semibold uppercase tracking-widest ${k.valorTerminalAplicado ? 'text-emerald-400' : 'text-zinc-600'}`}>{k.valorTerminalAplicado ? 'Activo' : 'Inactivo'}</span>}
+      subtitle={
+        k.valorTerminalAplicado
+          ? (k.metodoTerminalLabel ?? 'Aplicado')
+          : 'No aplicado — supuesto conservador'
+      }
+      badge={
+        <span
+          className={`text-2xs font-semibold uppercase tracking-widest ${k.valorTerminalAplicado ? 'text-emerald-400' : 'text-zinc-600'}`}
+        >
+          {k.valorTerminalAplicado ? 'Activo' : 'Inactivo'}
+        </span>
+      }
     >
       {k.valorTerminalIncompleto && (
-        <SectionHint>El valor de continuidad está activado pero faltan datos (múltiplo de EBITDA o valor manual). No se incluye en el VAN/TIR hasta completarlo.</SectionHint>
+        <SectionHint>
+          El valor de continuidad está activado pero faltan datos (múltiplo de EBITDA o valor
+          manual). No se incluye en el VAN/TIR hasta completarlo.
+        </SectionHint>
       )}
       {!k.valorTerminalAplicado && !k.valorTerminalIncompleto && (
         <p className="text-xs text-zinc-600">
-          Sin valor de continuidad: se asume que el negocio no tiene valor residual al final del horizonte. Supuesto conservador.
-          Actívalo en "Editar parámetros" → bloque "Valor de continuidad" (manual o múltiplo de EBITDA).
+          Sin valor de continuidad: se asume que el negocio no tiene valor residual al final del
+          horizonte. Supuesto conservador. Actívalo en "Editar parámetros" → bloque "Valor de
+          continuidad" (manual o múltiplo de EBITDA).
         </p>
       )}
       {k.valorTerminalAplicado && (
         <KpiGrid cols={3}>
-          <KpiCard label="Método" value={k.metodoTerminalLabel ?? '—'} sub="Cómo se estima el valor final" />
-          <KpiCard label="Valor terminal futuro" value={k.valorTerminalFuturo != null ? fmt(k.valorTerminalFuturo) : '—'} sub={`En el año ${k.horizonteUsado ?? 10}`} tooltip="Valor estimado del negocio al final del horizonte. Se suma al flujo del último año." />
-          <KpiCard label="Valor presente del terminal" value={k.valorTerminalPresente != null ? fmt(k.valorTerminalPresente) : '—'} sub={k.tasaDescuentoUsada != null ? `Descontado al ${fmtPct(k.tasaDescuentoUsada)}` : 'Descontado a hoy'} tooltip="Valor terminal futuro traído a hoy. Es lo que aporta el valor de continuidad al VAN." />
+          <KpiCard
+            label="Método"
+            value={k.metodoTerminalLabel ?? '—'}
+            sub="Cómo se estima el valor final"
+          />
+          <KpiCard
+            label="Valor terminal futuro"
+            value={k.valorTerminalFuturo != null ? fmt(k.valorTerminalFuturo) : '—'}
+            sub={`En el año ${k.horizonteUsado ?? 10}`}
+            tooltip="Valor estimado del negocio al final del horizonte. Se suma al flujo del último año."
+          />
+          <KpiCard
+            label="Valor presente del terminal"
+            value={k.valorTerminalPresente != null ? fmt(k.valorTerminalPresente) : '—'}
+            sub={
+              k.tasaDescuentoUsada != null
+                ? `Descontado al ${fmtPct(k.tasaDescuentoUsada)}`
+                : 'Descontado a hoy'
+            }
+            tooltip="Valor terminal futuro traído a hoy. Es lo que aporta el valor de continuidad al VAN."
+          />
         </KpiGrid>
       )}
     </Collapsible>
@@ -93,9 +163,22 @@ function SupuestosBlock({ k }: { k: KpisExplotacion }) {
   return (
     <Collapsible title="Supuestos e horizonte" subtitle="Tasa, horizonte y crecimiento usados">
       <KpiGrid cols={3}>
-        <KpiCard label="Tasa de descuento" value={k.tasaDescuentoUsada != null ? fmtPct(k.tasaDescuentoUsada) : '—'} sub="Para descontar los flujos" />
-        <KpiCard label="Horizonte de análisis" value={k.horizonteUsado != null ? `${k.horizonteUsado} años` : '—'} sub="Años proyectados" />
-        <KpiCard label="Crecimiento anual del FCF" value={k.crecimientoPct != null ? `${k.crecimientoPct}%` : '—'} sub="Aplicado a la caja libre (simplificación)" tooltip="Crecimiento anual aplicado directamente a la caja libre, como simplificación frente a proyectar cada línea." />
+        <KpiCard
+          label="Tasa de descuento"
+          value={k.tasaDescuentoUsada != null ? fmtPct(k.tasaDescuentoUsada) : '—'}
+          sub="Para descontar los flujos"
+        />
+        <KpiCard
+          label="Horizonte de análisis"
+          value={k.horizonteUsado != null ? `${k.horizonteUsado} años` : '—'}
+          sub="Años proyectados"
+        />
+        <KpiCard
+          label="Crecimiento anual del FCF"
+          value={k.crecimientoPct != null ? `${k.crecimientoPct}%` : '—'}
+          sub="Aplicado a la caja libre (simplificación)"
+          tooltip="Crecimiento anual aplicado directamente a la caja libre, como simplificación frente a proyectar cada línea."
+        />
       </KpiGrid>
     </Collapsible>
   );
@@ -123,7 +206,9 @@ export function ExplotacionView({ analisis, proyecto }: Props) {
 
       {/* 3 · KPIs principales */}
       <div className="space-y-2">
-        <p className="text-2xs font-semibold text-zinc-600 uppercase tracking-widest">Indicadores clave</p>
+        <p className="text-2xs font-semibold uppercase tracking-widest text-zinc-600">
+          Indicadores clave
+        </p>
         <KpiGrid cols={4}>
           <KpiCard
             label="Inversión inicial"
@@ -174,7 +259,11 @@ export function ExplotacionView({ analisis, proyecto }: Props) {
           <KpiCard
             label="Valor actual neto (VAN)"
             value={safe(k.van, fmt)}
-            sub={k.tasaDescuentoUsada != null ? `Tasa ${fmtPct(k.tasaDescuentoUsada)} · ${k.horizonteUsado} años` : undefined}
+            sub={
+              k.tasaDescuentoUsada != null
+                ? `Tasa ${fmtPct(k.tasaDescuentoUsada)} · ${k.horizonteUsado} años`
+                : undefined
+            }
             semaforo={k.van != null ? (k.van > 0 ? 'verde' : 'rojo') : 'neutro'}
             tooltip="Valor presente de la caja libre proyectada (más el valor de continuidad si se activa) descontada a la tasa exigida, menos la inversión inicial. VAN positivo = crea valor."
           />
@@ -193,16 +282,28 @@ export function ExplotacionView({ analisis, proyecto }: Props) {
 
       {/* Avisos de validación */}
       {!tieneIngresos && (
-        <SectionHint>Faltan los ingresos anuales: el EBITDA, el VAN y la TIR no son definitivos. Complétalos en "Editar parámetros" → "Ingresos".</SectionHint>
+        <SectionHint>
+          Faltan los ingresos anuales: el EBITDA, el VAN y la TIR no son definitivos. Complétalos en
+          "Editar parámetros" → "Ingresos".
+        </SectionHint>
       )}
       {tieneIngresos && !tieneInversion && (
-        <SectionHint>Falta la inversión inicial: la recuperación, el VAN y la TIR no son definitivos. Añádela en "Editar parámetros" → "Inversión inicial".</SectionHint>
+        <SectionHint>
+          Falta la inversión inicial: la recuperación, el VAN y la TIR no son definitivos. Añádela
+          en "Editar parámetros" → "Inversión inicial".
+        </SectionHint>
       )}
       {sinTasa && (
-        <SectionHint>No se ha indicado tasa de descuento: se usa 8% por defecto. Ajústala en "Editar parámetros" → "Horizonte".</SectionHint>
+        <SectionHint>
+          No se ha indicado tasa de descuento: se usa 8% por defecto. Ajústala en "Editar
+          parámetros" → "Horizonte".
+        </SectionHint>
       )}
       {sinHorizonte && (
-        <SectionHint>No se ha indicado horizonte: se usan 10 años por defecto. Ajústalo en "Editar parámetros" → "Horizonte".</SectionHint>
+        <SectionHint>
+          No se ha indicado horizonte: se usan 10 años por defecto. Ajústalo en "Editar parámetros"
+          → "Horizonte".
+        </SectionHint>
       )}
 
       {/* 5 · Detalle desplegable */}

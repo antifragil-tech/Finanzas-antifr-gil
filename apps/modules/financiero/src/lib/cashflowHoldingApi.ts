@@ -4,7 +4,11 @@
 
 import { sbHeaders, sbUrl } from '@alsari/supabase-client';
 
-export type FuenteFlujoHolding = 'flujo_manual' | 'presupuesto_pago' | 'factura_recibida' | 'vencimiento';
+export type FuenteFlujoHolding =
+  | 'flujo_manual'
+  | 'presupuesto_pago'
+  | 'factura_recibida'
+  | 'vencimiento';
 
 export type FlujoHolding = {
   proyecto_id_ref: string | null;
@@ -27,8 +31,8 @@ async function req<T>(path: string): Promise<T> {
 }
 
 export type FiltrosFlujoHolding = {
-  sociedadId?:  string;          // una sola sociedad (legacy)
-  sociedadIds?: string[];        // varias sociedades — usa in.()
+  sociedadId?: string; // una sola sociedad (legacy)
+  sociedadIds?: string[]; // varias sociedades — usa in.()
   desde?: string;
   hasta?: string;
   soloReales?: boolean;
@@ -36,9 +40,7 @@ export type FiltrosFlujoHolding = {
   limit?: number;
 };
 
-export async function getFlujosHolding(
-  filtros: FiltrosFlujoHolding = {}
-): Promise<FlujoHolding[]> {
+export async function getFlujosHolding(filtros: FiltrosFlujoHolding = {}): Promise<FlujoHolding[]> {
   const params = new URLSearchParams();
   params.set('order', 'fecha.asc');
   params.set('limit', String(filtros.limit ?? 1500));
@@ -56,14 +58,14 @@ export async function getFlujosHolding(
   }
 
   if (filtros.desde) params.set('fecha', `gte.${filtros.desde}`);
-  if (filtros.soloReales)     params.set('es_real', 'eq.true');
+  if (filtros.soloReales) params.set('es_real', 'eq.true');
   if (filtros.soloPendientes) params.set('es_real', 'eq.false');
 
   const rows = await req<FlujoHolding[]>(`cashflow_consolidado?${params.toString()}`);
 
   // Filtro 'hasta' en cliente (PostgREST no permite gte+lte sobre el mismo campo
   // en una sola request sin RPC)
-  return filtros.hasta ? rows.filter(r => r.fecha <= filtros.hasta!) : rows;
+  return filtros.hasta ? rows.filter((r) => r.fecha <= filtros.hasta!) : rows;
 }
 
 // ── Fetch de sociedades disponibles para el selector ─────────────────────────

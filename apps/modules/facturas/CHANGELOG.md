@@ -7,6 +7,7 @@ Cambios relevantes del módulo. Formato [Keep a Changelog](https://keepachangelo
 ## [Unreleased]
 
 ### Added
+
 - (Vacío)
 
 ---
@@ -14,6 +15,7 @@ Cambios relevantes del módulo. Formato [Keep a Changelog](https://keepachangelo
 ## [0.1.0] — 2026-05-16
 
 ### Added
+
 - Módulo inicial de gestión de facturas (Fase 1).
 - Lista con búsqueda por texto libre y filtros por estado.
 - 6 estados: pending, en_propiedad, en_finanzas, paid, paid_archived, rejected.

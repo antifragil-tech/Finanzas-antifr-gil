@@ -2,10 +2,10 @@ import { describe, it, expect } from 'vitest';
 import { normalizeNif, matchSociedadPorNif, type SociedadLite } from '../sociedadMatch';
 
 const SOCIEDADES: SociedadLite[] = [
-  { id_ref: 'S-002-1', cif: null },              // Alrive (sin cif)
-  { id_ref: 'S-001', cif: 'B-93626158' },        // Alsari Inversiones (con guion)
-  { id_ref: 'S-002', cif: 'B-92182500.' },       // Rialsa (con punto)
-  { id_ref: 'H-002', cif: 'B-26757070' },        // Armia
+  { id_ref: 'S-002-1', cif: null }, // Alrive (sin cif)
+  { id_ref: 'S-001', cif: 'B-93626158' }, // Alsari Inversiones (con guion)
+  { id_ref: 'S-002', cif: 'B-92182500.' }, // Rialsa (con punto)
+  { id_ref: 'H-002', cif: 'B-26757070' }, // Armia
 ];
 
 describe('normalizeNif', () => {

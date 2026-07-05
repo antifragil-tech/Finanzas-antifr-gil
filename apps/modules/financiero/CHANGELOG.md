@@ -7,6 +7,7 @@ Cambios relevantes del módulo. Formato [Keep a Changelog](https://keepachangelo
 ## [Unreleased]
 
 ### Added
+
 - (Vacío)
 
 ---
@@ -14,6 +15,7 @@ Cambios relevantes del módulo. Formato [Keep a Changelog](https://keepachangelo
 ## [0.1.0] — 2026-05-16
 
 ### Added
+
 - Migración completa del dashboard financiero standalone al monorepo (Fase 1).
 - 5 vistas: Overview (KPIs + cartera), CorporateMap (SVG interactivo),
   ProjectView (detalle + Recharts), Contabilidad (libro mayor), WorkspaceView.
