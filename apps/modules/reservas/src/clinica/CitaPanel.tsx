@@ -26,18 +26,20 @@ import { CitaBadges } from './badges';
 
 const hhmm = (iso: string) => iso.slice(11, 16);
 
+/**
+ * 'fixed' (default): overlay sobre el viewport completo — módulo standalone.
+ * 'contained': overlay limitado al contenedor posicionado (relative) más
+ * cercano, para embeber el módulo en el host/demo sin tapar toda la app.
+ */
+export type CitaPanelMode = 'fixed' | 'contained';
+
 interface Props {
   cita: CitaMock | null;
   onClose: () => void;
   onAccion: (accion: AccionCita) => void;
   onPago: (estado: EstadoPago) => void;
   onOrigen: (origen: OrigenCita) => void;
-  /**
-   * 'fixed' (default): overlay sobre el viewport completo — módulo standalone.
-   * 'contained': overlay limitado al contenedor posicionado (relative) más
-   * cercano, para embeber el módulo en el host/demo sin tapar toda la app.
-   */
-  mode?: 'fixed' | 'contained';
+  mode?: CitaPanelMode;
 }
 
 // Panel lateral (slide-over) de una cita. Acciones mock/local, sin backend.

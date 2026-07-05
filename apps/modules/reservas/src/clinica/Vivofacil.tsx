@@ -2,7 +2,7 @@ import { useState, Fragment } from 'react';
 import { Copy, Building2, CheckCircle2, ChevronDown, ChevronRight } from 'lucide-react';
 import { getProfesional, getServicio, VIVOFACIL_VALOR_SESION } from '../spike/mockData';
 import { Subvista } from './Subvista';
-import { CitaPanel } from './CitaPanel';
+import { CitaPanel, type CitaPanelMode } from './CitaPanel';
 import { useCitasStore } from './CitasStore';
 
 type EstadoCierre = 'abierto' | 'listo' | 'facturado' | 'cobrado';
@@ -32,7 +32,7 @@ const diaCorto = (iso: string) =>
 
 // Vista "Vivofácil": cierre mensual MOCK de las derivaciones. Cada sesión completada
 // vale 45 €; se factura agrupado a fin de mes → cobro B2B. NO crea facturas reales.
-export function Vivofacil() {
+export function Vivofacil({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
   const c = useCitasStore();
   const mesLabel = new Date(`${c.hoy}T00:00:00`).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
   const citasVf = c.citas.filter((x) => x.origen === 'vivofacil');
@@ -184,6 +184,7 @@ export function Vivofacil() {
         onAccion={c.onAccion}
         onPago={c.onPago}
         onOrigen={c.onOrigen}
+        mode={panelMode}
       />
     </Subvista>
   );

@@ -12,7 +12,7 @@ import {
   type CategoriaServicio,
 } from '../../spike/mockData';
 import { ESTADO_META, PAGO_SIN_ABONAR } from '../../spike/estados';
-import { CitaPanel } from '../CitaPanel';
+import { CitaPanel, type CitaPanelMode } from '../CitaPanel';
 import { useCitasStore } from '../CitasStore';
 import { repartirCarriles } from './lanes';
 
@@ -47,7 +47,7 @@ const hhmm = (iso: string) => iso.slice(11, 16);
 // columnas = profesionales, filas = horas, lectura rápida de huecos y citas,
 // línea de "ahora", KPIs del día y clic en hueco para cita rápida. Las citas
 // viven en el store compartido del módulo (CitasStore); aquí solo se filtra hoy.
-export function AgendaHoy() {
+export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
   const c = useCitasStore();
   const hoy = c.hoy;
   const citasHoy = c.citas.filter((x) => x.inicio.startsWith(hoy));
@@ -258,6 +258,7 @@ export function AgendaHoy() {
         onAccion={c.onAccion}
         onPago={c.onPago}
         onOrigen={c.onOrigen}
+        mode={panelMode}
       />
     </div>
   );

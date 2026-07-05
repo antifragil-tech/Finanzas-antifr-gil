@@ -15,7 +15,7 @@ import { getServicio, getProfesional, type CitaMock } from '../spike/mockData';
 import { PAGO_SIN_ABONAR } from '../spike/estados';
 import { BONOS, restantes } from './mock/bonos';
 import { Subvista } from './Subvista';
-import { CitaPanel } from './CitaPanel';
+import { CitaPanel, type CitaPanelMode } from './CitaPanel';
 import { useCitasStore } from './CitasStore';
 
 const hhmm = (iso: string) => iso.slice(11, 16);
@@ -39,7 +39,7 @@ interface Grupo {
 
 // Vista "Pendientes" (Clínica > Agenda > Pendientes): bandeja operativa de la
 // semana. Agrupa lo que recepción debe resolver y permite acciones mock.
-export function Pendientes() {
+export function Pendientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
   const c = useCitasStore();
   const { citas } = c;
   const [aviso, setAviso] = useState<string | null>(null);
@@ -248,6 +248,7 @@ export function Pendientes() {
         onAccion={c.onAccion}
         onPago={c.onPago}
         onOrigen={c.onOrigen}
+        mode={panelMode}
       />
     </Subvista>
   );

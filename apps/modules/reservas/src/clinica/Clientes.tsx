@@ -3,7 +3,7 @@ import { MessageCircle, Copy, User, History, ExternalLink, Search } from 'lucide
 import { CLIENTES, type ClienteMock } from './mock/clientes';
 import { getOrigen } from '../spike/mockData';
 import { Subvista } from './Subvista';
-import { CitaPanel } from './CitaPanel';
+import { CitaPanel, type CitaPanelMode } from './CitaPanel';
 import { useCitasStore } from './CitasStore';
 
 const fecha = (d: string | null) =>
@@ -12,7 +12,7 @@ const fecha = (d: string | null) =>
 // Vista "Clientes": ficha ADMINISTRATIVA mock (nombres y contactos ficticios,
 // sin datos reales). La ficha completa vive en un sistema externo (enlace mock);
 // aquí solo agenda, pagos y bonos.
-export function Clientes() {
+export function Clientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
   const c = useCitasStore();
   const [aviso, setAviso] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');
@@ -126,6 +126,7 @@ export function Clientes() {
         onAccion={c.onAccion}
         onPago={c.onPago}
         onOrigen={c.onOrigen}
+        mode={panelMode}
       />
     </Subvista>
   );

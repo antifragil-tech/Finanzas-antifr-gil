@@ -8,20 +8,29 @@ import { Vivofacil } from './clinica/Vivofacil';
 import { Clientes } from './clinica/Clientes';
 import { Bonos } from './clinica/Bonos';
 import { CitasProvider, useCitasStore } from './clinica/CitasStore';
+import type { CitaPanelMode } from './clinica/CitaPanel';
+
+interface ClinicaDashboardProps {
+  /**
+   * Modo del panel de cita: 'fixed' (default, standalone) o 'contained' para
+   * embeber el módulo en el host/demo sin que el panel tape toda la app.
+   */
+  panelMode?: CitaPanelMode;
+}
 
 // Raíz del módulo Clínica/Reservas. Clínica > Agenda con sub-navegación:
 // Hoy (vista por profesional, núcleo de recepción) por defecto · Semana · Mes ·
 // Pendientes · Gestión. El estado mock de citas vive en CitasProvider, compartido
 // por todas las vistas. Mismo patrón de export que los demás módulos (src/index.ts).
-export function ClinicaDashboard() {
+export function ClinicaDashboard({ panelMode = 'fixed' }: ClinicaDashboardProps = {}) {
   return (
     <CitasProvider>
-      <ClinicaShell />
+      <ClinicaShell panelMode={panelMode} />
     </CitasProvider>
   );
 }
 
-function ClinicaShell() {
+function ClinicaShell({ panelMode }: { panelMode: CitaPanelMode }) {
   const [vista, setVista] = useState<VistaAgenda>('hoy');
   const { setSelectedId } = useCitasStore();
 
@@ -50,13 +59,13 @@ function ClinicaShell() {
       </header>
 
       <main className="min-h-0 flex-1 px-6 py-4">
-        {vista === 'hoy' && <AgendaHoy />}
+        {vista === 'hoy' && <AgendaHoy panelMode={panelMode} />}
         {vista === 'semana' && <CalendarioSpike vistaInicial="semana" />}
         {vista === 'mes' && <CalendarioSpike vistaInicial="mes" />}
-        {vista === 'pendientes' && <Pendientes />}
-        {vista === 'cobros' && <Cobros />}
-        {vista === 'vivofacil' && <Vivofacil />}
-        {vista === 'clientes' && <Clientes />}
+        {vista === 'pendientes' && <Pendientes panelMode={panelMode} />}
+        {vista === 'cobros' && <Cobros panelMode={panelMode} />}
+        {vista === 'vivofacil' && <Vivofacil panelMode={panelMode} />}
+        {vista === 'clientes' && <Clientes panelMode={panelMode} />}
         {vista === 'bonos' && <Bonos />}
       </main>
     </div>

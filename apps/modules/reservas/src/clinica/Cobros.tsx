@@ -8,7 +8,7 @@ import {
 } from '../spike/mockData';
 import { PAGO_SIN_ABONAR } from '../spike/estados';
 import { Subvista } from './Subvista';
-import { CitaPanel } from './CitaPanel';
+import { CitaPanel, type CitaPanelMode } from './CitaPanel';
 import { useCitasStore } from './CitasStore';
 import { CLIENTES } from './mock/clientes';
 
@@ -25,7 +25,7 @@ const bonoDe = (c: CitaMock) => CLIENTES.find((cl) => cl.nombre === c.cliente_no
 // Vista "Cobros pendientes": quién debe, cuánto y desde cuándo. Diferencia
 // cliente directo de partners (Vivofácil/Oasis/Lidomare/otro). Acción de pago mock.
 // Esta lectura alimentará después Finanzas Operativas / Tesorería (cuando exista).
-export function Cobros() {
+export function Cobros({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
   const c = useCitasStore();
   const hoyMs = new Date(`${c.hoy}T00:00:00`).getTime();
   const [aviso, setAviso] = useState<string | null>(null);
@@ -134,6 +134,7 @@ export function Cobros() {
         onAccion={c.onAccion}
         onPago={c.onPago}
         onOrigen={c.onOrigen}
+        mode={panelMode}
       />
     </Subvista>
   );
