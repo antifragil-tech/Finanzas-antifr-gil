@@ -31,7 +31,7 @@ export type Fila = Record<string, string>;
 /** Parser CSV mínimo sin dependencias: detecta ; o , y respeta comillas. */
 export function parseCsv(texto: string): Fila[] {
   const lineas = texto
-    .replace(/^﻿/, '')
+    .replace(/^\uFEFF/, '')
     .split(/\r?\n/)
     .filter((l) => l.trim() !== '');
   if (lineas.length < 2) return [];
