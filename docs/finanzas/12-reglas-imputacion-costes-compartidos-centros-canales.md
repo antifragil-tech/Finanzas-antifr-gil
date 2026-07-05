@@ -25,64 +25,64 @@ Un catálogo de **reglas de imputación** que asigne cada coste a las dimensione
 
 ## 3. Conceptos
 
-| Concepto | Definición |
-|---|---|
-| `coste_directo` | Atribuible a una sesión/servicio concreto (profesional por sesión, material de la sesión, comisión del cobro). Entra en M1/M2 |
-| `coste_variable` | Crece con la actividad aunque no sea de una sesión concreta (consumibles, comisiones TPV agregadas) |
-| `coste_fijo` | Del periodo, independiente del volumen (alquiler, nóminas, software con cuota) |
-| `coste_compartido` | Lo soportan dos o más entidades/proyectos/centros (recepción con Lidomare, suministros de sede compartida) → **exige regla explícita** |
-| `coste_general` | Estructura no asignable con criterio razonable (gestoría global, seguros, administración) → al resultado global (M4), no se reparte por defecto |
-| `coste_comercial` | De captación: marketing, campañas, eventos de captación → imputable a **canal/campaña** |
-| `coste_de_personas` | El de FOP-B1 (08): por sesión (autónomos) o fijo mensual (nóminas, parte compartida) |
-| `regla_imputacion` | Cómo se asigna un coste: destino(s), método (§5), driver si aplica, vigencia, autor. **Versionada**: cambiar una regla crea versión nueva, la historia no se reescribe |
-| `driver` | La variable que reparte (nº sesiones, ingresos, horas, m², clientes captados) |
-| `periodo_imputacion` | El mes del devengo del coste (fecha de servicio, no de pago — D-op-2) |
-| `centro` / `canal` / `proyecto` | Dimensiones de 09 §6.1: dónde se presta / quién trajo al cliente / línea de negocio |
+| Concepto                        | Definición                                                                                                                                                             |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `coste_directo`                 | Atribuible a una sesión/servicio concreto (profesional por sesión, material de la sesión, comisión del cobro). Entra en M1/M2                                          |
+| `coste_variable`                | Crece con la actividad aunque no sea de una sesión concreta (consumibles, comisiones TPV agregadas)                                                                    |
+| `coste_fijo`                    | Del periodo, independiente del volumen (alquiler, nóminas, software con cuota)                                                                                         |
+| `coste_compartido`              | Lo soportan dos o más entidades/proyectos/centros (recepción con Lidomare, suministros de sede compartida) → **exige regla explícita**                                 |
+| `coste_general`                 | Estructura no asignable con criterio razonable (gestoría global, seguros, administración) → al resultado global (M4), no se reparte por defecto                        |
+| `coste_comercial`               | De captación: marketing, campañas, eventos de captación → imputable a **canal/campaña**                                                                                |
+| `coste_de_personas`             | El de FOP-B1 (08): por sesión (autónomos) o fijo mensual (nóminas, parte compartida)                                                                                   |
+| `regla_imputacion`              | Cómo se asigna un coste: destino(s), método (§5), driver si aplica, vigencia, autor. **Versionada**: cambiar una regla crea versión nueva, la historia no se reescribe |
+| `driver`                        | La variable que reparte (nº sesiones, ingresos, horas, m², clientes captados)                                                                                          |
+| `periodo_imputacion`            | El mes del devengo del coste (fecha de servicio, no de pago — D-op-2)                                                                                                  |
+| `centro` / `canal` / `proyecto` | Dimensiones de 09 §6.1: dónde se presta / quién trajo al cliente / línea de negocio                                                                                    |
 
 ## 4. Centro, canal y proyecto: la misma marca, tres preguntas
 
 Regla de 09 §5.6, ahora con la pata de coste. **La dimensión la elige la pregunta, no la marca:**
 
-| Marca | Como centro | Como canal | Como proyecto |
-|---|---|---|---|
-| **Lidomare** | Sede donde se prestan sesiones (coste de espacio/recepción compartida) | Derivación de clientes desde su comunidad | "Lidomare x Antifrágil" si adquiere P&L propio |
-| **Vivofácil** | Red donde se presta servicio B2B | Partner que trae clientes administrativos | Proyecto B2B si se gestiona como línea |
-| **Oasis** | Sede/espacio de colaboración | Canal de derivación | Proyecto de colaboración |
-| **9AM** | (Espacio de eventos, si aplica) | Canal de comunidad/captación | Proyecto/evento con presupuesto propio (doc 01: proyecto previsto) |
+| Marca         | Como centro                                                            | Como canal                                | Como proyecto                                                      |
+| ------------- | ---------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------------ |
+| **Lidomare**  | Sede donde se prestan sesiones (coste de espacio/recepción compartida) | Derivación de clientes desde su comunidad | "Lidomare x Antifrágil" si adquiere P&L propio                     |
+| **Vivofácil** | Red donde se presta servicio B2B                                       | Partner que trae clientes administrativos | Proyecto B2B si se gestiona como línea                             |
+| **Oasis**     | Sede/espacio de colaboración                                           | Canal de derivación                       | Proyecto de colaboración                                           |
+| **9AM**       | (Espacio de eventos, si aplica)                                        | Canal de comunidad/captación              | Proyecto/evento con presupuesto propio (doc 01: proyecto previsto) |
 
 Consecuencia: un coste de marketing de 9AM puede imputarse **al canal 9AM** (para medir coste de captación) aunque 9AM sea también un proyecto. La regla de imputación declara **a qué dimensión** va cada coste; el panel cruza después.
 
 ## 5. Tipos de reglas de imputación
 
-| Tipo | Cuándo usarlo | Ejemplo |
-|---|---|---|
-| `directa_100` | El coste es de un único destino | Alquiler de Playamar → 100 % proyecto Clínica / centro Playamar |
-| `porcentaje_fijo` | Reparto pactado estable | Recepción: X % Antifrágil / resto Lidomare (hoy es importe fijo, ver §6) |
-| `importe_fijo` | Parte fija pactada (caso real actual) | Lidia: 400 €/mes Antifrágil, resto Lidomare (08 §4.2) |
-| `por_sesiones` | Driver de actividad | Material común repartido por nº de sesiones de cada servicio |
-| `por_ingresos` | Driver económico | Comisión de plataforma repartida por ingreso devengado de cada línea |
-| `por_horas` | Driver de dedicación | Coordinación de María Moreno clínica/estructura (B2-P6) |
-| `por_profesional` | Coste ligado a personas concretas | Seguro de RC por profesional |
-| `por_centro` | Coste de sede repartido entre centros | Software de agenda si sirve a varios centros |
-| `por_m2` | Solo si hay espacios compartidos medibles | Suministros de sede compartida (si aplica) |
-| `por_campana` | Coste comercial → canal/campaña | Ads de una campaña concreta |
-| `manual_trazada` | Excepción puntual con motivo y autor | Ajuste de un mes atípico |
-| `no_imputable_todavia` | **No hay criterio** → visible sin repartir | Acuerdos partners sin documentar (B2-P3) |
+| Tipo                   | Cuándo usarlo                              | Ejemplo                                                                  |
+| ---------------------- | ------------------------------------------ | ------------------------------------------------------------------------ |
+| `directa_100`          | El coste es de un único destino            | Alquiler de Playamar → 100 % proyecto Clínica / centro Playamar          |
+| `porcentaje_fijo`      | Reparto pactado estable                    | Recepción: X % Antifrágil / resto Lidomare (hoy es importe fijo, ver §6) |
+| `importe_fijo`         | Parte fija pactada (caso real actual)      | Lidia: 400 €/mes Antifrágil, resto Lidomare (08 §4.2)                    |
+| `por_sesiones`         | Driver de actividad                        | Material común repartido por nº de sesiones de cada servicio             |
+| `por_ingresos`         | Driver económico                           | Comisión de plataforma repartida por ingreso devengado de cada línea     |
+| `por_horas`            | Driver de dedicación                       | Coordinación de María Moreno clínica/estructura (B2-P6)                  |
+| `por_profesional`      | Coste ligado a personas concretas          | Seguro de RC por profesional                                             |
+| `por_centro`           | Coste de sede repartido entre centros      | Software de agenda si sirve a varios centros                             |
+| `por_m2`               | Solo si hay espacios compartidos medibles  | Suministros de sede compartida (si aplica)                               |
+| `por_campana`          | Coste comercial → canal/campaña            | Ads de una campaña concreta                                              |
+| `manual_trazada`       | Excepción puntual con motivo y autor       | Ajuste de un mes atípico                                                 |
+| `no_imputable_todavia` | **No hay criterio** → visible sin repartir | Acuerdos partners sin documentar (B2-P3)                                 |
 
 ## 6. Casos reales actuales (con lo ya documentado; nada inventado)
 
-| Caso | Tipo de coste | Regla propuesta |
-|---|---|---|
-| **Lidia Muesa** (recepción) | compartido (personas) | `importe_fijo`: 400 €/mes Antifrágil, resto Lidomare (08 §2). Dentro de Antifrágil: al centro donde presta (Playamar/Lidomare, B2-P3 aclara) |
-| **María Moreno** | personas, mixto | Nómina como fijo del proyecto Clínica; split clínica/coordinación pendiente (`por_horas`, hereda B2-P6) |
-| **Alquiler** | fijo | `directa_100` al centro/proyecto de la sede |
-| **Gestoría** | general | Sin repartir → M4 (contribución primero) |
-| **Software** | fijo | `directa_100` al proyecto si es de un módulo; `por_centro`/`por_sesiones` si sirve a varios; general si es de estructura |
-| **Marketing** | comercial | `por_campana` → canal; permite coste de captación por cliente (09 §5.4, CAC futuro) |
-| **TPV/comisiones** | variable/directo | Ya resuelto en 09 §4.2: coste directo del cobro (M2) |
-| **Material** | directo o variable | De la sesión → M1/M2; común → `por_sesiones` |
-| **Eventos 9AM** | comercial/proyecto | Al proyecto 9AM y/o al canal 9AM según finalidad del gasto (captación vs producción del evento) |
-| **Lidomare x Antifrágil / Vivofácil / Oasis** | compartido/partner | `no_imputable_todavia` hasta documentar acuerdos (B2-P3); el modelo los recibe como `porcentaje_fijo`/`importe_fijo`/driver sin rediseño |
+| Caso                                          | Tipo de coste         | Regla propuesta                                                                                                                              |
+| --------------------------------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Lidia Muesa** (recepción)                   | compartido (personas) | `importe_fijo`: 400 €/mes Antifrágil, resto Lidomare (08 §2). Dentro de Antifrágil: al centro donde presta (Playamar/Lidomare, B2-P3 aclara) |
+| **María Moreno**                              | personas, mixto       | Nómina como fijo del proyecto Clínica; split clínica/coordinación pendiente (`por_horas`, hereda B2-P6)                                      |
+| **Alquiler**                                  | fijo                  | `directa_100` al centro/proyecto de la sede                                                                                                  |
+| **Gestoría**                                  | general               | Sin repartir → M4 (contribución primero)                                                                                                     |
+| **Software**                                  | fijo                  | `directa_100` al proyecto si es de un módulo; `por_centro`/`por_sesiones` si sirve a varios; general si es de estructura                     |
+| **Marketing**                                 | comercial             | `por_campana` → canal; permite coste de captación por cliente (09 §5.4, CAC futuro)                                                          |
+| **TPV/comisiones**                            | variable/directo      | Ya resuelto en 09 §4.2: coste directo del cobro (M2)                                                                                         |
+| **Material**                                  | directo o variable    | De la sesión → M1/M2; común → `por_sesiones`                                                                                                 |
+| **Eventos 9AM**                               | comercial/proyecto    | Al proyecto 9AM y/o al canal 9AM según finalidad del gasto (captación vs producción del evento)                                              |
+| **Lidomare x Antifrágil / Vivofácil / Oasis** | compartido/partner    | `no_imputable_todavia` hasta documentar acuerdos (B2-P3); el modelo los recibe como `porcentaje_fijo`/`importe_fijo`/driver sin rediseño     |
 
 ## 7. Prioridad de imputación (criterio en cascada)
 
@@ -118,12 +118,12 @@ Consecuencia: un coste de marketing de 9AM puede imputarse **al canal 9AM** (par
 
 ## 12. Roles
 
-| Capacidad | CEO | Coordinadora | Recepción | Profesional |
-|---|---|---|---|---|
-| Crear/editar/versionar reglas de imputación | ✅ (solo CEO) | ❌ | ❌ | ❌ |
-| Ver reglas operativas no sensibles (drivers, destinos) | ✅ | ✅ | ❌ | ❌ |
-| Ver costes imputados con importes (incluye retribuciones) | ✅ | ❌ | ❌ | ❌ |
-| Ver imputación global / comparativas | ✅ | ❌ (salvo permiso) | ❌ | ❌ |
+| Capacidad                                                 | CEO           | Coordinadora       | Recepción | Profesional |
+| --------------------------------------------------------- | ------------- | ------------------ | --------- | ----------- |
+| Crear/editar/versionar reglas de imputación               | ✅ (solo CEO) | ❌                 | ❌        | ❌          |
+| Ver reglas operativas no sensibles (drivers, destinos)    | ✅            | ✅                 | ❌        | ❌          |
+| Ver costes imputados con importes (incluye retribuciones) | ✅            | ❌                 | ❌        | ❌          |
+| Ver imputación global / comparativas                      | ✅            | ❌ (salvo permiso) | ❌        | ❌          |
 
 Las reglas son **configuración económica**: misma frontera dura que en 10 §13 — recepción y coordinación operan, no configuran.
 
@@ -136,32 +136,32 @@ Las reglas son **configuración económica**: misma frontera dura que en 10 §13
 
 ## 14. Riesgos y salvaguardas
 
-| Riesgo | Salvaguarda |
-|---|---|
-| Prorrateo artificial que distorsiona | Cascada §7 + contribución primero (D-op-7); reparto siempre con regla explícita |
+| Riesgo                                             | Salvaguarda                                                                                                    |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Prorrateo artificial que distorsiona               | Cascada §7 + contribución primero (D-op-7); reparto siempre con regla explícita                                |
 | Castigar un servicio rentable con demasiados fijos | Doble lectura M2/M3 en paneles; los fijos se imputan a proyecto/centro, no a servicio, salvo regla justificada |
-| Mezclar canal y centro | Dimensiones ortogonales (§4, 09 §5.6); la regla declara a cuál va |
-| No evidenciar acuerdos con partners | `no_imputable_todavia` + pendiente B2-P3: sin documento no hay regla, y se ve |
-| Asignar costes por intuición | Toda imputación referencia su regla; `manual_trazada` exige motivo y autor |
-| Que recepción modifique reglas | §12: configuración solo-CEO |
-| Ocultar costes generales | M4 los muestra siempre; "general" no significa invisible |
-| Usar datos clínicos | Ningún driver usa datos de pacientes; solo volúmenes administrativos (D-op-5) |
-| Convertir las reglas en contabilidad fiscal | Capa de gestión (D-op-6); el PGC y la gestoría no leen de aquí |
-| Cambiar reglas sin versionado | Reglas versionadas con vigencia; los meses cerrados no se recalculan al cambiar una regla |
+| Mezclar canal y centro                             | Dimensiones ortogonales (§4, 09 §5.6); la regla declara a cuál va                                              |
+| No evidenciar acuerdos con partners                | `no_imputable_todavia` + pendiente B2-P3: sin documento no hay regla, y se ve                                  |
+| Asignar costes por intuición                       | Toda imputación referencia su regla; `manual_trazada` exige motivo y autor                                     |
+| Que recepción modifique reglas                     | §12: configuración solo-CEO                                                                                    |
+| Ocultar costes generales                           | M4 los muestra siempre; "general" no significa invisible                                                       |
+| Usar datos clínicos                                | Ningún driver usa datos de pacientes; solo volúmenes administrativos (D-op-5)                                  |
+| Convertir las reglas en contabilidad fiscal        | Capa de gestión (D-op-6); el PGC y la gestoría no leen de aquí                                                 |
+| Cambiar reglas sin versionado                      | Reglas versionadas con vigencia; los meses cerrados no se recalculan al cambiar una regla                      |
 
 ## 15. Pendientes de decisión
 
-| # | Pendiente | Dueño |
-|---|---|---|
-| C1-P1 | **Acuerdo económico Lidomare** (recepción compartida: ¿sigue importe fijo 400 € o pasa a %? ¿quién paga qué del espacio?) — consolida F-2 y B2-P3 | Guille + Lidomare |
-| C1-P2 | **Acuerdo Vivofácil** (¿fee por sesión, % o cuota?) | Guille + Vivofácil |
-| C1-P3 | **Acuerdo Oasis** | Guille + Oasis |
-| C1-P4 | **Criterio de recepción compartida** dentro de Antifrágil: ¿a qué centro(s) se imputa la parte propia? | Guille |
-| C1-P5 | **Split María Moreno** coordinación/clínica (driver horas) — hereda B2-P6 | Guille |
-| C1-P6 | **Criterio marketing 9AM**: ¿canal de captación, proyecto evento, o mixto por finalidad? | Guille |
-| C1-P7 | **Tratamiento del software** (por proyecto/centro/general según herramienta) | Guille |
-| C1-P8 | **Confirmar contribución-antes-de-prorrateo como vista principal** (cierra F-4 del doc 04) | Guille |
+| #     | Pendiente                                                                                                                                         | Dueño              |
+| ----- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| C1-P1 | **Acuerdo económico Lidomare** (recepción compartida: ¿sigue importe fijo 400 € o pasa a %? ¿quién paga qué del espacio?) — consolida F-2 y B2-P3 | Guille + Lidomare  |
+| C1-P2 | **Acuerdo Vivofácil** (¿fee por sesión, % o cuota?)                                                                                               | Guille + Vivofácil |
+| C1-P3 | **Acuerdo Oasis**                                                                                                                                 | Guille + Oasis     |
+| C1-P4 | **Criterio de recepción compartida** dentro de Antifrágil: ¿a qué centro(s) se imputa la parte propia?                                            | Guille             |
+| C1-P5 | **Split María Moreno** coordinación/clínica (driver horas) — hereda B2-P6                                                                         | Guille             |
+| C1-P6 | **Criterio marketing 9AM**: ¿canal de captación, proyecto evento, o mixto por finalidad?                                                          | Guille             |
+| C1-P7 | **Tratamiento del software** (por proyecto/centro/general según herramienta)                                                                      | Guille             |
+| C1-P8 | **Confirmar contribución-antes-de-prorrateo como vista principal** (cierra F-4 del doc 04)                                                        | Guille             |
 
 ---
 
-*Diseño documental de FOP-C1. No modifica código productivo, SQL, tipos ni UI. Requiere validación de Guille (y acuerdos con partners para C1-P1..P3) antes de abrir implementación.*
+_Diseño documental de FOP-C1. No modifica código productivo, SQL, tipos ni UI. Requiere validación de Guille (y acuerdos con partners para C1-P1..P3) antes de abrir implementación._
