@@ -27,22 +27,25 @@ import {
 // ── Supuestos de financiación editables ───────────────────────────────────────
 
 export type SupuestosFinanciacion = {
-  tipoInteresPct: number;   // tipo nominal anual, en %  (ej. 3.5)
-  plazoAnios: number;       // plazo de amortización en años (solo renta)
+  tipoInteresPct: number; // tipo nominal anual, en %  (ej. 3.5)
+  plazoAnios: number; // plazo de amortización en años (solo renta)
 };
 
-export const SUPUESTOS_DEFAULT_RENTA: SupuestosFinanciacion = { tipoInteresPct: 3.5, plazoAnios: 20 };
-export const SUPUESTOS_DEFAULT_CV:    SupuestosFinanciacion = { tipoInteresPct: 5.0, plazoAnios: 2 };
+export const SUPUESTOS_DEFAULT_RENTA: SupuestosFinanciacion = {
+  tipoInteresPct: 3.5,
+  plazoAnios: 20,
+};
+export const SUPUESTOS_DEFAULT_CV: SupuestosFinanciacion = { tipoInteresPct: 5.0, plazoAnios: 2 };
 
 // ── Niveles de apalancamiento (LTV sobre el coste/valor de referencia) ────────
 
 export type NivelFinanciacion = 'sin' | 'conservadora' | 'moderada' | 'agresiva';
 
 const NIVELES: { id: NivelFinanciacion; label: string; ltv: number }[] = [
-  { id: 'sin',          label: 'Sin financiación', ltv: 0    },
-  { id: 'conservadora', label: 'Conservadora',     ltv: 0.50 },
-  { id: 'moderada',     label: 'Moderada',         ltv: 0.60 },
-  { id: 'agresiva',     label: 'Agresiva',         ltv: 0.70 },
+  { id: 'sin', label: 'Sin financiación', ltv: 0 },
+  { id: 'conservadora', label: 'Conservadora', ltv: 0.5 },
+  { id: 'moderada', label: 'Moderada', ltv: 0.6 },
+  { id: 'agresiva', label: 'Agresiva', ltv: 0.7 },
 ];
 
 // ── Resultado por opción ──────────────────────────────────────────────────────
@@ -50,21 +53,21 @@ const NIVELES: { id: NivelFinanciacion; label: string; ltv: number }[] = [
 export type OpcionFinanciacion = {
   id: NivelFinanciacion;
   label: string;
-  ltv: number;                         // 0-1 — % de la INVERSIÓN/coste financiado
-  deuda: number;                       // importe financiado
-  ltvValorActual: number | null;       // deuda / valor actual estimado (lectura sobre tasación)
-  equity: number;                      // capital propio necesario
-  equityLiberado: number;              // equity ahorrado vs. "sin financiación"
-  cuotaMensual: number | null;         // servicio de deuda mensual
+  ltv: number; // 0-1 — % de la INVERSIÓN/coste financiado
+  deuda: number; // importe financiado
+  ltvValorActual: number | null; // deuda / valor actual estimado (lectura sobre tasación)
+  equity: number; // capital propio necesario
+  equityLiberado: number; // equity ahorrado vs. "sin financiación"
+  cuotaMensual: number | null; // servicio de deuda mensual
   servicioDeudaAnual: number | null;
   costeFinancieroTotal: number | null; // intereses totales del periodo (CV) / vida (renta)
-  cashflowAnual: number | null;        // caja anual después de deuda (renta)
-  dscr: number | null;                 // solo renta: NOI / servicio deuda
-  rentabilidadEquity: number | null;   // cash-on-cash (renta) o TIR equity (CV), decimal
-  moic: number | null;                 // solo CV
-  tir: number | null;                  // TIR con apalancamiento (renta: con residual; CV: equity)
-  van: number | null;                  // VAN con apalancamiento, a la tasa de descuento
-  riesgoAlto: boolean;                 // DSCR < 1 → la renta no cubre la cuota
+  cashflowAnual: number | null; // caja anual después de deuda (renta)
+  dscr: number | null; // solo renta: NOI / servicio deuda
+  rentabilidadEquity: number | null; // cash-on-cash (renta) o TIR equity (CV), decimal
+  moic: number | null; // solo CV
+  tir: number | null; // TIR con apalancamiento (renta: con residual; CV: equity)
+  van: number | null; // VAN con apalancamiento, a la tasa de descuento
+  riesgoAlto: boolean; // DSCR < 1 → la renta no cubre la cuota
 };
 
 // ── Veredicto del apalancamiento ──────────────────────────────────────────────
@@ -75,7 +78,7 @@ export type VeredictoFinanciacion = {
   nivel: VeredictoNivel;
   titulo: string;
   mensaje: string;
-  riesgoAlto: boolean;                 // algún escenario con DSCR < 1
+  riesgoAlto: boolean; // algún escenario con DSCR < 1
   recomendada: NivelFinanciacion | null;
 };
 
@@ -85,9 +88,9 @@ export type ResultadoSimulacion = {
   yaFinanciado: boolean;
   inversionTotal: number | null;
   baseReferenciaLtv: number | null;
-  rentabilidadActivo: number | null;   // yield neto s/coste (renta) o ROI anual (CV) — DATO SECUNDARIO
-  tipoInteres: number;                 // decimal — DATO SECUNDARIO
-  opciones: OpcionFinanciacion[];      // incluye "sin financiación" como primera
+  rentabilidadActivo: number | null; // yield neto s/coste (renta) o ROI anual (CV) — DATO SECUNDARIO
+  tipoInteres: number; // decimal — DATO SECUNDARIO
+  opciones: OpcionFinanciacion[]; // incluye "sin financiación" como primera
   veredicto: VeredictoFinanciacion;
   motivoNoAplica: string | null;
 };
@@ -105,7 +108,13 @@ function tirDosFlujos(equity: number, retornoNeto: number, anos: number): number
 // VAN y TIR de un flujo de renta: -equity en t0, cashflowAnual constante,
 // ventaNeta al final del horizonte. Mismo modelo para base y opciones, de modo
 // que la comparación TIR↔TIR y VAN↔VAN sea siempre coherente.
-function tirVanRenta(equity: number, cashflowAnual: number, ventaNeta: number, horizonte: number, tasa: number): { tir: number | null; van: number | null } {
+function tirVanRenta(
+  equity: number,
+  cashflowAnual: number,
+  ventaNeta: number,
+  horizonte: number,
+  tasa: number,
+): { tir: number | null; van: number | null } {
   if (equity <= 0 || horizonte <= 0) return { tir: null, van: null };
   let van = -equity;
   for (let t = 1; t <= horizonte; t++) van += cashflowAnual / Math.pow(1 + tasa, t);
@@ -113,22 +122,27 @@ function tirVanRenta(equity: number, cashflowAnual: number, ventaNeta: number, h
 
   let tir: number | null = null;
   if (cashflowAnual * horizonte + ventaNeta > 0) {
-    let lo = -0.5, hi = 5.0;
+    let lo = -0.5,
+      hi = 5.0;
     for (let i = 0; i < 100; i++) {
       const mid = (lo + hi) / 2;
       let v = -equity;
       for (let t = 1; t <= horizonte; t++) v += cashflowAnual / Math.pow(1 + mid, t);
       v += ventaNeta / Math.pow(1 + mid, horizonte);
-      if (Math.abs(v) < 1e-6) { tir = mid; break; }
-      if (v > 0) lo = mid; else hi = mid;
+      if (Math.abs(v) < 1e-6) {
+        tir = mid;
+        break;
+      }
+      if (v > 0) lo = mid;
+      else hi = mid;
     }
     if (tir === null) tir = (lo + hi) / 2;
   }
   return { tir, van };
 }
 
-const fmtPctTxt = (v: number | null) => v != null ? `${(v * 100).toFixed(1)}%` : '—';
-const fmtXtxt   = (v: number | null) => v != null ? `${v.toFixed(2)}x` : '—';
+const fmtPctTxt = (v: number | null) => (v != null ? `${(v * 100).toFixed(1)}%` : '—');
+const fmtXtxt = (v: number | null) => (v != null ? `${v.toFixed(2)}x` : '—');
 
 // ── Construcción del veredicto (DSCR-first) ───────────────────────────────────
 
@@ -140,11 +154,14 @@ function construirVeredicto(
   const tirBase = num(base.tir);
   const cocBase = num(base.rentabilidadEquity);
 
-  const conTir   = financiadas.filter(o => num(o.tir) != null);
-  const mejorTir = conTir.length ? Math.max(...conTir.map(o => o.tir as number)) : null;
+  const conTir = financiadas.filter((o) => num(o.tir) != null);
+  const mejorTir = conTir.length ? Math.max(...conTir.map((o) => o.tir as number)) : null;
   const mejoraTir = mejorTir != null && tirBase != null ? mejorTir - tirBase : null;
 
-  const dscrs   = tipo === 'renta' ? financiadas.map(o => num(o.dscr)).filter((d): d is number => d != null) : [];
+  const dscrs =
+    tipo === 'renta'
+      ? financiadas.map((o) => num(o.dscr)).filter((d): d is number => d != null)
+      : [];
   const minDscr = dscrs.length ? Math.min(...dscrs) : null;
   const riesgoAlto = minDscr != null && minDscr < 1;
 
@@ -162,13 +179,16 @@ function construirVeredicto(
     }
     return true;
   };
-  const positivas = financiadas.filter(esPositiva).sort((a, b) => (b.tir ?? -Infinity) - (a.tir ?? -Infinity));
+  const positivas = financiadas
+    .filter(esPositiva)
+    .sort((a, b) => (b.tir ?? -Infinity) - (a.tir ?? -Infinity));
 
   if (positivas.length > 0) {
     const r = positivas[0]!;
-    const detalle = tipo === 'renta' && r.dscr != null
-      ? ` y la renta cubre la cuota con holgura (DSCR ${fmtXtxt(r.dscr)})`
-      : '';
+    const detalle =
+      tipo === 'renta' && r.dscr != null
+        ? ` y la renta cubre la cuota con holgura (DSCR ${fmtXtxt(r.dscr)})`
+        : '';
     return {
       nivel: 'positivo',
       titulo: 'Apalancamiento positivo',
@@ -179,8 +199,8 @@ function construirVeredicto(
   }
 
   // No es claramente positivo. Distinguir TIR del activo vs TIR del equity.
-  const empeoraTirReal = mejoraTir != null && mejoraTir <= 0;   // se puede comparar y NO mejora
-  const noComparable   = mejoraTir == null;                     // no hay TIR de equity comparable
+  const empeoraTirReal = mejoraTir != null && mejoraTir <= 0; // se puede comparar y NO mejora
+  const noComparable = mejoraTir == null; // no hay TIR de equity comparable
 
   if (tipo === 'renta' && riesgoAlto) {
     return {
@@ -208,14 +228,19 @@ function construirVeredicto(
     return {
       nivel: 'ajustado',
       titulo: 'Analizar financiación',
-      mensaje: 'Compara capital liberado, DSCR, caja libre y TIR sobre equity para decidir. No hay datos suficientes para concluir si mejora la rentabilidad sobre tu capital.',
+      mensaje:
+        'Compara capital liberado, DSCR, caja libre y TIR sobre equity para decidir. No hay datos suficientes para concluir si mejora la rentabilidad sobre tu capital.',
       riesgoAlto,
       recomendada: null,
     };
   }
 
   if (empeoraTirReal) {
-    const peorCoc = cocBase != null && financiadas.some(o => num(o.rentabilidadEquity) != null && (o.rentabilidadEquity as number) < cocBase);
+    const peorCoc =
+      cocBase != null &&
+      financiadas.some(
+        (o) => num(o.rentabilidadEquity) != null && (o.rentabilidadEquity as number) < cocBase,
+      );
     return {
       nivel: 'reduce',
       titulo: 'Libera capital, pero no mejora la rentabilidad sobre equity',
@@ -247,44 +272,70 @@ function simularRenta(
   const inversionTotal = k.inversionTotal;
   const noi = k.noIAnual;
 
-  const naVeredicto: VeredictoFinanciacion = { nivel: 'na', titulo: '', mensaje: '', riesgoAlto: false, recomendada: null };
+  const naVeredicto: VeredictoFinanciacion = {
+    nivel: 'na',
+    titulo: '',
+    mensaje: '',
+    riesgoAlto: false,
+    recomendada: null,
+  };
   const baseVacia: ResultadoSimulacion = {
-    aplica: false, tipo: 'renta', yaFinanciado: false, inversionTotal: null,
-    baseReferenciaLtv: null, rentabilidadActivo: null, tipoInteres: sup.tipoInteresPct / 100,
-    opciones: [], veredicto: naVeredicto, motivoNoAplica:
+    aplica: false,
+    tipo: 'renta',
+    yaFinanciado: false,
+    inversionTotal: null,
+    baseReferenciaLtv: null,
+    rentabilidadActivo: null,
+    tipoInteres: sup.tipoInteresPct / 100,
+    opciones: [],
+    veredicto: naVeredicto,
+    motivoNoAplica:
       'Completa el análisis de renta (precio de adquisición y renta mensual) para simular la financiación.',
   };
   if (inversionTotal == null || inversionTotal <= 0 || noi == null) return baseVacia;
 
-  const interes        = sup.tipoInteresPct / 100;
-  const plazoMeses     = Math.max(1, Math.round(sup.plazoAnios * 12));
-  const horizonte      = k.horizonteUsado ?? 10;
-  const tasa           = a.tasa_descuento ?? 0.08;
-  const valorResidual  = k.valorResidualUsado;
+  const interes = sup.tipoInteresPct / 100;
+  const plazoMeses = Math.max(1, Math.round(sup.plazoAnios * 12));
+  const horizonte = k.horizonteUsado ?? 10;
+  const tasa = a.tasa_descuento ?? 0.08;
+  const valorResidual = k.valorResidualUsado;
   // Los escenarios (50/60/70%) se calculan sobre la INVERSIÓN/coste, no sobre el
   // valor actual: así no se capan ni quedan idénticos. El LTV sobre valor actual
   // se muestra aparte como lectura adicional.
-  const valorActual    = a.valoracion_actual && a.valoracion_actual > 0 ? a.valoracion_actual : null;
+  const valorActual = a.valoracion_actual && a.valoracion_actual > 0 ? a.valoracion_actual : null;
   const yieldNetoCoste = noi / inversionTotal;
-  const yaFinanciado   = (a.deuda_hipotecaria ?? 0) > 0 || (a.cuota_hipoteca_mensual ?? 0) > 0;
+  const yaFinanciado = (a.deuda_hipotecaria ?? 0) > 0 || (a.cuota_hipoteca_mensual ?? 0) > 0;
 
-  const opciones: OpcionFinanciacion[] = NIVELES.map(n => {
-    const deuda  = inversionTotal * n.ltv;
+  const opciones: OpcionFinanciacion[] = NIVELES.map((n) => {
+    const deuda = inversionTotal * n.ltv;
     const equity = Math.max(inversionTotal - deuda, 0);
     const ltvValorActual = valorActual != null && deuda > 0 ? deuda / valorActual : null;
 
     if (n.id === 'sin') {
       // Base sin deuda: mismo modelo de flujos (equity = inversión total, sin cuota).
       const ventaNeta = valorResidual != null ? valorResidual : 0;
-      const { tir, van } = valorResidual != null
-        ? tirVanRenta(inversionTotal, noi, ventaNeta, horizonte, tasa)
-        : { tir: null, van: null };
+      const { tir, van } =
+        valorResidual != null
+          ? tirVanRenta(inversionTotal, noi, ventaNeta, horizonte, tasa)
+          : { tir: null, van: null };
       return {
-        id: n.id, label: n.label, ltv: 0, deuda: 0, ltvValorActual: null, equity: inversionTotal,
-        equityLiberado: 0, cuotaMensual: null, servicioDeudaAnual: null,
-        costeFinancieroTotal: null, cashflowAnual: noi, dscr: null,
+        id: n.id,
+        label: n.label,
+        ltv: 0,
+        deuda: 0,
+        ltvValorActual: null,
+        equity: inversionTotal,
+        equityLiberado: 0,
+        cuotaMensual: null,
+        servicioDeudaAnual: null,
+        costeFinancieroTotal: null,
+        cashflowAnual: noi,
+        dscr: null,
         rentabilidadEquity: inversionTotal > 0 ? noi / inversionTotal : null,
-        moic: null, tir, van, riesgoAlto: false,
+        moic: null,
+        tir,
+        van,
+        riesgoAlto: false,
       };
     }
 
@@ -299,27 +350,47 @@ function simularRenta(
     const cashflowAnual = noi - servicio;
     const cashOnCash = equity > 0 ? cashflowAnual / equity : null;
     const ventaNeta = valorResidual != null ? valorResidual - deudaPendienteSalida : null;
-    const { tir, van } = ventaNeta != null
-      ? tirVanRenta(equity, cashflowAnual, ventaNeta, horizonte, tasa)
-      : { tir: null, van: null };
+    const { tir, van } =
+      ventaNeta != null
+        ? tirVanRenta(equity, cashflowAnual, ventaNeta, horizonte, tasa)
+        : { tir: null, van: null };
 
     return {
-      id: n.id, label: n.label, ltv: n.ltv, deuda, ltvValorActual, equity,
+      id: n.id,
+      label: n.label,
+      ltv: n.ltv,
+      deuda,
+      ltvValorActual,
+      equity,
       equityLiberado: inversionTotal - equity,
-      cuotaMensual, servicioDeudaAnual: servicio, costeFinancieroTotal,
-      cashflowAnual, dscr, rentabilidadEquity: cashOnCash, moic: null, tir, van,
+      cuotaMensual,
+      servicioDeudaAnual: servicio,
+      costeFinancieroTotal,
+      cashflowAnual,
+      dscr,
+      rentabilidadEquity: cashOnCash,
+      moic: null,
+      tir,
+      van,
       riesgoAlto: dscr != null && dscr < 1,
     };
   });
 
-  const base = opciones.find(o => o.id === 'sin')!;
-  const financiadas = opciones.filter(o => o.id !== 'sin');
+  const base = opciones.find((o) => o.id === 'sin')!;
+  const financiadas = opciones.filter((o) => o.id !== 'sin');
   const veredicto = construirVeredicto('renta', base, financiadas);
 
   return {
-    aplica: true, tipo: 'renta', yaFinanciado, inversionTotal,
-    baseReferenciaLtv: inversionTotal, rentabilidadActivo: yieldNetoCoste,
-    tipoInteres: interes, opciones, veredicto, motivoNoAplica: null,
+    aplica: true,
+    tipo: 'renta',
+    yaFinanciado,
+    inversionTotal,
+    baseReferenciaLtv: inversionTotal,
+    rentabilidadActivo: yieldNetoCoste,
+    tipoInteres: interes,
+    opciones,
+    veredicto,
+    motivoNoAplica: null,
   };
 }
 
@@ -333,29 +404,48 @@ function simularCompraVenta(
 ): ResultadoSimulacion {
   const k = calcKpisCV(a, fechaInicio, fechaSalida, a.superficie_arrendable_m2 ?? null);
   const inversionTotal = k.inversionTotal;
-  const margenBruto    = k.margenBruto;
-  const anos           = k.anosUsados;
+  const margenBruto = k.margenBruto;
+  const anos = k.anosUsados;
 
-  const naVeredicto: VeredictoFinanciacion = { nivel: 'na', titulo: '', mensaje: '', riesgoAlto: false, recomendada: null };
+  const naVeredicto: VeredictoFinanciacion = {
+    nivel: 'na',
+    titulo: '',
+    mensaje: '',
+    riesgoAlto: false,
+    recomendada: null,
+  };
   const baseVacia: ResultadoSimulacion = {
-    aplica: false, tipo: 'compra_venta', yaFinanciado: false, inversionTotal: null,
-    baseReferenciaLtv: null, rentabilidadActivo: null, tipoInteres: sup.tipoInteresPct / 100,
-    opciones: [], veredicto: naVeredicto, motivoNoAplica:
+    aplica: false,
+    tipo: 'compra_venta',
+    yaFinanciado: false,
+    inversionTotal: null,
+    baseReferenciaLtv: null,
+    rentabilidadActivo: null,
+    tipoInteres: sup.tipoInteresPct / 100,
+    opciones: [],
+    veredicto: naVeredicto,
+    motivoNoAplica:
       'Completa el análisis de compra-venta (coste, precio de venta y plazo de la operación) para simular la financiación.',
   };
-  if (inversionTotal == null || inversionTotal <= 0 || margenBruto == null || anos == null || anos <= 0) {
+  if (
+    inversionTotal == null ||
+    inversionTotal <= 0 ||
+    margenBruto == null ||
+    anos == null ||
+    anos <= 0
+  ) {
     return baseVacia;
   }
 
-  const interes      = sup.tipoInteresPct / 100;
-  const isPct        = (a.impuesto_sociedades_pct ?? 26) / 100;
-  const tasa         = a.tasa_descuento ?? 0.08;
-  const baseRef      = inversionTotal;
-  const roiAnual     = (margenBruto / inversionTotal) / anos;
+  const interes = sup.tipoInteresPct / 100;
+  const isPct = (a.impuesto_sociedades_pct ?? 26) / 100;
+  const tasa = a.tasa_descuento ?? 0.08;
+  const baseRef = inversionTotal;
+  const roiAnual = margenBruto / inversionTotal / anos;
   const yaFinanciado = (a.deuda_promotora ?? 0) > 0;
 
-  const opciones: OpcionFinanciacion[] = NIVELES.map(n => {
-    const deuda  = Math.min(baseRef * n.ltv, inversionTotal);
+  const opciones: OpcionFinanciacion[] = NIVELES.map((n) => {
+    const deuda = Math.min(baseRef * n.ltv, inversionTotal);
     const equity = Math.max(inversionTotal - deuda, 0);
 
     // Préstamo promotor bullet: intereses acumulados; principal se devuelve a la venta.
@@ -366,26 +456,45 @@ function simularCompraVenta(
     const retornoNeto = equity + beneficioNeto;
     const tir = tirDosFlujos(equity, retornoNeto, anos);
     const moic = equity > 0 ? retornoNeto / equity : null;
-    const van = equity > 0 && retornoNeto > 0 ? retornoNeto / Math.pow(1 + tasa, anos) - equity : null;
+    const van =
+      equity > 0 && retornoNeto > 0 ? retornoNeto / Math.pow(1 + tasa, anos) - equity : null;
 
     return {
-      id: n.id, label: n.label, ltv: n.ltv, deuda, ltvValorActual: null, equity,
+      id: n.id,
+      label: n.label,
+      ltv: n.ltv,
+      deuda,
+      ltvValorActual: null,
+      equity,
       equityLiberado: inversionTotal - equity,
-      cuotaMensual: null, servicioDeudaAnual: null,
+      cuotaMensual: null,
+      servicioDeudaAnual: null,
       costeFinancieroTotal: n.id === 'sin' ? null : costeFinanciero,
-      cashflowAnual: null, dscr: null,
-      rentabilidadEquity: tir, moic, tir, van, riesgoAlto: false,
+      cashflowAnual: null,
+      dscr: null,
+      rentabilidadEquity: tir,
+      moic,
+      tir,
+      van,
+      riesgoAlto: false,
     };
   });
 
-  const base = opciones.find(o => o.id === 'sin')!;
-  const financiadas = opciones.filter(o => o.id !== 'sin');
+  const base = opciones.find((o) => o.id === 'sin')!;
+  const financiadas = opciones.filter((o) => o.id !== 'sin');
   const veredicto = construirVeredicto('compra_venta', base, financiadas);
 
   return {
-    aplica: true, tipo: 'compra_venta', yaFinanciado, inversionTotal,
-    baseReferenciaLtv: baseRef, rentabilidadActivo: roiAnual,
-    tipoInteres: interes, opciones, veredicto, motivoNoAplica: null,
+    aplica: true,
+    tipo: 'compra_venta',
+    yaFinanciado,
+    inversionTotal,
+    baseReferenciaLtv: baseRef,
+    rentabilidadActivo: roiAnual,
+    tipoInteres: interes,
+    opciones,
+    veredicto,
+    motivoNoAplica: null,
   };
 }
 
@@ -397,12 +506,20 @@ export function simularFinanciacion(
   fechaSalida: string | null,
   sup: SupuestosFinanciacion,
 ): ResultadoSimulacion {
-  if (a.tipo_analisis === 'renta')        return simularRenta(a, fechaInicio, fechaSalida, sup);
-  if (a.tipo_analisis === 'compra_venta') return simularCompraVenta(a, fechaInicio, fechaSalida, sup);
+  if (a.tipo_analisis === 'renta') return simularRenta(a, fechaInicio, fechaSalida, sup);
+  if (a.tipo_analisis === 'compra_venta')
+    return simularCompraVenta(a, fechaInicio, fechaSalida, sup);
   return {
-    aplica: false, tipo: null, yaFinanciado: false, inversionTotal: null,
-    baseReferenciaLtv: null, rentabilidadActivo: null, tipoInteres: sup.tipoInteresPct / 100,
-    opciones: [], veredicto: { nivel: 'na', titulo: '', mensaje: '', riesgoAlto: false, recomendada: null },
-    motivoNoAplica: 'La simulación de financiación solo aplica a proyectos en renta o compra-venta.',
+    aplica: false,
+    tipo: null,
+    yaFinanciado: false,
+    inversionTotal: null,
+    baseReferenciaLtv: null,
+    rentabilidadActivo: null,
+    tipoInteres: sup.tipoInteresPct / 100,
+    opciones: [],
+    veredicto: { nivel: 'na', titulo: '', mensaje: '', riesgoAlto: false, recomendada: null },
+    motivoNoAplica:
+      'La simulación de financiación solo aplica a proyectos en renta o compra-venta.',
   };
 }

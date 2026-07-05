@@ -3,6 +3,7 @@
 ## Objetivo
 
 Sistema de gestión documental y búsqueda semántica para ~60 documentos críticos de Alsari Capital dispersos en Google Drive y Gmail. Permite:
+
 - Preguntas en lenguaje natural ("¿qué pagos debo a Evariste?")
 - Ingesta automática de nuevos documentos
 - Alertas proactivas de fechas críticas (earn-outs, vencimientos, seguros)
@@ -10,6 +11,7 @@ Sistema de gestión documental y búsqueda semántica para ~60 documentos críti
 ## Decisión arquitectónica
 
 **Código Python, ejecución 100% local** (sin nube pública). Motivos:
+
 - Coste: 0€ de hosting
 - Mejores librerías para parseo de PDFs/Word/Excel
 - **Confidencialidad:** ningún documento ni token OAuth sale del PC. No usamos GitHub Actions precisamente por esto.
@@ -17,14 +19,14 @@ Sistema de gestión documental y búsqueda semántica para ~60 documentos críti
 
 ## Stack
 
-| Capa | Servicio | Plan | Uso estimado |
-|------|----------|------|--------------|
-| Base de datos + vectores | Supabase Free | 500 MB + pgvector | ~20 MB para 60 docs |
-| Embeddings | Voyage AI Free | 200M tokens gratis | ~500k para ingesta inicial |
-| Clasificación + Q&A | Anthropic API (**Claude Sonnet 4.6**) | pago por uso | ~1€ inicial + <1€/mes |
-| Cron / automatización | **Windows Task Scheduler (local)** | gratis | — |
-| Repo | GitHub privado | gratis | Solo código, nunca secretos ni tokens |
-| MCP server | Local (stdio) | gratis | Claude Desktop conecta local |
+| Capa                     | Servicio                              | Plan               | Uso estimado                          |
+| ------------------------ | ------------------------------------- | ------------------ | ------------------------------------- |
+| Base de datos + vectores | Supabase Free                         | 500 MB + pgvector  | ~20 MB para 60 docs                   |
+| Embeddings               | Voyage AI Free                        | 200M tokens gratis | ~500k para ingesta inicial            |
+| Clasificación + Q&A      | Anthropic API (**Claude Sonnet 4.6**) | pago por uso       | ~1€ inicial + <1€/mes                 |
+| Cron / automatización    | **Windows Task Scheduler (local)**    | gratis             | —                                     |
+| Repo                     | GitHub privado                        | gratis             | Solo código, nunca secretos ni tokens |
+| MCP server               | Local (stdio)                         | gratis             | Claude Desktop conecta local          |
 
 **Coste total estimado: 1–3 €/mes** (solo Anthropic API).
 
@@ -97,18 +99,18 @@ Alsari Database/
 
 ## Fases de entrega
 
-| Fase | Alcance | Estado |
-|------|---------|--------|
-| 0–2 | Arquitectura, schema Supabase, Voyage AI | ✅ Completada |
-| 3a | Núcleo Python: config, db, extract, pipeline | ✅ Completada |
-| 3b | `scripts/ingest_manual.py` (CLI 1 documento) | ✅ Completada |
-| 4 | `scripts/ingest_bulk.py` — 203 docs Drive + OCR Gemini para escaneados | ✅ Completada 2026-04-24 |
-| 4b | `scripts/ingest_gmail_bulk.py` — bulk Gmail desde oct 2025 (~369 hilos) | ✅ Completada 2026-04-24 |
-| 5 | `scripts/daily_sync.py` **incremental** Drive + Gmail + Task Scheduler 23:00 | ✅ Completada 2026-04-24 |
-| 6 | Tabla `alsari_hitos` + `check_deadlines.py` + email Gmail API + Task Scheduler 09:00 | ✅ Completada 2026-04-24 |
-| 6b | `scripts/generate_drafts.py` — borradores email con Gemini 2.5 Flash Lite + perfil estilo + Task Scheduler 08:00 | ✅ Completada 2026-04-24 |
-| 7 | `src/alsari/mcp/server.py` — Claude Desktop conectado, estado "running" | ✅ Completada 2026-04-24 |
-| 8 | Dashboard Streamlit multi-página con auth — `app.py` + `pages/` + `run_dashboard.bat` | ✅ Completada 2026-04-24 |
+| Fase | Alcance                                                                                                          | Estado                   |
+| ---- | ---------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| 0–2  | Arquitectura, schema Supabase, Voyage AI                                                                         | ✅ Completada            |
+| 3a   | Núcleo Python: config, db, extract, pipeline                                                                     | ✅ Completada            |
+| 3b   | `scripts/ingest_manual.py` (CLI 1 documento)                                                                     | ✅ Completada            |
+| 4    | `scripts/ingest_bulk.py` — 203 docs Drive + OCR Gemini para escaneados                                           | ✅ Completada 2026-04-24 |
+| 4b   | `scripts/ingest_gmail_bulk.py` — bulk Gmail desde oct 2025 (~369 hilos)                                          | ✅ Completada 2026-04-24 |
+| 5    | `scripts/daily_sync.py` **incremental** Drive + Gmail + Task Scheduler 23:00                                     | ✅ Completada 2026-04-24 |
+| 6    | Tabla `alsari_hitos` + `check_deadlines.py` + email Gmail API + Task Scheduler 09:00                             | ✅ Completada 2026-04-24 |
+| 6b   | `scripts/generate_drafts.py` — borradores email con Gemini 2.5 Flash Lite + perfil estilo + Task Scheduler 08:00 | ✅ Completada 2026-04-24 |
+| 7    | `src/alsari/mcp/server.py` — Claude Desktop conectado, estado "running"                                          | ✅ Completada 2026-04-24 |
+| 8    | Dashboard Streamlit multi-página con auth — `app.py` + `pages/` + `run_dashboard.bat`                            | ✅ Completada 2026-04-24 |
 
 ## Diseño Fase 5 — Ingesta Incremental
 
@@ -119,40 +121,40 @@ Alsari Database/
 
 ## Detalle Fase 3a — Orden de construcción
 
-| # | Módulo | Qué hace |
-|---|--------|----------|
-| 1 | `pyproject.toml` + `.env.example` | Proyecto inicializado, dependencias |
-| 2 | `src/alsari/config.py` | Lee credenciales + carga taxonomía |
-| 3 | `src/alsari/db/schema.py` | Modelo pydantic = tabla `alsari_knowledge` |
-| 4 | `src/alsari/db/supabase.py` | Cliente + upsert idempotente |
-| 5 | `src/alsari/extract/drive.py` | Auth Google (1 vez) + descarga según MIME |
-| 6 | `src/alsari/extract/pdf.py` | PDF → texto |
-| 7 | `src/alsari/extract/docx.py` | Word → texto |
-| 8 | `src/alsari/extract/gdocs.py` | Google Docs export → texto |
-| 9 | `src/alsari/extract/xlsx.py` | Excel/Sheets → Markdown |
-| 10 | `src/alsari/pipeline/chunker.py` | Trocea 500 tokens, overlap 50 |
-| 11 | `src/alsari/pipeline/classifier.py` | Claude → metadatos JSON |
-| 12 | `src/alsari/pipeline/embedder.py` | Voyage → vector 1024-d |
-| 13 | `src/alsari/pipeline/ingest.py` | Orquestador: ata todo |
+| #   | Módulo                              | Qué hace                                   |
+| --- | ----------------------------------- | ------------------------------------------ |
+| 1   | `pyproject.toml` + `.env.example`   | Proyecto inicializado, dependencias        |
+| 2   | `src/alsari/config.py`              | Lee credenciales + carga taxonomía         |
+| 3   | `src/alsari/db/schema.py`           | Modelo pydantic = tabla `alsari_knowledge` |
+| 4   | `src/alsari/db/supabase.py`         | Cliente + upsert idempotente               |
+| 5   | `src/alsari/extract/drive.py`       | Auth Google (1 vez) + descarga según MIME  |
+| 6   | `src/alsari/extract/pdf.py`         | PDF → texto                                |
+| 7   | `src/alsari/extract/docx.py`        | Word → texto                               |
+| 8   | `src/alsari/extract/gdocs.py`       | Google Docs export → texto                 |
+| 9   | `src/alsari/extract/xlsx.py`        | Excel/Sheets → Markdown                    |
+| 10  | `src/alsari/pipeline/chunker.py`    | Trocea 500 tokens, overlap 50              |
+| 11  | `src/alsari/pipeline/classifier.py` | Claude → metadatos JSON                    |
+| 12  | `src/alsari/pipeline/embedder.py`   | Voyage → vector 1024-d                     |
+| 13  | `src/alsari/pipeline/ingest.py`     | Orquestador: ata todo                      |
 
 ## Formatos soportados
 
-| Tipo | MIME | Extractor |
-|------|------|-----------|
-| PDF | `application/pdf` | `pdf.py` (pypdf) |
-| Word | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` | `docx.py` (python-docx) |
-| Google Docs | `application/vnd.google-apps.document` | `gdocs.py` (export text/plain) |
-| Excel | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet` | `xlsx.py` (openpyxl) |
-| Google Sheets | `application/vnd.google-apps.spreadsheet` | `xlsx.py` (export csv) |
+| Tipo          | MIME                                                                      | Extractor                      |
+| ------------- | ------------------------------------------------------------------------- | ------------------------------ |
+| PDF           | `application/pdf`                                                         | `pdf.py` (pypdf)               |
+| Word          | `application/vnd.openxmlformats-officedocument.wordprocessingml.document` | `docx.py` (python-docx)        |
+| Google Docs   | `application/vnd.google-apps.document`                                    | `gdocs.py` (export text/plain) |
+| Excel         | `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`       | `xlsx.py` (openpyxl)           |
+| Google Sheets | `application/vnd.google-apps.spreadsheet`                                 | `xlsx.py` (export csv)         |
 
 ### Chunking por tipo de fuente
 
 Hay dos estrategias — el orquestador (`ingest.py`) elige según `source_type`:
 
-| source_type | Chunker | Comportamiento |
-|-------------|---------|----------------|
-| `drive_pdf`, `drive_docx`, `drive_gdoc`, `gmail`, `manual` | `chunk_text` | Ventana de 500 tokens con overlap de 50 |
-| `drive_xlsx`, `drive_gsheet` | `chunk_tabular` | **Nunca parte filas.** Empaqueta filas enteras hasta 500 tokens. Repite título de hoja + cabecera Markdown en cada chunk para mantener contexto numérico de balances/PyG. |
+| source_type                                                | Chunker         | Comportamiento                                                                                                                                                            |
+| ---------------------------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `drive_pdf`, `drive_docx`, `drive_gdoc`, `gmail`, `manual` | `chunk_text`    | Ventana de 500 tokens con overlap de 50                                                                                                                                   |
+| `drive_xlsx`, `drive_gsheet`                               | `chunk_tabular` | **Nunca parte filas.** Empaqueta filas enteras hasta 500 tokens. Repite título de hoja + cabecera Markdown en cada chunk para mantener contexto numérico de balances/PyG. |
 
 ## Taxonomía canónica
 

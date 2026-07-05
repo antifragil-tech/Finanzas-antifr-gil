@@ -7,12 +7,12 @@
 
 ## 📦 Módulos previstos
 
-| Módulo | Propósito | Estado |
-|--------|-----------|--------|
+| Módulo       | Propósito                                         | Estado        |
+| ------------ | ------------------------------------------------- | ------------- |
 | `financiero` | Dashboard financiero consolidado, KPIs, cash flow | 🚧 Por migrar |
-| `facturas` | Gestión de facturas emitidas y recibidas | 🚧 Por migrar |
-| `proyectos` | Tracking de proyectos inmobiliarios | 🚧 Por migrar |
-| `_template` | Plantilla para crear módulos nuevos | ✅ Disponible |
+| `facturas`   | Gestión de facturas emitidas y recibidas          | 🚧 Por migrar |
+| `proyectos`  | Tracking de proyectos inmobiliarios               | 🚧 Por migrar |
+| `_template`  | Plantilla para crear módulos nuevos               | ✅ Disponible |
 
 ---
 
@@ -21,6 +21,7 @@
 ### Opción A: usar el slash command (recomendado)
 
 En el chat de Claude Code:
+
 ```
 /nuevo-modulo financiero
 ```

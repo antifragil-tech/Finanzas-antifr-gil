@@ -1,4 +1,5 @@
 # SESSION — Estado actual de trabajo
+
 > Última actualización: 2026-06-12 · Rama: `feat/ui-quiet-luxury-refresh` (apilada sobre `fix/revision-fable-jun11`)
 
 ## Objetivo de la rama actual
@@ -56,14 +57,14 @@ el preview de Vercel antes de merge** — el cambio tipográfico afecta a toda l
 
 ## Archivos clave modificados
 
-| Archivo | Cambio principal |
-|---------|-----------------|
-| `packages/config/tailwind-preset.js` | Nuevo — fuente única de tokens del design system |
-| `packages/ui/src/components/*` | KPICard realineado + 5 componentes nuevos |
-| `apps/host/src/app/{layout.tsx,globals.css}` | Geist, body zinc-950, glass spec, scrollbar, lucide 1.5 |
-| `apps/*/tailwind.config.ts` (×5) | Consumen el preset, sin theme local |
-| ~70 archivos .tsx en `apps/` | Rebalanceo tipográfico + rose + tamaños tokenizados (masivo, por reglas) |
-| `.claude/skills/ui-quiet-luxury/SKILL.md` | Documenta la realidad (paleta navy, text-2xs, pesos, anti-patrones) |
+| Archivo                                      | Cambio principal                                                         |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| `packages/config/tailwind-preset.js`         | Nuevo — fuente única de tokens del design system                         |
+| `packages/ui/src/components/*`               | KPICard realineado + 5 componentes nuevos                                |
+| `apps/host/src/app/{layout.tsx,globals.css}` | Geist, body zinc-950, glass spec, scrollbar, lucide 1.5                  |
+| `apps/*/tailwind.config.ts` (×5)             | Consumen el preset, sin theme local                                      |
+| ~70 archivos .tsx en `apps/`                 | Rebalanceo tipográfico + rose + tamaños tokenizados (masivo, por reglas) |
+| `.claude/skills/ui-quiet-luxury/SKILL.md`    | Documenta la realidad (paleta navy, text-2xs, pesos, anti-patrones)      |
 
 ## Contexto necesario para continuar
 

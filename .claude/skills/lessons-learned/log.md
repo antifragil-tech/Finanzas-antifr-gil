@@ -34,6 +34,7 @@ Las más recientes quedan abajo. La búsqueda se hace con `grep` por tags.
 **Lección:** `settings.json` debe ser JSON puro y válido. Sin claves `_comment`, `_comment_*` ni ninguna otra pseudoanotación. La documentación de la configuración va en `.claude/hooks/README.md` o en los `ways-of-working`, no en el propio JSON.
 
 **Acciones tomadas:**
+
 - [x] Eliminadas todas las claves `_comment*` de `.claude/settings.json`
 - [x] Verificado que `permissions.allow` y `permissions.deny` quedan como arrays directos bajo `permissions`
 
@@ -46,9 +47,11 @@ Las más recientes quedan abajo. La búsqueda se hace con `grep` por tags.
 **Contexto:** Configuración inicial de hooks en `.claude/settings.json`. Se escribió el campo `command` directamente en el objeto de cada entrada del array de eventos.
 
 **Error:** Estructura usada (incorrecta):
+
 ```json
 "PreToolUse": [{ "matcher": "Bash", "command": "script.sh" }]
 ```
+
 Además, los patrones Bash usaban `:*` como sufijo (`"Bash(git status:*)"`) en vez del wildcard correcto.
 
 **Corrección:** El schema oficial requiere un nivel extra de anidamiento: cada entrada del array de eventos debe tener un campo `hooks` que es un array de objetos `{ "type": "command", "command": "..." }`. Los patrones Bash deben usar solo el prefijo del comando sin `:*`.
@@ -58,6 +61,7 @@ Además, los patrones Bash usaban `:*` como sufijo (`"Bash(git status:*)"`) en v
 **Lección:** Antes de escribir o generar `settings.json`, consultar el schema en `https://json.schemastore.org/claude-code-settings.json`. La estructura correcta de hooks tiene **dos niveles**: matcher externo → array `hooks` interno con `type` + `command`.
 
 **Acciones tomadas:**
+
 - [x] Reestructurados los 4 hooks (PreToolUse, PostToolUse, SessionStart, Stop) al formato correcto
 - [x] Corregidos los patrones Bash eliminando el sufijo `:*`
 
@@ -76,11 +80,13 @@ Además, los patrones Bash usaban `:*` como sufijo (`"Bash(git status:*)"`) en v
 **Causa raíz:** Tailwind v3 genera CSS solo para las clases que detecta vía glob en `content`. Cuando Next.js (host) transpila e importa un módulo workspace cuyas fuentes están fuera de la carpeta del host, esas fuentes **no se escanean automáticamente** — pnpm las symlinkea, no las copia. Resultado: las clases que solo se usan en el módulo (`absolute`, `fixed`, `z-50`, `left-16`, `top-full`, `appearance-none`, etc.) se omiten del CSS generado, y el componente renderiza sin estilos críticos. Sin error visible: solo "se ve mal".
 
 **Lección:**
+
 1. Cuando un proyecto Next.js consume módulos workspace con sus propios componentes, el `content` de Tailwind del host **debe** incluir explícitamente las fuentes de esos módulos: `'../modules/*/src/**/*.{ts,tsx}'`.
 2. Importante: **NO** uses `'../modules/**/*.{ts,tsx}'` sin restringir a `src/` — escaneará `node_modules/` y `dist/` de cada módulo, lo que cuelga el dev server o provoca Internal Server Error.
 3. Heurística de diagnóstico: si el JSX "parece bien" pero el resultado visual es desastroso (especialmente posicionamiento y layout), **antes de tocar el JSX**, comprueba que las clases Tailwind se están generando — abre devtools y mira si el elemento tiene `position: absolute` aplicado de verdad.
 
 **Acciones tomadas:**
+
 - [x] Añadido `'../modules/*/src/**/*.{ts,tsx}'` al `content` de `apps/host/tailwind.config.ts`
 - [x] Borrado `apps/host/.next` para forzar regeneración del CSS
 - [x] Documentado en `apps/modules/_template/ways-of-working-local/README.md` para nuevos módulos
@@ -101,12 +107,14 @@ Además, los patrones Bash usaban `:*` como sufijo (`"Bash(git status:*)"`) en v
 **Causa raíz:** `@supabase/ssr` almacena la sesión en cookies para que funcione con Server Components y SSR de Next.js. Los módulos Vite importados como paquetes workspace no pueden acceder a esas cookies directamente. Resultado: `supabase.auth.getSession()` devuelve `null` desde un módulo Vite aunque el usuario esté autenticado en el host.
 
 **Lección:** El patrón correcto para auth en módulos Vite embebidos en un host Next.js con `@supabase/ssr`:
+
 1. `AppShell.tsx` (host) expone `window.alsariToken` tras cada `onAuthStateChange`.
 2. `getJwt()` en `@alsari/supabase-client` lee primero `window.alsariToken`, luego hace fallback a `localStorage`.
 3. Todos los módulos usan `getJwt()` para construir el header `Authorization: Bearer <token>`.
 4. Nunca leer `localStorage` directamente en los módulos para obtener el token de sesión.
 
 **Acciones tomadas:**
+
 - [x] `AppShell.tsx` expone `window.alsariToken` en `onAuthStateChange`
 - [x] `getJwt()` en `supabase-client` implementa la lectura por prioridad
 - [x] Documentado en `docs/ARQUITECTURA.md` sección "Auth bridge para módulos Vite"
@@ -119,21 +127,24 @@ Además, los patrones Bash usaban `:*` como sufijo (`"Bash(git status:*)"`) en v
 
 **Contexto:** `tsconfig.json` tiene `exactOptionalPropertyTypes: true`. Al desestructurar `emisorCif?: string` de una variable de tipo `PreviewProps` y pasarlo directamente a `buildInvoiceHtml({ ..., emisorCif })`, TypeScript rechaza la asignación con error: "Type 'string | undefined' is not assignable to type 'string'".
 
-**Error:** Se pasaron los campos opcionales desestructurados directamente como propiedades del objeto argumento. Con `exactOptionalPropertyTypes: true`, pasar `undefined` explícitamente a un campo `?: string` es un error de tipo — la propiedad opcional debe estar *ausente*, no presente con valor `undefined`.
+**Error:** Se pasaron los campos opcionales desestructurados directamente como propiedades del objeto argumento. Con `exactOptionalPropertyTypes: true`, pasar `undefined` explícitamente a un campo `?: string` es un error de tipo — la propiedad opcional debe estar _ausente_, no presente con valor `undefined`.
 
 **Corrección de Guille:** (Identificada internamente al leer el error de TypeScript.)
 
 **Causa raíz:** `exactOptionalPropertyTypes: true` distingue entre "propiedad ausente" y "propiedad con valor `undefined`". Son semánticamente distintos para este flag. Pasar `{ emisorCif: undefined }` es diferente a no pasar `emisorCif` en absoluto.
 
 **Lección:** Con `exactOptionalPropertyTypes: true`, para pasar campos opcionales que pueden ser `undefined`, usar conditional spread:
+
 ```ts
 ...(val && { key: val })
 // o para strings vacíos:
 ...(val !== undefined && { key: val })
 ```
+
 Nunca `{ key: val }` donde `val` puede ser `undefined`.
 
 **Acciones tomadas:**
+
 - [x] Todos los campos opcionales en `handleDownloadPdf` usan conditional spread
 
 **Tags:** #typescript #exactOptionalPropertyTypes #types #pattern
@@ -151,11 +162,13 @@ Nunca `{ key: val }` donde `val` puede ser `undefined`.
 **Causa raíz:** El proyecto nunca inicializó `supabase init`, por lo que no existe `config.toml`. Sin ese archivo, la CLI no rastrea qué migraciones están aplicadas y considera la BD siempre "al día". El directorio `migrations/` existe como historial documental, no como tracker de CLI.
 
 **Lección:**
+
 1. En este proyecto, **todas las migraciones se aplican manualmente** via Supabase Dashboard → SQL Editor.
 2. El directorio `migrations/` es documentación histórica del schema, no un mecanismo de aplicación automática.
 3. Ante una migración nueva: proporcionar el SQL al usuario + URL directa al SQL Editor (`https://supabase.com/dashboard/project/<project-id>/sql/new`). No intentar `db push`.
 
 **Acciones tomadas:**
+
 - [x] Documentado en `docs/ARQUITECTURA.md` la nota "Aplicadas manualmente vía Supabase Dashboard"
 
 **Tags:** #supabase #migrations #cli #workflow
@@ -171,21 +184,32 @@ Nunca `{ key: val }` donde `val` puede ser `undefined`.
 **Causa raíz:** Un elemento HTML por defecto tiene la altura de su contenido. Para que una factura con pocas líneas ocupe una página A4 completa, se necesita forzar la altura mínima y empujar el footer al fondo.
 
 **Lección:** Patrón definitivo para generar documentos A4 como HTML:
+
 ```css
 .page {
   min-height: 297mm;
   display: flex;
   flex-direction: column;
 }
-.page-spacer { flex: 1; min-height: 40px; }
+.page-spacer {
+  flex: 1;
+  min-height: 40px;
+}
 @media print {
-  @page { size: A4; margin: 0; }
-  .page { min-height: 297mm; }
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  .page {
+    min-height: 297mm;
+  }
 }
 ```
+
 Colocar `<div class="page-spacer"></div>` entre el contenido central y el footer. El spacer absorbe el espacio sobrante y el footer queda siempre al pie de la página.
 
 **Acciones tomadas:**
+
 - [x] Implementado en `FacturaEmitidaEditor.tsx` tanto en el HTML generado como en el preview React
 
 **Tags:** #pdf #html #a4 #css #facturas #print
@@ -201,12 +225,14 @@ Colocar `<div class="page-spacer"></div>` entre el contenido central y el footer
 **Causa raíz:** `about:blank` no tiene base URL de red. Una imagen con `src="/logo.png"` en ese contexto intenta cargar `about:///logo.png`, que no existe.
 
 **Lección:** En HTML generado para `document.write()` en ventanas popup:
+
 - Siempre construir URLs absolutas: `window.location.origin + '/logo.png'`
 - Añadir `onerror="this.style.display='none'"` como fallback silencioso
 - Este patrón aplica a cualquier asset (imágenes, fuentes, CSS externo) dentro de `document.write()`
 
 **Acciones tomadas:**
-- [x] `handleDownloadPdf` pasa `logoUrl: \`\${window.location.origin}/logo.png\`` a `buildInvoiceHtml`
+
+- [x] `handleDownloadPdf` pasa `logoUrl: \`\${window.location.origin}/logo.png\``a`buildInvoiceHtml`
 
 **Tags:** #pdf #html #logo #url #document-write #popup
 
@@ -225,6 +251,7 @@ Colocar `<div class="page-spacer"></div>` entre el contenido central y el footer
 **Lección:** Para datos de configuración que son prerequisito del módulo pero no parte del workflow diario (empresa, cuentas bancarias, plantillas), usar una **sección "CONFIGURACIÓN" separada al fondo del sidebar**. Es el mismo patrón de Holded, Sage y Xero. Esta separación comunica al usuario que son ajustes del sistema, no acciones recurrentes.
 
 **Acciones tomadas:**
+
 - [x] Sección "CONFIGURACIÓN" añadida al sidebar de Contabilidad con `Mis Empresas` como primer item
 
 **Tags:** #ux #sidebar #navigation #design-patterns #contabilidad
@@ -242,12 +269,14 @@ Colocar `<div class="page-spacer"></div>` entre el contenido central y el footer
 **Causa raíz:** El flujo manual de migraciones no tiene verificación. Un archivo commiteado y olvidado produce features que funcionan en dev contra suposiciones falsas y fallan en producción con errores opacos (42P01, 42703, PGRST204). Las tablas creadas por servicios externos (Python) ni siquiera pasan por el directorio de migraciones.
 
 **Lección:**
+
 1. Ante cualquier error 42P01/42703/PGRST204/23514 en producción, lo primero es comparar el schema remoto contra `services/supabase/migrations/` — ya van 3 incidentes con esta causa (préstamo 06-10, campos fondo 06-11, lote escenarios 06-11).
 2. Auditoría rápida de paridad: `npx supabase db query "SELECT tablename, rowsecurity FROM pg_tables WHERE schemaname='public'" --linked` y probes de `information_schema.columns` para columnas críticas.
 3. El comando que funciona en este entorno es `npx supabase db query --linked --file <ruta>` (el pipe de PowerShell corrompe el SQL con BOM; el redirect `<` no existe en PowerShell).
 4. Toda tabla creada fuera del flujo (servicios Python, dashboard) necesita su migración de RLS retroactiva en el repo como documentación + aplicación.
 
 **Acciones tomadas:**
+
 - [x] Aplicadas las 5 migraciones pendientes + 2 de RLS al remoto
 - [x] Verificado: 0 tablas sin RLS en `public`
 - [x] Documentado en `docs/CHANGELOG.md`
@@ -295,6 +324,7 @@ Plantilla para copiar:
 **Lección:** Antes de afirmar cómo funciona un flujo de datos del sistema, grep/leer el código que lo implementa — especialmente cuando la respuesta es para Guille, que toma decisiones operativas con ella. Si no se ha verificado, decir "creo que" y comprobarlo en el momento.
 
 **Acciones tomadas:**
+
 - [x] Verificado el flujo real en `sumasSaldosImport.ts` y corregida la respuesta
 - [x] Lección registrada
 
@@ -313,6 +343,7 @@ Plantilla para copiar:
 **Lección:** Los KPIs derivados del PGC hay que validarlos contra los datos reales de varias sociedades, no solo contra la teoría del plan contable. Antes de definir/corregir una fórmula de KPalfa, censar qué cuentas usa de verdad el holding (`SELECT substring(cuenta,1,4), sum(...) GROUP BY`) para no dejar fuera las cuentas donde está el dinero. La 171 en Alsari = préstamos de socios, no deuda genérica.
 
 **Acciones tomadas:**
+
 - [x] `deriveKpis`: deuda_socios = 550-553 + subgrupo 16 + 171; quitada la 555
 - [x] Migración `202606151600` recalcula el caché `kpis_sociedades.deuda_socios` desde el último balance de cada sociedad
 - [x] Verificado: Perisur 31 € → 1.708.934,60 €

@@ -31,7 +31,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       if (session?.access_token) win.alsariToken = session.access_token;
       else delete win.alsariToken;
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.access_token) win.alsariToken = session.access_token;
       else delete win.alsariToken;
     });

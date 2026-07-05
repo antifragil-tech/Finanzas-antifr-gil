@@ -12,20 +12,20 @@ La app actual de Guille vive en `Financiero/alsari-finances-frontend/` como una
 SPA monolítica (Vite + React). Tiene 4 rutas y un backend en Cloudflare Worker
 corriendo en `:8787`:
 
-| Archivo | Ruta | Destino |
-|---------|------|---------|
-| `App.tsx` | — | Boot screen + router → `apps/host` |
-| `LandingPage.tsx` | `/` | → `apps/host` |
-| `FinancialDashboard.tsx` | `/financiero` | → `apps/modules/financiero` |
-| `WorkspacePage.tsx` | `/proyectos` | → `apps/modules/proyectos` |
-| `InvoicesPage.tsx` | `/facturas` | → `apps/modules/facturas` |
-| `Sidebar.tsx` + `DashboardLayout.tsx` | — | → `apps/modules/financiero` |
-| Vistas `views/*` + `CorporateMap` | — | → `apps/modules/financiero` |
-| `InvoiceWorkflow.tsx` | — | → `apps/modules/facturas` |
-| `lib/utils.ts` (`cn`) | — | → `packages/utils` |
-| `lib/financialUtils.ts` | — | → `packages/utils` + `apps/modules/financiero` |
-| `lib/types.ts` | — | → `packages/types` |
-| `index.css` (`.glass-panel`, etc.) | — | → `packages/ui` |
+| Archivo                               | Ruta          | Destino                                        |
+| ------------------------------------- | ------------- | ---------------------------------------------- |
+| `App.tsx`                             | —             | Boot screen + router → `apps/host`             |
+| `LandingPage.tsx`                     | `/`           | → `apps/host`                                  |
+| `FinancialDashboard.tsx`              | `/financiero` | → `apps/modules/financiero`                    |
+| `WorkspacePage.tsx`                   | `/proyectos`  | → `apps/modules/proyectos`                     |
+| `InvoicesPage.tsx`                    | `/facturas`   | → `apps/modules/facturas`                      |
+| `Sidebar.tsx` + `DashboardLayout.tsx` | —             | → `apps/modules/financiero`                    |
+| Vistas `views/*` + `CorporateMap`     | —             | → `apps/modules/financiero`                    |
+| `InvoiceWorkflow.tsx`                 | —             | → `apps/modules/facturas`                      |
+| `lib/utils.ts` (`cn`)                 | —             | → `packages/utils`                             |
+| `lib/financialUtils.ts`               | —             | → `packages/utils` + `apps/modules/financiero` |
+| `lib/types.ts`                        | —             | → `packages/types`                             |
+| `index.css` (`.glass-panel`, etc.)    | —             | → `packages/ui`                                |
 
 **Objetivo de Fase 1:** la app funciona exactamente igual para Guille, pero con
 la estructura correcta del monorepo. **Cero cambios funcionales visibles.**
@@ -70,6 +70,7 @@ crece a más de 5 módulos en producción simultánea.
 ### Paso 1 — `packages/utils` ✅ COMPLETADO (2026-05-15)
 
 Extraídos de `lib/utils.ts` y `lib/financialUtils.ts`:
+
 - `cn()`, `parseCurrency()`, `cleanNumber()`, `formatCurrency()`, `formatPercent()`
 - Eliminados todos los `console.log` de debug del original
 - `calculateConsolidatedData` queda en `apps/modules/financiero` (lógica de negocio)
@@ -77,6 +78,7 @@ Extraídos de `lib/utils.ts` y `lib/financialUtils.ts`:
 ### Paso 2 — `packages/types` ✅ COMPLETADO (2026-05-15)
 
 Extraído de `lib/types.ts`, reorganizado por dominio:
+
 - `financial.ts`: tipos del holding y dashboard
 - `workspace.ts`: tipos del módulo proyectos
 - `invoices.ts`: tipos del módulo facturas
@@ -86,6 +88,7 @@ Extraído de `lib/types.ts`, reorganizado por dominio:
 ### Paso 3 — `packages/ui`: primitivos base
 
 Extraer de `index.css`:
+
 - `.glass-panel` y `.glass-header` como clases Tailwind o componente `<GlassPanel>`
 - Scrollbar CSS, tokens de color
 - `KPICard.tsx` entra en `packages/ui` si se comparte entre módulos;
@@ -94,6 +97,7 @@ Extraer de `index.css`:
 ### Paso 4 — `apps/host/`: shell Next.js
 
 Crear el Host OS con:
+
 - Boot screen (logo + "NEURAL FINANCE V3.0"), copiado de `App.tsx`
 - Sidebar del OS: navegación entre módulos (Financiero / Proyectos / Facturas)
 - Rutas: `/financiero`, `/proyectos`, `/facturas`
@@ -103,6 +107,7 @@ Crear el Host OS con:
 ### Paso 5 — `apps/modules/financiero/`
 
 Migrar FinancialDashboard y todo su ecosistema:
+
 - `FinancialDashboard.tsx` → `App.tsx` del módulo
 - `DashboardLayout.tsx`, `Sidebar.tsx` (selector sociedad/holding), `views/*`, `CorporateMap.tsx`
 - Imports actualizados: `lib/utils` → `@alsari/utils`, `lib/types` → `@alsari/types`

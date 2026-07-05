@@ -31,9 +31,9 @@ export function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-950 p-4">
       <div className="w-full max-w-sm">
-        <div className="flex flex-col items-center mb-10">
+        <div className="mb-10 flex flex-col items-center">
           <Image
             src="/logo.png"
             width={64}
@@ -41,10 +41,10 @@ export function LoginForm() {
             alt="Alsari Capital"
             className="mb-6 object-contain"
           />
-          <h1 className="text-brand text-xl font-semibold tracking-widest uppercase">
+          <h1 className="text-brand text-xl font-semibold uppercase tracking-widest">
             Alsari Capital OS
           </h1>
-          <p className="text-zinc-500 text-xs tracking-widest mt-1 uppercase">
+          <p className="mt-1 text-xs uppercase tracking-widest text-zinc-500">
             Neural Finance V3.0
           </p>
         </div>
@@ -54,10 +54,10 @@ export function LoginForm() {
             <input
               type="email"
               value={email}
-              onChange={e => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required
-              className="w-full bg-zinc-900 border border-white/10 rounded-lg px-4 py-3 text-brand placeholder-zinc-600 text-sm focus:outline-none focus:border-white/25 transition-colors"
+              className="text-brand w-full rounded-lg border border-white/10 bg-zinc-900 px-4 py-3 text-sm placeholder-zinc-600 transition-colors focus:border-white/25 focus:outline-none"
             />
           </div>
 
@@ -65,21 +65,19 @@ export function LoginForm() {
             <input
               type="password"
               value={password}
-              onChange={e => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)}
               placeholder="Contraseña"
               required
-              className="w-full bg-zinc-900 border border-white/10 rounded-lg px-4 py-3 text-brand placeholder-zinc-600 text-sm focus:outline-none focus:border-white/25 transition-colors"
+              className="text-brand w-full rounded-lg border border-white/10 bg-zinc-900 px-4 py-3 text-sm placeholder-zinc-600 transition-colors focus:border-white/25 focus:outline-none"
             />
           </div>
 
-          {error && (
-            <p className="text-red-400 text-xs text-center">{error}</p>
-          )}
+          {error && <p className="text-center text-xs text-red-400">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-brand text-zinc-950 font-semibold text-sm py-3 rounded-lg hover:bg-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed tracking-wider uppercase"
+            className="bg-brand w-full rounded-lg py-3 text-sm font-semibold uppercase tracking-wider text-zinc-950 transition-colors hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
           >
             {loading ? 'Accediendo...' : 'Acceder'}
           </button>
