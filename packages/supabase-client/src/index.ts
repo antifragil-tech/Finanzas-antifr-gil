@@ -5,10 +5,14 @@
 // lessons-learned 2026-05-22). Los módulos NUNCA deben declarar estas
 // constantes en local: importar siempre de este paquete.
 
-// La anon key es pública por diseño — la protección real es el RLS en Supabase.
-const FALLBACK_URL = 'https://swtyxysvnfcfxziclteq.supabase.co';
-const FALLBACK_ANON_KEY =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3dHl4eXN2bmZjZnh6aWNsdGVxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0MzA4NzMsImV4cCI6MjA5MjAwNjg3M30.aSHBdsXyT-TAdA7rv79qZFbLyMjVd25kX1E0GwBZTQ8';
+// DESCONECTADO del proyecto legacy de Alsari (decisión del cockpit 2026-07-05:
+// sus datos ya no deben aparecer en Antifrágil OS). Sin variables de entorno
+// configuradas, el cliente apunta a un destino inexistente: toda petición
+// falla de forma controlada y los módulos muestran sus estados vacíos/error.
+// La conexión real del OS se configurará vía env cuando exista el Supabase
+// nuevo de Antifrágil (Fase 7).
+const FALLBACK_URL = 'https://desconectado.invalid';
+const FALLBACK_ANON_KEY = 'desconectado';
 
 // Next.js no inyecta `import.meta.env` al transpilar módulos Vite: leer siempre
 // con optional chaining y sin asumir que el objeto existe.
