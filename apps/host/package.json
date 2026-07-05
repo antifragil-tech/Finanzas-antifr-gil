@@ -14,6 +14,7 @@
     "@alsari/contabilidad": "workspace:*",
     "@alsari/presupuestos": "workspace:*",
     "@alsari/financiero": "workspace:*",
+    "@alsari/reservas": "workspace:*",
     "@alsari/types": "workspace:*",
     "@alsari/ui": "workspace:*",
     "@alsari/utils": "workspace:*",

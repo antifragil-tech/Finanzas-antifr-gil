@@ -50,6 +50,9 @@ importers:
       '@alsari/presupuestos':
         specifier: workspace:*
         version: link:../modules/presupuestos
+      '@alsari/reservas':
+        specifier: workspace:*
+        version: link:../modules/reservas
       '@alsari/types':
         specifier: workspace:*
         version: link:../../packages/types
