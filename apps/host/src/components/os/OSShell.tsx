@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { OSContextBar } from './OSContextBar';
 import { OS_NAV, tituloDeRuta } from './osNav';
 
 // Shell visual de Antifrágil OS: sidebar de navegación + topbar + área de
@@ -71,10 +72,13 @@ export function OSShell({ children }: { children: React.ReactNode }) {
           <h1 className="text-sm font-medium tracking-tight text-zinc-300">
             {tituloDeRuta(pathname)}
           </h1>
-          <span className="text-2xs inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 uppercase tracking-widest text-zinc-500">
-            <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-            Draft — shell sin módulos
-          </span>
+          <div className="flex items-center gap-3">
+            <OSContextBar />
+            <span className="text-2xs inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 uppercase tracking-widest text-zinc-500">
+              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+              Draft — shell sin módulos
+            </span>
+          </div>
         </header>
         <main className="min-h-[calc(100vh-3.5rem)]">{children}</main>
       </div>
