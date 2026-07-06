@@ -17,6 +17,11 @@ import {
   type EstadoFacturaRecibida,
 } from '@antifragil/operativa';
 import {
+  cargarGastosReales,
+  cargarIngresosReales,
+  datosRealesDisponibles,
+} from '@/lib/datos/fuenteDatos';
+import {
   OSPageHeader,
   OSSection,
   OSKpiCard,
@@ -24,8 +29,9 @@ import {
   type OSBadgeTone,
 } from '@/components/os/ui';
 
-// Tesorería operativa: ingresos y gastos diferenciados, facturas emitidas y
-// recibidas, caja vs devengo por separado. Escenario demo compartido del MVP.
+// Tesorería operativa. Con Supabase configurado lee los DATOS REALES
+// importados de los Excel (Cash Flow 2025-2026 + ingresos por servicio);
+// sin entorno cae al escenario demo (build CI sin secrets sigue verde).
 
 const NOMBRE_CATEGORIA: Record<CategoriaGasto, string> = {
   coste_profesional_variable: 'Coste profesional variable',
@@ -51,16 +57,21 @@ const TONO_FR: Record<EstadoFacturaRecibida, OSBadgeTone> = {
   bloqueada: 'danger',
 };
 
-export default function TesoreriaPage() {
-  const ingresos = ingresosDemo();
-  const gastos = gastosDemo();
+export default async function TesoreriaPage() {
+  const real = datosRealesDisponibles();
+  const ingresos = real ? await cargarIngresosReales() : ingresosDemo();
+  const gastos = real ? await cargarGastosReales() : gastosDemo();
+  // Facturas: aún sin datos reales importados (llegarán con Salonized/gestoría).
   const emitidas = facturasEmitidasDemo();
   const recibidas = facturasRecibidasDemo();
 
   const t = totalesCajaDevengo(ingresos, gastos);
-  const cobradoFacturas = importeCobradoDeFacturas(emitidas);
-  const pagado = importePagadoDeFacturas(recibidas);
   const bloqueados = gastos.filter((g) => estadoValidacion(g) === 'bloqueado_sin_documento');
+  // En el Cash Flow real cada gasto está PAGADO en su fecha (informe de caja).
+  const pagado = real
+    ? gastos.reduce((s, g) => s + g.importe, 0)
+    : importePagadoDeFacturas(recibidas);
+  const cobrado = real ? t.cobrado : t.cobrado + importeCobradoDeFacturas(emitidas);
 
   const porCategoria = new Map<
     CategoriaGasto,
@@ -75,38 +86,50 @@ export default function TesoreriaPage() {
     porCategoria.set(cat, acc);
   }
 
+  const gastosVisibles = [...gastos].reverse().slice(0, 60);
+
   return (
     <div className="pb-10">
       <OSPageHeader
         titulo="Tesorería"
-        descripcion={`Ingresos, gastos y facturas del mes demo ${MES_DEMO} — caja y devengo por separado, nunca sumados. Datos ficticios del escenario compartido.`}
+        descripcion={
+          real
+            ? `DATOS REALES importados de los Excel operativos (${gastos.length} gastos 2025–2026, ${ingresos.length} apuntes de ingreso). La caja de cobros por sesión llegará con Salonized.`
+            : `Ingresos, gastos y facturas del mes demo ${MES_DEMO} — caja y devengo por separado, nunca sumados. Datos ficticios del escenario compartido.`
+        }
       />
 
       <div className="grid grid-cols-2 gap-4 px-8 pt-4 lg:grid-cols-4">
         <OSKpiCard
-          label="Cobrado (caja)"
-          valor={formatCurrency(t.cobrado + cobradoFacturas)}
-          hint="sueltas al acto + bonos cobrados"
+          label={real ? 'Ingreso devengado (importado)' : 'Cobrado (caja)'}
+          valor={formatCurrency(real ? t.devengado : cobrado)}
+          hint={real ? 'agregados por servicio del Excel' : 'sueltas al acto + bonos cobrados'}
           icon={ArrowDownToLine}
           tone="ok"
         />
         <OSKpiCard
           label="Pagado (caja)"
           valor={formatCurrency(pagado)}
-          hint="solo facturas recibidas pagadas"
+          hint={
+            real ? 'Cash Flow: todo gasto en su fecha de pago' : 'solo facturas recibidas pagadas'
+          }
           icon={ArrowUpFromLine}
         />
         <OSKpiCard
           label="Pendiente de cobro"
           valor={formatCurrency(t.pendienteCobro)}
-          hint="partners y sesiones sin cobrar"
+          hint={
+            real
+              ? 'cobros reales pendientes de importar (Salonized)'
+              : 'partners y sesiones sin cobrar'
+          }
           icon={FileText}
           tone="warn"
         />
         <OSKpiCard
           label="Pagos bloqueados"
           valor={formatCurrency(bloqueados.reduce((s, g) => s + g.importe, 0))}
-          hint="sin documento: no se validan"
+          hint="sin documento/factura: no se validan"
           icon={AlertTriangle}
           tone={bloqueados.length > 0 ? 'warn' : 'ok'}
         />
@@ -120,13 +143,11 @@ export default function TesoreriaPage() {
           <table className="w-full min-w-[720px] text-left text-xs">
             <thead className="text-2xs border-b border-white/5 uppercase tracking-widest text-zinc-500">
               <tr>
-                {['Categoría', 'Conceptos', 'Importe devengado', 'Bloqueado sin documento'].map(
-                  (h) => (
-                    <th key={h} className="px-4 py-3 font-medium">
-                      {h}
-                    </th>
-                  ),
-                )}
+                {['Categoría', 'Conceptos', 'Importe', 'Bloqueado sin documento'].map((h) => (
+                  <th key={h} className="px-4 py-3 font-medium">
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
@@ -150,26 +171,35 @@ export default function TesoreriaPage() {
         </div>
       </OSSection>
 
-      <OSSection titulo="Detalle de gastos">
+      <OSSection
+        titulo={
+          real
+            ? `Últimos gastos (${gastosVisibles.length} de ${gastos.length})`
+            : 'Detalle de gastos'
+        }
+      >
         <div className="glass-panel overflow-x-auto rounded-2xl">
           <table className="w-full min-w-[900px] text-left text-xs">
             <thead className="text-2xs border-b border-white/5 uppercase tracking-widest text-zinc-500">
               <tr>
-                {['Concepto', 'Tipo', 'Capa', 'Importe', 'Documento', 'Validación'].map((h) => (
-                  <th key={h} className="px-4 py-3 font-medium">
-                    {h}
-                  </th>
-                ))}
+                {['Fecha', 'Concepto', 'Tipo', 'Capa', 'Importe', 'Documento', 'Validación'].map(
+                  (h) => (
+                    <th key={h} className="px-4 py-3 font-medium">
+                      {h}
+                    </th>
+                  ),
+                )}
               </tr>
             </thead>
             <tbody>
-              {gastos.map((g) => {
+              {gastosVisibles.map((g) => {
                 const val = estadoValidacion(g);
                 return (
                   <tr
                     key={g.id}
                     className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
                   >
+                    <td className="px-4 py-3 text-zinc-500">{g.fecha}</td>
                     <td className="px-4 py-3 text-zinc-200">
                       {g.concepto}
                       {g.pendienteConfirmacion ? (
@@ -209,7 +239,11 @@ export default function TesoreriaPage() {
 
       <OSSection
         titulo="Facturas emitidas operativas"
-        nota="Factura emitida no implica cobro — internas, no fiscales (doc 02)"
+        nota={
+          real
+            ? 'DEMO — las facturas reales llegarán con Salonized/gestoría. Factura emitida no implica cobro'
+            : 'Factura emitida no implica cobro — internas, no fiscales (doc 02)'
+        }
       >
         <div className="glass-panel overflow-x-auto rounded-2xl">
           <table className="w-full min-w-[760px] text-left text-xs">
@@ -249,7 +283,11 @@ export default function TesoreriaPage() {
 
       <OSSection
         titulo="Facturas recibidas"
-        nota="Factura recibida no implica pago — soporte documental de gastos y liquidaciones"
+        nota={
+          real
+            ? 'DEMO — soporte documental; las reales llegarán del Drive/gestoría'
+            : 'Factura recibida no implica pago — soporte documental de gastos y liquidaciones'
+        }
       >
         <div className="glass-panel overflow-x-auto rounded-2xl">
           <table className="w-full min-w-[760px] text-left text-xs">
