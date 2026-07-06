@@ -13,6 +13,11 @@ import {
   gastosDemo,
 } from '@antifragil/operativa';
 import { OSPageHeader, OSSection, OSKpiCard, OSStatusBadge } from '@/components/os/ui';
+import {
+  cargarGastosReales,
+  cargarIngresosReales,
+  datosRealesDisponibles,
+} from '@/lib/datos/fuenteDatos';
 
 // Rentabilidad operativa (doc 09) sobre el escenario demo compartido.
 // Vista devengo por defecto; la caja se muestra aparte y NUNCA se suman.
@@ -69,8 +74,7 @@ function TablaMargen({
   );
 }
 
-function EscaleraM1M3() {
-  const e = escaleraMargen(ingresosDemo(), gastosDemo());
+function EscaleraM1M3({ e, real }: { e: ReturnType<typeof escaleraMargen>; real: boolean }) {
   const filas: { etiqueta: string; importe: number; esMargen?: boolean }[] = [
     { etiqueta: 'Ingreso devengado', importe: e.ingresoDevengado },
     { etiqueta: '− Coste profesional variable', importe: -e.costeProfesionalVariable },
@@ -83,7 +87,11 @@ function EscaleraM1M3() {
   return (
     <OSSection
       titulo="Escalera de márgenes M1 → M3"
-      nota="Margen real: facturado por sesiones − pagos a trabajadores − costes propios de la clínica (doc 09)"
+      nota={
+        real
+          ? 'DATOS REALES importados (Cash Flow 2025–2026 + ingresos por servicio)'
+          : 'Margen real: facturado por sesiones − pagos a trabajadores − costes propios de la clínica (doc 09)'
+      }
     >
       <div className="glass-panel rounded-2xl px-5 py-2">
         {filas.map((f) => (
@@ -119,19 +127,31 @@ function EscaleraM1M3() {
   );
 }
 
-export default function RentabilidadPage() {
+export default async function RentabilidadPage() {
+  const real = datosRealesDisponibles();
+  const ingresos = real ? await cargarIngresosReales() : ingresosDemo();
+  const gastos = real ? await cargarGastosReales() : gastosDemo();
+  const e = escaleraMargen(ingresos, gastos);
+
   const hechos = hechosDemo();
   const t = totalesDemo();
   const bonos = resumenesVentasDemo();
 
-  const pctMargen = t.ingresoDevengado > 0 ? (t.margenBruto / t.ingresoDevengado) * 100 : 0;
+  const heroIngreso = real ? e.ingresoDevengado : t.ingresoDevengado;
+  const heroCoste = real ? e.costeProfesionalVariable : t.costeProfesional;
+  const heroMargen = real ? e.m1 : t.margenBruto;
+  const pctMargen = heroIngreso > 0 ? (heroMargen / heroIngreso) * 100 : 0;
   const pctCoste = Math.max(0, Math.min(100, 100 - pctMargen));
 
   return (
     <div className="pb-10">
       <OSPageHeader
         titulo="Rentabilidad"
-        descripcion={`Margen operativo — mes demo ${MES_DEMO}, vista devengo (docs/finanzas/09). Datos ficticios del escenario compartido del MVP.`}
+        descripcion={
+          real
+            ? 'Margen operativo con DATOS REALES importados de los Excel (2025–2026), vista devengo. Los desgloses por sesión siguen en demo hasta importar Salonized.'
+            : `Margen operativo — mes demo ${MES_DEMO}, vista devengo (docs/finanzas/09). Datos ficticios del escenario compartido del MVP.`
+        }
       />
 
       {/* Resultado total del mes: hero + barra de composición
@@ -139,13 +159,11 @@ export default function RentabilidadPage() {
       <div className="glass-panel mx-8 mt-4 rounded-2xl p-6">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <div>
-            <p className="text-2xs uppercase tracking-widest text-zinc-500">
-              Margen bruto del mes (M1)
-            </p>
+            <p className="text-2xs uppercase tracking-widest text-zinc-500">Margen bruto (M1)</p>
             <p
-              className={`mt-1 text-4xl font-light tracking-tight ${t.margenBruto >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}
+              className={`mt-1 text-4xl font-light tracking-tight ${heroMargen >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}
             >
-              {formatCurrency(t.margenBruto)}
+              {formatCurrency(heroMargen)}
             </p>
             <p className="mt-1 text-sm text-zinc-500">
               {pctMargen.toFixed(1)}% del ingreso devengado
@@ -154,7 +172,7 @@ export default function RentabilidadPage() {
           <div className="text-right">
             <p className="text-2xs uppercase tracking-widest text-zinc-500">Ingreso devengado</p>
             <p className="mt-1 text-2xl font-light tracking-tight text-zinc-100">
-              {formatCurrency(t.ingresoDevengado)}
+              {formatCurrency(heroIngreso)}
             </p>
           </div>
         </div>
@@ -163,22 +181,22 @@ export default function RentabilidadPage() {
           <div
             className="rounded-l-full bg-zinc-600"
             style={{ width: `${pctCoste}%` }}
-            title={`Coste profesional: ${formatCurrency(t.costeProfesional)}`}
+            title={`Coste profesional: ${formatCurrency(heroCoste)}`}
           />
           <div
             className="rounded-r-full bg-emerald-400"
             style={{ width: `${pctMargen}%` }}
-            title={`Margen bruto: ${formatCurrency(t.margenBruto)}`}
+            title={`Margen bruto: ${formatCurrency(heroMargen)}`}
           />
         </div>
         <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-xs">
           <span className="flex items-center gap-2 text-zinc-400">
             <span className="h-2 w-2 rounded-full bg-zinc-600" />
-            Coste profesional −{formatCurrency(t.costeProfesional)} ({pctCoste.toFixed(1)}%)
+            Coste profesional −{formatCurrency(heroCoste)} ({pctCoste.toFixed(1)}%)
           </span>
           <span className="flex items-center gap-2 text-zinc-300">
             <span className="h-2 w-2 rounded-full bg-emerald-400" />
-            Margen bruto {formatCurrency(t.margenBruto)} ({pctMargen.toFixed(1)}%)
+            Margen bruto {formatCurrency(heroMargen)} ({pctMargen.toFixed(1)}%)
           </span>
         </div>
       </div>
@@ -210,22 +228,22 @@ export default function RentabilidadPage() {
         Caja no es rentabilidad · Cobrado no es devengado · Coste pagado no es coste devengado
       </p>
 
-      <EscaleraM1M3 />
+      <EscaleraM1M3 e={e} real={real} />
 
       <TablaMargen
-        titulo="Por profesional"
+        titulo={real ? 'Por profesional (demo hasta importar Salonized)' : 'Por profesional'}
         filas={agregarMargen(hechos, 'profesionalId')}
         nombreDe={(id) => getProfesional(id)?.nombre ?? id}
       />
 
       <TablaMargen
-        titulo="Por servicio"
+        titulo={real ? 'Por servicio (demo)' : 'Por servicio'}
         filas={agregarMargen(hechos, 'servicio')}
         nombreDe={(s) => s.charAt(0).toUpperCase() + s.slice(1)}
       />
 
       <TablaMargen
-        titulo="Por centro"
+        titulo={real ? 'Por centro (demo)' : 'Por centro'}
         filas={agregarMargen(hechos, 'centroId')}
         nombreDe={(id) => NOMBRE_CENTRO[id] ?? id}
       />
