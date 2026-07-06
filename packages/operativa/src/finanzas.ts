@@ -30,6 +30,8 @@ export interface IngresoOperativo {
   importeDevengado: number;
   /** Lo efectivamente cobrado (caja). Puede ser 0 (pendiente) o parcial. */
   importeCobrado: number;
+  /** Medio de cobro normalizado — separa datafono (banco) de efectivo (caja). */
+  metodoPago?: 'tarjeta' | 'efectivo' | 'transferencia' | 'bizum' | 'otro';
   facturaEmitidaId?: string;
   pendienteConfirmacion?: boolean;
 }
@@ -113,7 +115,12 @@ export interface GastoOperativo {
   id: string;
   tipo: TipoGasto;
   concepto: string;
+  /** Fecha de DEVENGO del gasto (cuando se genera la obligación). */
   fecha: string;
+  /** Fecha de PAGO real si difiere del devengo (nóminas de mayo pagadas en junio). */
+  fechaPago?: string;
+  /** Cuenta de tesorería con la que se paga (columna "Tesorería" del cashflow). */
+  cuentaTesoreria?: 'banco' | 'caja';
   importe: number;
   capa: CapaCoste;
   documento: DocumentoAsociado;
