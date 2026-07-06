@@ -50,5 +50,11 @@ export const CANALES: Canal[] = [
   { id: 'canal-recomendacion', nombre: 'Recomendación', tipo: 'referido', activo: true },
   { id: 'canal-vivofacil', nombre: 'Vivofácil (partner B2B)', tipo: 'partner_b2b', activo: true },
   { id: 'canal-lidomare', nombre: 'Derivación Lidomare', tipo: 'partner_b2b', activo: true },
-  { id: 'canal-9am', nombre: '9AM', tipo: 'referido', activo: true },
+  { id: 'canal-afdh', nombre: 'AFDH (plataforma)', tipo: 'partner_b2b', activo: true },
+  {
+    id: 'canal-9am',
+    nombre: '9AM (proyecto eventos — contabilidad aparte)',
+    tipo: 'referido',
+    activo: true,
+  },
 ];

@@ -109,13 +109,28 @@ export type NombrePlantilla = 'ingresos' | 'gastos' | 'facturas_recibidas' | 'fa
 export const PLANTILLAS: Record<NombrePlantilla, ColumnaPlantilla[]> = {
   ingresos: [
     { clave: 'fecha', sinonimos: ['fecha', 'dia', 'date'], requerida: true },
-    { clave: 'cliente', sinonimos: ['cliente', 'paciente', 'nombre'], requerida: true },
     {
-      clave: 'servicio',
-      sinonimos: ['servicio', 'tratamiento_tipo', 'tipo_servicio'],
+      clave: 'cliente',
+      sinonimos: ['cliente', 'paciente', 'nombre', 'customer', 'customer_name', 'client'],
       requerida: true,
     },
-    { clave: 'profesional', sinonimos: ['profesional', 'trabajador'], requerida: false },
+    {
+      clave: 'servicio',
+      sinonimos: [
+        'servicio',
+        'tratamiento_tipo',
+        'tipo_servicio',
+        'treatment',
+        'service',
+        'service_name',
+      ],
+      requerida: true,
+    },
+    {
+      clave: 'profesional',
+      sinonimos: ['profesional', 'trabajador', 'employee', 'staff'],
+      requerida: false,
+    },
     { clave: 'centro', sinonimos: ['centro', 'clinica', 'sede'], requerida: false },
     { clave: 'canal', sinonimos: ['canal', 'origen'], requerida: false },
     { clave: 'tipo_ingreso', sinonimos: ['tipo_ingreso', 'tipo', 'modalidad'], requerida: true },
@@ -126,12 +141,27 @@ export const PLANTILLAS: Record<NombrePlantilla, ColumnaPlantilla[]> = {
     },
     {
       clave: 'importe_devengado',
-      sinonimos: ['importe_devengado', 'devengado', 'importe', 'ingreso'],
+      sinonimos: [
+        'importe_devengado',
+        'devengado',
+        'importe',
+        'ingreso',
+        'total',
+        'amount',
+        'price',
+      ],
       requerida: true,
     },
     {
       clave: 'metodo_pago',
-      sinonimos: ['metodo_pago', 'metodo_de_pago', 'medio_pago', 'forma_pago', 'forma_de_pago'],
+      sinonimos: [
+        'metodo_pago',
+        'metodo_de_pago',
+        'medio_pago',
+        'forma_pago',
+        'forma_de_pago',
+        'payment_method',
+      ],
       requerida: false,
     },
     {

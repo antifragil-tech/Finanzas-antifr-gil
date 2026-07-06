@@ -33,6 +33,20 @@ export function ingresosDemo(): IngresoOperativo[] {
     ...(h.tipoVenta === 'suelta' ? { facturaEmitidaId: `fe-sesion-${h.sesionId}` } : {}),
   }));
 
+  // AFDH (confirmado 2026-07-06): plataforma que reporta ~900 EUR/mes de
+  // beneficio a la clínica; se cobra TRIMESTRALMENTE -> devengo mensual con
+  // cobro pendiente hasta el cierre del trimestre (CxC viva).
+  ingresos.push({
+    id: 'ing-afdh',
+    origen: 'partner',
+    concepto: 'AFDH — beneficio mensual (cobro trimestral)',
+    fecha: `${MES_DEMO}-30`,
+    centroId: 'centro-playamar',
+    canalId: 'canal-afdh',
+    importeDevengado: 900,
+    importeCobrado: 0,
+  });
+
   // Partner Vivofácil: cierre mensual agrupado (B2B) — devengado, aún sin cobrar.
   ingresos.push({
     id: 'ing-partner-vivofacil',
@@ -105,7 +119,7 @@ export const GASTOS_DEMO: GastoOperativo[] = [
     tipo: 'alquiler',
     concepto: 'Alquiler Clínica Playamar',
     fecha: `${MES_DEMO}-01`,
-    importe: 1200,
+    importe: 600,
     capa: 'fijo',
     documento: doc('factura_recibida', true, 'FR-DEMO-101'),
     centroId: 'centro-playamar',
@@ -201,16 +215,6 @@ export const GASTOS_DEMO: GastoOperativo[] = [
     id: 'g-gea',
     tipo: 'concepto_provisional',
     concepto: 'GEA (concepto del Excel, significado pendiente de confirmar)',
-    fecha: `${MES_DEMO}-30`,
-    importe: 0,
-    capa: 'general',
-    documento: doc('no_requerido', true),
-    pendienteConfirmacion: true,
-  },
-  {
-    id: 'g-afdh',
-    tipo: 'concepto_provisional',
-    concepto: 'AFDH (concepto del Excel, significado pendiente de confirmar)',
     fecha: `${MES_DEMO}-30`,
     importe: 0,
     capa: 'general',
@@ -347,7 +351,7 @@ export function facturasRecibidasDemo(): FacturaRecibida[] {
       contraparte: 'Arrendador Playamar',
       tipo: 'gasto_clinica',
       fecha: `${MES_DEMO}-01`,
-      importe: 1200,
+      importe: 600,
       estado: 'pagada',
       gastoId: 'g-alquiler',
     },
@@ -380,5 +384,4 @@ export const CONCEPTOS_PENDIENTES: { clave: string; descripcion: string }[] = [
   },
   { clave: 'formaciones_solis', descripcion: 'Formaciones de María Solís: ¿tarifa por formación?' },
   { clave: 'gea', descripcion: 'GEA: entidad/concepto del cash flow sin definir en el OS.' },
-  { clave: 'afdh', descripcion: 'AFDH: línea de ingresos del Excel sin definir en el OS.' },
 ];
