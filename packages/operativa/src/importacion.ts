@@ -182,25 +182,44 @@ export const PLANTILLAS: Record<NombrePlantilla, ColumnaPlantilla[]> = {
     },
   ],
   gastos: [
-    { clave: 'fecha', sinonimos: ['fecha', 'dia', 'date'], requerida: true },
+    {
+      clave: 'fecha',
+      sinonimos: ['fecha', 'dia', 'date', 'fecha_devengo', 'mes_devengo'],
+      requerida: true,
+    },
+    { clave: 'fecha_pago', sinonimos: ['fecha_pago', 'pagado_en', 'mes_pago'], requerida: false },
+    {
+      clave: 'cuenta_tesoreria',
+      sinonimos: ['cuenta_tesoreria', 'tesoreria', 'cuenta'],
+      requerida: false,
+    },
     {
       clave: 'proveedor_profesional',
       sinonimos: ['proveedor_profesional', 'proveedor', 'profesional', 'trabajador'],
       requerida: false,
     },
-    { clave: 'concepto', sinonimos: ['concepto', 'descripcion', 'detalle'], requerida: true },
+    {
+      clave: 'concepto',
+      sinonimos: ['concepto', 'descripcion', 'detalle', 'gasto'],
+      requerida: true,
+    },
     { clave: 'categoria', sinonimos: ['categoria', 'tipo_gasto', 'tipo'], requerida: true },
-    { clave: 'capa_imputacion', sinonimos: ['capa_imputacion', 'capa'], requerida: false },
+    {
+      clave: 'capa_imputacion',
+      sinonimos: ['capa_imputacion', 'capa', 'p_l', 'pl'],
+      requerida: false,
+    },
     { clave: 'centro', sinonimos: ['centro', 'clinica'], requerida: false },
     { clave: 'proyecto', sinonimos: ['proyecto'], requerida: false },
-    { clave: 'importe', sinonimos: ['importe', 'total', 'gasto', 'neto'], requerida: true },
+    { clave: 'importe', sinonimos: ['importe', 'total', 'monto', 'neto'], requerida: true },
     { clave: 'iva', sinonimos: ['iva', 'iva_si_aplica'], requerida: false },
     {
       clave: 'documento_recibido',
-      sinonimos: ['documento_recibido', 'documento', 'factura_recibida'],
+      sinonimos: ['documento_recibido', 'documento', 'factura_recibida', 'factura'],
       requerida: false,
     },
     { clave: 'estado_documento', sinonimos: ['estado_documento'], requerida: false },
+    { clave: 'observaciones', sinonimos: ['observaciones', 'observacion'], requerida: false },
     { clave: 'estado_pago', sinonimos: ['estado_pago', 'pagado'], requerida: false },
     { clave: 'recurrente', sinonimos: ['recurrente', 'mensual'], requerida: false },
     { clave: 'amortizable', sinonimos: ['amortizable', 'inversion'], requerida: false },
@@ -264,7 +283,7 @@ export function plantillaCsv(nombre: NombrePlantilla): string {
     ingresos:
       '05/07/2026;Cliente Demo 01;fisioterapia;Profesional Demo 01;playamar;organico;suelta;45;45;tarjeta;OPS-101;;cobrado;',
     gastos:
-      '05/07/2026;Proveedor Demo;Alquiler clinica;alquiler;fijo;playamar;clinica;1200;;si;recibida;pagado;si;no;no',
+      '05/07/2026;;caja;Proveedor Demo;Alquiler clinica;alquiler;fijo;playamar;clinica;600;;si;recibida;;pagado;si;no;no',
     facturas_recibidas:
       '05/07/2026;;Proveedor Demo;Suministros;148,76;31,24;180;pendiente_recibir;;;g-suministros',
     facturas_emitidas: '05/07/2026;Cliente Demo 01;sesion;fisioterapia;45;;45;cobrada;;',
@@ -275,6 +294,44 @@ export function plantillaCsv(nombre: NombrePlantilla): string {
 // ---------------------------------------------------------------------------
 // Mapeo de columnas y resultado de importación
 // ---------------------------------------------------------------------------
+
+/**
+ * Categorias del cashflow real de la clinica -> taxonomia del dominio.
+ * Solo las inequivocas; el resto entra como concepto_provisional
+ * (mapeo pendiente de confirmar con el cockpit).
+ */
+export const CATEGORIA_CASHFLOW: Record<string, TipoGasto> = {
+  alquiler: 'alquiler',
+  limpieza: 'mantenimiento',
+  marketing: 'marketing',
+  gestion: 'gestoria',
+  materiales_clinica: 'material',
+  recursos_digitales: 'software',
+};
+
+/** Columna "P&L" del cashflow -> capa de imputacion (doc 09 s4.2). */
+export const PL_A_CAPA: Record<string, 'directo' | 'fijo' | 'general' | 'amortizable'> = {
+  cogs: 'directo',
+  personal_directo: 'directo',
+  opex_directo: 'directo',
+  personal_estructura: 'fijo',
+  opex_estructura: 'general',
+  impuestos: 'fijo',
+  capex: 'amortizable',
+};
+
+/** Medio de pago (Salonized "Card"/"Cash", datafono, bizum...) -> normalizado. */
+export function normalizarMetodoPago(
+  v: string,
+): 'tarjeta' | 'efectivo' | 'transferencia' | 'bizum' | 'otro' | null {
+  const k = normalizarClave(v);
+  if (k === '') return null;
+  if (['tarjeta', 'card', 'datafono', 'tpv', 'credit_card'].includes(k)) return 'tarjeta';
+  if (['efectivo', 'cash', 'metalico'].includes(k)) return 'efectivo';
+  if (['transferencia', 'bank_transfer', 'transfer'].includes(k)) return 'transferencia';
+  if (k === 'bizum') return 'bizum';
+  return 'otro';
+}
 
 export interface MapeoColumnas {
   /** columna origen → clave canónica */
@@ -360,6 +417,9 @@ export function importarIngresos(
       canalId: fila['canal'] ?? 'canal-organico',
       importeDevengado: devengado,
       importeCobrado: normalizarImporte(fila['importe_cobrado'] ?? '') ?? 0,
+      ...(normalizarMetodoPago(fila['metodo_pago'] ?? '')
+        ? { metodoPago: normalizarMetodoPago(fila['metodo_pago'] ?? '')! }
+        : {}),
       ...(fila['factura_operativa'] ? { facturaEmitidaId: fila['factura_operativa'] } : {}),
       ...(tipo ? {} : { pendienteConfirmacion: true }),
     });
@@ -367,9 +427,17 @@ export function importarIngresos(
   return r;
 }
 
+export interface OpcionesImportacionGastos {
+  /** Fecha a usar cuando la hoja no trae columna de fecha (hojas mensuales del cashflow). */
+  fechaPorDefecto?: string;
+  /** true si la hoja es un informe de CAJA: su fecha es la de PAGO, no la de devengo. */
+  esInformeDeCaja?: boolean;
+}
+
 export function importarGastos(
   filas: Fila[],
   cabeceras?: string[],
+  opciones: OpcionesImportacionGastos = {},
 ): ResultadoImportacion<GastoOperativo> {
   const mapeo = mapearColumnas(cabeceras ?? Object.keys(filas[0] ?? {}), 'gastos');
   const r: ResultadoImportacion<GastoOperativo> = {
@@ -381,26 +449,39 @@ export function importarGastos(
   const tiposValidos = Object.keys(CATEGORIA_DE) as TipoGasto[];
   filas.forEach((filaOriginal, i) => {
     const fila = canonizar(filaOriginal, mapeo);
-    const fecha = normalizarFecha(fila['fecha'] ?? '');
+    const fecha = normalizarFecha(fila['fecha'] ?? '') ?? opciones.fechaPorDefecto ?? null;
     const importe = normalizarImporte(fila['importe'] ?? '');
     if (!fecha || importe === null) {
       r.errores.push(`fila ${i + 2}: fecha o importe inválidos`);
       return;
     }
     const tipoBruto = normalizarClave(fila['categoria'] ?? '');
-    const tipo = tiposValidos.find((t) => t === tipoBruto);
+    const tipo = tiposValidos.find((t) => t === tipoBruto) ?? CATEGORIA_CASHFLOW[tipoBruto];
     if (!tipo) r.desconocidos.push(`categoria:${fila['categoria'] ?? ''} (fila ${i + 2})`);
     const amortizable = esAfirmativo(fila['amortizable']);
     const capaBruta = normalizarClave(fila['capa_imputacion'] ?? '');
-    const capa = (['directo', 'fijo', 'compartido', 'general', 'amortizable'] as const).find(
-      (c) => c === capaBruta,
-    );
+    const capa =
+      (['directo', 'fijo', 'compartido', 'general', 'amortizable'] as const).find(
+        (c) => c === capaBruta,
+      ) ?? PL_A_CAPA[capaBruta];
     const documentoRecibido = esAfirmativo(fila['documento_recibido']);
+    const fechaPago =
+      normalizarFecha(fila['fecha_pago'] ?? '') ?? (opciones.esInformeDeCaja ? fecha : null);
+    const cuentaBruta = normalizarClave(fila['cuenta_tesoreria'] ?? '');
+    const cuenta =
+      cuentaBruta === 'banco'
+        ? ('banco' as const)
+        : cuentaBruta === 'cash' || cuentaBruta === 'caja'
+          ? ('caja' as const)
+          : null;
     r.entidades.push({
       id: `imp-gas-${i + 1}`,
       tipo: tipo ?? 'concepto_provisional',
       concepto: fila['concepto'] ?? 'sin concepto',
       fecha,
+      ...(fechaPago && fechaPago !== fecha ? { fechaPago } : {}),
+      ...(cuenta ? { cuentaTesoreria: cuenta } : {}),
+      ...(fila['observaciones'] ? { nota: fila['observaciones'] } : {}),
       importe,
       capa: capa ?? (amortizable ? 'amortizable' : 'general'),
       documento: { tipo: 'factura_recibida', recibido: documentoRecibido },
