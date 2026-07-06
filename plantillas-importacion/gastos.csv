@@ -1,0 +1,2 @@
+fecha;proveedor_profesional;concepto;categoria;capa_imputacion;centro;proyecto;importe;iva;documento_recibido;estado_documento;estado_pago;recurrente;amortizable;pendiente_confirmacion
+05/07/2026;Proveedor Demo;Alquiler clinica;alquiler;fijo;playamar;clinica;600;;si;recibida;pagado;si;no;no

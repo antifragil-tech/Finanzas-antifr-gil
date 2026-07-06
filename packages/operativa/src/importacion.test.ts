@@ -85,6 +85,18 @@ describe('importación segura Excel/CSV', () => {
     expect(gas.entidades[0]?.tipo).toBe('alquiler');
   });
 
+  it('un export tipo Salonized (cabeceras en inglés) se mapea a ingresos', () => {
+    const r = importarIngresos(
+      parseCsv(
+        'Date,Customer,Treatment,Employee,Total,Payment method\n05/07/2026,Cliente Demo 03,Fisioterapia,Profesional Demo 01,"45,00",Card\n',
+      ),
+    );
+    expect(r.avisos.filter((a) => a.includes('tipo_ingreso'))).toHaveLength(1); // Salonized no trae tipo
+    expect(r.entidades).toHaveLength(1);
+    expect(r.entidades[0]?.importeDevengado).toBe(45);
+    expect(r.entidades[0]?.concepto).toContain('Cliente Demo 03');
+  });
+
   it('un import demo alimenta la escalera M1→M3 igual que el motor', () => {
     const ingresos = importarIngresos(
       parseCsv(

@@ -1,0 +1,2 @@
+fecha;cliente;servicio;profesional;centro;canal;tipo_ingreso;importe_cobrado;importe_devengado;metodo_pago;factura_operativa;factura_oficial_externa;estado_cobro;observacion_admin
+05/07/2026;Cliente Demo 01;fisioterapia;Profesional Demo 01;playamar;organico;suelta;45;45;tarjeta;OPS-101;;cobrado;

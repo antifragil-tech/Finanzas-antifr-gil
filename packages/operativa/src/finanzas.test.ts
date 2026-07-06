@@ -65,7 +65,7 @@ describe('motor financiero operativo', () => {
 
   it('factura recibida no implica pago: solo las pagadas son pago ejecutado', () => {
     const facturas = facturasRecibidasDemo();
-    expect(importePagadoDeFacturas(facturas)).toBe(1200); // solo el alquiler
+    expect(importePagadoDeFacturas(facturas)).toBe(600); // solo el alquiler (600 EUR reales)
     expect(facturas.some((f) => f.estado === 'pendiente_pago')).toBe(true);
   });
 
