@@ -132,7 +132,17 @@ export default async function TesoreriaPage({
             ? `${periodo} · DATOS REALES importados (${gastos.length} gastos, ${ingresos.length} apuntes de ingreso). La caja de cobros por sesión llegará con Salonized.`
             : `${periodo} · Ingresos, gastos y facturas del mes demo ${MES_DEMO} — caja y devengo por separado, nunca sumados. Datos ficticios del escenario compartido.`
         }
-        acciones={<OSFiltroMes accion="/tesoreria" mes={mes} />}
+        acciones={
+          <div className="flex flex-wrap items-end gap-4">
+            <OSFiltroMes accion="/tesoreria" mes={mes} />
+            <Link
+              href="/tesoreria/importar"
+              className="text-2xs px-1 py-2 uppercase tracking-widest text-zinc-500 underline-offset-4 transition-colors hover:text-zinc-300 hover:underline"
+            >
+              Importar reporte
+            </Link>
+          </div>
+        }
       />
 
       {avisoOk || avisoError ? (

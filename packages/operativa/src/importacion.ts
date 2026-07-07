@@ -104,7 +104,14 @@ export interface ColumnaPlantilla {
   requerida: boolean;
 }
 
-export type NombrePlantilla = 'ingresos' | 'gastos' | 'facturas_recibidas' | 'facturas_emitidas';
+export type NombrePlantilla =
+  | 'ingresos'
+  | 'gastos'
+  | 'facturas_recibidas'
+  | 'facturas_emitidas'
+  | 'facturas_salonized'
+  | 'efectivo'
+  | 'extracto_banco';
 
 export const PLANTILLAS: Record<NombrePlantilla, ColumnaPlantilla[]> = {
   ingresos: [
@@ -274,6 +281,147 @@ export const PLANTILLAS: Record<NombrePlantilla, ColumnaPlantilla[]> = {
       requerida: false,
     },
   ],
+  // Export de facturas de Salonized (semanal/mensual). Cabeceras GENÉRICAS y
+  // tolerantes (ES/EN): cuando llegue el primer export real se afinan los
+  // sinónimos, no la lógica.
+  facturas_salonized: [
+    {
+      clave: 'numero_factura',
+      sinonimos: [
+        'numero_factura',
+        'numero_de_factura',
+        'numero',
+        'num_factura',
+        'n_factura',
+        'no_factura',
+        'factura',
+        'invoice',
+        'invoice_number',
+        'invoice_no',
+        'invoice_id',
+        'reference',
+        'referencia',
+      ],
+      requerida: true,
+    },
+    {
+      clave: 'fecha',
+      sinonimos: [
+        'fecha',
+        'fecha_factura',
+        'fecha_emision',
+        'date',
+        'invoice_date',
+        'created_at',
+        'dia',
+      ],
+      requerida: true,
+    },
+    {
+      clave: 'cliente',
+      sinonimos: ['cliente', 'paciente', 'customer', 'customer_name', 'client', 'nombre', 'name'],
+      requerida: true,
+    },
+    {
+      clave: 'servicio',
+      sinonimos: [
+        'servicio',
+        'tratamiento',
+        'treatment',
+        'concepto',
+        'descripcion',
+        'description',
+        'detalle',
+        'items',
+      ],
+      requerida: false,
+    },
+    {
+      clave: 'importe',
+      sinonimos: [
+        'importe',
+        'importe_total',
+        'total',
+        'amount',
+        'total_amount',
+        'precio',
+        'price',
+        'total_incl_tax',
+        'grand_total',
+      ],
+      requerida: true,
+    },
+    {
+      clave: 'metodo_pago',
+      sinonimos: [
+        'metodo_pago',
+        'metodo_de_pago',
+        'metodo',
+        'medio_pago',
+        'forma_pago',
+        'forma_de_pago',
+        'payment_method',
+        'payment',
+        'pago',
+        'pagado_con',
+      ],
+      requerida: false,
+    },
+    { clave: 'estado', sinonimos: ['estado', 'status'], requerida: false },
+  ],
+  // Reporte periódico de pagos en EFECTIVO (formato acordado con Javi:
+  // fecha;hora;importe;nota).
+  efectivo: [
+    { clave: 'fecha', sinonimos: ['fecha', 'dia', 'date'], requerida: true },
+    { clave: 'hora', sinonimos: ['hora', 'time', 'hora_pago'], requerida: false },
+    {
+      clave: 'importe',
+      sinonimos: ['importe', 'cantidad', 'total', 'amount', 'efectivo'],
+      requerida: true,
+    },
+    {
+      clave: 'nota',
+      sinonimos: ['nota', 'notas', 'observaciones', 'observacion', 'comentario', 'comentarios'],
+      requerida: false,
+    },
+  ],
+  // Extracto semanal de la cuenta bancaria (export de Lidia). El importe va
+  // CON SIGNO: negativo = pago saliente, positivo = abono entrante.
+  extracto_banco: [
+    {
+      clave: 'fecha',
+      sinonimos: ['fecha', 'fecha_operacion', 'f_operacion', 'fecha_contable', 'date', 'dia'],
+      requerida: true,
+    },
+    {
+      clave: 'fecha_valor',
+      sinonimos: ['fecha_valor', 'f_valor', 'value_date'],
+      requerida: false,
+    },
+    {
+      clave: 'concepto',
+      sinonimos: [
+        'concepto',
+        'descripcion',
+        'description',
+        'beneficiario',
+        'concepto_operacion',
+        'movimiento',
+        'detalle',
+        'mas_datos',
+        'observaciones',
+      ],
+      requerida: true,
+    },
+    {
+      clave: 'importe',
+      sinonimos: ['importe', 'cantidad', 'amount', 'importe_eur', 'euros', 'imp'],
+      requerida: true,
+    },
+    { clave: 'saldo', sinonimos: ['saldo', 'saldo_posterior', 'balance'], requerida: false },
+    { clave: 'iban', sinonimos: ['iban', 'numero_cuenta', 'cuenta'], requerida: false },
+    { clave: 'banco', sinonimos: ['banco', 'entidad'], requerida: false },
+  ],
 };
 
 /** CSV descargable de cada plantilla, con una fila de ejemplo DEMO. */
@@ -287,6 +435,9 @@ export function plantillaCsv(nombre: NombrePlantilla): string {
     facturas_recibidas:
       '05/07/2026;;Proveedor Demo;Suministros;148,76;31,24;180;pendiente_recibir;;;g-suministros',
     facturas_emitidas: '05/07/2026;Cliente Demo 01;sesion;fisioterapia;45;;45;cobrada;;',
+    facturas_salonized: 'INV-0001;05/07/2026;Cliente Demo 01;fisioterapia;45;datafono;pagada',
+    efectivo: '2026-07-05;12:30;45;',
+    extracto_banco: '05/07/2026;;TRANSFERENCIA PROVEEDOR DEMO;-180,00;1.234,56;;',
   };
   return `${cab}\n${demo[nombre]}\n`;
 }
@@ -587,6 +738,161 @@ export function importarFacturasEmitidas(
       ...(fila['factura_oficial_externa']
         ? { refFacturaExterna: fila['factura_oficial_externa'] }
         : {}),
+    });
+  });
+  return r;
+}
+
+// ---------------------------------------------------------------------------
+// Reportes periódicos (Salonized · efectivo · extracto banco)
+// ---------------------------------------------------------------------------
+
+export type MetodoPagoNormalizado = NonNullable<ReturnType<typeof normalizarMetodoPago>>;
+
+/** Factura del export periódico de Salonized (una fila = una factura). */
+export interface FacturaSalonizedImportada {
+  id: string;
+  /** Nº de factura de Salonized — clave natural para no duplicar al re-importar. */
+  numeroFactura: string;
+  fecha: string;
+  cliente: string;
+  concepto: string;
+  importe: number;
+  /** null = el export no traía método de pago (no se genera cobro). */
+  metodoPago: MetodoPagoNormalizado | null;
+  estado?: string;
+}
+
+export function importarFacturasSalonized(
+  filas: Fila[],
+  cabeceras?: string[],
+): ResultadoImportacion<FacturaSalonizedImportada> {
+  const mapeo = mapearColumnas(cabeceras ?? Object.keys(filas[0] ?? {}), 'facturas_salonized');
+  const r: ResultadoImportacion<FacturaSalonizedImportada> = {
+    entidades: [],
+    desconocidos: [...mapeo.desconocidas.map((c) => `columna:${c}`)],
+    avisos: mapeo.faltantes.map((f) => `falta columna requerida: ${f}`),
+    errores: [],
+  };
+  filas.forEach((filaOriginal, i) => {
+    const fila = canonizar(filaOriginal, mapeo);
+    const fecha = normalizarFecha(fila['fecha'] ?? '');
+    const importe = normalizarImporte(fila['importe'] ?? '');
+    if (!fecha || importe === null) {
+      r.errores.push(`fila ${i + 2}: fecha o importe inválidos`);
+      return;
+    }
+    const numeroFactura = (fila['numero_factura'] ?? '').trim();
+    if (!numeroFactura) {
+      r.avisos.push(
+        `fila ${i + 2}: sin nº de factura — la clave anti-duplicados se deriva del contenido`,
+      );
+    }
+    const metodoPago = normalizarMetodoPago(fila['metodo_pago'] ?? '');
+    if (metodoPago === 'otro') {
+      r.desconocidos.push(`metodo_pago:${fila['metodo_pago'] ?? ''} (fila ${i + 2})`);
+    }
+    r.entidades.push({
+      id: `imp-sal-${i + 1}`,
+      numeroFactura,
+      fecha,
+      cliente: fila['cliente'] ?? 'cliente',
+      concepto: fila['servicio'] ?? 'servicio clínica',
+      importe,
+      metodoPago,
+      ...(fila['estado'] ? { estado: fila['estado'] } : {}),
+    });
+  });
+  return r;
+}
+
+/** Pago en efectivo del reporte periódico de Javi (fecha;hora;importe;nota). */
+export interface PagoEfectivoImportado {
+  id: string;
+  fecha: string;
+  /** HH:MM si el reporte la trae; '' si no. Parte de la clave anti-duplicados. */
+  hora: string;
+  importe: number;
+  nota: string;
+}
+
+export function importarEfectivo(
+  filas: Fila[],
+  cabeceras?: string[],
+): ResultadoImportacion<PagoEfectivoImportado> {
+  const mapeo = mapearColumnas(cabeceras ?? Object.keys(filas[0] ?? {}), 'efectivo');
+  const r: ResultadoImportacion<PagoEfectivoImportado> = {
+    entidades: [],
+    desconocidos: [...mapeo.desconocidas.map((c) => `columna:${c}`)],
+    avisos: mapeo.faltantes.map((f) => `falta columna requerida: ${f}`),
+    errores: [],
+  };
+  filas.forEach((filaOriginal, i) => {
+    const fila = canonizar(filaOriginal, mapeo);
+    const fecha = normalizarFecha(fila['fecha'] ?? '');
+    const importe = normalizarImporte(fila['importe'] ?? '');
+    if (!fecha || importe === null || importe === 0) {
+      r.errores.push(`fila ${i + 2}: fecha o importe inválidos`);
+      return;
+    }
+    r.entidades.push({
+      id: `imp-efe-${i + 1}`,
+      fecha,
+      hora: (fila['hora'] ?? '').trim(),
+      importe,
+      nota: (fila['nota'] ?? '').trim(),
+    });
+  });
+  return r;
+}
+
+/** Movimiento del extracto bancario semanal (importe CON SIGNO). */
+export interface MovimientoBancoImportado {
+  id: string;
+  fecha: string;
+  fechaValor?: string;
+  concepto: string;
+  /** Negativo = pago saliente (candidato a conciliar con factura recibida). */
+  importe: number;
+  saldo?: number;
+  iban?: string;
+  banco?: string;
+}
+
+export function importarExtractoBanco(
+  filas: Fila[],
+  cabeceras?: string[],
+): ResultadoImportacion<MovimientoBancoImportado> {
+  const mapeo = mapearColumnas(cabeceras ?? Object.keys(filas[0] ?? {}), 'extracto_banco');
+  const r: ResultadoImportacion<MovimientoBancoImportado> = {
+    entidades: [],
+    desconocidos: [...mapeo.desconocidas.map((c) => `columna:${c}`)],
+    avisos: mapeo.faltantes.map((f) => `falta columna requerida: ${f}`),
+    errores: [],
+  };
+  filas.forEach((filaOriginal, i) => {
+    const fila = canonizar(filaOriginal, mapeo);
+    const fecha = normalizarFecha(fila['fecha'] ?? '');
+    const importe = normalizarImporte(fila['importe'] ?? '');
+    if (!fecha || importe === null || importe === 0) {
+      r.errores.push(`fila ${i + 2}: fecha o importe inválidos`);
+      return;
+    }
+    const concepto = (fila['concepto'] ?? '').trim();
+    if (!concepto) {
+      r.avisos.push(`fila ${i + 2}: movimiento sin concepto — dificulta la conciliación`);
+    }
+    const fechaValor = normalizarFecha(fila['fecha_valor'] ?? '');
+    const saldo = normalizarImporte(fila['saldo'] ?? '');
+    r.entidades.push({
+      id: `imp-ban-${i + 1}`,
+      fecha,
+      ...(fechaValor ? { fechaValor } : {}),
+      concepto: concepto || 'movimiento sin concepto',
+      importe,
+      ...(saldo !== null ? { saldo } : {}),
+      ...(fila['iban']?.trim() ? { iban: fila['iban'].trim() } : {}),
+      ...(fila['banco']?.trim() ? { banco: fila['banco'].trim() } : {}),
     });
   });
   return r;

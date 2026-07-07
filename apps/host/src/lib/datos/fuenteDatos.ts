@@ -235,3 +235,99 @@ export async function cargarLiquidacionesReales(): Promise<LiquidacionReal[]> {
     estado: f.estado,
   }));
 }
+
+// ---------------------------------------------------------------------------
+// Importación de reportes y conciliación (lecturas)
+// ---------------------------------------------------------------------------
+
+/** Cuentas de tesorería activas por TIPO (nunca ids hardcodeados). Seguro sin env. */
+export async function cuentasTesoreriaPorTipo(): Promise<{
+  caja: string | null;
+  banco: string | null;
+}> {
+  try {
+    const filas = await rest<{ id: string; tipo: string }>(
+      'cuenta_tesoreria?select=id,tipo&activa=is.true&order=created_at.asc',
+    );
+    return {
+      caja: filas.find((c) => c.tipo === 'caja')?.id ?? null,
+      banco: filas.find((c) => c.tipo === 'banco')?.id ?? null,
+    };
+  } catch {
+    return { caja: null, banco: null };
+  }
+}
+
+/** ¿Cuáles de estos ids ya existen en la tabla? (detección de duplicados en la preview). */
+export async function idsExistentes(tabla: string, ids: string[]): Promise<Set<string>> {
+  const existentes = new Set<string>();
+  if (!datosRealesDisponibles()) return existentes;
+  for (let i = 0; i < ids.length; i += 80) {
+    const trozo = ids.slice(i, i + 80);
+    try {
+      const filas = await rest<{ id: string }>(
+        `${tabla}?select=id&id=in.(${trozo.join(',')})&limit=${trozo.length}`,
+      );
+      for (const f of filas) existentes.add(f.id);
+    } catch {
+      // La preview sigue sin marca de duplicados antes que romper la página.
+    }
+  }
+  return existentes;
+}
+
+export interface PagoSalienteBanco {
+  id: string;
+  fecha: string;
+  concepto: string;
+  importe: number;
+}
+
+/** Pagos SALIENTES del banco aún sin factura recibida asociada (conciliación v1). */
+export async function cargarPagosSalientesSinFactura(): Promise<PagoSalienteBanco[]> {
+  const filas = await rest<{
+    id: string;
+    fecha: string;
+    concepto: string;
+    importe: number | string;
+  }>(
+    'movimientos_bancarios?select=id,fecha,concepto,importe&importe=lt.0&factura_recibida_id=is.null&order=fecha.desc&limit=100',
+  );
+  return filas.map((f) => ({
+    id: f.id,
+    fecha: f.fecha,
+    concepto: f.concepto,
+    importe: Number(f.importe),
+  }));
+}
+
+export interface FacturaConciliable {
+  id: string;
+  proveedor: string;
+  fecha: string;
+  total: number;
+  estado: string;
+  gastoOperativoId: string | null;
+}
+
+/** Facturas recibidas sin movimiento bancario vinculado (candidatas de conciliación). */
+export async function cargarFacturasConciliables(): Promise<FacturaConciliable[]> {
+  const filas = await rest<{
+    id: string;
+    proveedor_nombre: string;
+    fecha_factura: string;
+    total: number | string;
+    estado: string;
+    gasto_operativo_id: string | null;
+  }>(
+    'facturas_recibidas?select=id,proveedor_nombre,fecha_factura,total,estado,gasto_operativo_id&movimiento_id=is.null&estado=neq.rechazada&order=fecha_factura.desc&limit=1000',
+  );
+  return filas.map((f) => ({
+    id: f.id,
+    proveedor: f.proveedor_nombre,
+    fecha: f.fecha_factura,
+    total: Number(f.total),
+    estado: f.estado,
+    gastoOperativoId: f.gasto_operativo_id,
+  }));
+}
