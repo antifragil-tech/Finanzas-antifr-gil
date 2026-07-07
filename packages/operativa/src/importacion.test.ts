@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import { escaleraMargen, estadoValidacion } from './finanzas';
 import {
+  importarEfectivo,
+  importarExtractoBanco,
   importarFacturasEmitidas,
   importarFacturasRecibidas,
+  importarFacturasSalonized,
   importarGastos,
   importarIngresos,
   mapearColumnas,
@@ -95,6 +98,106 @@ describe('importación segura Excel/CSV', () => {
     expect(r.entidades).toHaveLength(1);
     expect(r.entidades[0]?.importeDevengado).toBe(45);
     expect(r.entidades[0]?.concepto).toContain('Cliente Demo 03');
+  });
+
+  it('facturas_salonized: mapea cabeceras EN, separa datáfono vs efectivo y avisa sin nº factura', () => {
+    const r = importarFacturasSalonized(
+      parseCsv(
+        'Invoice number,Date,Customer,Treatment,Total,Payment method\n' +
+          'INV-001,05/07/2026,Cliente Demo 01,Fisioterapia,"45,00",Card\n' +
+          'INV-002,05/07/2026,Cliente Demo 02,Nutrición,"55,00",Cash\n' +
+          'INV-003,06/07/2026,Cliente Demo 03,Fisioterapia,"45,00",Datáfono\n' +
+          ',06/07/2026,Cliente Demo 04,Fisioterapia,"45,00",\n',
+      ),
+    );
+    expect(r.errores).toEqual([]);
+    expect(r.entidades).toHaveLength(4);
+    expect(r.entidades[0]?.numeroFactura).toBe('INV-001');
+    expect(r.entidades[0]?.metodoPago).toBe('tarjeta'); // Card → tarjeta (datáfono)
+    expect(r.entidades[1]?.metodoPago).toBe('efectivo'); // Cash → efectivo
+    expect(r.entidades[2]?.metodoPago).toBe('tarjeta'); // Datáfono → tarjeta
+    expect(r.entidades[3]?.metodoPago).toBeNull(); // sin método → sin cobro
+    expect(r.avisos.some((a) => a.includes('sin nº de factura'))).toBe(true);
+  });
+
+  it('facturas_salonized: fila sin fecha o importe es error y no entra', () => {
+    const r = importarFacturasSalonized(
+      parseCsv(
+        'numero_factura;fecha;cliente;importe\nINV-9;;Cliente;45\nINV-10;05/07/2026;Cliente;no-num\n',
+      ),
+    );
+    expect(r.entidades).toHaveLength(0);
+    expect(r.errores).toHaveLength(2);
+  });
+
+  it('efectivo: importa el formato acordado (fecha;hora;importe;nota) con BOM y duplicados legítimos', () => {
+    const r = importarEfectivo(
+      parseCsv(
+        '﻿fecha;hora;importe;nota\n' +
+          '2026-05-28;20:27;45;\n' +
+          '2026-05-27;13:27;45;\n' +
+          '2026-05-27;13:27;45;segundo pago misma hora\n' +
+          '2026-05-22;09:09;225;bono 5 sesiones\n',
+      ),
+    );
+    expect(r.errores).toEqual([]);
+    expect(r.entidades).toHaveLength(4);
+    expect(r.entidades[0]).toMatchObject({
+      fecha: '2026-05-28',
+      hora: '20:27',
+      importe: 45,
+      nota: '',
+    });
+    expect(r.entidades[2]?.nota).toBe('segundo pago misma hora');
+    expect(r.entidades[3]?.importe).toBe(225);
+  });
+
+  it('efectivo: importe 0 o fecha inválida son error legible por fila', () => {
+    const r = importarEfectivo(
+      parseCsv('fecha;hora;importe;nota\n2026-05-28;10:00;0;\nayer;10:00;45;\n'),
+    );
+    expect(r.entidades).toHaveLength(0);
+    expect(r.errores).toHaveLength(2);
+    expect(r.errores[0]).toContain('fila 2');
+  });
+
+  it('extracto_banco: importes CON SIGNO en formato español y saldo opcional', () => {
+    const r = importarExtractoBanco(
+      parseCsv(
+        'Fecha operación;Concepto;Importe;Saldo\n' +
+          '05/07/2026;TRANSFERENCIA PROVEEDOR DEMO;-1.234,56;10.000,00\n' +
+          '06/07/2026;ABONO TPV DATAFONO;345,10;10.345,10\n',
+      ),
+    );
+    expect(r.errores).toEqual([]);
+    expect(r.entidades).toHaveLength(2);
+    expect(r.entidades[0]?.importe).toBe(-1234.56); // negativo = pago saliente
+    expect(r.entidades[0]?.saldo).toBe(10000);
+    expect(r.entidades[1]?.importe).toBe(345.1);
+  });
+
+  it('extracto_banco: beneficiario vale como concepto y la fila sin concepto avisa sin romper', () => {
+    const r = importarExtractoBanco(
+      parseCsv(
+        'fecha;beneficiario;importe\n05/07/2026;GESTORIA DEMO SL;-108,90\n06/07/2026;;-50\n',
+      ),
+    );
+    expect(r.errores).toEqual([]);
+    expect(r.entidades[0]?.concepto).toBe('GESTORIA DEMO SL');
+    expect(r.entidades[1]?.concepto).toBe('movimiento sin concepto');
+    expect(r.avisos.some((a) => a.includes('sin concepto'))).toBe(true);
+  });
+
+  it('las plantillas CSV nuevas se reimportan limpias (round-trip demo)', () => {
+    const sal = importarFacturasSalonized(parseCsv(plantillaCsv('facturas_salonized')));
+    expect(sal.errores).toEqual([]);
+    expect(sal.entidades[0]?.metodoPago).toBe('tarjeta');
+    const efe = importarEfectivo(parseCsv(plantillaCsv('efectivo')));
+    expect(efe.errores).toEqual([]);
+    expect(efe.entidades[0]?.importe).toBe(45);
+    const ban = importarExtractoBanco(parseCsv(plantillaCsv('extracto_banco')));
+    expect(ban.errores).toEqual([]);
+    expect(ban.entidades[0]?.importe).toBe(-180);
   });
 
   it('un import demo alimenta la escalera M1→M3 igual que el motor', () => {
