@@ -1,4 +1,9 @@
-import type { GastoOperativo, IngresoOperativo } from '@antifragil/operativa';
+import type {
+  FacturaEmitidaOperativa,
+  FacturaRecibida,
+  GastoOperativo,
+  IngresoOperativo,
+} from '@antifragil/operativa';
 
 /**
  * Fuente de datos del OS (solo servidor): lee las tablas reales de Supabase
@@ -86,6 +91,112 @@ export async function cargarIngresosReales(): Promise<IngresoOperativo[]> {
     importeDevengado: Number(f.importe_devengado),
     importeCobrado: 0,
     ...(f.pendiente_confirmacion ? { pendienteConfirmacion: true } : {}),
+  }));
+}
+
+interface FilaFacturaEmitida {
+  id: string;
+  serie: string;
+  numero: number;
+  origen_tipo: FacturaEmitidaOperativa['origenTipo'];
+  origen_id: string | null;
+  contraparte: string;
+  fecha: string;
+  importe: number | string;
+  estado: FacturaEmitidaOperativa['estado'];
+  ref_factura_externa: string | null;
+  notas: string | null;
+}
+
+function mapearFacturaEmitida(f: FilaFacturaEmitida): FacturaEmitidaOperativa {
+  return {
+    id: f.id,
+    serie: f.serie,
+    numero: f.numero,
+    origenTipo: f.origen_tipo,
+    origenId: f.origen_id ?? '',
+    contraparte: f.contraparte,
+    fecha: f.fecha,
+    importe: Number(f.importe),
+    estado: f.estado,
+    ...(f.ref_factura_externa ? { refFacturaExterna: f.ref_factura_externa } : {}),
+  };
+}
+
+/** Facturas emitidas operativas reales (registro precontable, doc 02). */
+export async function cargarFacturasEmitidasReales(): Promise<FacturaEmitidaOperativa[]> {
+  const filas = await rest<FilaFacturaEmitida>(
+    'facturas_emitidas_operativas?select=*&order=fecha.desc,numero.desc&limit=1000',
+  );
+  return filas.map(mapearFacturaEmitida);
+}
+
+/** Detalle de una factura emitida operativa, con el desglose base/IVA parseado de las notas. */
+export interface FacturaEmitidaDetalle extends FacturaEmitidaOperativa {
+  concepto: string | null;
+  base: number | null;
+  iva: number | null;
+  notas: string | null;
+}
+
+/**
+ * La tabla facturas_emitidas_operativas no desglosa IVA a propósito (D2:
+ * catálogo sanitario exento). La emisión manual guarda el desglose en `notas`
+ * con formato estable «Concepto: … · Base: 0.00 · IVA: 0.00»; aquí se parsea.
+ */
+function parsearDesglose(notas: string | null): {
+  concepto: string | null;
+  base: number | null;
+  iva: number | null;
+} {
+  if (!notas) return { concepto: null, base: null, iva: null };
+  const concepto = /Concepto:\s*(.*?)(?:\s+·\s+(?:Base|IVA):|$)/.exec(notas)?.[1] ?? null;
+  const base = /Base:\s*(\d+(?:\.\d+)?)/.exec(notas)?.[1];
+  const iva = /IVA:\s*(\d+(?:\.\d+)?)/.exec(notas)?.[1];
+  return {
+    concepto,
+    base: base !== undefined ? Number(base) : null,
+    iva: iva !== undefined ? Number(iva) : null,
+  };
+}
+
+export async function cargarFacturaEmitidaPorId(id: string): Promise<FacturaEmitidaDetalle | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return null;
+  const filas = await rest<FilaFacturaEmitida>(
+    `facturas_emitidas_operativas?select=*&id=eq.${id}&limit=1`,
+  );
+  const fila = filas[0];
+  if (!fila) return null;
+  return { ...mapearFacturaEmitida(fila), notas: fila.notas, ...parsearDesglose(fila.notas) };
+}
+
+interface FilaFacturaRecibidaOperativa {
+  id: string;
+  contraparte: string;
+  fecha: string;
+  importe: number | string;
+  estado_operativo: FacturaRecibida['estado'] | null;
+  gasto_operativo_id: string | null;
+  liquidacion_id: string | null;
+}
+
+/**
+ * Facturas recibidas reales vía la vista v_facturas_recibidas_operativas
+ * (traduce el estado físico del workflow OCR al vocabulario del producto).
+ */
+export async function cargarFacturasRecibidasReales(): Promise<FacturaRecibida[]> {
+  const filas = await rest<FilaFacturaRecibidaOperativa>(
+    'v_facturas_recibidas_operativas?select=*&order=fecha.desc&limit=1000',
+  );
+  return filas.map((f) => ({
+    id: f.id,
+    contraparte: f.contraparte,
+    tipo: 'proveedor',
+    fecha: f.fecha,
+    importe: Number(f.importe),
+    estado: f.estado_operativo ?? 'recibida',
+    ...(f.gasto_operativo_id ? { gastoId: f.gasto_operativo_id } : {}),
+    ...(f.liquidacion_id ? { liquidacionRef: f.liquidacion_id } : {}),
   }));
 }
 

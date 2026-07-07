@@ -11,20 +11,19 @@
 
 @layer components {
   .glass-panel {
-    @apply bg-zinc-900/40 backdrop-blur-md border border-white/5 shadow-xl;
+    @apply border border-white/5 bg-zinc-900/40 shadow-xl backdrop-blur-md;
   }
 
   .glass-header {
-    @apply bg-zinc-950/80 backdrop-blur-xl border-b border-white/5;
+    @apply border-b border-white/5 bg-zinc-950/80 backdrop-blur-xl;
   }
 
   /* Shared form utilities — used by embedded modules (contabilidad, etc.) */
   .field-label {
-    @apply block text-2xs font-medium text-zinc-500 uppercase tracking-widest mb-1;
+    @apply text-2xs mb-1 block font-medium uppercase tracking-widest text-zinc-500;
   }
   .field-input {
-    @apply w-full bg-zinc-800 border border-white/[0.12] rounded-lg px-3 py-2 text-sm text-white
-           placeholder:text-zinc-500 focus:outline-none focus:border-blue-500/50 transition-colors;
+    @apply w-full rounded-lg border border-white/[0.12] bg-zinc-800 px-3 py-2 text-sm text-white transition-colors placeholder:text-zinc-500 focus:border-blue-500/50 focus:outline-none;
     color-scheme: dark;
   }
 }
@@ -58,4 +57,25 @@ textarea {
 /* Iconos Lucide: trazo fino 1.5 en todo el OS (el atributo SVG por defecto es 2). */
 .lucide {
   stroke-width: 1.5;
+}
+
+/* Vista imprimible de factura operativa: cuando la página contiene una
+   .factura-print, al imprimir (Ctrl+P → PDF) solo sale la factura — el shell
+   oscuro del OS (sidebar/topbar) queda fuera del papel. */
+@media print {
+  body:has(.factura-print) {
+    background: #fff !important;
+  }
+  body:has(.factura-print) * {
+    visibility: hidden;
+  }
+  .factura-print,
+  .factura-print * {
+    visibility: visible;
+  }
+  .factura-print {
+    position: absolute !important;
+    inset: 0 !important;
+    overflow: visible !important;
+  }
 }
