@@ -12,12 +12,13 @@ import {
   ingresosDemo,
   gastosDemo,
 } from '@antifragil/operativa';
-import { OSPageHeader, OSSection, OSKpiCard, OSStatusBadge } from '@/components/os/ui';
+import { OSPageHeader, OSSection, OSKpiCard, OSStatusBadge, OSFiltroMes } from '@/components/os/ui';
 import {
   cargarGastosReales,
   cargarIngresosReales,
   datosRealesDisponibles,
 } from '@/lib/datos/fuenteDatos';
+import { etiquetaMes, filtrarPorMes, mesValido, primerValor } from '@/lib/datos/periodo';
 
 // Rentabilidad operativa (doc 09) sobre el escenario demo compartido.
 // Vista devengo por defecto; la caja se muestra aparte y NUNCA se suman.
@@ -127,10 +128,27 @@ function EscaleraM1M3({ e, real }: { e: ReturnType<typeof escaleraMargen>; real:
   );
 }
 
-export default async function RentabilidadPage() {
+export default async function RentabilidadPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  // Next 15: searchParams es una Promise — hay que esperarla.
+  const params = await searchParams;
+  const mesParam = primerValor(params['mes']);
+  const mes = mesValido(mesParam) ? mesParam : undefined;
+
   const real = datosRealesDisponibles();
-  const ingresos = real ? await cargarIngresosReales() : ingresosDemo();
-  const gastos = real ? await cargarGastosReales() : gastosDemo();
+  const ingresos = filtrarPorMes(
+    real ? await cargarIngresosReales() : ingresosDemo(),
+    mes,
+    (i) => i.fecha,
+  );
+  const gastos = filtrarPorMes(
+    real ? await cargarGastosReales() : gastosDemo(),
+    mes,
+    (g) => g.fecha,
+  );
   const e = escaleraMargen(ingresos, gastos);
 
   const hechos = hechosDemo();
@@ -146,12 +164,13 @@ export default async function RentabilidadPage() {
   return (
     <div className="pb-10">
       <OSPageHeader
-        titulo="Rentabilidad"
+        titulo={mes ? `Rentabilidad — ${etiquetaMes(mes)}` : 'Rentabilidad'}
         descripcion={
           real
-            ? 'Margen operativo con DATOS REALES importados de los Excel (2025–2026), vista devengo. Los desgloses por sesión siguen en demo hasta importar Salonized.'
-            : `Margen operativo — mes demo ${MES_DEMO}, vista devengo (docs/finanzas/09). Datos ficticios del escenario compartido del MVP.`
+            ? `${mes ? `Periodo: ${etiquetaMes(mes)}` : 'Todo el histórico'} · Margen operativo con DATOS REALES importados (vista devengo). Los desgloses por sesión siguen en demo hasta importar Salonized.`
+            : `${mes ? `Periodo: ${etiquetaMes(mes)}` : 'Todo el histórico'} · Margen operativo — mes demo ${MES_DEMO}, vista devengo (docs/finanzas/09). Datos ficticios del escenario compartido del MVP.`
         }
+        acciones={<OSFiltroMes accion="/rentabilidad" mes={mes} />}
       />
 
       {/* Resultado total del mes: hero + barra de composición

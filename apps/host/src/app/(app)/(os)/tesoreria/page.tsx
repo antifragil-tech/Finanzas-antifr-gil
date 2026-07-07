@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { ArrowDownToLine, ArrowUpFromLine, FileText, AlertTriangle } from 'lucide-react';
 import { formatCurrency } from '@alsari/utils';
 import {
@@ -17,15 +18,20 @@ import {
   type EstadoFacturaRecibida,
 } from '@antifragil/operativa';
 import {
+  cargarFacturasEmitidasReales,
+  cargarFacturasRecibidasReales,
   cargarGastosReales,
   cargarIngresosReales,
   datosRealesDisponibles,
 } from '@/lib/datos/fuenteDatos';
+import { etiquetaMes, filtrarPorMes, mesValido, primerValor } from '@/lib/datos/periodo';
+import { EntradaDatos } from '@/components/os/tesoreria/EntradaDatos';
 import {
   OSPageHeader,
   OSSection,
   OSKpiCard,
   OSStatusBadge,
+  OSFiltroMes,
   type OSBadgeTone,
 } from '@/components/os/ui';
 
@@ -57,13 +63,39 @@ const TONO_FR: Record<EstadoFacturaRecibida, OSBadgeTone> = {
   bloqueada: 'danger',
 };
 
-export default async function TesoreriaPage() {
+export default async function TesoreriaPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  // Next 15: searchParams es una Promise — hay que esperarla.
+  const params = await searchParams;
+  const mesParam = primerValor(params['mes']);
+  const mes = mesValido(mesParam) ? mesParam : undefined;
+  const avisoOk = primerValor(params['ok']);
+  const avisoError = primerValor(params['error']);
+
   const real = datosRealesDisponibles();
-  const ingresos = real ? await cargarIngresosReales() : ingresosDemo();
-  const gastos = real ? await cargarGastosReales() : gastosDemo();
-  // Facturas: aún sin datos reales importados (llegarán con Salonized/gestoría).
-  const emitidas = facturasEmitidasDemo();
-  const recibidas = facturasRecibidasDemo();
+  const ingresos = filtrarPorMes(
+    real ? await cargarIngresosReales() : ingresosDemo(),
+    mes,
+    (i) => i.fecha,
+  );
+  const gastos = filtrarPorMes(
+    real ? await cargarGastosReales() : gastosDemo(),
+    mes,
+    (g) => g.fecha,
+  );
+  const emitidas = filtrarPorMes(
+    real ? await cargarFacturasEmitidasReales() : facturasEmitidasDemo(),
+    mes,
+    (f) => f.fecha,
+  );
+  const recibidas = filtrarPorMes(
+    real ? await cargarFacturasRecibidasReales() : facturasRecibidasDemo(),
+    mes,
+    (f) => f.fecha,
+  );
 
   const t = totalesCajaDevengo(ingresos, gastos);
   const bloqueados = gastos.filter((g) => estadoValidacion(g) === 'bloqueado_sin_documento');
@@ -87,17 +119,35 @@ export default async function TesoreriaPage() {
   }
 
   const gastosVisibles = [...gastos].reverse().slice(0, 60);
+  const recibidasVisibles = recibidas.slice(0, 60);
+
+  const periodo = mes ? `Periodo: ${etiquetaMes(mes)}` : 'Todo el histórico';
 
   return (
     <div className="pb-10">
       <OSPageHeader
-        titulo="Tesorería"
+        titulo={mes ? `Tesorería — ${etiquetaMes(mes)}` : 'Tesorería'}
         descripcion={
           real
-            ? `DATOS REALES importados de los Excel operativos (${gastos.length} gastos 2025–2026, ${ingresos.length} apuntes de ingreso). La caja de cobros por sesión llegará con Salonized.`
-            : `Ingresos, gastos y facturas del mes demo ${MES_DEMO} — caja y devengo por separado, nunca sumados. Datos ficticios del escenario compartido.`
+            ? `${periodo} · DATOS REALES importados (${gastos.length} gastos, ${ingresos.length} apuntes de ingreso). La caja de cobros por sesión llegará con Salonized.`
+            : `${periodo} · Ingresos, gastos y facturas del mes demo ${MES_DEMO} — caja y devengo por separado, nunca sumados. Datos ficticios del escenario compartido.`
         }
+        acciones={<OSFiltroMes accion="/tesoreria" mes={mes} />}
       />
+
+      {avisoOk || avisoError ? (
+        <div className="px-8 pt-2">
+          <p
+            className={`rounded-xl border px-4 py-2.5 text-xs ${
+              avisoError
+                ? 'border-rose-400/20 bg-rose-400/5 text-rose-300'
+                : 'border-emerald-400/20 bg-emerald-400/5 text-emerald-300'
+            }`}
+          >
+            {avisoError ?? avisoOk}
+          </p>
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-4 px-8 pt-4 lg:grid-cols-4">
         <OSKpiCard
@@ -134,6 +184,17 @@ export default async function TesoreriaPage() {
           tone={bloqueados.length > 0 ? 'warn' : 'ok'}
         />
       </div>
+
+      <OSSection
+        titulo="Añadir datos"
+        nota={
+          real
+            ? 'Entrada manual: escribe en las tablas reales de Supabase'
+            : 'Modo demo sin Supabase: el alta devolverá un error legible'
+        }
+      >
+        <EntradaDatos mes={mes} />
+      </OSSection>
 
       <OSSection
         titulo="Gastos por categoría"
@@ -241,7 +302,7 @@ export default async function TesoreriaPage() {
         titulo="Facturas emitidas operativas"
         nota={
           real
-            ? 'DEMO — las facturas reales llegarán con Salonized/gestoría. Factura emitida no implica cobro'
+            ? 'REALES — el Nº abre la vista imprimible. Factura emitida no implica cobro (doc 02)'
             : 'Factura emitida no implica cobro — internas, no fiscales (doc 02)'
         }
       >
@@ -263,7 +324,16 @@ export default async function TesoreriaPage() {
                   className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
                 >
                   <td className="px-4 py-3 font-mono text-zinc-400">
-                    {f.serie}-{f.numero}
+                    {real ? (
+                      <Link
+                        href={`/tesoreria/factura/${f.id}`}
+                        className="underline-offset-4 transition-colors hover:text-zinc-100 hover:underline"
+                      >
+                        {f.serie}-{f.numero}
+                      </Link>
+                    ) : (
+                      `${f.serie}-${f.numero}`
+                    )}
                   </td>
                   <td className="px-4 py-3 text-zinc-400">{f.origenTipo}</td>
                   <td className="px-4 py-3 text-zinc-200">{f.contraparte}</td>
@@ -282,10 +352,14 @@ export default async function TesoreriaPage() {
       </OSSection>
 
       <OSSection
-        titulo="Facturas recibidas"
+        titulo={
+          real
+            ? `Facturas recibidas (${recibidasVisibles.length} de ${recibidas.length})`
+            : 'Facturas recibidas'
+        }
         nota={
           real
-            ? 'DEMO — soporte documental; las reales llegarán del Drive/gestoría'
+            ? 'REALES — soporte documental (Drive/gestoría + altas manuales); no implica pago'
             : 'Factura recibida no implica pago — soporte documental de gastos y liquidaciones'
         }
       >
@@ -301,7 +375,7 @@ export default async function TesoreriaPage() {
               </tr>
             </thead>
             <tbody>
-              {recibidas.map((f) => (
+              {recibidasVisibles.map((f) => (
                 <tr
                   key={f.id}
                   className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
