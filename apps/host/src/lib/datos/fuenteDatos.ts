@@ -88,3 +88,39 @@ export async function cargarIngresosReales(): Promise<IngresoOperativo[]> {
     ...(f.pendiente_confirmacion ? { pendienteConfirmacion: true } : {}),
   }));
 }
+
+interface FilaLiquidacion {
+  id: string;
+  mes: string;
+  importe_calculado: number | string;
+  estado: string;
+  notas: string | null;
+  clinica_profesionales: { nombre: string; activo: boolean } | null;
+  lineas_liquidacion: { detalle: string; cantidad: number | string; importe: number | string }[];
+}
+
+export interface LiquidacionReal {
+  id: string;
+  mes: string;
+  profesional: string;
+  activo: boolean;
+  detalle: string;
+  importe: number;
+  estado: string;
+}
+
+/** Liquidaciones reales importadas (Pago de Trabajadores nov-2024 → dic-2025). */
+export async function cargarLiquidacionesReales(): Promise<LiquidacionReal[]> {
+  const filas = await rest<FilaLiquidacion>(
+    'liquidaciones_mensuales?select=id,mes,importe_calculado,estado,notas,clinica_profesionales(nombre,activo),lineas_liquidacion(detalle,cantidad,importe)&order=mes.desc&limit=500',
+  );
+  return filas.map((f) => ({
+    id: f.id,
+    mes: f.mes,
+    profesional: f.clinica_profesionales?.nombre ?? 'profesional',
+    activo: f.clinica_profesionales?.activo ?? true,
+    detalle: f.lineas_liquidacion.map((l) => l.detalle).join(' · ') || '—',
+    importe: Number(f.importe_calculado),
+    estado: f.estado,
+  }));
+}
