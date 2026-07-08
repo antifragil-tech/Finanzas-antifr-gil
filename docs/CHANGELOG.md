@@ -9,7 +9,65 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
 ## [Unreleased]
 
-> **Fase 5 (continuación) — Presupuestos multi-sociedad, cashflow consolidado, presupuesto de ingresos y recurrencia automática.**
+> **Antifrágil OS — web operativa conectada a datos reales (2026-07-06 → 2026-07-07).**
+> Los PRs #33–#42 convirtieron el host en el runtime del MVP Antifrágil OS: las páginas
+> operativas viven en `apps/host/src/app/(app)/(os)/` y consumen el dominio de
+> `packages/operativa` (`@antifragil/operativa`). Contrato transversal de todas las
+> entradas siguientes: **sin entorno configurado → escenario demo (el build de CI sin
+> secrets sigue verde); con entorno → datos reales de Supabase.**
+
+#### Host OS + `@antifragil/operativa` — importación web de reportes periódicos + conciliación pago→factura (PR #42, 2026-07-07)
+
+**Dominio (`packages/operativa/src/importacion.ts`):**
+
+- 3 plantillas nuevas en `PLANTILLAS` con sus importadores puros: `facturas_salonized` (`importarFacturasSalonized`), `efectivo` (`importarEfectivo`, formato `fecha;hora;importe;nota`) y `extracto_banco` (`importarExtractoBanco`, importe con signo). Reutilizan `parseCsv` y la normalización de claves/importes/fechas existente.
+
+**Servidor (`apps/host/src/lib/datos/`):**
+
+- `importacionWeb.ts`: el CSV subido vive como **lote temporal en el tmpdir del sistema** (jamás se persiste en el repo) solo entre la previsualización y el "Aplicar". Cada fila recibe una **clave determinista uuid v5** de su contenido (namespace fijo del OS + contador de ocurrencia para filas legítimamente idénticas, p. ej. dos pagos iguales a la misma hora).
+- `accionesImportacion.ts`: server actions `subirReporte` (CSV ≤ 4 MB), `aplicarLote` (insert con `on_conflict=id` + `resolution=ignore-duplicates` ⇒ **aplicación idempotente**: re-importar el mismo archivo no duplica nada), `descartarLote` y `conciliarPago`.
+
+**UI (`/tesoreria/importar`):**
+
+- Selector de tipo de reporte + **preview con detección de duplicados** contra la base (consulta `idsExistentes` por lotes de 80 ids) antes de aplicar.
+- **Conciliación v1**: pagos SALIENTES del banco sin factura asociada (`movimientos_bancarios` con `importe < 0` y `factura_recibida_id is null`) ↔ facturas recibidas sin movimiento vinculado. Al conciliar → doble vínculo movimiento↔factura, la factura pasa a `pagada` y, si da soporte a un gasto operativo, se cierra también ese vínculo inverso.
+
+**Destinos:** facturas_salonized → `ingresos_devengados` + `cobros` · efectivo → `cobros` · extracto_banco → `movimientos_bancarios`. Las cuentas de tesorería se resuelven **por tipo** (`caja`/`banco`) — nunca ids hardcodeados.
+
+#### Host OS — entrada manual de datos + emisión de factura operativa serie OPS (PR #41, 2026-07-07)
+
+**Entrada manual en `/tesoreria`** (`EntradaDatos.tsx` + server actions en `apps/host/src/lib/datos/acciones.ts`):
+
+- Alta de **gasto operativo** (taxonomía A–D + capa de coste), **ingreso devengado con cobro opcional** (el cobro entra al libro de caja `cobros`; caja y devengo son libros separados que jamás se suman — doc 09 §4.4) y **factura recibida** (soporte documental, estados físicos del workflow del baseline). Validación SIEMPRE en servidor; avisos por redirect `?ok=`/`?error=` — nunca crash.
+
+**Emisión de factura operativa (`emitirFacturaOperativa`):**
+
+- Registro **precontable** serie **OPS** (doc 02 D1: la factura fiscal oficial sigue delegada fuera del OS). Numeración `max(numero)+1` por serie con reintento único ante colisión 409 (unique `(serie, numero)`). Total = base + IVA; el desglose Base/IVA viaja en `notas` con formato estable (la tabla no lo persiste — D2). Con IVA = 0 añade la leyenda de **exención sanitaria (art. 20.Uno.3º Ley 37/1992)**.
+- **Vista imprimible `/tesoreria/factura/[id]`** (series OPS/DRV): overlay de fondo blanco sobre el shell oscuro con **wordmark Antifrágil**, pensada para Ctrl+P → PDF (reglas `@media print` en `globals.css`: solo se imprime `.factura-print`). Tras emitir se redirige directamente a esta vista.
+
+**Filtro de mes:**
+
+- Selector `?mes=YYYY-MM` (componente `OSFiltroMes` + utilidades puras `apps/host/src/lib/datos/periodo.ts`) en **Tesorería y Rentabilidad**; las server actions conservan el periodo activo al volver.
+
+#### Host OS — Liquidaciones conectada al histórico real de Supabase (PR #40, 2026-07-07)
+
+- `/liquidaciones` lee `liquidaciones_mensuales` con embed de `clinica_profesionales` (nombre, activo) y `lineas_liquidacion` (detalle, cantidad, importe) vía `cargarLiquidacionesReales()`. Histórico real **nov-2024 → dic-2025** importado del Excel de pago a trabajadores. Sin entorno → escenario demo.
+
+#### Host OS — Tesorería y Rentabilidad conectadas a los datos reales de Supabase (PR #39, 2026-07-06)
+
+- **Nueva capa de datos `apps/host/src/lib/datos/fuenteDatos.ts` (solo servidor)**: lecturas vía **PostgREST con la service_role key** — la clave jamás llega al cliente (las páginas OS son Server Components).
+- **Contrato del build establecido**: `datosRealesDisponibles()` comprueba `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`; si faltan, las pantallas caen al **escenario demo** de `@antifragil/operativa` (el build de CI sin secrets sigue verde).
+- Tesorería y Rentabilidad leen `gastos_operativos` (fecha = fecha de PAGO), `ingresos_devengados`, `facturas_emitidas_operativas` y la vista **`v_facturas_recibidas_operativas`** (traduce el estado físico del workflow OCR al vocabulario del producto).
+
+#### Datos — base Supabase real de Antifrágil poblada (2026-07-06/07)
+
+> Sin cifras sensibles en este documento: se describen **estructuras**, no importes.
+
+- La base real quedó poblada con la operativa del negocio: **gastos operativos** del Cash Flow 2025–2026, **ingresos devengados** con el detalle de Salonized, **99 facturas recibidas del Drive** (88 conciliadas con sus movimientos bancarios), **liquidaciones nov-2024 → dic-2025**, **cobros en efectivo** y **cuentas por cobrar**.
+- **Cambios de esquema aplicados directamente sobre la base real** (aún sin SQL versionado en el repo; llegará con `feat/web-cxc-proyectos`): tabla nueva **`public.cuentas_por_cobrar`** (RLS activado, policies para `authenticated`) y **dimensión de proyectos en `gastos_operativos`** para imputar gasto a proyecto (CLI-PLY, CENS, MENDRA, 9AM).
+- Sin datos clínicos: solo estructuras administrativo-financieras (alcance v1, `docs/compliance/`).
+
+> **Fase 5 (continuación) — Presupuestos multi-sociedad, cashflow consolidado, presupuesto de ingresos y recurrencia automática.** _(Bloque legado Alsari, anterior al MVP Antifrágil OS.)_
 
 #### `@alsari/contabilidad` — PR F: importación de extractos bancarios (2026-06-23)
 
@@ -716,8 +774,7 @@ Reorganización del análisis financiero de proyectos en renta para una lectura 
 
 ---
 
-> **Fase 4 — Módulo Contabilidad: OCR de facturas, workflow de aprobación multi-paso, asientos contables automáticos, movimientos bancarios y reconciliación.**
-> `@alsari/contabilidad` reemplaza y fusiona el antiguo `@alsari/facturas` (nunca construido).
+> **Fase 4 — Módulo Contabilidad: OCR de facturas, workflow de aprobación multi-paso, asientos contables automáticos, movimientos bancarios y reconciliación.** > `@alsari/contabilidad` reemplaza y fusiona el antiguo `@alsari/facturas` (nunca construido).
 > 10 tablas nuevas en Supabase · Edge Function `procesar-factura` con Claude Vision.
 
 ### Added

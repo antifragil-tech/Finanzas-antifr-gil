@@ -3,7 +3,7 @@
 > Documento vivo. Estado técnico actual del sistema.
 > **Claude actualiza este archivo inmediatamente cuando cambia algo relevante.**
 
-**Última actualización:** v0.4.6 · 2026-06-11 — Rediseno mapa corporativo: personas fisicas en L0, holdings anclados a extremos del bus L2 (`SharedBusEdges`), `buildLayout()` refactorizado para calcular L2 antes que L1. Migración `20260611090000` añade `fecha_inicio_inversion` y `tae_declarada` a `activos_patrimonio`.
+**Última actualización:** v0.4.7 · 2026-07-07 — Antifrágil OS: capa de datos reales del host (`apps/host/src/lib/datos/`, PRs #39–#42) — Tesorería/Rentabilidad/Liquidaciones con datos reales, entrada manual + factura operativa serie OPS con vista imprimible, importación web idempotente de reportes + conciliación pago→factura, base Supabase real poblada (nueva tabla `cuentas_por_cobrar` + dimensión proyectos en `gastos_operativos`). Ver sección "Antifrágil OS — capa de datos reales del host".
 **Mantenedor técnico:** Claude (con validación de Guille)
 
 ---
@@ -81,6 +81,73 @@ holding Alsari Capital. Está compuesto por:
 
 **No hace:** lógica interna de módulos, cálculos financieros, queries específicas
 de cada dominio.
+
+### Antifrágil OS — capa de datos reales del host (2026-07, PRs #39–#42)
+
+> El runtime MVP vigente es **Antifrágil OS** (cirugía del PR #33): las páginas
+> operativas viven en `apps/host/src/app/(app)/(os)/` (Server Components) y consumen
+> el dominio de `packages/operativa` (`@antifragil/operativa`). Esta sección describe
+> el estado real de `main` a 2026-07-07.
+
+**Contrato del build (CI sin secrets):** todas las páginas OS siguen el patrón
+**«sin entorno → demo, con entorno → datos reales»**. `datosRealesDisponibles()`
+comprueba `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`; si faltan, las
+pantallas caen al escenario demo de `@antifragil/operativa` y las server actions
+devuelven un error legible vía redirect `?error=` (nunca crash). Así el build de CI
+sin secrets sigue en verde — este contrato es innegociable para cualquier página nueva.
+
+**Capa de datos (`apps/host/src/lib/datos/`, solo servidor):**
+
+- `fuenteDatos.ts` — lecturas vía **PostgREST con la service_role key (server-only,
+  jamás llega al cliente)**: `gastos_operativos`, `ingresos_devengados`,
+  `facturas_emitidas_operativas` (+ detalle con desglose Base/IVA parseado de `notas`),
+  vista `v_facturas_recibidas_operativas` (estado físico OCR → vocabulario del
+  producto), `liquidaciones_mensuales` (+ profesional + líneas), cuentas de tesorería
+  resueltas **por tipo** (`caja`/`banco`, nunca ids hardcodeados), pagos salientes sin
+  factura y facturas conciliables.
+- `acciones.ts` — server actions de entrada manual: `crearGasto`, `crearIngreso`
+  (con cobro opcional al libro de caja `cobros` — caja y devengo jamás se suman),
+  `crearFacturaRecibida` y `emitirFacturaOperativa` (serie **OPS**, registro
+  precontable; numeración `max+1` con reintento ante 409 por la unique
+  `(serie, numero)`; leyenda de exención sanitaria art. 20.Uno.3º Ley 37/1992 con
+  IVA = 0). Validación SIEMPRE en servidor.
+- `importacionWeb.ts` — lotes temporales en el tmpdir del sistema (el archivo subido
+  jamás se persiste en el repo) + **uuid v5 determinista por contenido de fila** (con
+  contador de ocurrencia para filas legítimamente idénticas).
+- `accionesImportacion.ts` — `subirReporte` (CSV ≤ 4 MB) → preview → `aplicarLote`
+  (insert `on_conflict=id` + `resolution=ignore-duplicates` ⇒ **idempotente**:
+  re-importar no duplica) · `conciliarPago` (movimiento bancario ↔ factura recibida:
+  doble vínculo, factura → `pagada`, cierre del vínculo con el gasto operativo si existe).
+- `periodo.ts` — utilidades puras del selector de mes `?mes=YYYY-MM`
+  (`mesValido`, `filtrarPorMes`, `etiquetaMes`).
+
+**Páginas OS relevantes:**
+
+- `/tesoreria` — caja vs devengo, gastos por categoría, facturas; **entrada manual de
+  datos** (gasto · ingreso + cobro · factura recibida · emisión OPS) vía
+  `components/os/tesoreria/EntradaDatos.tsx`; **filtro de mes** (`OSFiltroMes`).
+- `/tesoreria/importar` — importación web de reportes periódicos (3 plantillas:
+  `facturas_salonized`, `efectivo`, `extracto_banco`, definidas en
+  `@antifragil/operativa`) con preview + detección de duplicados, y **conciliación v1**
+  de pagos salientes del banco con facturas recibidas.
+- `/tesoreria/factura/[id]` — **vista imprimible** de la factura operativa (series
+  OPS/DRV): overlay de fondo blanco con wordmark Antifrágil, pensada para
+  Ctrl+P → PDF (reglas `@media print` en `globals.css`).
+- `/rentabilidad` — márgenes con datos reales + filtro de mes.
+- `/liquidaciones` — histórico real nov-2024 → dic-2025.
+
+**Base de datos real (Supabase de Antifrágil):** poblada con la operativa del negocio
+(gastos del Cash Flow, ingresos detallados de Salonized, facturas recibidas del Drive
+con conciliación bancaria, liquidaciones, cobros en efectivo, cuentas por cobrar y
+proyectos CLI-PLY/CENS/MENDRA/9AM). **Ojo:** dos cambios de esquema están aplicados
+directamente sobre la base real y aún **sin SQL versionado en el repo** (llegará con
+`feat/web-cxc-proyectos`); el directorio `services/supabase/migrations/` es legacy
+Alsari y NO refleja esta base:
+
+- **Tabla nueva `public.cuentas_por_cobrar`** — RLS activado, policies para
+  `authenticated`.
+- **Dimensión de proyectos en `gastos_operativos`** — imputación de gasto a proyecto
+  (CLI-PLY, CENS, MENDRA, 9AM).
 
 ### Módulos (`apps/modules/*`)
 
@@ -385,6 +452,9 @@ Guille abre Antigravity en la carpeta del proyecto
 | Supabase: schema financiero                    | ✅ Aplicado      | kpis, proyectos, sumas_saldos, vencimientos, patrimonio, vencimiento_sociedades, cashflow_consolidado                                                                                                               |
 | CI/CD                                          | ✅ Configurado   | Workflow `.github/workflows/ci.yml` listo                                                                                                                                                                           |
 | Deploy a producción                            | ✅ En producción | Vercel: `https://alsari-capital-os-host.vercel.app/`                                                                                                                                                                |
+| Antifrágil OS — páginas operativas `(os)`      | ✅ En main       | Tesorería/Rentabilidad/Liquidaciones con datos reales; entrada manual + factura OPS imprimible; `/tesoreria/importar` con conciliación v1 (PRs #33–#42)                                                             |
+| Antifrágil OS — capa `apps/host/src/lib/datos` | ✅ En main       | `fuenteDatos.ts` (PostgREST service_role server-only), `acciones.ts`, `importacionWeb.ts`, `accionesImportacion.ts`, `periodo.ts`. Contrato: sin env → demo, con env → datos reales                                 |
+| Base Supabase real de Antifrágil               | ✅ Poblada       | Gastos, ingresos Salonized, 99 facturas Drive (88 conciliadas), liquidaciones, cobros efectivo, `cuentas_por_cobrar`, proyectos. **Esquema aplicado en vivo, SQL versionado pendiente** (`feat/web-cxc-proyectos`)  |
 
 **Leyenda:** ✅ Completo · 🚧 En curso · ⏸️ Aplazado · ❌ No iniciado.
 
