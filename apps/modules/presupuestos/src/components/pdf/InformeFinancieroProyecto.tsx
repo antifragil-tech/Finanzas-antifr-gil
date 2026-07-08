@@ -10,7 +10,7 @@ import type {
   Seccion,
   EscenarioCol,
 } from '../../lib/exportProyectoFinanciero';
-import { LOGO_ALSARI } from '../../lib/logoAlsari';
+import { LOGO_MARCA } from '../../lib/logoMarca';
 
 // Sin partición de palabras a mitad ("AC-TUAL"): un documento financiero no
 // debe hifenar. Las palabras saltan de línea completas.
@@ -417,7 +417,7 @@ function Escenarios({ cols }: { cols: EscenarioCol[] }) {
 function Header({ r }: { r: InformeFinanciero }) {
   return (
     <View style={s.hdrBand} fixed>
-      <Image style={s.hdrLogo} src={LOGO_ALSARI} />
+      <Image style={s.hdrLogo} src={LOGO_MARCA} />
       <Text style={s.hdrProj}>
         {r.nombreProyecto} · {r.tipoLabel}
       </Text>
@@ -449,7 +449,7 @@ export function InformeFinancieroProyecto({ informe: r }: { informe: InformeFina
       <Page size="A4" style={s.cover}>
         <View style={s.coverFrame}>
           <View style={s.coverHair} />
-          <Image style={s.coverLogo} src={LOGO_ALSARI} />
+          <Image style={s.coverLogo} src={LOGO_MARCA} />
           <Text style={s.coverTitle}>{r.nombreProyecto}</Text>
           <Text style={s.coverSubtitle}>Informe financiero</Text>
           <View style={s.coverMetaWrap}>
@@ -466,7 +466,7 @@ export function InformeFinancieroProyecto({ informe: r }: { informe: InformeFina
             <Text style={s.coverNote}>
               Informe interno basado en datos introducidos por el usuario.
             </Text>
-            <Text style={s.coverBrandTiny}>Generado desde Alsari Capital OS</Text>
+            <Text style={s.coverBrandTiny}>Generado desde Antifrágil OS</Text>
           </View>
         </View>
       </Page>
