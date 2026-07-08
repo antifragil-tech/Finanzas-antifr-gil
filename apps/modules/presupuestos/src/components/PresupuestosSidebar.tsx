@@ -88,7 +88,7 @@ export function PresupuestosSidebar({
         </button>
         <img
           src="/logo.png"
-          alt="Alsari Capital"
+          alt="Antifrágil"
           className="h-6 w-auto cursor-pointer object-contain opacity-70 transition-opacity hover:opacity-90"
           onClick={handleHome}
           onError={(e) => {
