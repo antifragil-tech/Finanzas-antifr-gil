@@ -14,11 +14,15 @@ import {
 } from '@antifragil/operativa';
 import { OSPageHeader, OSSection, OSKpiCard, OSStatusBadge, OSFiltroMes } from '@/components/os/ui';
 import {
+  cargarCuentasPorCobrar,
   cargarGastosReales,
   cargarIngresosReales,
+  cargarProyectos,
   datosRealesDisponibles,
+  separarPorProyecto,
 } from '@/lib/datos/fuenteDatos';
 import { etiquetaMes, filtrarPorMes, mesValido, primerValor } from '@/lib/datos/periodo';
+import { ProyectosFuera } from '@/components/os/tesoreria/ProyectosFuera';
 
 // Rentabilidad operativa (doc 09) sobre el escenario demo compartido.
 // Vista devengo por defecto; la caja se muestra aparte y NUNCA se suman.
@@ -149,7 +153,14 @@ export default async function RentabilidadPage({
     mes,
     (g) => g.fecha,
   );
-  const e = escaleraMargen(ingresos, gastos);
+  // La escalera es de la CLÍNICA: los gastos de proyectos externos (CENS,
+  // MENDRA, 9AM…) se segregan y se muestran aparte — nada se oculta.
+  const { clinica: gastosClinica, proyectos: gastosProyectos } = separarPorProyecto(gastos);
+  const e = escaleraMargen(ingresos, gastosClinica);
+
+  const [proyectos, cuentasPorCobrar] = real
+    ? await Promise.all([cargarProyectos(), cargarCuentasPorCobrar()])
+    : [[], []];
 
   const hechos = hechosDemo();
   const t = totalesDemo();
@@ -167,7 +178,7 @@ export default async function RentabilidadPage({
         titulo={mes ? `Rentabilidad — ${etiquetaMes(mes)}` : 'Rentabilidad'}
         descripcion={
           real
-            ? `${mes ? `Periodo: ${etiquetaMes(mes)}` : 'Todo el histórico'} · Margen operativo con DATOS REALES importados (vista devengo). Los desgloses por sesión siguen en demo hasta importar Salonized.`
+            ? `${mes ? `Periodo: ${etiquetaMes(mes)}` : 'Todo el histórico'} · Margen operativo de la CLÍNICA con DATOS REALES (vista devengo); los proyectos externos van segregados abajo. Los desgloses por sesión siguen en demo hasta importar Salonized.`
             : `${mes ? `Periodo: ${etiquetaMes(mes)}` : 'Todo el histórico'} · Margen operativo — mes demo ${MES_DEMO}, vista devengo (docs/finanzas/09). Datos ficticios del escenario compartido del MVP.`
         }
         acciones={<OSFiltroMes accion="/rentabilidad" mes={mes} />}
@@ -306,6 +317,19 @@ export default async function RentabilidadPage({
           </table>
         </div>
       </OSSection>
+
+      {real ? (
+        <OSSection
+          titulo="Proyectos fuera de la operativa"
+          nota="Excluidos de la escalera M1→M3 de la clínica — segregados, nunca ocultos"
+        >
+          <ProyectosFuera
+            gastosProyectos={gastosProyectos}
+            proyectos={proyectos}
+            cuentasPorCobrar={cuentasPorCobrar}
+          />
+        </OSSection>
+      ) : null}
     </div>
   );
 }

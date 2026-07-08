@@ -124,6 +124,51 @@ async function consultar<T>(recurso: string): Promise<T[]> {
   return (await res.json()) as T[];
 }
 
+/** PATCH condicionado vía PostgREST (los filtros del recurso hacen de guard). */
+async function actualizar<T>(
+  recurso: string,
+  cuerpo: Record<string, unknown>,
+): Promise<ResultadoInsert<T>> {
+  if (!URL_BASE || !SERVICE_KEY) {
+    return {
+      ok: false,
+      filas: [],
+      status: 0,
+      error: 'Sin conexión a Supabase: entorno no configurado (modo demo, solo lectura).',
+    };
+  }
+  try {
+    const res = await fetch(`${URL_BASE}/rest/v1/${recurso}`, {
+      method: 'PATCH',
+      headers: {
+        apikey: SERVICE_KEY,
+        Authorization: `Bearer ${SERVICE_KEY}`,
+        'Content-Type': 'application/json',
+        Prefer: 'return=representation',
+      },
+      body: JSON.stringify(cuerpo),
+      cache: 'no-store',
+    });
+    if (!res.ok) {
+      const detalle = (await res.text()).slice(0, 200);
+      return {
+        ok: false,
+        filas: [],
+        status: res.status,
+        error: `Supabase HTTP ${res.status}: ${detalle}`,
+      };
+    }
+    return { ok: true, filas: (await res.json()) as T[], status: res.status, error: '' };
+  } catch (e) {
+    return {
+      ok: false,
+      filas: [],
+      status: 0,
+      error: `Error de red al actualizar ${recurso}: ${String(e)}`,
+    };
+  }
+}
+
 function revalidarFinanzas(): void {
   revalidatePath('/tesoreria');
   revalidatePath('/rentabilidad');
@@ -316,4 +361,87 @@ export async function emitirFacturaOperativa(fd: FormData): Promise<void> {
 
   revalidarFinanzas();
   redirect(`/tesoreria/factura/${id}`);
+}
+
+const MEDIOS_PAGO_COBRO = [
+  'efectivo',
+  'tarjeta',
+  'transferencia',
+  'bizum',
+  'domiciliacion',
+  'otro',
+];
+
+/**
+ * Registra el COBRO REAL de una cuenta por cobrar: reclama la CxC con un
+ * update condicionado a estado='pendiente' (guard anti doble-cobro), inserta
+ * el cobro en el libro `cobros` y enlaza cobro_id. Si el insert falla, la CxC
+ * vuelve a pendiente (nunca queda cobrada sin cobro).
+ */
+export async function registrarCobroCxc(fd: FormData): Promise<void> {
+  const cxcId = texto(fd, 'cxc_id');
+  const fecha = texto(fd, 'fecha');
+  const medio = texto(fd, 'medio_pago');
+  const cuentaId = texto(fd, 'cuenta_tesoreria_id');
+
+  if (!/^[0-9a-f-]{36}$/i.test(cxcId)) volver(fd, { error: 'CxC: identificador no válido.' });
+  if (!fechaValida(fecha))
+    volver(fd, { error: 'CxC: la fecha del cobro debe ser una fecha ISO válida (AAAA-MM-DD).' });
+  if (!MEDIOS_PAGO_COBRO.includes(medio)) volver(fd, { error: 'CxC: medio de pago no válido.' });
+
+  const cuentas = await consultar<{ id: string }>(
+    'cuenta_tesoreria?select=id&activa=is.true&limit=50',
+  );
+  if (!cuentas.some((c) => c.id === cuentaId))
+    volver(fd, { error: 'CxC: la cuenta de tesorería elegida no existe o no está activa.' });
+
+  // 1) Reclamar la CxC (guard: solo si sigue pendiente).
+  const reclamo = await actualizar<{
+    id: string;
+    deudor: string;
+    concepto: string;
+    importe: number | string;
+  }>(`cuentas_por_cobrar?id=eq.${cxcId}&estado=eq.pendiente`, { estado: 'cobrada' });
+  if (!reclamo.ok) volver(fd, { error: `CxC: ${reclamo.error}` });
+  const cxc = reclamo.filas[0];
+  if (!cxc)
+    volver(fd, { error: 'Esa cuenta por cobrar ya no está pendiente (recarga la página).' });
+
+  // 2) Insertar el cobro real en el libro de cobros.
+  const cobro = await insertar<{ id: string }>('cobros', {
+    fecha,
+    origen_tipo: 'otro',
+    origen_id: cxc.id,
+    importe: Number(cxc.importe),
+    medio_pago: medio,
+    cuenta_tesoreria_id: cuentaId,
+    registrado_por_email: 'entrada-manual-web',
+    notas: `Cobro CxC · ${cxc.deudor} · ${cxc.concepto}`,
+  });
+  if (!cobro.ok || !cobro.filas[0]) {
+    // Rollback del reclamo: la CxC no puede quedar cobrada sin cobro real.
+    await actualizar(`cuentas_por_cobrar?id=eq.${cxcId}&estado=eq.cobrada`, {
+      estado: 'pendiente',
+    });
+    volver(fd, { error: `CxC: el cobro no se pudo registrar (${cobro.error}).` });
+  }
+
+  // 3) Enlazar el cobro en la CxC.
+  const enlace = await actualizar(`cuentas_por_cobrar?id=eq.${cxcId}`, {
+    cobro_id: cobro.filas[0].id,
+  });
+  if (!enlace.ok)
+    volver(fd, {
+      error: `CxC cobrada pero sin enlace al cobro (${enlace.error}) — revisar a mano.`,
+    });
+
+  revalidarFinanzas();
+  volver(fd, {
+    ok: `Cobro registrado: ${cxc.deudor} · ${formatearImporteAviso(Number(cxc.importe))} (${fecha}).`,
+  });
+}
+
+/** Importe legible para los avisos (es-ES, 2 decimales). */
+function formatearImporteAviso(n: number): string {
+  return `${n.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €`;
 }
