@@ -18,14 +18,21 @@ import {
   type EstadoFacturaRecibida,
 } from '@antifragil/operativa';
 import {
+  cargarCuentasPorCobrar,
+  cargarCuentasTesoreria,
   cargarFacturasEmitidasReales,
   cargarFacturasRecibidasReales,
   cargarGastosReales,
   cargarIngresosReales,
+  cargarProyectos,
   datosRealesDisponibles,
+  separarPorProyecto,
 } from '@/lib/datos/fuenteDatos';
 import { etiquetaMes, filtrarPorMes, mesValido, primerValor } from '@/lib/datos/periodo';
 import { EntradaDatos } from '@/components/os/tesoreria/EntradaDatos';
+import { AvisoIva } from '@/components/os/tesoreria/AvisoIva';
+import { CuentasPorCobrarSeccion } from '@/components/os/tesoreria/CuentasPorCobrar';
+import { ProyectosFuera } from '@/components/os/tesoreria/ProyectosFuera';
 import {
   OSPageHeader,
   OSSection,
@@ -97,11 +104,20 @@ export default async function TesoreriaPage({
     (f) => f.fecha,
   );
 
-  const t = totalesCajaDevengo(ingresos, gastos);
-  const bloqueados = gastos.filter((g) => estadoValidacion(g) === 'bloqueado_sin_documento');
+  // CxC y proyectos: la deuda viva NO se filtra por periodo (es foto de balance).
+  const [cuentasPorCobrar, proyectos, cuentasTesoreria] = real
+    ? await Promise.all([cargarCuentasPorCobrar(), cargarProyectos(), cargarCuentasTesoreria()])
+    : [[], [], []];
+
+  // Segregación: los KPIs de la CLÍNICA excluyen los gastos de proyectos
+  // externos (CENS, MENDRA, 9AM…), que se muestran aparte. Nada se oculta.
+  const { clinica: gastosClinica, proyectos: gastosProyectos } = separarPorProyecto(gastos);
+
+  const t = totalesCajaDevengo(ingresos, gastosClinica);
+  const bloqueados = gastosClinica.filter((g) => estadoValidacion(g) === 'bloqueado_sin_documento');
   // En el Cash Flow real cada gasto está PAGADO en su fecha (informe de caja).
   const pagado = real
-    ? gastos.reduce((s, g) => s + g.importe, 0)
+    ? gastosClinica.reduce((s, g) => s + g.importe, 0)
     : importePagadoDeFacturas(recibidas);
   const cobrado = real ? t.cobrado : t.cobrado + importeCobradoDeFacturas(emitidas);
 
@@ -109,7 +125,7 @@ export default async function TesoreriaPage({
     CategoriaGasto,
     { importe: number; items: number; bloqueado: number }
   >();
-  for (const g of gastos) {
+  for (const g of gastosClinica) {
     const cat = CATEGORIA_DE[g.tipo];
     const acc = porCategoria.get(cat) ?? { importe: 0, items: 0, bloqueado: 0 };
     acc.importe += g.importe;
@@ -118,7 +134,7 @@ export default async function TesoreriaPage({
     porCategoria.set(cat, acc);
   }
 
-  const gastosVisibles = [...gastos].reverse().slice(0, 60);
+  const gastosVisibles = [...gastosClinica].reverse().slice(0, 60);
   const recibidasVisibles = recibidas.slice(0, 60);
 
   const periodo = mes ? `Periodo: ${etiquetaMes(mes)}` : 'Todo el histórico';
@@ -129,7 +145,7 @@ export default async function TesoreriaPage({
         titulo={mes ? `Tesorería — ${etiquetaMes(mes)}` : 'Tesorería'}
         descripcion={
           real
-            ? `${periodo} · DATOS REALES importados (${gastos.length} gastos, ${ingresos.length} apuntes de ingreso). La caja de cobros por sesión llegará con Salonized.`
+            ? `${periodo} · DATOS REALES — cifras de la CLÍNICA (${gastosClinica.length} gastos, ${ingresos.length} apuntes de ingreso); los proyectos externos (CENS, MENDRA, 9AM) van segregados abajo.`
             : `${periodo} · Ingresos, gastos y facturas del mes demo ${MES_DEMO} — caja y devengo por separado, nunca sumados. Datos ficticios del escenario compartido.`
         }
         acciones={
@@ -195,6 +211,34 @@ export default async function TesoreriaPage({
         />
       </div>
 
+      <AvisoIva ingresos={ingresos} />
+
+      {real ? (
+        <OSSection
+          titulo="Cuentas por cobrar"
+          nota="Deuda viva a favor de la clínica — no se filtra por periodo. Cobrar exige fecha, medio y cuenta"
+        >
+          <CuentasPorCobrarSeccion
+            cuentas={cuentasPorCobrar}
+            cuentasTesoreria={cuentasTesoreria}
+            mes={mes}
+          />
+        </OSSection>
+      ) : null}
+
+      {real ? (
+        <OSSection
+          titulo="Proyectos fuera de la operativa"
+          nota="Segregados de los KPIs de la clínica — nada se oculta, se muestra aparte"
+        >
+          <ProyectosFuera
+            gastosProyectos={gastosProyectos}
+            proyectos={proyectos}
+            cuentasPorCobrar={cuentasPorCobrar}
+          />
+        </OSSection>
+      ) : null}
+
       <OSSection
         titulo="Añadir datos"
         nota={
@@ -207,7 +251,7 @@ export default async function TesoreriaPage({
       </OSSection>
 
       <OSSection
-        titulo="Gastos por categoría"
+        titulo={real ? 'Gastos por categoría (clínica)' : 'Gastos por categoría'}
         nota="Sin documento válido, un gasto está calculado pero NO validado para pago"
       >
         <div className="glass-panel overflow-x-auto rounded-2xl">
@@ -245,7 +289,7 @@ export default async function TesoreriaPage({
       <OSSection
         titulo={
           real
-            ? `Últimos gastos (${gastosVisibles.length} de ${gastos.length})`
+            ? `Últimos gastos de la clínica (${gastosVisibles.length} de ${gastosClinica.length})`
             : 'Detalle de gastos'
         }
       >

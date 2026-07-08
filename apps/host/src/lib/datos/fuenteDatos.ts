@@ -43,8 +43,33 @@ interface FilaGasto {
   documento_tipo: GastoOperativo['documento']['tipo'];
   documento_recibido: boolean;
   documento_referencia: string | null;
+  proyecto_id_ref: string | null;
   pendiente_confirmacion: boolean;
   nota: string | null;
+}
+
+/** Proyecto de la clínica en public.proyectos: sus gastos SÍ son operativa. */
+export const PROYECTO_CLINICA = 'CLI-PLY';
+
+/** Gasto del dominio + el proyecto al que está imputado en la tabla real. */
+export type GastoReal = GastoOperativo & { proyectoIdRef?: string };
+
+/**
+ * Segrega la operativa de la CLÍNICA de los proyectos externos (CENS, MENDRA,
+ * 9AM…): los KPIs y la escalera de la clínica excluyen esos gastos, que se
+ * muestran aparte — se segrega, nunca se oculta.
+ */
+export function separarPorProyecto(gastos: GastoReal[]): {
+  clinica: GastoReal[];
+  proyectos: GastoReal[];
+} {
+  const clinica: GastoReal[] = [];
+  const proyectos: GastoReal[] = [];
+  for (const g of gastos) {
+    if (g.proyectoIdRef && g.proyectoIdRef !== PROYECTO_CLINICA) proyectos.push(g);
+    else clinica.push(g);
+  }
+  return { clinica, proyectos };
 }
 
 interface FilaIngreso {
@@ -56,8 +81,8 @@ interface FilaIngreso {
   pendiente_confirmacion: boolean;
 }
 
-/** Gastos reales importados (Cash Flow: su fecha es la de PAGO). */
-export async function cargarGastosReales(): Promise<GastoOperativo[]> {
+/** Gastos reales importados (Cash Flow: su fecha es la de PAGO), con su proyecto. */
+export async function cargarGastosReales(): Promise<GastoReal[]> {
   const filas = await rest<FilaGasto>('gastos_operativos?select=*&order=fecha.asc&limit=5000');
   return filas.map((f) => ({
     id: f.id,
@@ -71,6 +96,7 @@ export async function cargarGastosReales(): Promise<GastoOperativo[]> {
       recibido: f.documento_recibido,
       ...(f.documento_referencia ? { referencia: f.documento_referencia } : {}),
     },
+    ...(f.proyecto_id_ref ? { proyectoIdRef: f.proyecto_id_ref } : {}),
     ...(f.pendiente_confirmacion ? { pendienteConfirmacion: true } : {}),
     ...(f.nota ? { nota: f.nota } : {}),
   }));
@@ -330,4 +356,108 @@ export async function cargarFacturasConciliables(): Promise<FacturaConciliable[]
     estado: f.estado,
     gastoOperativoId: f.gasto_operativo_id,
   }));
+}
+
+// ---------------------------------------------------------------------------
+// Cuentas por cobrar y proyectos
+// ---------------------------------------------------------------------------
+
+export type EstadoCxc = 'pendiente' | 'cobrada' | 'cancelada';
+
+export interface CuentaPorCobrar {
+  id: string;
+  fechaOrigen: string;
+  deudor: string;
+  concepto: string;
+  importe: number;
+  proyectoIdRef: string | null;
+  estado: EstadoCxc;
+  cobroId: string | null;
+  notas: string | null;
+}
+
+/** Cuentas por cobrar reales (p. ej. el 50 % de los pagos CENS que debe Felipe). */
+export async function cargarCuentasPorCobrar(): Promise<CuentaPorCobrar[]> {
+  const filas = await rest<{
+    id: string;
+    fecha_origen: string;
+    deudor: string;
+    concepto: string;
+    importe: number | string;
+    proyecto_id_ref: string | null;
+    estado: EstadoCxc;
+    cobro_id: string | null;
+    notas: string | null;
+  }>('cuentas_por_cobrar?select=*&order=fecha_origen.desc&limit=500');
+  return filas.map((f) => ({
+    id: f.id,
+    fechaOrigen: f.fecha_origen,
+    deudor: f.deudor,
+    concepto: f.concepto,
+    importe: Number(f.importe),
+    proyectoIdRef: f.proyecto_id_ref,
+    estado: f.estado,
+    cobroId: f.cobro_id,
+    notas: f.notas,
+  }));
+}
+
+export interface TotalesCxc {
+  pendiente: number;
+  cobrada: number;
+  porDeudor: { deudor: string; pendiente: number; partidas: number }[];
+}
+
+/** Totales derivados de CxC (nunca almacenados): pendiente/cobrado y desglose por deudor. */
+export function totalesCxc(cuentas: CuentaPorCobrar[]): TotalesCxc {
+  const porDeudor = new Map<string, { pendiente: number; partidas: number }>();
+  let pendiente = 0;
+  let cobrada = 0;
+  for (const c of cuentas) {
+    if (c.estado === 'cobrada') cobrada += c.importe;
+    if (c.estado !== 'pendiente') continue;
+    pendiente += c.importe;
+    const acc = porDeudor.get(c.deudor) ?? { pendiente: 0, partidas: 0 };
+    acc.pendiente += c.importe;
+    acc.partidas += 1;
+    porDeudor.set(c.deudor, acc);
+  }
+  return {
+    pendiente: Math.round(pendiente * 100) / 100,
+    cobrada: Math.round(cobrada * 100) / 100,
+    porDeudor: [...porDeudor.entries()]
+      .map(([deudor, v]) => ({ deudor, ...v, pendiente: Math.round(v.pendiente * 100) / 100 }))
+      .sort((a, b) => b.pendiente - a.pendiente),
+  };
+}
+
+export interface ProyectoInfo {
+  idRef: string;
+  nombre: string;
+  estado: string;
+}
+
+/** Catálogo de proyectos (CLI-PLY, CENS, MENDRA, 9AM, LIDO, EVT). */
+export async function cargarProyectos(): Promise<ProyectoInfo[]> {
+  const filas = await rest<{ id_ref: string; nombre: string; estado: string | null }>(
+    'proyectos?select=id_ref,nombre,estado&order=id_ref.asc&limit=100',
+  );
+  return filas.map((f) => ({ idRef: f.id_ref, nombre: f.nombre, estado: f.estado ?? 'activo' }));
+}
+
+/** Cuentas de tesorería activas (para elegir dónde entra un cobro). */
+export interface CuentaTesoreriaInfo {
+  id: string;
+  nombre: string;
+  tipo: string;
+}
+
+export async function cargarCuentasTesoreria(): Promise<CuentaTesoreriaInfo[]> {
+  try {
+    return await rest<CuentaTesoreriaInfo>(
+      'cuenta_tesoreria?select=id,nombre,tipo&activa=is.true&order=tipo.asc',
+    );
+  } catch {
+    return [];
+  }
 }
