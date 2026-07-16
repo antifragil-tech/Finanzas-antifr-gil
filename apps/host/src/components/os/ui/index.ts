@@ -1,6 +1,8 @@
 export { OSPageHeader } from './OSPageHeader';
 export { OSSection } from './OSSection';
 export { OSKpiCard } from './OSKpiCard';
+export { OSHeroMetric, type HeroTono } from './OSHeroMetric';
+export { OSDelta } from './OSDelta';
 export { OSStatusBadge, type OSBadgeTone } from './OSStatusBadge';
 export { OSEmptyState } from './OSEmptyState';
 export { OSDataList, type OSDataListItem } from './OSDataList';

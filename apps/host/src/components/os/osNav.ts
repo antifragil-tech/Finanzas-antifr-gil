@@ -29,21 +29,26 @@ export type OSNavGroup = {
   items: OSNavItem[];
 };
 
+// Orden por lógica de decisión: de lo ejecutivo (¿cómo vamos?) a lo operativo
+// (¿qué hago hoy?) y, al fondo, los ajustes del sistema. Guille abre el Panel,
+// baja al Dinero (tesorería → rentabilidad → liquidaciones) y solo entra en
+// Operación/Sistema cuando lo necesita.
 export const OS_NAV: OSNavGroup[] = [
   {
-    titulo: 'Operativa',
+    titulo: 'Dirección',
+    items: [{ href: '/dashboard', label: 'Panel', icon: LayoutDashboard }],
+  },
+  {
+    titulo: 'Dinero',
     items: [
-      { href: '/dashboard', label: 'Panel', icon: LayoutDashboard },
-      { href: '/reservas', label: 'Reservas', icon: CalendarDays },
+      { href: '/tesoreria', label: 'Tesorería', icon: Wallet },
+      { href: '/rentabilidad', label: 'Rentabilidad', icon: TrendingUp },
       { href: '/liquidaciones', label: 'Liquidaciones', icon: HandCoins },
     ],
   },
   {
-    titulo: 'Finanzas operativas',
-    items: [
-      { href: '/tesoreria', label: 'Tesorería', icon: Wallet, placeholder: true },
-      { href: '/rentabilidad', label: 'Rentabilidad', icon: TrendingUp },
-    ],
+    titulo: 'Operación',
+    items: [{ href: '/reservas', label: 'Reservas', icon: CalendarDays }],
   },
   {
     titulo: 'Sistema',
