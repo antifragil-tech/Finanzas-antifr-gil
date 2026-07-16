@@ -1,9 +1,11 @@
-# Arquitectura — Alsari Capital OS
+# Arquitectura — Antifrágil OS
 
-> Documento vivo. Estado técnico actual del sistema.
+> Documento vivo. Estado técnico actual del sistema. (Título histórico hasta
+> v0.4.7: "Alsari Capital OS"; los scopes internos siguen siendo `@alsari/*`
+> hasta el rebrand de paquetes, ver ROADMAP bloque G.)
 > **Claude actualiza este archivo inmediatamente cuando cambia algo relevante.**
 
-**Última actualización:** v0.4.7 · 2026-07-07 — Antifrágil OS: capa de datos reales del host (`apps/host/src/lib/datos/`, PRs #39–#42) — Tesorería/Rentabilidad/Liquidaciones con datos reales, entrada manual + factura operativa serie OPS con vista imprimible, importación web idempotente de reportes + conciliación pago→factura, base Supabase real poblada (nueva tabla `cuentas_por_cobrar` + dimensión proyectos en `gastos_operativos`). Ver sección "Antifrágil OS — capa de datos reales del host".
+**Última actualización:** v0.4.8 · 2026-07-16 — Panel de dirección con datos reales y jerarquía visual del OS (PR #46); **esquema real de la base versionado** en `services/supabase/esquema-real/` con auditoría RLS y script de regeneración (PR #47); PRs #4/#12 cerrados como superados; base `antifragil-os` reactivada tras pausa del plan free. Ver secciones "Antifrágil OS — capa de datos reales del host" y el README de `esquema-real/`.
 **Mantenedor técnico:** Claude (con validación de Guille)
 
 ---
@@ -136,18 +138,28 @@ sin secrets sigue en verde — este contrato es innegociable para cualquier pág
 - `/rentabilidad` — márgenes con datos reales + filtro de mes.
 - `/liquidaciones` — histórico real nov-2024 → dic-2025.
 
-**Base de datos real (Supabase de Antifrágil):** poblada con la operativa del negocio
-(gastos del Cash Flow, ingresos detallados de Salonized, facturas recibidas del Drive
-con conciliación bancaria, liquidaciones, cobros en efectivo, cuentas por cobrar y
-proyectos CLI-PLY/CENS/MENDRA/9AM). **Ojo:** dos cambios de esquema están aplicados
-directamente sobre la base real y aún **sin SQL versionado en el repo** (llegará con
-`feat/web-cxc-proyectos`); el directorio `services/supabase/migrations/` es legacy
-Alsari y NO refleja esta base:
+**Base de datos real (Supabase de Antifrágil, proyecto `antifragil-os`):** poblada con
+la operativa del negocio (gastos del Cash Flow, ingresos detallados de Salonized,
+facturas recibidas del Drive con conciliación bancaria, liquidaciones, cobros en
+efectivo, cuentas por cobrar y proyectos CLI-PLY/CENS/MENDRA/9AM).
 
-- **Tabla nueva `public.cuentas_por_cobrar`** — RLS activado, policies para
-  `authenticated`.
-- **Dimensión de proyectos en `gastos_operativos`** — imputación de gasto a proyecto
-  (CLI-PLY, CENS, MENDRA, 9AM).
+**Esquema versionado (PR #47, 2026-07-16):** la fuente de verdad del esquema vivo es
+`services/supabase/esquema-real/` — foto fiel generada por reflexión de solo lectura
+(58 tablas · 21 enums · 12 vistas · 36 triggers · 74 políticas RLS · 256 constraints),
+regenerable con `scripts/db/reflejar-esquema.py` tras cada cambio de esquema. El
+directorio `services/supabase/migrations/` sigue siendo legacy Alsari (no refleja esta
+base). Puntos clave del esquema real:
+
+- **RLS activado en las 58 tablas**; buckets privados. Existe una **capa de roles
+  operativos en BD** (`rol_operativo_actual()`, `es_direccion()`, `perfiles_operativos`)
+  con políticas finas; 41/74 políticas siguen siendo la base permisiva
+  (`authenticated using(true)`), pendientes de endurecer donde aplique.
+- Más allá del vertical del MVP, ya existen `clinica_citas` (con constraint de
+  exclusión anti-solapes por profesional), el ledger de bonos
+  (`ventas/consumos/caducidades/devoluciones_bono`) y el motor de liquidaciones
+  (reglas/evidencias/ajustes/pagos) — sin datos aún; son la base del Bloque B/E.
+- Plan free: la base **se pausa tras ~1 semana sin uso** (DNS del proyecto deja de
+  resolver; la web no puede leer). Reactivación manual vía Dashboard/Management API.
 
 ### Módulos (`apps/modules/*`)
 
@@ -454,7 +466,9 @@ Guille abre Antigravity en la carpeta del proyecto
 | Deploy a producción                            | ✅ En producción | Vercel: `https://alsari-capital-os-host.vercel.app/`                                                                                                                                                                |
 | Antifrágil OS — páginas operativas `(os)`      | ✅ En main       | Tesorería/Rentabilidad/Liquidaciones con datos reales; entrada manual + factura OPS imprimible; `/tesoreria/importar` con conciliación v1 (PRs #33–#42)                                                             |
 | Antifrágil OS — capa `apps/host/src/lib/datos` | ✅ En main       | `fuenteDatos.ts` (PostgREST service_role server-only), `acciones.ts`, `importacionWeb.ts`, `accionesImportacion.ts`, `periodo.ts`. Contrato: sin env → demo, con env → datos reales                                 |
-| Base Supabase real de Antifrágil               | ✅ Poblada       | Gastos, ingresos Salonized, 99 facturas Drive (88 conciliadas), liquidaciones, cobros efectivo, `cuentas_por_cobrar`, proyectos. **Esquema aplicado en vivo, SQL versionado pendiente** (`feat/web-cxc-proyectos`)  |
+| Base Supabase real de Antifrágil               | ✅ Poblada       | Gastos, ingresos Salonized, 99 facturas Drive (88 conciliadas), liquidaciones, cobros efectivo, `cuentas_por_cobrar`, proyectos. Plan free: se pausa tras ~1 semana sin uso                                         |
+| Antifrágil OS — esquema real versionado        | ✅ En main       | `services/supabase/esquema-real/` (PR #47): 58 tablas, RLS 58/58, capa de roles en BD; regenerable con `scripts/db/reflejar-esquema.py`; checks de paridad incluidos                                                |
+| Antifrágil OS — Panel de dirección             | ✅ En main       | `/dashboard` con datos reales (PR #46): héroe "Resultado del mes", KPIs, tendencia 6 meses, avisos "Requiere atención"; nav Dirección/Dinero/Operación/Sistema                                                      |
 
 **Leyenda:** ✅ Completo · 🚧 En curso · ⏸️ Aplazado · ❌ No iniciado.
 
