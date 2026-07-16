@@ -1,146 +1,111 @@
-# Roadmap — Alsari Capital OS
+# Roadmap — Antifrágil OS
 
-> Declaración priorizada de intenciones.
-> **No es un compromiso de fechas.** Es el orden actual en el que queremos avanzar.
+> Declaración priorizada de intenciones. **No es un compromiso de fechas.**
 > Guille marca prioridades; Claude propone detalles técnicos.
-> Documento **ejecutivo**: el detalle técnico vive en `ARQUITECTURA.md` y `CHANGELOG.md`.
+> Documento **ejecutivo**: el detalle técnico vive en `ARQUITECTURA.md`,
+> `CHANGELOG.md` y `SESSION.md`.
 
-**Última revisión:** 2026-06-19 · OS con 3 módulos productivos sobre Supabase (Financiero, Contabilidad, Proyectos/Presupuestos).
+**Última revisión:** 2026-07-16 · MVP web operativo en producción sobre la base
+Supabase real; plan por bloques A–G acordado ("haremos todas").
 
----
-
-## 🎯 Visión a 12 meses
-
-Un **OS funcional con 3 módulos productivos** — **Financiero**, **Contabilidad** y **Proyectos/Presupuestos** — que cubran la operativa diaria del holding sobre Supabase, con un **flujo de facturas completo** (recepción → validación → pago → archivo → gestoría), sistema de aprendizaje maduro y deuda técnica mínima.
-
-> El plan original hablaba de "financiero, facturas, proyectos". La realidad evolucionó: **Facturas vive ahora dentro de Contabilidad** (el módulo `@alsari/facturas` está archivado) y el tab **"Proyectos" carga el módulo Presupuestos**.
-
----
-
-## 🧭 Estado actual (de un vistazo)
-
-| Tab del OS   | Paquete técnico        | Capa de datos | Estado                                                               |
-| ------------ | ---------------------- | ------------- | -------------------------------------------------------------------- |
-| Financiero   | `@alsari/financiero`   | Supabase      | ✅ Productivo                                                        |
-| Contabilidad | `@alsari/contabilidad` | Supabase      | ✅ Productivo · flujo de facturas en ampliación                      |
-| Proyectos    | `@alsari/presupuestos` | Supabase      | ⚡ Base financiera lista · Proyectos inmobiliario dedicado pendiente |
-| (Facturas)   | `@alsari/facturas`     | —             | 🗄️ Archivado · `/facturas → /contabilidad`                           |
-
-**Supabase ya es la capa de datos** de los módulos vivos. El stack legacy (CF Worker + Google Sheets + IMAP/Drive) **no está conectado al flujo vivo** y queda para decommission.
+> El roadmap anterior (2026-06-19) describía **Alsari Capital OS** (holding:
+> Financiero/Contabilidad/Presupuestos). Ese vertical quedó **fuera del runtime**
+> (cirugía del 2026-07-05) y sus módulos solo se conservan como código heredado
+> sin montar. Este roadmap es el del producto vivo: **Antifrágil OS (clínica)**.
 
 ---
 
-## 🛣️ Fases
+## 🎯 Visión
 
-### Fase 0 — Cimientos ✅ COMPLETADA
+Un OS interno que cubra la operativa diaria de la clínica: **agenda/reservas de
+recepción conectada al dinero** (cobros, liquidaciones, rentabilidad), con
+importación fiable de las fuentes reales (Salonized, banco, efectivo) y una capa
+financiera precontable que alimente a gestoría. Administrativo-operativo:
+**nunca historia clínica**.
 
-Monorepo, Ways of Working, skills de Claude, CI/CD básico, sistema de aprendizaje vivo, documentación maestra inicial.
+## ✅ Conseguido hasta hoy (resumen)
 
-### Fase 1 — Migración del código al monorepo ✅ COMPLETADA (2026-05-16)
+- **MVP web con datos reales** (PRs #31–#46): Tesorería (entrada manual, factura
+  OPS imprimible, importación CSV idempotente, conciliación banco↔factura),
+  Rentabilidad (escalera M1→M3), Liquidaciones (histórico nov-2024→dic-2025) y
+  **Panel de dirección con datos reales** y avisos accionables.
+- **Base Supabase real poblada y versionada** (PR #47): 58 tablas con RLS,
+  capa de roles operativos en BD, esquema reflejado en
+  `services/supabase/esquema-real/`.
+- Marca visible Antifrágil en toda la UI; legado Alsari desmontado del runtime.
 
-La app actual de Guille se movió al monorepo con la arquitectura correcta: `packages/utils`, `packages/types`, `packages/ui`, Host OS (Next.js) y los módulos integrados vía `transpilePackages`. Plan: `docs/decisiones/0002-plan-migracion-fase1.md`.
+## 🛣️ Bloques de trabajo (orden vigente)
 
-### Fase 2 — Autenticación + Host OS ✅ COMPLETADA (2026-05-17)
+### A — Cimientos de datos ✅ COMPLETADO (2026-07-16)
 
-Supabase Auth + middleware + route group, login Quiet Luxury, home launcher, sidebar, governance docs por módulo y limpieza estructural.
+Esquema real versionado + auditoría RLS + PRs #4/#12 cerrados.
+**Cola restante:** endurecer las 41 políticas permisivas · identidad real del
+escritor en las escrituras del host · rotar token `sbp_` (Javi).
 
-> El plan preveía aplazar **todos** los datos a Supabase hasta el final. En la práctica la capa de datos Supabase llegó antes, módulo a módulo (ver Fases 3-5). Por eso la antigua "Fase N — primera migración" se reescribe abajo como **consolidación**, no como migración inicial.
+### B — Reservas con backend ⏭️ SIGUIENTE (prioridad nº1 de negocio)
 
-### Fase 3 — Módulo Financiero ✅ COMPLETADA
+Conectar el módulo Reservas (hoy maqueta UI completa) a la base real:
 
-Dashboard financiero vivo sobre Supabase: KPIs consolidados del holding, vista por entidad, mapa corporativo, patrimonio (sociedades/personas), préstamos intragrupo y workspace semanal.
+1. Catálogos reales (`clinica_profesionales`, `clinica_servicios`, horarios).
+2. Citas persistentes sobre `clinica_citas` (la tabla ya existe, con
+   anti-solapes y RLS por rol) — crear/mover/cancelar/completar con histórico.
+3. Cobros de recepción conectados a `cobros`/CxC (el dinero del día).
+4. Bonos sobre el ledger real (`ventas/consumos_bono`).
+5. Flujo de reserva pública del cliente (fase posterior, `src/cliente`).
 
-### Fase 4 — Módulo Contabilidad ✅ COMPLETADA y EN AMPLIACIÓN
+### C — Ingesta de fuentes reales (bloqueado por exports)
 
-> Reemplaza y supera el antiguo plan de "Módulo Facturas". `@alsari/contabilidad` absorbió las facturas.
+Validar plantillas contra los archivos reales: **Salonized** (desbloquea
+rentabilidad por profesional/servicio/centro y liquidaciones del mes corriente)
+y **extracto del banco** (Lidia; `movimientos_bancarios` sigue a 0).
 
-**Base (2026-05-21):** facturas recibidas con OCR (Claude Vision vía Edge Function), workflow de aprobación multi-paso, conciliación bancaria, importación de extractos CSV, categorización automática con aprendizaje, asientos PGC y diario borrador. Datos en Supabase (RLS + Edge Functions).
+### D — Configuración real
 
-**Refuerzos del flujo de facturas (2026-06):**
+Usuarios/roles (sobre `perfiles_operativos` ya existente), centros, catálogo
+de servicios/tarifas administrable.
 
-- ✅ **PR A** — saneamiento de estados (estados técnicos canónicos, labels en fuente única, `notifications_enabled`).
-- ✅ **PR B** — trazabilidad/auditoría inmutable (`factura_aprobaciones`) con RPC atómica y autorización rol→acción.
-- ✅ **PR A2** — Storage privado de facturas (`storage_path` + bucket privado + signed URLs).
-- ✅ Módulo antiguo `@alsari/facturas` **archivado**; `/facturas → /contabilidad`.
+### E — Finanzas operativas (serie FOP, docs 04–14)
 
-**Próximos pasos del flujo → ver "Flujo de facturas" más abajo.**
+Liquidaciones automáticas desde agenda · bonos/devengo · CxC/CxP completo ·
+imputación de costes compartidos · presupuesto vs real y forecast.
+Diseño documental hecho; parte del modelo ya existe como tablas en la base.
+**Gateado por las decisiones del bloque F.**
 
-**Pendiente (no ligado al flujo de facturas):** UI de facturas emitidas, importación de asientos oficiales (A3/Sage/CSV), matching factura ↔ movimiento bancario, export para gestoría.
+### F — Decisiones de negocio (Guille / Fernando / gestoría)
 
-### Fase 5 — Proyectos / Presupuestos ⚡ PARCIAL
+Las que bloquean E y parte de B: costes generales (contribución vs prorrateo),
+recepción compartida, acuerdos partners (Lidomare/Vivofácil/Oasis), devengo y
+caducidad de bonos, regla de extras en liquidaciones, política de CxC, forecast,
+UG/PM, plan de pago de Supabase. Lista viva en `SESSION.md` §6.
 
-**Módulo actual** = `@alsari/presupuestos` (el tab del OS se llama **"Proyectos"**). Hoy es la **base financiera de los proyectos**:
+### G — Higiene continua
 
-- presupuesto; ingresos/gastos; cashflow; análisis financiero; escenarios; **Números**; export **PDF** (dossier de inversión); seguimiento económico; OKRs/tareas.
-
-**Futuro — módulo "Proyectos" inmobiliario/operativo dedicado** (fase aparte, aún sin construir):
-
-- hitos; stakeholders; documentación; licencias; contratos; unidades; cronograma; riesgos.
-
-> Decisión: **dos módulos**. El financiero (Presupuestos) ya existe; el operativo inmobiliario (Proyectos) es futuro. No se renombra el tab ni se tocan rutas por ahora (ver Deuda técnica).
-
-### Fase 6 — Ecosistema MCP y automatización (pendiente)
-
-MCP propio para consultar el OS desde Claude.ai y reportes automáticos. **Gmail y Drive ya no viven aquí**: entran como parte del flujo de facturas (PR D y PR H).
-
-### Fase 7 — Módulos futuros (backlog priorizable)
-
-Tesorería en tiempo real, Contratos (repositorio + alertas), portal de Socios, CENS / Antifrágil si requieren herramienta dedicada.
-
-### Fase N — Consolidación Supabase + decommission legacy (pendiente)
-
-> **Ya no es "la primera migración"**: Financiero, Contabilidad y Presupuestos ya corren sobre Supabase. Lo que queda es endurecer y retirar lo viejo.
-
-- Hardening de RLS + tests de políticas en todas las tablas.
-- Historial de migraciones por CLI (`supabase db push`) en vez de aplicación manual vía Management API.
-- Tipos TypeScript autogenerados desde Supabase.
-- Decommission del CF Worker + Google Sheets + IMAP/Drive legacy no usados.
-- MFA para admins.
-
----
-
-## 🧾 Flujo de facturas — próximos pasos
-
-**Base ya en producción:** recepción OCR → validación Guille → (revisión Javi si supera umbral) → pendiente de pago → pagada/rechazada, con trazabilidad inmutable y PDF en Storage privado.
-
-| Orden | PR                        | Alcance                                                                                 |
-| ----- | ------------------------- | --------------------------------------------------------------------------------------- |
-| 1     | **PR C**                  | Pagos parciales + justificantes + comparación de importes + incidencias sobre/infrapago |
-| 2     | **PR D**                  | Drive documental (archivo oficial)                                                      |
-| 3     | **PR E**                  | Proveedores recurrentes / domiciliadas                                                  |
-| 4     | **PR H**                  | Gmail `administracion@alsari.net` (entrada de facturas por email)                       |
-| ∥     | **PR A2-bis**             | Privatizar el bucket `proyecto-documentos` (seguridad documental, en paralelo)          |
-| Final | **Notificaciones reales** | Emails a Javi/Alicia: `notifications_enabled` + correos distintos por persona           |
-
-> Principios: la app es el **motor de workflow**; **Drive** = archivo oficial; **Supabase** = metadatos/estados/enlaces; el OCR **propone**, no contabiliza en firme; **sin pagos bancarios reales**; las **notificaciones reales solo en la fase final**. (Letras F y G reservadas, sin asignar.)
+Docs reconciliados (este bloque, en curso) · tests de host y reservas · E2E en
+CI · rebrand `@alsari/*` → `@antifragil/*` (fase dedicada) · decommission del
+código heredado del holding cuando se decida.
 
 ---
 
-## 🚧 Deuda técnica acumulada
+## 🚧 Deuda técnica visible
 
-| Deuda                                        | Nota                                                                                                                                          |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Prettier repo-wide (#37)**                 | El Quality Gate de CI falla solo en `format:check` (~211 archivos). Merges con admin override hasta saldarla.                                 |
-| **`proyecto-documentos` público**            | Único bucket público real con datos sensibles → **PR A2-bis**.                                                                                |
-| **Migraciones aplicadas a mano**             | Se aplican vía Management API; sin historial CLI / `supabase db push`.                                                                        |
-| **Modo single-operator**                     | Los 3 correos (Guille/Javi/Alicia) coinciden → la matriz rol→acción queda bypaseada hasta poner emails reales distintos.                      |
-| **Facturas antiguas sin PDF**                | 16 facturas previas sin documento persistido (solo drop manual).                                                                              |
-| **Legacy CF Worker / Sheets / IMAP / Drive** | No conectado al flujo vivo; pendiente de decommission.                                                                                        |
-| **Naming Proyectos/Presupuestos**            | El tab se llama _Proyectos_ pero el paquete técnico es `@alsari/presupuestos`; decidir más adelante si se renombra, se separa o se consolida. |
+| Deuda                                | Nota                                                                   |
+| ------------------------------------ | ---------------------------------------------------------------------- |
+| Políticas RLS permisivas (41/74)     | Endurecer por rol; la capa de roles ya existe en BD                    |
+| Identidad del escritor               | `'entrada-manual-web'` en vez del usuario autenticado                  |
+| Pausas del plan free de Supabase     | Sin uso ~1 semana → base pausada y web sin datos; decidir plan de pago |
+| Tests                                | 0 en host y reservas; ~53 en `operativa`; E2E off                      |
+| Rebrand `@alsari/*`                  | Solo la marca visible es Antifrágil; scopes internos en fase dedicada  |
+| Docs históricos sin reconciliar      | `docs/integration/*`, `docs/governance/00` (pre-MVP)                   |
+| Columna `cuenta_tesoreria` en gastos | La UI la lee tolerante; añadirla (A1b) o derivar de `medio_pago`       |
 
----
+## 💡 Ideas a evaluar (sin priorizar)
 
-## 💡 Ideas a evaluar
-
-- Notificaciones push para alertas críticas (vencimientos, alertas bancarias).
-- Modo offline-first en el Host OS (PWA) para acceso desde móvil sin conexión.
-- IA generativa para resumir hilos largos de email del holding.
-- Conexión con la API de la AEAT para presentaciones automáticas (largo plazo).
-
----
+- Notificaciones (recordatorios de cita por WhatsApp; avisos de cobro pendiente).
+- MCP propio para consultar el OS desde Claude.
+- PWA/offline para recepción.
 
 ## 🔄 Cómo se actualiza este roadmap
 
-1. **Mensualmente** Guille revisa prioridades y mueve items entre fases.
-2. **En cada fase completada**, Claude mueve los items a `CHANGELOG.md` y limpia esta lista.
-3. **Nuevas ideas** van al final, sección "Ideas a evaluar", hasta que se priorizan.
+1. Guille revisa prioridades y mueve bloques.
+2. Al completar un bloque, Claude lo mueve a `CHANGELOG.md` y actualiza esto.
+3. Ideas nuevas entran al final hasta que se priorizan.

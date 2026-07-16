@@ -1,10 +1,10 @@
 # SESSION — Estado actual de trabajo · Antifrágil OS
 
-> **Última actualización:** 2026-07-07 · Rama: `docs/sync-estado-2026-07-07`
-> Sustituye al SESSION del 2026-07-04 (pre-integración). Todo lo marcado como mergeado
-> está **verificado contra `origin/main` y `gh pr list` el 2026-07-07**. Si el estado
-> real diverge de este documento, gana el estado real: verificar con `git log origin/main`
-> y `gh pr list` antes de asumir.
+> **Última actualización:** 2026-07-16 · Rama: `docs/reconciliacion-estado-2026-07-16`
+> Sustituye al SESSION del 2026-07-07. Todo lo marcado como mergeado está
+> **verificado contra `origin/main` y `gh pr list` el 2026-07-16**. Si el estado
+> real diverge de este documento, gana el estado real: verificar con
+> `git log origin/main` y `gh pr list` antes de asumir.
 
 ---
 
@@ -18,113 +18,113 @@ Detalle del alcance en `docs/compliance/00-alcance-administrativo-operativo.md` 
 
 ---
 
-## 2. 🎯 Objetivo de la rama actual
+## 2. ✅ Completado (mergeado en `main`, verificado 2026-07-16)
 
-Sincronizar la documentación humana (`docs/CHANGELOG.md`, `docs/ARQUITECTURA.md`,
-`docs/SESSION.md`) con el estado real de `main` tras los merges del 6–7 de julio
-(PRs #33–#42): web operativa conectada a datos reales de Supabase.
+Sobre lo ya descrito en el CHANGELOG (PRs #31–#45, web operativa con datos reales):
 
-## 3. ✅ Completado (mergeado en `main`, verificado)
+- **#46 — Jerarquía visual del OS**: el **Panel (`/dashboard`) dejó de ser mock**
+  (lee ingresos/gastos/CxC/liquidaciones reales; banda héroe "Resultado del mes",
+  tendencia 6 meses, avisos reales "Requiere atención"); nav reorganizado en
+  Dirección / Dinero / Operación / Sistema; héroe M3 en Rentabilidad con delta
+  mensual; héroe de saldo Caja/Banco en Tesorería; topbar "MVP operativo".
+  (Rescate del trabajo del 8-jul que quedó sin commitear en `wt-ux-jerarquia`.)
+- **#47 — Esquema real versionado**: `services/supabase/esquema-real/` contiene la
+  foto fiel del esquema `public` de la base real (58 tablas · 21 enums · 12 vistas ·
+  74 políticas RLS · 256 constraints), generada por reflexión de solo lectura y
+  regenerable con `scripts/db/reflejar-esquema.py`. **Cierra el drift repo↔producción.**
+- **PRs #4 y #12 cerrados** (2026-07-16): superados por la realidad — su contenido
+  está aplicado y ampliado en la base. Referencia canónica: `esquema-real/`.
+- **No queda ningún PR abierto.**
 
-Cadena de PRs mergeados que construyó el MVP web (del más antiguo al más nuevo):
+## 3. 🔎 Hallazgos clave del reflejo de la base (2026-07-16)
 
-- **#31 + #33** — Reservas canónico montado en el host + **cirugía del runtime MVP**:
-  Antifrágil OS sin legado Alsari visible; páginas operativas en
-  `apps/host/src/app/(app)/(os)/`.
-- **#34–#35** — Dominio `@antifragil/operativa` (`packages/operativa`): motor
-  financiero (ingresos, gastos, facturas, Tesorería) + liquidación asociada a
-  nómina/factura de autónomo.
-- **#36–#38** — Importación segura Excel/CSV, datos de negocio confirmados
-  (AFDH, alquiler, Salonized), plantillas CSV (`plantillas-importacion/`),
-  importador compatible con el cashflow real + método de pago.
-- **#39** — **Web conectada a datos reales**: `apps/host/src/lib/datos/fuenteDatos.ts`
-  (PostgREST con service_role **server-only**), contrato «sin env → demo,
-  con env → datos reales» (build CI sin secrets sigue verde).
-- **#40** — **Liquidaciones** con histórico real (`liquidaciones_mensuales` +
-  profesionales + líneas, nov-2024 → dic-2025).
-- **#41** — **Entrada manual de datos** en Tesorería (gasto · ingreso+cobro · factura
-  recibida) + **emisión de factura operativa serie OPS** con vista imprimible
-  `/tesoreria/factura/[id]` (wordmark Antifrágil, exención IVA sanitaria
-  art. 20.Uno.3º) + **filtro de mes** en Tesorería/Rentabilidad.
-- **#42** — **Importación web de reportes** (`/tesoreria/importar`): plantillas
-  `facturas_salonized`, `efectivo` y `extracto_banco` en `@antifragil/operativa`,
-  preview con detección de duplicados, aplicación **idempotente** (uuid v5
-  determinista) y **conciliación v1** movimientos bancarios ↔ facturas recibidas.
-- **Datos**: base Supabase real **poblada** — gastos del Cash Flow, ingresos
-  detallados de Salonized, 99 facturas del Drive (88 conciliadas), liquidaciones
-  nov-2024 → dic-2025, cobros en efectivo, cuentas por cobrar y proyectos
-  CLI-PLY/CENS/MENDRA/9AM. (Estructuras: las cifras no se documentan en el repo.)
+- La base contiene **mucho más de lo que el repo/documentación conocía**: existe
+  `clinica_citas` (con **constraint de exclusión anti-solapes** por profesional),
+  el ledger completo de bonos (`ventas/consumos/caducidades/devoluciones_bono`),
+  el motor de liquidaciones (reglas/evidencias/ajustes/pagos) y una **capa de
+  roles operativos en BD** (`rol_operativo_actual()`, `es_direccion()`,
+  `perfiles_operativos`; roles direccion/coordinacion/recepcion/profesional).
+- **RLS activado en las 58 tablas**; buckets `facturas` y `documentos-operativos`
+  privados. 41/74 políticas siguen siendo la base permisiva (`authenticated` +
+  `using (true)`): endurecerlas donde toque sigue en backlog.
+- **Datos reales intactos**: 514 gastos · 158 ingresos · 99 facturas recibidas ·
+  71 liquidaciones · 21 facturas OPS · 37 cobros · 11 CxC · 10 profesionales.
+  `movimientos_bancarios` **a 0** (falta el export real del banco) y
+  `clinica_citas` **a 0** (Reservas sigue mock, sin conectar).
+- `gastos_operativos` **no tiene** la columna `cuenta_tesoreria` que la UI del
+  PR #46 lee de forma tolerante: el desglose Caja/Banco es parcial hasta añadirla
+  (candidata a paquete A1b) o derivarla de `medio_pago`.
 
-Detalle por PR en `docs/CHANGELOG.md` (bloque Unreleased) y estado técnico en
-`docs/ARQUITECTURA.md` (sección "Antifrágil OS — capa de datos reales del host").
+## 4. ⚠️ Operativa de la base: pausas del plan free
 
-## 4. 🚧 En progreso / Incompleto
+El proyecto Supabase `antifragil-os` **estaba pausado** desde ~8-jul (plan free:
+pausa automática tras ~1 semana sin uso; el DNS del proyecto deja de resolver y
+la web desplegada no puede leer datos). Se reactivó el 2026-07-16 vía Management
+API. **Decisión pendiente de Guille:** subir a plan de pago o asumir
+reactivaciones manuales periódicas.
 
-- **`feat/web-cxc-proyectos`** — **en construcción por otro agente**: pantalla de
-  cuentas por cobrar + dimensión de proyectos en la web. La base real YA tiene la
-  tabla `public.cuentas_por_cobrar` (RLS + policies `authenticated`) y la dimensión
-  de proyectos en `gastos_operativos`; **faltan el SQL versionado en el repo y el
-  cableado UI**. No duplicar ese trabajo desde otra sesión.
-- **PRs Draft abiertos**: #4 (baseline DB, NO APPLY) y #12 (A2 catálogos clínica,
-  NO APPLY) — su vigencia debe revisarse ahora que la base real existe y está poblada.
+## 5. 📋 Plan vigente (acordado con Guille el 2026-07-16: "haremos todas")
 
-## 5. 📋 Próximos pasos recomendados
+| Bloque | Qué es                                                                                                                | Estado                                                                                     |
+| ------ | --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| A      | Deuda BD: versionar esquema, RLS, cerrar #4/#12                                                                       | ✅ Hecho (queda endurecer políticas permisivas + identidad de escritor real + rotar token) |
+| B      | **Reservas con backend** (conectar módulo a `clinica_citas`/catálogos reales, cobros/bonos; flujo cliente público)    | ⏭️ Siguiente — prioridad nº1 de negocio                                                    |
+| C      | Ingesta Salonized + export banco (desbloquea rentabilidad por profesional/servicio, liquidaciones del mes, caja real) | Bloqueado por exports reales (Javi/Lidia)                                                  |
+| D      | Configuración real (usuarios/roles/centros) — Panel ya es real                                                        | Pendiente                                                                                  |
+| E      | Serie FOP (docs finanzas 04–14): liquidaciones automáticas, bonos/devengo, CxC/CxP, imputación, forecast              | Diseño hecho; parte del modelo ya existe en BD; bloqueado por decisiones §6                |
+| F      | Decisiones humanas (ver §6)                                                                                           | En curso                                                                                   |
+| G      | Higiene: docs (este PR), tests host/reservas, E2E, rebrand `@alsari/*`                                                | Este PR es la parte docs                                                                   |
 
-1. Revisar y mergear el PR Draft de esta rama (sincronización de docs).
-2. Cerrar `feat/web-cxc-proyectos` (agente en curso) incluyendo su SQL versionado.
-3. Desbloquear la operativa semanal con los pendientes de Javi (§6): en especial el
-   export real del banco (Lidia) para la plantilla `extracto_banco`.
-4. Reconciliar los PRs #4/#12 (baseline curado) con el esquema real ya aplicado, para
-   que el repo vuelva a ser fuente de verdad del esquema.
-5. Rotar credenciales pendientes (§6, seguridad) antes de seguir cargando datos.
+## 6. ⚠️ Pendientes de humanos (decisiones / acciones manuales)
 
-## 6. ⚠️ Pendientes de Javi (decisiones / acciones manuales)
+- 🔴 **Rotar el token de Supabase `sbp_`** usado en las sesiones de carga y
+  reflexión (Javi; acción manual en el Dashboard, fuera del repo).
+- **Plan de pago Supabase** vs pausas semanales del free (Guille, ver §4).
+- **Export banco de Lidia**: formato real del extracto semanal para validar la
+  plantilla `extracto_banco` (`movimientos_bancarios` sigue a 0).
+- **Primer export real de Salonized** para validar la plantilla `facturas_salonized`.
+- **Logo definitivo** (la factura imprimible usa el wordmark tipográfico).
+- **Regla de extras de bonos** en liquidaciones (Guille/Fernando).
+- **UG/PM**: decisión pendiente (contexto en la sesión operativa del 7-jul).
+- Decisiones de negocio de la serie FOP (costes generales, recepción compartida,
+  partners Lidomare/Vivofácil/Oasis, devengo/caducidad de bonos, política CxC,
+  forecast): listadas doc a doc en `docs/finanzas/04`–`13`.
+- ✅ ~~Anon key legacy hardcodeada~~ — eliminada del código en la cirugía del
+  2026-07-05 (`packages/supabase-client` usa fallbacks inertes). Rotarla en el
+  proyecto legacy sigue siendo prudente, pero ya no hay exposición en el repo.
 
-- **Export banco de Lidia**: conseguir el formato real del extracto semanal para
-  validar/ajustar la plantilla `extracto_banco`.
-- **Logo**: la factura imprimible usa hoy el wordmark tipográfico "Antifrágil";
-  falta el logo definitivo.
-- **Regla de extras de bonos**: criterio pendiente para las liquidaciones.
-- **UG/PM**: decisión pendiente (detalle por confirmar; anotado en la sesión
-  operativa del 7 de julio — quien lo retome debe pedir contexto a Javi).
-- 🔴 **Rotar el token de Supabase `sbp_`** usado en la sesión de carga de datos
-  (acción de seguridad manual, fuera del repo).
-- 🔴 (Heredado, riesgo R5) **rotar la anon key legacy** hardcodeada en
-  `packages/supabase-client` (proyecto Supabase legacy de Alsari).
+## 7. 🐛 Deuda técnica vigente
 
-## 7. 🐛 Bugs conocidos / Deuda técnica detectada
+- **41/74 políticas RLS permisivas** (`authenticated using(true)`) — endurecer
+  por rol donde aplique (la capa de roles ya existe en BD).
+- **Identidad del escritor**: las escrituras del host registran
+  `'entrada-manual-web'`/`'importacion-web'` en vez del usuario real.
+- **Desglose Base/IVA de la factura OPS** viaja en `notas` (deuda D2 asumida).
+- **Lotes de importación en tmpdir**: un reinicio/redeploy caduca la preview.
+- **0 tests en `apps/host` y `apps/modules/reservas`** (el dominio `operativa`
+  sí tiene ~53); E2E desactivado en CI.
+- **Rebrand global `@alsari/*` diferido** (decisión vigente: solo marca visible).
+- `docs/integration/*` y `docs/governance/00` describen el estado pre-MVP
+  (PRs #1–#22) y no se han reconciliado; tratarlos como históricos.
 
-- **Esquema real sin SQL versionado**: `public.cuentas_por_cobrar` y la dimensión de
-  proyectos en `gastos_operativos` se aplicaron directamente sobre la base real. El
-  directorio `services/supabase/migrations/` es 100 % legacy Alsari y NO refleja la
-  base de Antifrágil.
-- **Desglose Base/IVA de la factura OPS** viaja en `notas` con formato estable
-  (parseado en `fuenteDatos.ts`) porque la tabla no lo persiste — deuda asumida (D2).
-- **Lotes de importación en tmpdir**: un reinicio/redeploy del servidor caduca la
-  preview (la UI ya avisa "vuelve a subir el archivo").
-- **Rebrand global `@alsari/*` diferido** (decisión vigente): solo la marca visible
-  es Antifrágil; los scopes de paquetes internos se renombrarán en fase dedicada.
+## 8. 📁 Referencias clave
 
-## 8. 📁 Archivos clave (estado actual en `main`)
-
-| Archivo                                                  | Cambio principal                                                          |
-| -------------------------------------------------------- | ------------------------------------------------------------------------- |
-| `apps/host/src/lib/datos/fuenteDatos.ts`                 | Lecturas PostgREST service_role (server-only) + fallback demo sin entorno |
-| `apps/host/src/lib/datos/acciones.ts`                    | Server actions de entrada manual + emisión factura OPS                    |
-| `apps/host/src/lib/datos/importacionWeb.ts`              | Lotes temporales (tmpdir) + uuid v5 determinista por fila                 |
-| `apps/host/src/lib/datos/accionesImportacion.ts`         | Subir/aplicar lote idempotente + conciliación pago→factura                |
-| `apps/host/src/lib/datos/periodo.ts`                     | Utilidades puras del filtro de mes `?mes=YYYY-MM`                         |
-| `apps/host/src/app/(app)/(os)/tesoreria/`                | Página Tesorería + `importar/` + `factura/[id]/` (vista imprimible)       |
-| `apps/host/src/components/os/tesoreria/EntradaDatos.tsx` | Formularios de entrada manual                                             |
-| `packages/operativa/src/importacion.ts`                  | 7 plantillas CSV (3 nuevas: facturas_salonized, efectivo, extracto_banco) |
-| `docs/CHANGELOG.md` · `docs/ARQUITECTURA.md`             | Sincronizados con este estado (esta rama)                                 |
+| Qué                                                   | Dónde                                                    |
+| ----------------------------------------------------- | -------------------------------------------------------- |
+| Esquema real versionado (fuente de verdad)            | `services/supabase/esquema-real/`                        |
+| Regenerar el reflejo tras un cambio de esquema        | `scripts/db/reflejar-esquema.py`                         |
+| Checks de paridad repo↔base                           | `services/supabase/esquema-real/post_reflejo_checks.sql` |
+| Capa de datos del host                                | `apps/host/src/lib/datos/`                               |
+| Dominio operativo (motor financiero + plantillas CSV) | `packages/operativa/src/`                                |
+| Derivaciones del Panel                                | `apps/host/src/components/os/dashboard/panel.ts`         |
 
 ## 9. 🔗 Contexto necesario para continuar
 
-- **Contrato innegociable del build**: toda página/acción nueva del OS debe funcionar
-  sin entorno (demo) y con entorno (datos reales); la service_role key JAMÁS llega al
-  cliente. El juez de formato y checks es el CI (Linux; los `.md` van con LF).
-- Reglas de siempre: **no tocar `main`**, todo por ramas/worktrees aislados, **todo PR
-  empieza como Draft**, no aplicar SQL sin autorización expresa, **no datos clínicos**.
-- Otros chats/agentes trabajan en paralelo sobre este repo: verificar ramas y PRs
-  (`git fetch` + `gh pr list`) antes de asumir que algo no existe.
+- **Contrato innegociable del build**: toda página/acción nueva del OS funciona
+  sin entorno (demo) y con entorno (datos reales); la service_role key JAMÁS
+  llega al cliente. El juez de formato y checks es el CI (Linux; `.md` con LF).
+- Reglas de siempre: **no tocar `main`**, todo por ramas/worktrees aislados,
+  **todo PR empieza como Draft**, no aplicar SQL sin autorización expresa,
+  **no datos clínicos**.
+- Tras cualquier cambio de esquema en la base real: regenerar el reflejo
+  (`scripts/db/reflejar-esquema.py`) y commitearlo en el mismo PR.

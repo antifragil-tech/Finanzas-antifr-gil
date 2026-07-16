@@ -1,4 +1,4 @@
-# Changelog — Alsari Capital OS
+# Changelog — Antifrágil OS
 
 Todos los cambios relevantes del proyecto se documentan en este archivo.
 
@@ -8,6 +8,47 @@ y este proyecto se adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 ---
 
 ## [Unreleased]
+
+#### DB — reflejo versionado del esquema real de `antifragil-os` (PR #47, 2026-07-16)
+
+- **`services/supabase/esquema-real/`**: foto fiel del esquema `public` de la base
+  real (58 tablas · 21 enums · 12 funciones propias · 12 vistas · 36 triggers ·
+  256 constraints · 74 políticas RLS), generada por reflexión de **solo lectura**
+  (`information_schema` + `pg_catalog` vía Management API). Cierra la deuda
+  "esquema aplicado en vivo sin SQL versionado".
+- `scripts/db/reflejar-esquema.py` regenera el reflejo tras cualquier cambio de
+  esquema (token por variable de entorno, nunca commiteado);
+  `post_reflejo_checks.sql` verifica la paridad repo↔base viva.
+- Auditoría incluida en el README del paquete: RLS activado en 58/58 tablas,
+  buckets privados, capa de roles operativos ya construida en BD; 41/74 políticas
+  aún permisivas (backlog de endurecimiento).
+- Consecuencia: **PRs #4 y #12 cerrados** (su contenido está aplicado y ampliado
+  en la base real; quedan como documentación histórica del diseño).
+
+#### Host OS — jerarquía visual del OS: Panel con datos reales y héroes por página (PR #46, 2026-07-16)
+
+- **El Panel (`/dashboard`) deja de ser mock**: con entorno lee ingresos, gastos,
+  CxC y liquidaciones reales (sin entorno, demo). Banda héroe "Resultado del mes ·
+  Clínica", KPIs de apoyo (pendiente de cobrar, coste de equipo, nº ingresos,
+  ticket medio), tendencia de 6 meses (ingresos vs gastos) y avisos **reales**
+  "Requiere atención" derivados de los datos (IVA aplicado a exentos, reglas de
+  liquidación sin confirmar, deuda de proyectos externos). Derivaciones puras en
+  `apps/host/src/components/os/dashboard/panel.ts`; se eliminan `OSDashboard.tsx`
+  y `mockDashboardData.ts`.
+- **Nav por lógica de decisión**: Dirección (Panel) / Dinero (Tesorería →
+  Rentabilidad → Liquidaciones) / Operación (Reservas) / Sistema. Tesorería pierde
+  el flag `placeholder` obsoleto; topbar del shell pasa de "Draft — shell sin
+  módulos" a "MVP operativo".
+- **Rentabilidad**: el héroe pasa de M1 a **M3 (margen operativo)** con delta vs
+  mes anterior; M1 e ingreso devengado como cifras de apoyo.
+- **Tesorería**: banda héroe de saldo con reparto Caja/Banco (lee
+  `cuenta_tesoreria` de gastos vía `select=*`, tolerante si la columna no existe).
+- **UI kit**: `OSHeroMetric`, `OSDelta`, `OSSection` plegable (`<details>`
+  server-safe); utilidades de periodo (`resolverMes` — cada página abre en el
+  último mes con datos; `?mes=todo` para histórico; `variacionPct`, `mesAnterior`).
+- Origen: rescate del trabajo del 2026-07-08 que quedó sin commitear en
+  `wt-ux-jerarquia` (Rentabilidad estaba a medio refactor y no compilaba; se
+  completó según el diseño original).
 
 > **Antifrágil OS — web operativa conectada a datos reales (2026-07-06 → 2026-07-07).**
 > Los PRs #33–#42 convirtieron el host en el runtime del MVP Antifrágil OS: las páginas
