@@ -22,7 +22,7 @@ export function OSFiltroMes({ accion, mes }: { accion: string; mes?: string | un
         Filtrar
       </button>
       <Link
-        href={accion}
+        href={`${accion}?mes=todo`}
         className="text-2xs px-1 py-2 uppercase tracking-widest text-zinc-500 underline-offset-4 transition-colors hover:text-zinc-300 hover:underline"
       >
         Todo el histórico

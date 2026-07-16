@@ -44,6 +44,8 @@ interface FilaGasto {
   documento_recibido: boolean;
   documento_referencia: string | null;
   proyecto_id_ref: string | null;
+  /** Columna "Tesorería" del Cash Flow: con qué cuenta se pagó (si existe). */
+  cuenta_tesoreria?: string | null;
   pendiente_confirmacion: boolean;
   nota: string | null;
 }
@@ -97,6 +99,9 @@ export async function cargarGastosReales(): Promise<GastoReal[]> {
       ...(f.documento_referencia ? { referencia: f.documento_referencia } : {}),
     },
     ...(f.proyecto_id_ref ? { proyectoIdRef: f.proyecto_id_ref } : {}),
+    ...(f.cuenta_tesoreria === 'banco' || f.cuenta_tesoreria === 'caja'
+      ? { cuentaTesoreria: f.cuenta_tesoreria }
+      : {}),
     ...(f.pendiente_confirmacion ? { pendienteConfirmacion: true } : {}),
     ...(f.nota ? { nota: f.nota } : {}),
   }));

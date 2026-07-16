@@ -28,11 +28,12 @@ import {
   datosRealesDisponibles,
   separarPorProyecto,
 } from '@/lib/datos/fuenteDatos';
-import { etiquetaMes, filtrarPorMes, mesValido, primerValor } from '@/lib/datos/periodo';
+import { etiquetaMes, filtrarPorMes, primerValor, resolverMes } from '@/lib/datos/periodo';
 import { EntradaDatos } from '@/components/os/tesoreria/EntradaDatos';
 import { AvisoIva } from '@/components/os/tesoreria/AvisoIva';
 import { CuentasPorCobrarSeccion } from '@/components/os/tesoreria/CuentasPorCobrar';
 import { ProyectosFuera } from '@/components/os/tesoreria/ProyectosFuera';
+import { SaldoTesoreria } from '@/components/os/tesoreria/SaldoTesoreria';
 import {
   OSPageHeader,
   OSSection,
@@ -78,31 +79,28 @@ export default async function TesoreriaPage({
   // Next 15: searchParams es una Promise — hay que esperarla.
   const params = await searchParams;
   const mesParam = primerValor(params['mes']);
-  const mes = mesValido(mesParam) ? mesParam : undefined;
   const avisoOk = primerValor(params['ok']);
   const avisoError = primerValor(params['error']);
 
   const real = datosRealesDisponibles();
-  const ingresos = filtrarPorMes(
-    real ? await cargarIngresosReales() : ingresosDemo(),
-    mes,
-    (i) => i.fecha,
+
+  // Se carga el histórico y se resuelve el mes activo (por defecto, el más
+  // reciente con datos) antes de filtrar; ?mes=todo muestra el histórico entero.
+  const ingresosTodos = real ? await cargarIngresosReales() : ingresosDemo();
+  const gastosTodos = real ? await cargarGastosReales() : gastosDemo();
+  const emitidasTodas = real ? await cargarFacturasEmitidasReales() : facturasEmitidasDemo();
+  const recibidasTodas = real ? await cargarFacturasRecibidasReales() : facturasRecibidasDemo();
+
+  const mes = resolverMes(
+    mesParam,
+    [...ingresosTodos.map((i) => i.fecha), ...gastosTodos.map((g) => g.fecha)],
+    MES_DEMO,
   );
-  const gastos = filtrarPorMes(
-    real ? await cargarGastosReales() : gastosDemo(),
-    mes,
-    (g) => g.fecha,
-  );
-  const emitidas = filtrarPorMes(
-    real ? await cargarFacturasEmitidasReales() : facturasEmitidasDemo(),
-    mes,
-    (f) => f.fecha,
-  );
-  const recibidas = filtrarPorMes(
-    real ? await cargarFacturasRecibidasReales() : facturasRecibidasDemo(),
-    mes,
-    (f) => f.fecha,
-  );
+
+  const ingresos = filtrarPorMes(ingresosTodos, mes, (i) => i.fecha);
+  const gastos = filtrarPorMes(gastosTodos, mes, (g) => g.fecha);
+  const emitidas = filtrarPorMes(emitidasTodas, mes, (f) => f.fecha);
+  const recibidas = filtrarPorMes(recibidasTodas, mes, (f) => f.fecha);
 
   // CxC y proyectos: la deuda viva NO se filtra por periodo (es foto de balance).
   const [cuentasPorCobrar, proyectos, cuentasTesoreria] = real
@@ -120,6 +118,22 @@ export default async function TesoreriaPage({
     ? gastosClinica.reduce((s, g) => s + g.importe, 0)
     : importePagadoDeFacturas(recibidas);
   const cobrado = real ? t.cobrado : t.cobrado + importeCobradoDeFacturas(emitidas);
+
+  // Saldo de tesorería del periodo (cuánto dinero hay). Caja = cobros en
+  // efectivo − pagos con caja; el resto (banco y sin clasificar) va a Banco,
+  // de modo que Caja + Banco = saldo total. Cobros reales pendientes (Salonized).
+  const entradasEfectivo = ingresos
+    .filter((i) => i.metodoPago === 'efectivo')
+    .reduce((s, i) => s + i.importeCobrado, 0);
+  const salidasCaja = gastosClinica
+    .filter((g) => g.cuentaTesoreria === 'caja')
+    .reduce((s, g) => s + g.importe, 0);
+  const saldoTotal = cobrado - pagado;
+  const saldoCaja = entradasEfectivo - salidasCaja;
+  const saldoBanco = saldoTotal - saldoCaja;
+
+  // Concepto del gasto vinculado (para no mostrar UUIDs en "Vinculada a").
+  const conceptoDeGasto = new Map(gastosTodos.map((g) => [g.id, g.concepto]));
 
   const porCategoria = new Map<
     CategoriaGasto,
@@ -175,11 +189,19 @@ export default async function TesoreriaPage({
         </div>
       ) : null}
 
+      <SaldoTesoreria
+        saldoTotal={saldoTotal}
+        saldoCaja={saldoCaja}
+        saldoBanco={saldoBanco}
+        cuentas={cuentasTesoreria}
+        real={real}
+      />
+
       <div className="grid grid-cols-2 gap-4 px-8 pt-4 lg:grid-cols-4">
         <OSKpiCard
-          label={real ? 'Ingreso devengado (importado)' : 'Cobrado (caja)'}
-          valor={formatCurrency(real ? t.devengado : cobrado)}
-          hint={real ? 'agregados por servicio del Excel' : 'sueltas al acto + bonos cobrados'}
+          label="Cobrado (caja)"
+          valor={formatCurrency(cobrado)}
+          hint={real ? 'cobros por importar (Salonized)' : 'sueltas al acto + bonos cobrados'}
           icon={ArrowDownToLine}
           tone="ok"
         />
@@ -287,6 +309,7 @@ export default async function TesoreriaPage({
       </OSSection>
 
       <OSSection
+        plegable
         titulo={
           real
             ? `Últimos gastos de la clínica (${gastosVisibles.length} de ${gastosClinica.length})`
@@ -353,11 +376,12 @@ export default async function TesoreriaPage({
       </OSSection>
 
       <OSSection
-        titulo="Facturas emitidas operativas"
+        plegable
+        titulo="Facturas emitidas"
         nota={
           real
-            ? 'REALES — el Nº abre la vista imprimible. Factura emitida no implica cobro (doc 02)'
-            : 'Factura emitida no implica cobro — internas, no fiscales (doc 02)'
+            ? 'El Nº abre la vista imprimible · emitir no es cobrar'
+            : 'Emitir no es cobrar · registros internos, no fiscales'
         }
       >
         <div className="glass-panel overflow-x-auto rounded-2xl">
@@ -406,6 +430,7 @@ export default async function TesoreriaPage({
       </OSSection>
 
       <OSSection
+        plegable
         titulo={
           real
             ? `Facturas recibidas (${recibidasVisibles.length} de ${recibidas.length})`
@@ -413,8 +438,8 @@ export default async function TesoreriaPage({
         }
         nota={
           real
-            ? 'REALES — soporte documental (Drive/gestoría + altas manuales); no implica pago'
-            : 'Factura recibida no implica pago — soporte documental de gastos y liquidaciones'
+            ? 'Soporte documental de gastos · recibir no es pagar'
+            : 'Recibir no es pagar · soporte documental de gastos'
         }
       >
         <div className="glass-panel overflow-x-auto rounded-2xl">
@@ -439,7 +464,7 @@ export default async function TesoreriaPage({
                   <td className="px-4 py-3 text-zinc-500">{f.fecha}</td>
                   <td className="px-4 py-3 text-zinc-300">{formatCurrency(f.importe)}</td>
                   <td className="px-4 py-3 text-zinc-500">
-                    {f.liquidacionRef ?? f.gastoId ?? '—'}
+                    {(f.gastoId ? conceptoDeGasto.get(f.gastoId) : undefined) ?? '—'}
                   </td>
                   <td className="px-4 py-3">
                     <OSStatusBadge tone={TONO_FR[f.estado]}>
@@ -454,8 +479,9 @@ export default async function TesoreriaPage({
       </OSSection>
 
       <OSSection
+        plegable
         titulo="Conceptos pendientes de confirmar"
-        nota="No rompen los cálculos: los marcan como provisionales"
+        nota="Marcan el resultado como provisional"
       >
         <ul className="glass-panel rounded-2xl px-5 py-4 text-xs text-zinc-400">
           {CONCEPTOS_PENDIENTES.map((c) => (

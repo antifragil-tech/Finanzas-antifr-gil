@@ -6,9 +6,9 @@ import { OSContextBar } from './OSContextBar';
 import { OS_NAV, tituloDeRuta } from './osNav';
 
 // Shell visual de Antifrágil OS: sidebar de navegación + topbar + área de
-// contenido. Sin backend, sin Supabase, sin datos: solo estructura y estética
-// Quiet Luxury. Envuelve únicamente las rutas placeholder del route group
-// (app)/(os); las rutas legacy de Alsari no pasan por aquí.
+// contenido, estética Quiet Luxury. Envuelve las rutas del route group
+// (app)/(os); cada página decide su capa de datos (reales vía fuenteDatos o
+// demo sin entorno). Las rutas legacy de Alsari no pasan por aquí.
 
 export function OSShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -90,8 +90,8 @@ export function OSShell({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-3">
             <OSContextBar />
             <span className="text-2xs inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 uppercase tracking-widest text-zinc-500">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
-              Draft — shell sin módulos
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              MVP operativo
             </span>
           </div>
         </header>
