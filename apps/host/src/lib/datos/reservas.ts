@@ -109,6 +109,7 @@ interface FilaServicio {
   nombre: string;
   categoria: string;
   duracion_minutos: number;
+  precio_base: number | null;
   activo: boolean;
 }
 
@@ -228,7 +229,7 @@ export async function cargarAgendaReal(): Promise<AgendaReal | null> {
       nombre: s.nombre,
       categoria: categoriaServicio(s.categoria),
       duracion_minutos: s.duracion_minutos,
-      precio: 0, // la tarifa vive en la cita (precio_snapshot); catálogo sin precio aún
+      precio: s.precio_base ?? 0, // tarifario real sincronizado desde Salonized
     })),
     citas: citas.map((f) => ({
       id: f.id,
