@@ -1,4 +1,5 @@
-import { getProfesional, PROF_COLOR, type CitaMock } from './mockData';
+import type { CitaMock } from './mockData';
+import { useCatalogo } from '../clinica/catalogo';
 
 interface Props {
   citas: CitaMock[];
@@ -12,6 +13,7 @@ const DIAS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 // Vista MES = resumen operativo (no eventos): por día, qué profesionales trabajan y
 // cuántos clientes tienen. No es la vista principal del módulo.
 export function MonthResumen({ citas, startDate, onDayClick }: Props) {
+  const { getProfesional, colorProfesional } = useCatalogo();
   const base = new Date(`${startDate.slice(0, 7)}-01T00:00:00`);
   const year = base.getFullYear();
   const month = base.getMonth();
@@ -73,7 +75,7 @@ export function MonthResumen({ citas, startDate, onDayClick }: Props) {
                   >
                     <i
                       className="h-2 w-2 shrink-0 rounded-full"
-                      style={{ background: PROF_COLOR[pid] ?? '#71717a' }}
+                      style={{ background: colorProfesional(pid) }}
                     />
                     {getProfesional(pid)?.nombre.split(' ')[0]}
                     <span className="text-zinc-500">·{n}</span>

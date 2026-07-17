@@ -59,7 +59,7 @@ export interface ServicioAgenda {
   id: string;
   nombre: string;
   categoria: 'fisioterapia' | 'entrenamiento_personal' | 'nutricion';
-  duracion: number;
+  duracion_minutos: number;
   precio: number;
 }
 
@@ -227,7 +227,7 @@ export async function cargarAgendaReal(): Promise<AgendaReal | null> {
       id: s.id,
       nombre: s.nombre,
       categoria: categoriaServicio(s.categoria),
-      duracion: s.duracion_minutos,
+      duracion_minutos: s.duracion_minutos,
       precio: 0, // la tarifa vive en la cita (precio_snapshot); catálogo sin precio aún
     })),
     citas: citas.map((f) => ({

@@ -21,9 +21,9 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { CitaMock, EstadoPago, OrigenCita } from '../spike/mockData';
-import { getProfesional, getSala, getServicio } from '../spike/mockData';
 import type { AccionCita } from '../spike/CitaModal';
 import { CitaBadges } from './badges';
+import { useCatalogo } from './catalogo';
 
 const hhmm = (iso: string) => iso.slice(11, 16);
 
@@ -46,6 +46,7 @@ interface Props {
 // Panel lateral (slide-over) de una cita. Acciones mock/local, sin backend.
 // Sin borrado físico: cancelar / no-show / completar son cambios de estado.
 export function CitaPanel({ cita, onClose, onAccion, onPago, onOrigen, mode = 'fixed' }: Props) {
+  const { getProfesional, getSala, getServicio } = useCatalogo();
   const [aviso, setAviso] = useState<string | null>(null);
   if (!cita) return null;
 

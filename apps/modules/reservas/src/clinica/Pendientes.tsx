@@ -11,7 +11,8 @@ import {
   Gift,
   type LucideIcon,
 } from 'lucide-react';
-import { getServicio, getProfesional, type CitaMock } from '../spike/mockData';
+import type { CitaMock } from '../spike/mockData';
+import { useCatalogo } from './catalogo';
 import { PAGO_SIN_ABONAR } from '../spike/estados';
 import { BONOS, restantes } from './mock/bonos';
 import { Subvista } from './Subvista';
@@ -43,6 +44,7 @@ interface Grupo {
 // Vista "Pendientes" (Clínica > Agenda > Pendientes): bandeja operativa de la
 // semana. Agrupa lo que recepción debe resolver y permite acciones mock.
 export function Pendientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
+  const { getProfesional, getServicio } = useCatalogo();
   const c = useCitasStore();
   const { citas } = c;
   const [aviso, setAviso] = useState<string | null>(null);
