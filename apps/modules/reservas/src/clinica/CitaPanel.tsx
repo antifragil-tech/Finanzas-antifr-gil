@@ -206,7 +206,19 @@ export function CitaPanel({
         </Seccion>
 
         <Seccion titulo="Comunicación">
-          <Accion icon={MessageCircle} onClick={() => flash('WhatsApp / recordatorio (demo)')}>
+          <Accion
+            icon={MessageCircle}
+            onClick={() => {
+              const bruto = (cita.cliente_telefono ?? '').replace(/[^\d]/g, '');
+              if (!bruto) {
+                flash('Sin teléfono en la ficha del cliente');
+                return;
+              }
+              const tel = bruto.length === 9 ? `34${bruto}` : bruto;
+              window.open(`https://wa.me/${tel}`, '_blank', 'noopener');
+              flash('Abriendo WhatsApp…');
+            }}
+          >
             WhatsApp
           </Accion>
           <Accion icon={Copy} onClick={copiar}>

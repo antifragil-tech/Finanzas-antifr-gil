@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+// (useRef también lo usa el autocompletado del alta)
 import { DayPilotCalendar } from '@daypilot/daypilot-lite-react';
 import { Plus } from 'lucide-react';
 import { Button } from '@alsari/ui';
@@ -279,10 +280,11 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
         <AltaCitaDialog
           datos={alta}
           onCerrar={() => setAlta(null)}
-          onCrear={(nombre, servicioId) => {
+          onCrear={(nombre, servicioId, clienteId) => {
             c.crearCita(alta.inicio, alta.fin, alta.profId, {
               clienteNombre: nombre,
               servicioId,
+              ...(clienteId ? { clienteId } : {}),
             });
             setAlta(null);
           }}
@@ -310,10 +312,11 @@ function AltaCitaDialog({
   onCerrar,
 }: {
   datos: { inicio: string; fin: string; profId?: string };
-  onCrear: (nombre: string, servicioId: string) => void;
+  onCrear: (nombre: string, servicioId: string, clienteId?: string) => void;
   onCerrar: () => void;
 }) {
   const { servicios, getProfesional } = useCatalogo();
+  const store = useCitasStore();
   const rol = (getProfesional(datos.profId ?? '')?.rol ?? '').toLowerCase();
   const catSugerida = rol.includes('entren')
     ? 'entrenamiento_personal'
@@ -323,11 +326,36 @@ function AltaCitaDialog({
   const sugerido = servicios.find((s) => s.categoria === catSugerida) ?? servicios[0];
   const [nombre, setNombre] = useState('');
   const [servicioId, setServicioId] = useState(sugerido?.id ?? '');
+  const [clienteId, setClienteId] = useState<string | undefined>(undefined);
+  const [sugerencias, setSugerencias] = useState<
+    { id: string; nombre: string; apellidos: string | null; telefono: string | null }[]
+  >([]);
+  const timer = useRef<number | null>(null);
   const prof = getProfesional(datos.profId ?? '');
+
+  // Autocompletado: buscar en la base (o mock) con un pequeño debounce.
+  const alEscribir = (v: string) => {
+    setNombre(v);
+    setClienteId(undefined); // al editar, deja de ser el cliente elegido
+    if (timer.current) window.clearTimeout(timer.current);
+    if (v.trim().length < 2) {
+      setSugerencias([]);
+      return;
+    }
+    timer.current = window.setTimeout(() => {
+      void store.buscarClientes(v).then((r) => setSugerencias(r.slice(0, 6)));
+    }, 250);
+  };
+
+  const elegir = (s: { id: string; nombre: string; apellidos: string | null }) => {
+    setNombre(`${s.nombre}${s.apellidos ? ` ${s.apellidos}` : ''}`);
+    setClienteId(s.id);
+    setSugerencias([]);
+  };
 
   const crear = () => {
     if (!servicioId) return;
-    onCrear(nombre, servicioId);
+    onCrear(nombre, servicioId, clienteId);
   };
 
   return (
@@ -345,14 +373,36 @@ function AltaCitaDialog({
         <input
           autoFocus
           value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
+          onChange={(e) => alEscribir(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === 'Enter') crear();
             if (e.key === 'Escape') onCerrar();
           }}
-          placeholder="Nombre del cliente"
+          placeholder="Buscar o crear cliente…"
           className="mt-1 w-full rounded-lg border border-white/10 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-white/25 focus:outline-none"
         />
+        {sugerencias.length > 0 ? (
+          <div className="mt-1 overflow-hidden rounded-lg border border-white/10 bg-zinc-950">
+            {sugerencias.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => elegir(s)}
+                className="flex w-full items-baseline justify-between gap-2 px-3 py-1.5 text-left text-sm text-zinc-200 hover:bg-white/5"
+              >
+                <span>
+                  {s.nombre}
+                  {s.apellidos ? ` ${s.apellidos}` : ''}
+                </span>
+                <span className="text-2xs text-zinc-500">{s.telefono ?? ''}</span>
+              </button>
+            ))}
+          </div>
+        ) : null}
+        {clienteId ? (
+          <p className="text-2xs mt-1 text-emerald-300">Cliente existente seleccionado</p>
+        ) : nombre.trim().length >= 2 && sugerencias.length === 0 ? (
+          <p className="text-2xs mt-1 text-zinc-500">Se creará como cliente nuevo</p>
+        ) : null}
 
         <label className="text-2xs mt-3 block uppercase tracking-widest text-zinc-500">
           Servicio

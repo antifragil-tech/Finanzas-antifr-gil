@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { MessageCircle, Copy, User, History, ExternalLink, Search } from 'lucide-react';
 import { CLIENTES, type ClienteMock } from './mock/clientes';
 import { getOrigen } from '../spike/mockData';
 import { Subvista } from './Subvista';
 import { CitaPanel, type CitaPanelMode } from './CitaPanel';
-import { useCitasStore } from './CitasStore';
+import { useCitasStore, type ClienteBusqueda } from './CitasStore';
 
 const fecha = (d: string | null) =>
   d
@@ -15,6 +15,137 @@ const fecha = (d: string | null) =>
 // sin datos reales). La ficha completa vive en un sistema externo (enlace mock);
 // aquí solo agenda, pagos y bonos.
 export function Clientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
+  const c = useCitasStore();
+  if (c.real) return <ClientesReales />;
+  return <ClientesDemo panelMode={panelMode} />;
+}
+
+// ── Modo REAL: los clientes de la base (sincronizados desde Salonized) ──────
+function ClientesReales() {
+  const c = useCitasStore();
+  const [q, setQ] = useState('');
+  const [filas, setFilas] = useState<ClienteBusqueda[]>([]);
+  const [aviso, setAviso] = useState<string | null>(null);
+  const timer = useRef<number | null>(null);
+  const flash = (m: string) => {
+    setAviso(m);
+    window.setTimeout(() => setAviso(null), 2200);
+  };
+
+  useEffect(() => {
+    void c.buscarClientes('').then(setFilas);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const alEscribir = (v: string) => {
+    setQ(v);
+    if (timer.current) window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      void c.buscarClientes(v).then(setFilas);
+    }, 250);
+  };
+
+  const abrirWhatsApp = (tel: string | null) => {
+    const bruto = (tel ?? '').replace(/[^\d]/g, '');
+    if (!bruto) {
+      flash('Sin teléfono en la ficha');
+      return;
+    }
+    window.open(`https://wa.me/${bruto.length === 9 ? `34${bruto}` : bruto}`, '_blank', 'noopener');
+  };
+
+  return (
+    <Subvista
+      titulo="Clientes"
+      subtitulo="Ficha administrativa (sincronizada desde Salonized). Sin datos clínicos."
+      acciones={
+        <div className="relative">
+          <Search size={13} className="absolute left-2.5 top-2.5 text-zinc-500" />
+          <input
+            value={q}
+            onChange={(e) => alEscribir(e.target.value)}
+            placeholder="Buscar por nombre o teléfono…"
+            className="w-64 rounded-lg border border-white/10 bg-zinc-950 py-1.5 pl-8 pr-3 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-white/25 focus:outline-none"
+          />
+        </div>
+      }
+    >
+      {aviso ? (
+        <p className="mb-3 inline-block rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-300">
+          {aviso}
+        </p>
+      ) : null}
+      <div className="glass-panel overflow-x-auto rounded-2xl">
+        <table className="w-full min-w-[560px] text-left text-xs">
+          <thead className="text-2xs border-b border-white/5 uppercase tracking-widest text-zinc-500">
+            <tr>
+              {['Cliente', 'Teléfono', 'Email', ''].map((h, i) => (
+                <th key={i} className="px-4 py-3 font-medium">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filas.map((f) => (
+              <tr
+                key={f.id}
+                className="border-b border-white/5 last:border-0 hover:bg-white/[0.03]"
+              >
+                <td className="px-4 py-2.5 text-zinc-200">
+                  {f.nombre}
+                  {f.apellidos ? ` ${f.apellidos}` : ''}
+                </td>
+                <td className="px-4 py-2.5 text-zinc-400">{f.telefono ?? '—'}</td>
+                <td className="px-4 py-2.5 text-zinc-400">{f.email ?? '—'}</td>
+                <td className="px-4 py-2.5 text-right">
+                  <span className="inline-flex gap-1">
+                    <button
+                      onClick={() => abrirWhatsApp(f.telefono)}
+                      title="Abrir WhatsApp"
+                      className="text-2xs rounded-md border border-white/10 px-2 py-1 text-zinc-300 hover:bg-white/5"
+                    >
+                      <MessageCircle size={12} />
+                    </button>
+                    <button
+                      onClick={() =>
+                        navigator.clipboard
+                          ?.writeText(
+                            `${f.nombre}${f.apellidos ? ` ${f.apellidos}` : ''} · ${f.telefono ?? ''} · ${f.email ?? ''}`,
+                          )
+                          .then(
+                            () => flash('Datos copiados'),
+                            () => flash('Datos copiados'),
+                          )
+                      }
+                      title="Copiar datos"
+                      className="text-2xs rounded-md border border-white/10 px-2 py-1 text-zinc-300 hover:bg-white/5"
+                    >
+                      <Copy size={12} />
+                    </button>
+                  </span>
+                </td>
+              </tr>
+            ))}
+            {filas.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-4 py-6 text-center text-zinc-500">
+                  Sin resultados
+                </td>
+              </tr>
+            ) : null}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-2xs mt-2 text-zinc-600">
+        {q ? 'Máx. 20 resultados por búsqueda.' : 'Mostrando los primeros 100 por nombre.'}
+      </p>
+    </Subvista>
+  );
+}
+
+// ── Modo DEMO: la maqueta original con datos ficticios ──────────────────────
+function ClientesDemo({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
   const c = useCitasStore();
   const [aviso, setAviso] = useState<string | null>(null);
   const [busqueda, setBusqueda] = useState('');

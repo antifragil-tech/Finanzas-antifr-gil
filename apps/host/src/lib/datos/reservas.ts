@@ -45,6 +45,7 @@ export interface CitaAgenda {
   fin: string;
   estado_cita: EstadoCitaAgenda;
   estado_pago: EstadoPagoAgenda;
+  cliente_telefono?: string | null;
   precio_previsto: number;
   cambios: { ts: string; accion: string; detalle: string }[];
 }
@@ -93,7 +94,7 @@ interface FilaCita {
   tipo_venta: string;
   precio_snapshot: number | null;
   notas_admin: string | null;
-  clinica_clientes: { nombre: string; apellidos: string | null } | null;
+  clinica_clientes: { nombre: string; apellidos: string | null; telefono: string | null } | null;
 }
 
 interface FilaProfesional {
@@ -208,7 +209,7 @@ export async function cargarAgendaReal(): Promise<AgendaReal | null> {
 
   const [citas, profesionales, servicios, canales, cobros] = await Promise.all([
     rest<FilaCita>(
-      `clinica_citas?select=id,cliente_id,profesional_id,servicio_id,canal_id,inicio,fin,estado,tipo_venta,precio_snapshot,notas_admin,clinica_clientes(nombre,apellidos)&inicio=gte.${desde}&inicio=lte.${hasta}&order=inicio.asc&limit=5000`,
+      `clinica_citas?select=id,cliente_id,profesional_id,servicio_id,canal_id,inicio,fin,estado,tipo_venta,precio_snapshot,notas_admin,clinica_clientes(nombre,apellidos,telefono)&inicio=gte.${desde}&inicio=lte.${hasta}&order=inicio.asc&limit=5000`,
     ),
     rest<FilaProfesional>(`clinica_profesionales?select=*&activo=is.true&order=nombre.asc`),
     rest<FilaServicio>(`clinica_servicios?select=*&activo=is.true&order=nombre.asc`),
@@ -243,6 +244,7 @@ export async function cargarAgendaReal(): Promise<AgendaReal | null> {
         ? `${f.clinica_clientes.nombre}${f.clinica_clientes.apellidos ? ` ${f.clinica_clientes.apellidos}` : ''}`
         : 'Cliente',
       profesional_id: f.profesional_id,
+      cliente_telefono: f.clinica_clientes?.telefono ?? null,
       sala_id: null, // el recurso/sala se conectará con clinica_recursos más adelante
       servicio_id: f.servicio_id,
       origen: origenDesdeCanal(f.canal_id, mapaCanales),

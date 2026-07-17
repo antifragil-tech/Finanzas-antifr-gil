@@ -70,6 +70,8 @@ export interface CitaMock {
   fin: string;
   estado_cita: EstadoCita;
   estado_pago: EstadoPago;
+  /** Teléfono del cliente (solo en modo real, para WhatsApp). */
+  cliente_telefono?: string | null;
   precio_previsto: number;
   notas_internas?: string;
   cambios: CambioCita[];
