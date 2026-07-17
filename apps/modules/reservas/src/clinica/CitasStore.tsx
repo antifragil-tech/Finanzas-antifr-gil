@@ -7,6 +7,7 @@ import {
   type OrigenCita,
 } from '../spike/mockData';
 import type { AccionCita } from '../spike/CitaModal';
+import { CLIENTES } from './mock/clientes';
 import { useCatalogo } from './catalogo';
 
 const pad = (x: number) => String(x).padStart(2, '0');
@@ -31,6 +32,14 @@ export interface AgendaInicial {
 
 export type MedioPagoCobro = 'efectivo' | 'tarjeta' | 'bizum' | 'transferencia';
 
+export interface ClienteBusqueda {
+  id: string;
+  nombre: string;
+  apellidos: string | null;
+  telefono: string | null;
+  email: string | null;
+}
+
 export interface RespuestaAgenda {
   ok: boolean;
   error?: string | undefined;
@@ -38,6 +47,7 @@ export interface RespuestaAgenda {
 
 export interface AccionesRealesAgenda {
   crearCita(datos: {
+    clienteId?: string | undefined;
     clienteNombre: string;
     profesionalId: string;
     servicioId: string;
@@ -49,6 +59,8 @@ export interface AccionesRealesAgenda {
   cambiarEstado(citaId: string, estado: EstadoCita): Promise<RespuestaAgenda>;
   /** Cobro real: importe y cliente se resuelven en el servidor desde la cita. */
   registrarCobro(citaId: string, medio: MedioPagoCobro): Promise<RespuestaAgenda>;
+  /** Buscador de clientes (nombre/apellidos/teléfono). */
+  buscarClientes(q: string): Promise<ClienteBusqueda[]>;
 }
 
 export interface CitasStore {
@@ -75,8 +87,10 @@ export interface CitasStore {
     inicio: string,
     fin: string,
     profesional_id?: string,
-    opts?: { clienteNombre?: string; servicioId?: string },
+    opts?: { clienteNombre?: string; servicioId?: string; clienteId?: string },
   ) => void;
+  /** Buscar clientes (real: base; demo: mock local). */
+  buscarClientes: (q: string) => Promise<ClienteBusqueda[]>;
   /** Alta de una cita ya construida (p. ej. Semana/Día con sala) y la selecciona. */
   agregarCita: (nueva: CitaMock) => void;
 }
@@ -203,11 +217,23 @@ export function CitasProvider({
     return servicios.find((s) => s.categoria === cat) ?? servicios[0];
   };
 
+  const buscarClientes = async (q: string): Promise<ClienteBusqueda[]> => {
+    if (acciones) return acciones.buscarClientes(q);
+    const n = q.trim().toLowerCase();
+    return CLIENTES.filter((cl) => !n || cl.nombre.toLowerCase().includes(n)).map((cl) => ({
+      id: cl.id,
+      nombre: cl.nombre,
+      apellidos: null,
+      telefono: cl.telefono,
+      email: cl.email,
+    }));
+  };
+
   const crearCita = (
     inicio: string,
     fin: string,
     profesional_id?: string,
-    opts?: { clienteNombre?: string; servicioId?: string },
+    opts?: { clienteNombre?: string; servicioId?: string; clienteId?: string },
   ) => {
     const profId = profesional_id ?? profesionales[0]?.id ?? '';
     const serv =
@@ -222,6 +248,7 @@ export function CitasProvider({
     if (acciones) {
       void acciones
         .crearCita({
+          clienteId: opts?.clienteId,
           clienteNombre: opts?.clienteNombre?.trim() || 'Nuevo cliente',
           profesionalId: profId,
           servicioId: serv.id,
@@ -277,6 +304,7 @@ export function CitasProvider({
     registrarPago,
     cobrar,
     crearCita,
+    buscarClientes,
     agregarCita,
   };
 

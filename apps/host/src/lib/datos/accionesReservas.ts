@@ -101,6 +101,8 @@ async function resolverCanal(origen: OrigenCitaAgenda): Promise<string | null> {
 }
 
 export async function crearCitaReal(datos: {
+  /** Si viene (elegido en el buscador), se usa directamente: cero duplicados. */
+  clienteId?: string | undefined;
   clienteNombre: string;
   profesionalId: string;
   servicioId: string;
@@ -109,10 +111,13 @@ export async function crearCitaReal(datos: {
   origen: OrigenCitaAgenda;
   precio: number;
 }): Promise<RespuestaCrearCita> {
-  if (!datos.clienteNombre.trim()) return { ok: false, error: 'Falta el nombre del cliente' };
+  if (!datos.clienteId && !datos.clienteNombre.trim())
+    return { ok: false, error: 'Falta el nombre del cliente' };
 
-  const cliente = await resolverCliente(datos.clienteNombre);
-  if (cliente.error) return { ok: false, error: cliente.error };
+  const cliente = datos.clienteId
+    ? { id: datos.clienteId }
+    : await resolverCliente(datos.clienteNombre);
+  if ('error' in cliente && cliente.error) return { ok: false, error: cliente.error };
   const canalId = await resolverCanal(datos.origen);
 
   const res = await escribir<{ id: string; inicio: string; fin: string }>('POST', 'clinica_citas', {
@@ -204,4 +209,24 @@ export async function registrarCobroCitaReal(
     registrado_por_email: ACTOR,
   });
   return res.ok ? { ok: true } : { ok: false, error: res.error };
+}
+
+export interface ClienteBusqueda {
+  id: string;
+  nombre: string;
+  apellidos: string | null;
+  telefono: string | null;
+  email: string | null;
+}
+
+/** Buscador de clientes para recepción: por nombre, apellidos o teléfono. */
+export async function buscarClientesReal(q: string): Promise<ClienteBusqueda[]> {
+  // Se eliminan caracteres con significado en la sintaxis de filtros PostgREST.
+  const limpio = q.trim().replace(/[,()*]/g, '');
+  const filtro = limpio
+    ? `&or=(nombre.ilike.*${encodeURIComponent(limpio)}*,apellidos.ilike.*${encodeURIComponent(limpio)}*,telefono.ilike.*${encodeURIComponent(limpio)}*)`
+    : '';
+  return rest<ClienteBusqueda>(
+    `clinica_clientes?select=id,nombre,apellidos,telefono,email${filtro}&order=nombre.asc&limit=${limpio ? 20 : 100}`,
+  );
 }

@@ -3,6 +3,7 @@
 import dynamic from 'next/dynamic';
 import type { AgendaInicial, Catalogo } from '@alsari/reservas';
 import {
+  buscarClientesReal,
   cambiarEstadoCitaReal,
   crearCitaReal,
   registrarCobroCitaReal,
@@ -26,6 +27,7 @@ const ACCIONES = {
   crearCita: crearCitaReal,
   cambiarEstado: cambiarEstadoCitaReal,
   registrarCobro: registrarCobroCitaReal,
+  buscarClientes: buscarClientesReal,
 };
 
 export function ReservasClient({
