@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- ANTIFRÁGIL OS — REFLEJO DEL ESQUEMA REAL (generado 2026-07-16)
+-- ANTIFRÁGIL OS — REFLEJO DEL ESQUEMA REAL (generado 2026-07-17)
 -- ═══════════════════════════════════════════════════════════════════════════
 -- Generado por scripts/db/reflejar-esquema.py (solo lecturas de catálogo).
 -- ES LA FOTO del esquema aplicado en la base real; NO aplicar sobre ella.
@@ -624,7 +624,8 @@ create table public.clinica_clientes (
   activo                           boolean not null default true,
   created_at                       timestamptz not null default now(),
   updated_at                       timestamptz not null default now(),
-  external_clinical_record_id      text
+  external_clinical_record_id      text,
+  salonized_id                     text
 );
 
 create table public.clinica_disponibilidad_excepcional (
@@ -722,7 +723,9 @@ create table public.clinica_servicios (
   sociedad_id_ref                  text,
   activo                           boolean not null default true,
   created_at                       timestamptz not null default now(),
-  updated_at                       timestamptz not null default now()
+  updated_at                       timestamptz not null default now(),
+  precio_base                      numeric(14,2),
+  salonized_id                     text
 );
 
 create table public.clinica_ubicaciones (
@@ -1667,7 +1670,7 @@ alter table public.ventas_bono add constraint ventas_bono_cliente_id_fkey FOREIG
 alter table public.ventas_bono add constraint ventas_bono_producto_id_fkey FOREIGN KEY (producto_id) REFERENCES clinica_productos(id) ON DELETE RESTRICT;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- §5. ÍNDICES (116 no asociados a constraints)
+-- §5. ÍNDICES (118 no asociados a constraints)
 -- ═══════════════════════════════════════════════════════════════════════════
 CREATE INDEX ajustes_liq_liquidacion_idx ON public.ajustes_liquidacion USING btree (liquidacion_id);
 CREATE INDEX arqueo_caja_cuenta_fecha_idx ON public.arqueo_caja USING btree (cuenta_tesoreria_id, fecha DESC);
@@ -1688,12 +1691,14 @@ CREATE INDEX clinica_citas_profesional_inicio_idx ON public.clinica_citas USING 
 CREATE INDEX clinica_clientes_auth_idx ON public.clinica_clientes USING btree (auth_user_id);
 CREATE INDEX clinica_clientes_email_idx ON public.clinica_clientes USING btree (email);
 CREATE UNIQUE INDEX clinica_clientes_external_record_uniq ON public.clinica_clientes USING btree (external_clinical_record_id) WHERE ((external_clinical_record_id IS NOT NULL) AND (external_clinical_record_id <> ''::text));
+CREATE UNIQUE INDEX clinica_clientes_salonized_id_uniq ON public.clinica_clientes USING btree (salonized_id);
 CREATE INDEX clinica_disp_excep_idx ON public.clinica_disponibilidad_excepcional USING btree (profesional_id, fecha);
 CREATE INDEX clinica_horarios_prof_idx ON public.clinica_horarios_profesional USING btree (profesional_id, dia_semana);
 CREATE INDEX clinica_productos_publico_idx ON public.clinica_productos USING btree (visible_en_reserva_publica) WHERE activo;
 CREATE INDEX clinica_productos_servicio_idx ON public.clinica_productos USING btree (servicio_id);
 CREATE INDEX clinica_prof_serv_servicio_idx ON public.clinica_profesional_servicios USING btree (servicio_id);
 CREATE INDEX clinica_recursos_ubicacion_idx ON public.clinica_recursos USING btree (ubicacion_id);
+CREATE UNIQUE INDEX clinica_servicios_salonized_id_uniq ON public.clinica_servicios USING btree (salonized_id);
 CREATE INDEX clinica_ubicaciones_proyecto_idx ON public.clinica_ubicaciones USING btree (proyecto_id_ref);
 CREATE UNIQUE INDEX clinica_ubicaciones_sociedad_nombre_uniq ON public.clinica_ubicaciones USING btree (sociedad_id_ref, nombre);
 CREATE INDEX clinica_usuarios_auth_idx ON public.clinica_usuarios USING btree (auth_user_id);
