@@ -191,18 +191,24 @@ function estadoPago(fila: FilaCita, cobradoPorCita: Map<string, number>): Estado
 // ── Carga ───────────────────────────────────────────────────────────────────
 
 /**
- * Agenda real: citas en la ventana [hoy−7 días, hoy+21 días] + catálogos
- * activos. Devuelve null sin entorno (el módulo cae al mock).
+ * Agenda real: citas desde el día 1 del MES ANTERIOR (así las vistas Semana/
+ * Mes siempre tienen el mes en curso completo y el previo para consulta)
+ * hasta 60 días vista. Volumen contenido: ~180 citas/mes. Devuelve null sin
+ * entorno (el módulo cae al mock).
  */
 export async function cargarAgendaReal(): Promise<AgendaReal | null> {
   if (!datosRealesDisponibles()) return null;
 
-  const desde = new Date(Date.now() - 7 * 86400_000).toISOString();
-  const hasta = new Date(Date.now() + 21 * 86400_000).toISOString();
+  const hoyMadrid = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Madrid' }).format(
+    new Date(),
+  ); // YYYY-MM-DD
+  const [anio = 1970, mes = 1] = hoyMadrid.split('-').map(Number);
+  const desde = mes === 1 ? `${anio - 1}-12-01` : `${anio}-${String(mes - 1).padStart(2, '0')}-01`;
+  const hasta = new Date(Date.now() + 60 * 86400_000).toISOString();
 
   const [citas, profesionales, servicios, canales, cobros] = await Promise.all([
     rest<FilaCita>(
-      `clinica_citas?select=id,cliente_id,profesional_id,servicio_id,canal_id,inicio,fin,estado,tipo_venta,precio_snapshot,notas_admin,clinica_clientes(nombre,apellidos)&inicio=gte.${desde}&inicio=lte.${hasta}&order=inicio.asc&limit=2000`,
+      `clinica_citas?select=id,cliente_id,profesional_id,servicio_id,canal_id,inicio,fin,estado,tipo_venta,precio_snapshot,notas_admin,clinica_clientes(nombre,apellidos)&inicio=gte.${desde}&inicio=lte.${hasta}&order=inicio.asc&limit=5000`,
     ),
     rest<FilaProfesional>(`clinica_profesionales?select=*&activo=is.true&order=nombre.asc`),
     rest<FilaServicio>(`clinica_servicios?select=*&activo=is.true&order=nombre.asc`),
