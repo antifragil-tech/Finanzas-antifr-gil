@@ -168,16 +168,25 @@ export async function cambiarEstadoCitaReal(
   return res.ok ? { ok: true } : { ok: false, error: res.error };
 }
 
-export async function registrarCobroCitaReal(datos: {
-  citaId: string;
-  clienteId?: string;
-  importe: number;
-  medioPago: 'efectivo' | 'tarjeta' | 'transferencia' | 'bizum' | 'otro';
-}): Promise<RespuestaAccion> {
-  if (!(datos.importe > 0)) return { ok: false, error: 'Importe inválido' };
+export async function registrarCobroCitaReal(
+  citaId: string,
+  medio: 'efectivo' | 'tarjeta' | 'bizum' | 'transferencia',
+): Promise<RespuestaAccion> {
+  // Importe y cliente se resuelven desde la CITA en el servidor: la UI solo
+  // elige el medio de pago (un toque para recepción, cero importes a mano).
+  const citas = await rest<{ id: string; cliente_id: string; precio_snapshot: number | null }>(
+    `clinica_citas?select=id,cliente_id,precio_snapshot&id=eq.${encodeURIComponent(citaId)}&limit=1`,
+  );
+  const cita = citas[0];
+  if (!cita) return { ok: false, error: 'Cita no encontrada' };
+  const importe = cita.precio_snapshot ?? 0;
+  if (!(importe > 0)) {
+    return { ok: false, error: 'La cita no tiene precio fijado: ponlo antes de cobrar.' };
+  }
+
   // La cuenta de tesorería se resuelve por TIPO (nunca ids hardcodeados):
   // efectivo → caja; el resto de medios → banco.
-  const tipoCuenta = datos.medioPago === 'efectivo' ? 'caja' : 'banco';
+  const tipoCuenta = medio === 'efectivo' ? 'caja' : 'banco';
   const cuentas = await rest<{ id: string }>(
     `cuenta_tesoreria?select=id&tipo=eq.${tipoCuenta}&activa=is.true&limit=1`,
   );
@@ -187,10 +196,10 @@ export async function registrarCobroCitaReal(datos: {
 
   const res = await escribir('POST', 'cobros', {
     origen_tipo: 'cita',
-    origen_id: datos.citaId,
-    ...(datos.clienteId ? { cliente_id: datos.clienteId } : {}),
-    importe: datos.importe,
-    medio_pago: datos.medioPago,
+    origen_id: cita.id,
+    cliente_id: cita.cliente_id,
+    importe,
+    medio_pago: medio,
     cuenta_tesoreria_id: cuenta.id,
     registrado_por_email: ACTOR,
   });

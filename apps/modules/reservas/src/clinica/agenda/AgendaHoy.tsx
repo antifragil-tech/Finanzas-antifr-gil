@@ -117,16 +117,18 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
 
   const onEventClick = (args: ClickArgs) => c.setSelectedId(String(args.e.id()));
 
+  // Alta en dos pasos: seleccionar hueco → mini-formulario (nombre + servicio).
+  const [alta, setAlta] = useState<{ inicio: string; fin: string; profId?: string } | null>(null);
   const onTimeRangeSelected = (args: RangeArgs) => {
-    c.crearCita(
-      args.start.toString(),
-      args.end.toString(),
-      args.resource != null ? String(args.resource) : undefined,
-    );
+    setAlta({
+      inicio: args.start.toString(),
+      fin: args.end.toString(),
+      ...(args.resource != null ? { profId: String(args.resource) } : {}),
+    });
     calendar?.clearSelection();
   };
 
-  const nuevaCitaBoton = () => c.crearCita(`${hoy}T10:00:00`, `${hoy}T10:45:00`);
+  const nuevaCitaBoton = () => setAlta({ inicio: `${hoy}T10:00:00`, fin: `${hoy}T10:45:00` });
 
   // Ancho de columna fijo para que las columnas por profesional no se compriman.
   useEffect(() => {
@@ -273,14 +275,115 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
         </div>
       </div>
 
+      {alta ? (
+        <AltaCitaDialog
+          datos={alta}
+          onCerrar={() => setAlta(null)}
+          onCrear={(nombre, servicioId) => {
+            c.crearCita(alta.inicio, alta.fin, alta.profId, {
+              clienteNombre: nombre,
+              servicioId,
+            });
+            setAlta(null);
+          }}
+        />
+      ) : null}
+
       <CitaPanel
         cita={c.seleccionada}
         onClose={() => c.setSelectedId(null)}
         onAccion={c.onAccion}
         onPago={c.onPago}
+        onCobrar={(m) => c.seleccionada && c.cobrar(c.seleccionada.id, m)}
         onOrigen={c.onOrigen}
         mode={panelMode}
       />
+    </div>
+  );
+}
+
+// Mini-formulario de alta rápida para recepción: nombre del cliente (autofocus)
+// y servicio (precargado según el profesional del hueco). Enter crea, Esc cierra.
+function AltaCitaDialog({
+  datos,
+  onCrear,
+  onCerrar,
+}: {
+  datos: { inicio: string; fin: string; profId?: string };
+  onCrear: (nombre: string, servicioId: string) => void;
+  onCerrar: () => void;
+}) {
+  const { servicios, getProfesional } = useCatalogo();
+  const rol = (getProfesional(datos.profId ?? '')?.rol ?? '').toLowerCase();
+  const catSugerida = rol.includes('entren')
+    ? 'entrenamiento_personal'
+    : rol.includes('nutri')
+      ? 'nutricion'
+      : 'fisioterapia';
+  const sugerido = servicios.find((s) => s.categoria === catSugerida) ?? servicios[0];
+  const [nombre, setNombre] = useState('');
+  const [servicioId, setServicioId] = useState(sugerido?.id ?? '');
+  const prof = getProfesional(datos.profId ?? '');
+
+  const crear = () => {
+    if (!servicioId) return;
+    onCrear(nombre, servicioId);
+  };
+
+  return (
+    <div className="absolute inset-0 z-40 flex items-center justify-center bg-zinc-950/70 p-4">
+      <div className="glass-panel w-full max-w-sm rounded-2xl border border-white/10 bg-zinc-900 p-5">
+        <p className="text-2xs uppercase tracking-widest text-zinc-500">Nueva cita</p>
+        <p className="mt-1 text-sm text-zinc-300">
+          {datos.inicio.slice(11, 16)}–{datos.fin.slice(11, 16)}
+          {prof ? ` · ${prof.nombre}` : ''}
+        </p>
+
+        <label className="text-2xs mt-4 block uppercase tracking-widest text-zinc-500">
+          Cliente
+        </label>
+        <input
+          autoFocus
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') crear();
+            if (e.key === 'Escape') onCerrar();
+          }}
+          placeholder="Nombre del cliente"
+          className="mt-1 w-full rounded-lg border border-white/10 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder:text-zinc-600 focus:border-white/25 focus:outline-none"
+        />
+
+        <label className="text-2xs mt-3 block uppercase tracking-widest text-zinc-500">
+          Servicio
+        </label>
+        <select
+          value={servicioId}
+          onChange={(e) => setServicioId(e.target.value)}
+          className="mt-1 w-full rounded-lg border border-white/10 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-white/25 focus:outline-none"
+        >
+          {servicios.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.nombre} · {s.duracion_minutos}&apos;
+            </option>
+          ))}
+        </select>
+
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            onClick={onCerrar}
+            className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-zinc-400 hover:text-zinc-200"
+          >
+            Cancelar
+          </button>
+          <button
+            onClick={crear}
+            className="rounded-lg border border-emerald-400/25 bg-emerald-400/10 px-3 py-1.5 text-xs font-medium text-emerald-300 hover:bg-emerald-400/20"
+          >
+            Crear cita
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

@@ -5,7 +5,7 @@ import { useCatalogo } from './catalogo';
 import { PAGO_SIN_ABONAR } from '../spike/estados';
 import { Subvista } from './Subvista';
 import { CitaPanel, type CitaPanelMode } from './CitaPanel';
-import { useCitasStore } from './CitasStore';
+import { useCitasStore, type MedioPagoCobro } from './CitasStore';
 import { CLIENTES } from './mock/clientes';
 
 const hhmm = (iso: string) => iso.slice(11, 16);
@@ -49,9 +49,9 @@ export function Cobros({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = 
   const totalPartner = pendientes.filter(esPartner).reduce((s, x) => s + importeDe(x), 0);
   const totalDirecto = total - totalPartner;
 
-  const cobrar = (id: string) => {
-    c.registrarPago(id);
-    setAviso('Pago registrado');
+  const cobrar = (id: string, medio: MedioPagoCobro) => {
+    c.cobrar(id, medio);
+    setAviso(`Cobrado (${medio})`);
     window.setTimeout(() => setAviso(null), 2000);
   };
 
@@ -154,12 +154,18 @@ export function Cobros({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = 
                     </td>
                     <td className="px-4 py-2.5 text-zinc-500">{dias} d</td>
                     <td className="px-4 py-2.5 text-right">
-                      <button
-                        onClick={() => cobrar(x.id)}
-                        className="text-2xs rounded-md border border-white/10 px-2.5 py-1 text-zinc-200 hover:bg-white/5"
-                      >
-                        Registrar pago
-                      </button>
+                      <span className="inline-flex gap-1">
+                        {(['efectivo', 'tarjeta'] as const).map((medio) => (
+                          <button
+                            key={medio}
+                            onClick={() => cobrar(x.id, medio)}
+                            className="text-2xs rounded-md border border-emerald-400/25 bg-emerald-400/5 px-2 py-1 uppercase tracking-wide text-emerald-300 hover:bg-emerald-400/15"
+                            title={`Cobrar en ${medio}`}
+                          >
+                            {medio === 'efectivo' ? 'Efectivo' : 'Tarjeta'}
+                          </button>
+                        ))}
+                      </span>
                     </td>
                   </tr>
                 );
@@ -178,6 +184,7 @@ export function Cobros({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = 
         onClose={() => c.setSelectedId(null)}
         onAccion={c.onAccion}
         onPago={c.onPago}
+        onCobrar={(m) => c.seleccionada && c.cobrar(c.seleccionada.id, m)}
         onOrigen={c.onOrigen}
         mode={panelMode}
       />

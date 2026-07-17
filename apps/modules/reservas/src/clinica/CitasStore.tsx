@@ -29,6 +29,8 @@ export interface AgendaInicial {
   citas: CitaMock[];
 }
 
+export type MedioPagoCobro = 'efectivo' | 'tarjeta' | 'bizum' | 'transferencia';
+
 export interface RespuestaAgenda {
   ok: boolean;
   error?: string | undefined;
@@ -45,6 +47,8 @@ export interface AccionesRealesAgenda {
     precio: number;
   }): Promise<RespuestaAgenda & { cita?: CitaMock | undefined }>;
   cambiarEstado(citaId: string, estado: EstadoCita): Promise<RespuestaAgenda>;
+  /** Cobro real: importe y cliente se resuelven en el servidor desde la cita. */
+  registrarCobro(citaId: string, medio: MedioPagoCobro): Promise<RespuestaAgenda>;
 }
 
 export interface CitasStore {
@@ -65,7 +69,14 @@ export interface CitasStore {
   confirmar: (id: string) => void;
   noAsistio: (id: string) => void;
   registrarPago: (id: string, estado?: EstadoPago) => void;
-  crearCita: (inicio: string, fin: string, profesional_id?: string) => void;
+  /** Cobro con medio de pago: real → tesorería; demo → cambio local. */
+  cobrar: (id: string, medio: MedioPagoCobro) => void;
+  crearCita: (
+    inicio: string,
+    fin: string,
+    profesional_id?: string,
+    opts?: { clienteNombre?: string; servicioId?: string },
+  ) => void;
   /** Alta de una cita ya construida (p. ej. Semana/Día con sala) y la selecciona. */
   agregarCita: (nueva: CitaMock) => void;
 }
@@ -164,6 +175,17 @@ export function CitasProvider({
   const noAsistio = (id: string) => cambiarEstado(id, 'no_asiste', 'No asistió');
   const registrarPago = (id: string, estado: EstadoPago = 'pagado') => marcarPago(id, estado);
 
+  // Cobro DE VERDAD: con acciones, el servidor registra el cobro en tesorería
+  // (cuenta por tipo de medio) antes de marcar la cita como pagada.
+  const cobrar = (id: string, medio: MedioPagoCobro) =>
+    patchEscribiendo(
+      id,
+      { estado_pago: 'pagado' },
+      'pago',
+      `Cobrado (${medio})`,
+      acciones ? () => acciones.registrarCobro(id, medio) : undefined,
+    );
+
   const agregarCita = (nueva: CitaMock) => {
     setCitas((prev) => [...prev, nueva]);
     setSelectedId(nueva.id);
@@ -181,9 +203,16 @@ export function CitasProvider({
     return servicios.find((s) => s.categoria === cat) ?? servicios[0];
   };
 
-  const crearCita = (inicio: string, fin: string, profesional_id?: string) => {
+  const crearCita = (
+    inicio: string,
+    fin: string,
+    profesional_id?: string,
+    opts?: { clienteNombre?: string; servicioId?: string },
+  ) => {
     const profId = profesional_id ?? profesionales[0]?.id ?? '';
-    const serv = servicioPorRol(getProfesional(profId)?.rol);
+    const serv =
+      (opts?.servicioId ? servicios.find((s) => s.id === opts.servicioId) : undefined) ??
+      servicioPorRol(getProfesional(profId)?.rol);
     if (!serv) {
       setUltimoError('No hay servicios en el catálogo: siembra clinica_servicios.');
       return;
@@ -193,7 +222,7 @@ export function CitasProvider({
     if (acciones) {
       void acciones
         .crearCita({
-          clienteNombre: 'Nuevo cliente',
+          clienteNombre: opts?.clienteNombre?.trim() || 'Nuevo cliente',
           profesionalId: profId,
           servicioId: serv.id,
           inicioIso: inicio,
@@ -217,7 +246,7 @@ export function CitasProvider({
 
     agregarCita({
       id: `c${Date.now()}`,
-      cliente_nombre: 'Nuevo cliente',
+      cliente_nombre: opts?.clienteNombre?.trim() || 'Nuevo cliente',
       profesional_id: profId,
       sala_id: esEntreno ? null : 's1',
       servicio_id: serv.id,
@@ -246,6 +275,7 @@ export function CitasProvider({
     confirmar,
     noAsistio,
     registrarPago,
+    cobrar,
     crearCita,
     agregarCita,
   };

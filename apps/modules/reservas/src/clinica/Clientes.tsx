@@ -170,6 +170,7 @@ export function Clientes({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } 
         onClose={() => c.setSelectedId(null)}
         onAccion={c.onAccion}
         onPago={c.onPago}
+        onCobrar={(m) => c.seleccionada && c.cobrar(c.seleccionada.id, m)}
         onOrigen={c.onOrigen}
         mode={panelMode}
       />
