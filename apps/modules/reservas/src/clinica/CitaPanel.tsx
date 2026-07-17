@@ -21,6 +21,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import type { CitaMock, EstadoPago, OrigenCita } from '../spike/mockData';
+import type { MedioPagoCobro } from './CitasStore';
 import type { AccionCita } from '../spike/CitaModal';
 import { CitaBadges } from './badges';
 import { useCatalogo } from './catalogo';
@@ -39,13 +40,22 @@ interface Props {
   onClose: () => void;
   onAccion: (accion: AccionCita) => void;
   onPago: (estado: EstadoPago) => void;
+  onCobrar: (medio: MedioPagoCobro) => void;
   onOrigen: (origen: OrigenCita) => void;
   mode?: CitaPanelMode;
 }
 
 // Panel lateral (slide-over) de una cita. Acciones mock/local, sin backend.
 // Sin borrado físico: cancelar / no-show / completar son cambios de estado.
-export function CitaPanel({ cita, onClose, onAccion, onPago, onOrigen, mode = 'fixed' }: Props) {
+export function CitaPanel({
+  cita,
+  onClose,
+  onAccion,
+  onPago,
+  onCobrar,
+  onOrigen,
+  mode = 'fixed',
+}: Props) {
   const { getProfesional, getSala, getServicio } = useCatalogo();
   const [aviso, setAviso] = useState<string | null>(null);
   if (!cita) return null;
@@ -136,15 +146,24 @@ export function CitaPanel({ cita, onClose, onAccion, onPago, onOrigen, mode = 'f
         </Seccion>
 
         <Seccion titulo="Pago">
-          <Accion
-            icon={Euro}
-            onClick={() => {
-              onPago('pagado');
-              flash('Pago registrado');
-            }}
-          >
-            Registrar pago
-          </Accion>
+          <div className="flex flex-wrap items-center gap-1.5 py-1">
+            <span className="flex items-center gap-1.5 pr-1 text-xs text-zinc-400">
+              <Euro size={13} className="text-zinc-500" />
+              Cobrar {formatCurrency(cita.precio_previsto)}
+            </span>
+            {(['efectivo', 'tarjeta', 'bizum'] as const).map((medio) => (
+              <button
+                key={medio}
+                onClick={() => {
+                  onCobrar(medio);
+                  flash(`Cobrado (${medio})`);
+                }}
+                className="text-2xs rounded-full border border-emerald-400/25 bg-emerald-400/10 px-2.5 py-1 uppercase tracking-wide text-emerald-300 transition-colors hover:bg-emerald-400/20"
+              >
+                {medio}
+              </button>
+            ))}
+          </div>
           <Accion
             icon={Gift}
             onClick={() => {

@@ -2,7 +2,11 @@
 
 import dynamic from 'next/dynamic';
 import type { AgendaInicial, Catalogo } from '@alsari/reservas';
-import { cambiarEstadoCitaReal, crearCitaReal } from '@/lib/datos/accionesReservas';
+import {
+  cambiarEstadoCitaReal,
+  crearCitaReal,
+  registrarCobroCitaReal,
+} from '@/lib/datos/accionesReservas';
 import '@alsari/reservas/styles'; // tema .dp-quiet de DayPilot — import único y controlado (solo esta ruta)
 
 // DayPilot manipula el DOM directamente: sin SSR. El import dinámico además
@@ -21,6 +25,7 @@ const ClinicaDashboard = dynamic(() => import('@alsari/reservas').then((m) => m.
 const ACCIONES = {
   crearCita: crearCitaReal,
   cambiarEstado: cambiarEstadoCitaReal,
+  registrarCobro: registrarCobroCitaReal,
 };
 
 export function ReservasClient({
