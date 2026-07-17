@@ -602,7 +602,8 @@ create table public.clinica_citas (
   registrado_por_email             text,
   created_at                       timestamptz not null default now(),
   updated_at                       timestamptz not null default now(),
-  liquidacion_id                   uuid
+  liquidacion_id                   uuid,
+  salonized_id                     text
 );
 
 create table public.clinica_clientes (
@@ -1670,7 +1671,7 @@ alter table public.ventas_bono add constraint ventas_bono_cliente_id_fkey FOREIG
 alter table public.ventas_bono add constraint ventas_bono_producto_id_fkey FOREIGN KEY (producto_id) REFERENCES clinica_productos(id) ON DELETE RESTRICT;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- §5. ÍNDICES (118 no asociados a constraints)
+-- §5. ÍNDICES (119 no asociados a constraints)
 -- ═══════════════════════════════════════════════════════════════════════════
 CREATE INDEX ajustes_liq_liquidacion_idx ON public.ajustes_liquidacion USING btree (liquidacion_id);
 CREATE INDEX arqueo_caja_cuenta_fecha_idx ON public.arqueo_caja USING btree (cuenta_tesoreria_id, fecha DESC);
@@ -1688,6 +1689,7 @@ CREATE INDEX clinica_citas_estado_idx ON public.clinica_citas USING btree (estad
 CREATE INDEX clinica_citas_inicio_idx ON public.clinica_citas USING btree (inicio DESC);
 CREATE INDEX clinica_citas_liquidacion_idx ON public.clinica_citas USING btree (liquidacion_id);
 CREATE INDEX clinica_citas_profesional_inicio_idx ON public.clinica_citas USING btree (profesional_id, inicio);
+CREATE UNIQUE INDEX clinica_citas_salonized_id_uniq ON public.clinica_citas USING btree (salonized_id);
 CREATE INDEX clinica_clientes_auth_idx ON public.clinica_clientes USING btree (auth_user_id);
 CREATE INDEX clinica_clientes_email_idx ON public.clinica_clientes USING btree (email);
 CREATE UNIQUE INDEX clinica_clientes_external_record_uniq ON public.clinica_clientes USING btree (external_clinical_record_id) WHERE ((external_clinical_record_id IS NOT NULL) AND (external_clinical_record_id <> ''::text));
