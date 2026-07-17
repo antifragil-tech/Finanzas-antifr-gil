@@ -2,15 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { DayPilotCalendar } from '@daypilot/daypilot-lite-react';
 import { Plus } from 'lucide-react';
 import { Button } from '@alsari/ui';
-import {
-  PROFESIONALES,
-  PROF_COLOR,
-  SERVICIOS,
-  ORIGENES,
-  getServicio,
-  type OrigenCita,
-  type CategoriaServicio,
-} from '../../spike/mockData';
+import { ORIGENES, type OrigenCita, type CategoriaServicio } from '../../spike/mockData';
+import { useCatalogo } from '../catalogo';
 import { ESTADO_META, PAGO_SIN_ABONAR } from '../../spike/estados';
 import { CitaPanel, type CitaPanelMode } from '../CitaPanel';
 import { useCitasStore } from '../CitasStore';
@@ -49,6 +42,7 @@ const hhmm = (iso: string) => iso.slice(11, 16);
 // viven en el store compartido del módulo (CitasStore); aquí solo se filtra hoy.
 export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
   const c = useCitasStore();
+  const { profesionales, servicios, getServicio, colorProfesional } = useCatalogo();
   const hoy = c.hoy;
   const citasHoy = c.citas.filter((x) => x.inicio.startsWith(hoy));
   const [calendar, setCalendar] = useState<
@@ -56,21 +50,23 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
   >();
   const panelRef = useRef<HTMLDivElement>(null);
   const repartoRaf = useRef<number | null>(null);
-  const [profVisibles, setProfVisibles] = useState<string[]>(PROFESIONALES.map((p) => p.id));
+  const [profVisibles, setProfVisibles] = useState<string[]>(profesionales.map((p) => p.id));
   const [servFiltro, setServFiltro] = useState<CategoriaServicio | 'todos'>('todos');
   const [origenFiltro, setOrigenFiltro] = useState<OrigenCita | 'todos'>('todos');
 
-  const profsOn = profVisibles.length ? profVisibles : PROFESIONALES.map((p) => p.id);
+  const profsOn = profVisibles.length ? profVisibles : profesionales.map((p) => p.id);
   const citasVisibles = citasHoy.filter(
     (x) =>
       profsOn.includes(x.profesional_id) &&
       (servFiltro === 'todos' || getServicio(x.servicio_id)?.categoria === servFiltro) &&
       (origenFiltro === 'todos' || x.origen === origenFiltro),
   );
-  const columns = PROFESIONALES.filter((p) => profsOn.includes(p.id)).map((p) => ({
-    name: p.nombre,
-    id: p.id,
-  }));
+  const columns = profesionales
+    .filter((p) => profsOn.includes(p.id))
+    .map((p) => ({
+      name: p.nombre,
+      id: p.id,
+    }));
   const events = citasVisibles.map((x) => ({
     id: x.id,
     start: x.inicio,
@@ -104,7 +100,7 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
     const serv = getServicio(cita.servicio_id);
     args.data.backColor = 'rgba(255,255,255,0.035)';
     args.data.borderColor = 'rgba(255,255,255,0.10)';
-    args.data.barColor = PROF_COLOR[cita.profesional_id] ?? '#71717a';
+    args.data.barColor = colorProfesional(cita.profesional_id);
     args.data.fontColor = '#e8e8ea';
     const clases = [`dp-serv-${serv?.categoria ?? 'otro'}`];
     if (cita.estado_cita === 'cancelada') clases.push('dp-cancelada');
@@ -185,7 +181,7 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-2xs uppercase tracking-widest text-zinc-500">Prof.</span>
-          {PROFESIONALES.map((p) => {
+          {profesionales.map((p) => {
             const on = profVisibles.includes(p.id);
             return (
               <button
@@ -199,7 +195,7 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
               >
                 <i
                   className="h-2 w-2 rounded-full"
-                  style={{ background: on ? PROF_COLOR[p.id] : '#3f3f46' }}
+                  style={{ background: on ? colorProfesional(p.id) : '#3f3f46' }}
                 />
                 {p.nombre.split(' ')[0]}
               </button>
@@ -215,7 +211,7 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
           >
             Todos
           </Button>
-          {SERVICIOS.map((s) => (
+          {servicios.map((s) => (
             <Button
               key={s.id}
               variant={servFiltro === s.categoria ? 'secondary' : 'ghost'}
@@ -252,7 +248,7 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
         ref={panelRef}
         className="dp-quiet glass-panel min-h-0 flex-1 overflow-auto rounded-xl p-1.5"
       >
-        <div style={{ minWidth: `${PROFESIONALES.length * 200 + 64}px` }}>
+        <div style={{ minWidth: `${profesionales.length * 200 + 64}px` }}>
           <DayPilotCalendar
             startDate={hoy}
             events={events}

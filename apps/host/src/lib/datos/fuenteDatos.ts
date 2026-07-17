@@ -19,7 +19,7 @@ export function datosRealesDisponibles(): boolean {
   return Boolean(URL_BASE && SERVICE_KEY);
 }
 
-async function rest<T>(recurso: string): Promise<T[]> {
+export async function rest<T>(recurso: string): Promise<T[]> {
   if (!URL_BASE || !SERVICE_KEY) return [];
   const res = await fetch(`${URL_BASE}/rest/v1/${recurso}`, {
     headers: {

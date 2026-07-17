@@ -1,6 +1,8 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import type { AgendaInicial, Catalogo } from '@alsari/reservas';
+import { cambiarEstadoCitaReal, crearCitaReal } from '@/lib/datos/accionesReservas';
 import '@alsari/reservas/styles'; // tema .dp-quiet de DayPilot — import único y controlado (solo esta ruta)
 
 // DayPilot manipula el DOM directamente: sin SSR. El import dinámico además
@@ -14,8 +16,28 @@ const ClinicaDashboard = dynamic(() => import('@alsari/reservas').then((m) => m.
   ),
 });
 
-export function ReservasClient() {
+// Escrituras reales de la agenda: server actions del host inyectadas al
+// módulo. Solo se pasan cuando hay agenda real (con entorno Supabase).
+const ACCIONES = {
+  crearCita: crearCitaReal,
+  cambiarEstado: cambiarEstadoCitaReal,
+};
+
+export function ReservasClient({
+  catalogo,
+  agenda,
+}: {
+  catalogo?: Catalogo;
+  agenda?: AgendaInicial;
+} = {}) {
   // 'contained': el panel de cita se abre dentro del área de contenido del
   // shell; el modo 'fixed' (default standalone) taparía sidebar y topbar.
-  return <ClinicaDashboard panelMode="contained" />;
+  return (
+    <ClinicaDashboard
+      panelMode="contained"
+      catalogo={catalogo}
+      agenda={agenda}
+      acciones={agenda ? ACCIONES : undefined}
+    />
+  );
 }

@@ -12,16 +12,8 @@ import {
   DoorOpen,
 } from 'lucide-react';
 import { Button, Badge } from '@alsari/ui';
-import {
-  PROFESIONALES,
-  SALAS,
-  PROF_COLOR,
-  getProfesional,
-  getServicio,
-  type CitaMock,
-  type EstadoCita,
-  type CategoriaServicio,
-} from './mockData';
+import { type CitaMock, type EstadoCita, type CategoriaServicio } from './mockData';
+import { useCatalogo } from '../clinica/catalogo';
 import { ESTADO_META, PAGO_LABEL, PAGO_SIN_ABONAR } from './estados';
 import { CitaModal } from './CitaModal';
 import { MonthResumen } from './MonthResumen';
@@ -74,12 +66,13 @@ const servicioPorRol = (rol?: string) =>
   rol === 'Entrenador personal' ? 'sv3' : rol === 'Nutricionista' ? 'sv4' : 'sv1';
 
 export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vista } = {}) {
+  const { profesionales, salas, getProfesional, getServicio, colorProfesional } = useCatalogo();
   const store = useCitasStore();
   const { citas, seleccionada, setSelectedId } = store;
   const [startDate, setStartDate] = useState<string>(store.hoy);
   const [vista, setVista] = useState<Vista>(vistaInicial);
   const [dimDia, setDimDia] = useState<DimDia>('profesional');
-  const [profVisibles, setProfVisibles] = useState<string[]>(PROFESIONALES.map((p) => p.id));
+  const [profVisibles, setProfVisibles] = useState<string[]>(profesionales.map((p) => p.id));
   const [servFiltro, setServFiltro] = useState<ServFiltro>('todos');
   const [calendar, setCalendar] = useState<
     { clearSelection: () => void; update: (cfg: Record<string, unknown>) => void } | undefined
@@ -89,7 +82,7 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
   const panelRef = useRef<HTMLDivElement>(null);
   const repartoRaf = useRef<number | null>(null);
 
-  const profsOn = profVisibles.length ? profVisibles : PROFESIONALES.map((p) => p.id);
+  const profsOn = profVisibles.length ? profVisibles : profesionales.map((p) => p.id);
 
   const citasVisibles = citas.filter((c) => {
     const okProf = profsOn.includes(c.profesional_id);
@@ -103,11 +96,13 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
     vista !== 'dia'
       ? []
       : dimDia === 'profesional'
-        ? PROFESIONALES.filter((p) => profsOn.includes(p.id)).map((p) => ({
-            name: p.nombre,
-            id: p.id,
-          }))
-        : SALAS.map((s) => ({ name: s.nombre, id: s.id }));
+        ? profesionales
+            .filter((p) => profsOn.includes(p.id))
+            .map((p) => ({
+              name: p.nombre,
+              id: p.id,
+            }))
+        : salas.map((s) => ({ name: s.nombre, id: s.id }));
 
   const events = citasVisibles.map((c) => {
     const resource = dimDia === 'sala' ? c.sala_id : c.profesional_id;
@@ -136,7 +131,7 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
     // (forma/textura, vía cssClass) · estado = puntito · fondo neutro (sin mezcla).
     args.data.backColor = 'rgba(255,255,255,0.035)';
     args.data.borderColor = 'rgba(255,255,255,0.10)';
-    args.data.barColor = PROF_COLOR[c.profesional_id] ?? '#71717a';
+    args.data.barColor = colorProfesional(c.profesional_id);
     args.data.fontColor = '#e8e8ea';
     const clases = [`dp-serv-${serv?.categoria ?? 'otro'}`];
     if (c.estado_cita === 'cancelada') clases.push('dp-cancelada');
@@ -373,7 +368,7 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <div className="flex flex-wrap items-center gap-1.5">
           <span className="text-2xs uppercase tracking-widest text-zinc-500">Profesionales</span>
-          {PROFESIONALES.map((p) => {
+          {profesionales.map((p) => {
             const on = profVisibles.includes(p.id);
             return (
               <button
@@ -387,7 +382,7 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
               >
                 <i
                   className="h-2 w-2 rounded-full"
-                  style={{ background: on ? PROF_COLOR[p.id] : '#3f3f46' }}
+                  style={{ background: on ? colorProfesional(p.id) : '#3f3f46' }}
                 />
                 {p.nombre.split(' ')[0]}
               </button>

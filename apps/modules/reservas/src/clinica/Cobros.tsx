@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { formatCurrency } from '@alsari/utils';
-import {
-  getServicio,
-  getProfesional,
-  getOrigen,
-  VIVOFACIL_VALOR_SESION,
-  type CitaMock,
-} from '../spike/mockData';
+import { getOrigen, VIVOFACIL_VALOR_SESION, type CitaMock } from '../spike/mockData';
+import { useCatalogo } from './catalogo';
 import { PAGO_SIN_ABONAR } from '../spike/estados';
 import { Subvista } from './Subvista';
 import { CitaPanel, type CitaPanelMode } from './CitaPanel';
@@ -31,6 +26,7 @@ const bonoDe = (c: CitaMock) => CLIENTES.find((cl) => cl.nombre === c.cliente_no
 // cliente directo de partners (Vivofácil/Oasis/Lidomare/otro). Acción de pago mock.
 // Esta lectura alimentará después Finanzas Operativas / Tesorería (cuando exista).
 export function Cobros({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
+  const { getProfesional, getServicio } = useCatalogo();
   const c = useCitasStore();
   const hoyMs = new Date(`${c.hoy}T00:00:00`).getTime();
   const [aviso, setAviso] = useState<string | null>(null);

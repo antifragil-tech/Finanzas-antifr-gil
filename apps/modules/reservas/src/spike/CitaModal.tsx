@@ -2,7 +2,7 @@ import { Modal, Button } from '@alsari/ui';
 import { formatCurrency } from '@alsari/utils';
 import { Check, CheckCheck, UserX, XCircle, Clock, MapPin, User, Euro } from 'lucide-react';
 import type { CitaMock } from './mockData';
-import { getProfesional, getSala, getServicio } from './mockData';
+import { useCatalogo } from '../clinica/catalogo';
 import { CitaBadges } from '../clinica/badges';
 
 export type AccionCita = 'confirmar' | 'completar' | 'no_asiste' | 'cancelar';
@@ -29,6 +29,7 @@ function Fila({ icon: Icon, children }: { icon: typeof Clock; children: React.Re
 // Modal PROPIO del OS (reutiliza @alsari/ui). NO se usa el modal nativo de
 // DayPilot. Las acciones cambian de estado; nunca borran la cita.
 export function CitaModal({ cita, onClose, onAccion }: Props) {
+  const { getProfesional, getSala, getServicio } = useCatalogo();
   if (!cita) return null;
 
   const prof = getProfesional(cita.profesional_id);
