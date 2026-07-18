@@ -59,7 +59,7 @@ function volver(fd: FormData, aviso: { ok?: string; error?: string }): never {
   if (mesValido(mes)) params.set('mes', mes);
   if (aviso.ok) params.set('ok', aviso.ok);
   if (aviso.error) params.set('error', aviso.error);
-  redirect(`/tesoreria?${params.toString()}`);
+  redirect(`/operativa?${params.toString()}`);
 }
 
 interface ResultadoInsert<T> {
