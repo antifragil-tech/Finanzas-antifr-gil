@@ -37,13 +37,21 @@ interface RenderArgs {
 
 const hhmm = (iso: string) => iso.slice(11, 16);
 
+// El filtro de servicio es por CATEGORIA (3 pastillas): con el catalogo real
+// (29 programas) un boton por servicio era inusable.
+const CATEGORIAS_FILTRO: { id: CategoriaServicio; label: string }[] = [
+  { id: 'fisioterapia', label: 'Fisioterapia' },
+  { id: 'entrenamiento_personal', label: 'Entrenamiento' },
+  { id: 'nutricion', label: 'Nutrición' },
+];
+
 // Vista "Hoy" por profesional (Clínica > Agenda > Hoy). Núcleo de recepción:
 // columnas = profesionales, filas = horas, lectura rápida de huecos y citas,
 // línea de "ahora", KPIs del día y clic en hueco para cita rápida. Las citas
 // viven en el store compartido del módulo (CitasStore); aquí solo se filtra hoy.
 export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode } = {}) {
   const c = useCitasStore();
-  const { profesionales, servicios, getServicio, colorProfesional } = useCatalogo();
+  const { profesionales, getServicio, colorProfesional } = useCatalogo();
   const hoy = c.hoy;
   const citasHoy = c.citas.filter((x) => x.inicio.startsWith(hoy));
   const [calendar, setCalendar] = useState<
@@ -214,14 +222,14 @@ export function AgendaHoy({ panelMode = 'fixed' }: { panelMode?: CitaPanelMode }
           >
             Todos
           </Button>
-          {servicios.map((s) => (
+          {CATEGORIAS_FILTRO.map((cat) => (
             <Button
-              key={s.id}
-              variant={servFiltro === s.categoria ? 'secondary' : 'ghost'}
+              key={cat.id}
+              variant={servFiltro === cat.id ? 'secondary' : 'ghost'}
               size="sm"
-              onClick={() => setServFiltro(s.categoria)}
+              onClick={() => setServFiltro(cat.id)}
             >
-              {s.nombre}
+              {cat.label}
             </Button>
           ))}
         </div>
@@ -412,11 +420,20 @@ function AltaCitaDialog({
           onChange={(e) => setServicioId(e.target.value)}
           className="mt-1 w-full rounded-lg border border-white/10 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-white/25 focus:outline-none"
         >
-          {servicios.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.nombre} · {s.duracion_minutos}&apos;
-            </option>
-          ))}
+          {CATEGORIAS_FILTRO.map((cat) => {
+            const delGrupo = servicios.filter((s) => s.categoria === cat.id);
+            if (delGrupo.length === 0) return null;
+            return (
+              <optgroup key={cat.id} label={cat.label}>
+                {delGrupo.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.nombre} · {s.duracion_minutos}&apos;
+                    {s.precio > 0 ? ` · ${s.precio}€` : ''}
+                  </option>
+                ))}
+              </optgroup>
+            );
+          })}
         </select>
 
         <div className="mt-5 flex justify-end gap-2">

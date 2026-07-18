@@ -393,3 +393,25 @@ Plantilla para copiar:
 - [x] Lección registrada antes de continuar la integración
 
 **Tags:** #windows #crlf #prettier #format-gate #verificacion
+
+## 2026-07-18 — Orden y diseño pensado ANTES de acumular features
+
+**Contexto:** sprint de conexión a datos reales (Salonized + histórico). Se
+encadenaron mejoras sueltas a buen ritmo (filtros, cobros, clientes) y Guille
+tuvo que señalar dos veces problemas de coherencia: un aviso que listaba 277
+nombres, un filtro con 29 botones, y "Añadir datos" perdido dentro de Tesorería.
+
+**Corrección de Guille:** "te he pedido orden y que cada cosa esté bien pensada
+y organizada para facilitar su uso" — y antes: "las cuentas tienen que tener
+sentido" y "revisa todo antes de decirme que está".
+
+**Causa raíz:** entregar función a función sin re-evaluar el CONJUNTO cada vez
+que cambia la escala de los datos (3 servicios mock → 29 reales; 12 citas demo
+→ 5.700 reales) ni la arquitectura de información (dónde vive cada tarea).
+
+**Regla a aplicar:** (1) tras cada cambio de escala de datos, pasar revista a
+TODAS las vistas afectadas antes de dar nada por hecho; (2) los cambios de
+estructura (navegación, qué página hace qué) se proponen organizados y se
+validan con Guille antes de codificar; (3) ningún aviso/lista sin límite;
+(4) todo KPI debe poder explicarse con una frase que cuadre con la realidad
+del negocio.
