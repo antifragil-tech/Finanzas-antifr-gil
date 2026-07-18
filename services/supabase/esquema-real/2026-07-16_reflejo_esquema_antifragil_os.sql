@@ -1,9 +1,9 @@
 -- ═══════════════════════════════════════════════════════════════════════════
--- ANTIFRÁGIL OS — REFLEJO DEL ESQUEMA REAL (generado 2026-07-17)
+-- ANTIFRÁGIL OS — REFLEJO DEL ESQUEMA REAL (generado 2026-07-18)
 -- ═══════════════════════════════════════════════════════════════════════════
 -- Generado por scripts/db/reflejar-esquema.py (solo lecturas de catálogo).
 -- ES LA FOTO del esquema aplicado en la base real; NO aplicar sobre ella.
--- Contenido: 58 tablas · 21 enums · 12 funciones · 12 vistas · 36 triggers · 74 políticas RLS
+-- Contenido: 59 tablas · 21 enums · 12 funciones · 12 vistas · 36 triggers · 75 políticas RLS
 -- ═══════════════════════════════════════════════════════════════════════════
 
 -- Extensiones presentes en la base (informativo):
@@ -482,7 +482,7 @@ end;
 $function$;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- §3. TABLAS (58) — columnas; constraints en §4
+-- §3. TABLAS (59) — columnas; constraints en §4
 -- ═══════════════════════════════════════════════════════════════════════════
 create table public.ajustes_liquidacion (
   id                               uuid not null default gen_random_uuid(),
@@ -777,6 +777,19 @@ create table public.configuracion_contabilidad (
   updated_at                       timestamptz not null default now()
 );
 
+create table public.confirmaciones_saldo (
+  id                               uuid not null default gen_random_uuid(),
+  cuenta_tesoreria_id              uuid not null,
+  fecha                            date not null default CURRENT_DATE,
+  saldo_calculado                  numeric(14,2) not null,
+  coincide                         boolean not null,
+  saldo_reportado                  numeric(14,2),
+  origen_tipo                      text,
+  origen_id                        uuid,
+  registrado_por_email             text,
+  created_at                       timestamptz not null default now()
+);
+
 create table public.consumos_bono (
   id                               uuid not null default gen_random_uuid(),
   venta_bono_id                    uuid not null,
@@ -814,7 +827,9 @@ create table public.cuenta_tesoreria (
   activa                           boolean not null default true,
   notas                            text,
   created_at                       timestamptz not null default now(),
-  updated_at                       timestamptz not null default now()
+  updated_at                       timestamptz not null default now(),
+  saldo_ancla                      numeric(14,2),
+  saldo_ancla_fecha                date
 );
 
 create table public.cuentas_bancarias_sociedad (
@@ -1072,7 +1087,8 @@ create table public.gastos_operativos (
   pendiente_confirmacion           boolean not null default false,
   nota                             text,
   created_at                       timestamptz not null default now(),
-  updated_at                       timestamptz not null default now()
+  updated_at                       timestamptz not null default now(),
+  cuenta_tesoreria                 text
 );
 
 create table public.ingresos_devengados (
@@ -1411,7 +1427,7 @@ create table public.ventas_bono (
 );
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- §4. CONSTRAINTS (256) — pk → unique → check → exclusion → fk
+-- §4. CONSTRAINTS (259) — pk → unique → check → exclusion → fk
 -- ═══════════════════════════════════════════════════════════════════════════
 alter table public.ajustes_liquidacion add constraint ajustes_liquidacion_pkey PRIMARY KEY (id);
 alter table public.arqueo_caja add constraint arqueo_caja_pkey PRIMARY KEY (id);
@@ -1434,6 +1450,7 @@ alter table public.clinica_ubicaciones add constraint clinica_ubicaciones_pkey P
 alter table public.clinica_usuarios add constraint clinica_usuarios_pkey PRIMARY KEY (id);
 alter table public.cobros add constraint cobros_pkey PRIMARY KEY (id);
 alter table public.configuracion_contabilidad add constraint configuracion_contabilidad_pkey PRIMARY KEY (id);
+alter table public.confirmaciones_saldo add constraint confirmaciones_saldo_pkey PRIMARY KEY (id);
 alter table public.consumos_bono add constraint consumos_bono_pkey PRIMARY KEY (id);
 alter table public.contactos add constraint contactos_pkey PRIMARY KEY (id);
 alter table public.cuenta_tesoreria add constraint cuenta_tesoreria_pkey PRIMARY KEY (id);
@@ -1532,6 +1549,7 @@ alter table public.facturas_recibidas add constraint facturas_recibidas_drive_es
 alter table public.facturas_recibidas add constraint facturas_recibidas_estado_check CHECK ((estado = ANY (ARRAY['borrador_ocr'::text, 'revision_javi'::text, 'pendiente_pago'::text, 'pagada'::text, 'rechazada'::text])));
 alter table public.facturas_recibidas add constraint facturas_recibidas_tipo_operacion_check CHECK ((tipo_operacion = ANY (ARRAY['normal'::text, 'exenta'::text, 'no_sujeta'::text, 'inversion_sujeto_pasivo'::text, 'suplido'::text])));
 alter table public.flujos_caja_proyectos add constraint flujos_caja_proyectos_tipo_flujo_check CHECK ((tipo_flujo = ANY (ARRAY['inversion'::text, 'recapex'::text, 'venta'::text, 'dividendo'::text, 'ingreso_operativo'::text, 'gasto_operativo'::text, 'otro'::text])));
+alter table public.gastos_operativos add constraint gastos_operativos_cuenta_tesoreria_check CHECK ((cuenta_tesoreria = ANY (ARRAY['banco'::text, 'caja'::text])));
 alter table public.gastos_operativos add constraint gastos_operativos_importe_check CHECK ((importe <> (0)::numeric));
 alter table public.ingresos_devengados add constraint ingresos_devengados_caducidad_coherente CHECK (((origen_devengo <> 'ingreso_por_caducidad'::origen_devengo) OR (venta_bono_id IS NOT NULL)));
 alter table public.ingresos_devengados add constraint ingresos_devengados_importe_devengado_check CHECK ((importe_devengado <> (0)::numeric));
@@ -1597,6 +1615,7 @@ alter table public.clinica_usuarios add constraint clinica_usuarios_profesional_
 alter table public.cobros add constraint cobros_cliente_id_fkey FOREIGN KEY (cliente_id) REFERENCES clinica_clientes(id) ON DELETE RESTRICT;
 alter table public.cobros add constraint cobros_cuenta_tesoreria_id_fkey FOREIGN KEY (cuenta_tesoreria_id) REFERENCES cuenta_tesoreria(id) ON DELETE RESTRICT;
 alter table public.cobros add constraint cobros_movimiento_caja_id_fkey FOREIGN KEY (movimiento_caja_id) REFERENCES movimiento_caja(id) ON DELETE SET NULL;
+alter table public.confirmaciones_saldo add constraint confirmaciones_saldo_cuenta_tesoreria_id_fkey FOREIGN KEY (cuenta_tesoreria_id) REFERENCES cuenta_tesoreria(id);
 alter table public.consumos_bono add constraint consumos_bono_cita_id_fkey FOREIGN KEY (cita_id) REFERENCES clinica_citas(id) ON DELETE RESTRICT;
 alter table public.consumos_bono add constraint consumos_bono_profesional_id_fkey FOREIGN KEY (profesional_id) REFERENCES clinica_profesionales(id) ON DELETE RESTRICT;
 alter table public.consumos_bono add constraint consumos_bono_venta_bono_id_fkey FOREIGN KEY (venta_bono_id) REFERENCES ventas_bono(id) ON DELETE RESTRICT;
@@ -1671,7 +1690,7 @@ alter table public.ventas_bono add constraint ventas_bono_cliente_id_fkey FOREIG
 alter table public.ventas_bono add constraint ventas_bono_producto_id_fkey FOREIGN KEY (producto_id) REFERENCES clinica_productos(id) ON DELETE RESTRICT;
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- §5. ÍNDICES (119 no asociados a constraints)
+-- §5. ÍNDICES (120 no asociados a constraints)
 -- ═══════════════════════════════════════════════════════════════════════════
 CREATE INDEX ajustes_liq_liquidacion_idx ON public.ajustes_liquidacion USING btree (liquidacion_id);
 CREATE INDEX arqueo_caja_cuenta_fecha_idx ON public.arqueo_caja USING btree (cuenta_tesoreria_id, fecha DESC);
@@ -1747,6 +1766,7 @@ CREATE INDEX gastos_operativos_pendiente_idx ON public.gastos_operativos USING b
 CREATE INDEX gastos_operativos_prof_idx ON public.gastos_operativos USING btree (profesional_id);
 CREATE INDEX gastos_operativos_tipo_idx ON public.gastos_operativos USING btree (tipo);
 CREATE INDEX ingresos_devengados_centro_canal_idx ON public.ingresos_devengados USING btree (centro_id, canal_id);
+CREATE UNIQUE INDEX ingresos_devengados_cita_id_uniq ON public.ingresos_devengados USING btree (cita_id);
 CREATE INDEX ingresos_devengados_cita_idx ON public.ingresos_devengados USING btree (cita_id);
 CREATE INDEX ingresos_devengados_fecha_idx ON public.ingresos_devengados USING btree (fecha_devengo DESC);
 CREATE INDEX ingresos_devengados_origen_idx ON public.ingresos_devengados USING btree (origen);
@@ -2201,7 +2221,7 @@ CREATE TRIGGER vencimientos_touch BEFORE UPDATE ON public.vencimientos FOR EACH 
 CREATE TRIGGER ventas_bono_touch BEFORE UPDATE ON public.ventas_bono FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
 
 -- ═══════════════════════════════════════════════════════════════════════════
--- §8. ROW LEVEL SECURITY (58 tablas · 74 políticas)
+-- §8. ROW LEVEL SECURITY (59 tablas · 75 políticas)
 -- ═══════════════════════════════════════════════════════════════════════════
 alter table public.ajustes_liquidacion enable row level security;
 alter table public.arqueo_caja enable row level security;
@@ -2224,6 +2244,7 @@ alter table public.clinica_ubicaciones enable row level security;
 alter table public.clinica_usuarios enable row level security;
 alter table public.cobros enable row level security;
 alter table public.configuracion_contabilidad enable row level security;
+alter table public.confirmaciones_saldo enable row level security;
 alter table public.consumos_bono enable row level security;
 alter table public.contactos enable row level security;
 alter table public.cuenta_tesoreria enable row level security;
@@ -2396,6 +2417,12 @@ create policy "cobros_select" on public.cobros
   using ((rol_operativo_actual() = ANY (ARRAY['direccion'::rol_operativo, 'coordinacion'::rol_operativo, 'recepcion'::rol_operativo])));
 
 create policy "configuracion_contabilidad_auth_all" on public.configuracion_contabilidad
+  for all
+  to authenticated
+  using (true)
+  with check (true);
+
+create policy "confirmaciones_saldo_rw" on public.confirmaciones_saldo
   for all
   to authenticated
   using (true)

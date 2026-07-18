@@ -9,6 +9,7 @@ import {
   type GastoReal,
 } from '@/lib/datos/fuenteDatos';
 import { primerValor } from '@/lib/datos/periodo';
+import { confirmarSaldo } from '@/lib/datos/acciones';
 import { EntradaDatos } from '@/components/os/tesoreria/EntradaDatos';
 import { OSKpiCard, OSPageHeader, OSSection, OSStatusBadge } from '@/components/os/ui';
 import Link from 'next/link';
@@ -40,6 +41,9 @@ export default async function OperativaPage({
   const params = await searchParams;
   const avisoOk = primerValor(params['ok']);
   const avisoError = primerValor(params['error']);
+  const confCuenta = primerValor(params['conf_cuenta']);
+  const confId = primerValor(params['conf_id']);
+  const confSaldo = primerValor(params['conf_saldo']);
   const real = datosRealesDisponibles();
 
   const mesActual = new Intl.DateTimeFormat('sv-SE', { timeZone: 'Europe/Madrid' })
@@ -85,6 +89,50 @@ export default async function OperativaPage({
         >
           {avisoError ?? avisoOk}
         </p>
+      ) : null}
+
+      {confId && confSaldo && confCuenta ? (
+        <div className="mx-8 mt-3 rounded-2xl border border-blue-400/20 bg-blue-400/5 p-5">
+          <p className="text-sm text-zinc-200">
+            Saldo restante en <span className="font-medium">{confCuenta}</span> tras este apunte:{' '}
+            <span className="text-2xl font-light tracking-tight text-blue-200">
+              {formatCurrency(Number(confSaldo))}
+            </span>
+          </p>
+          <p className="text-2xs mt-1 uppercase tracking-widest text-zinc-500">
+            ¿Coincide con lo que ves en la cuenta?
+          </p>
+          <form action={confirmarSaldo} className="mt-3 flex flex-wrap items-center gap-2">
+            <input type="hidden" name="cuenta_id" value={confId} />
+            <input type="hidden" name="saldo_calculado" value={confSaldo} />
+            <button
+              type="submit"
+              name="coincide"
+              value="si"
+              className="rounded-lg border border-emerald-400/25 bg-emerald-400/10 px-4 py-1.5 text-sm text-emerald-300 hover:bg-emerald-400/20"
+            >
+              Sí, coincide
+            </button>
+            <button
+              type="submit"
+              name="coincide"
+              value="no"
+              className="rounded-lg border border-rose-400/25 bg-rose-400/10 px-4 py-1.5 text-sm text-rose-300 hover:bg-rose-400/20"
+            >
+              No coincide
+            </button>
+            <label className="flex items-center gap-2 text-xs text-zinc-500">
+              Si no coincide, ¿cuánto hay?
+              <input
+                type="number"
+                step="0.01"
+                name="saldo_reportado"
+                placeholder="0,00"
+                className="w-28 rounded-lg border border-white/10 bg-zinc-950 px-2 py-1 text-sm text-zinc-100"
+              />
+            </label>
+          </form>
+        </div>
       ) : null}
 
       {/* Los números del mes en curso — el medidor clave es "% con factura":
