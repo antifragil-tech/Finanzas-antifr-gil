@@ -29,7 +29,6 @@ import {
   separarPorProyecto,
 } from '@/lib/datos/fuenteDatos';
 import { etiquetaMes, filtrarPorMes, primerValor, resolverMes } from '@/lib/datos/periodo';
-import { EntradaDatos } from '@/components/os/tesoreria/EntradaDatos';
 import { AvisoIva } from '@/components/os/tesoreria/AvisoIva';
 import { CuentasPorCobrarSeccion } from '@/components/os/tesoreria/CuentasPorCobrar';
 import { ProyectosFuera } from '@/components/os/tesoreria/ProyectosFuera';
@@ -260,17 +259,6 @@ export default async function TesoreriaPage({
           />
         </OSSection>
       ) : null}
-
-      <OSSection
-        titulo="Añadir datos"
-        nota={
-          real
-            ? 'Entrada manual: escribe en las tablas reales de Supabase'
-            : 'Modo demo sin Supabase: el alta devolverá un error legible'
-        }
-      >
-        <EntradaDatos mes={mes} />
-      </OSSection>
 
       <OSSection
         titulo={real ? 'Gastos por categoría (clínica)' : 'Gastos por categoría'}

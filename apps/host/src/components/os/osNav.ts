@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react';
 import {
   CalendarDays,
+  ClipboardList,
   HandCoins,
   LayoutDashboard,
   Settings,
@@ -48,7 +49,10 @@ export const OS_NAV: OSNavGroup[] = [
   },
   {
     titulo: 'Operación',
-    items: [{ href: '/reservas', label: 'Reservas', icon: CalendarDays }],
+    items: [
+      { href: '/reservas', label: 'Reservas', icon: CalendarDays },
+      { href: '/operativa', label: 'Operativa', icon: ClipboardList },
+    ],
   },
   {
     titulo: 'Sistema',
