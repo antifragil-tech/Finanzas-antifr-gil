@@ -407,10 +407,15 @@ export function CalendarioSpike({ vistaInicial = 'semana' }: { vistaInicial?: Vi
       {sinAbonar.length > 0 && (
         <div className="flex items-center gap-2 rounded-lg border border-amber-500/20 bg-amber-500/10 px-3 py-2 text-sm text-amber-200">
           <AlertTriangle size={15} className="shrink-0" />
-          <span>
-            <strong>{sinAbonar.length}</strong> cita{sinAbonar.length > 1 ? 's' : ''} sin abonar:{' '}
+          <span className="min-w-0">
+            <strong>{sinAbonar.length}</strong> cita{sinAbonar.length > 1 ? 's' : ''} sin abonar
+            {': '}
             <span className="text-amber-300/80">
-              {sinAbonar.map((c) => c.cliente_nombre).join(', ')}
+              {sinAbonar
+                .slice(0, 6)
+                .map((c) => c.cliente_nombre)
+                .join(', ')}
+              {sinAbonar.length > 6 ? ` y ${sinAbonar.length - 6} más — gestión en Cobros` : ''}
             </span>
           </span>
         </div>
