@@ -94,6 +94,7 @@ interface FilaCita {
   tipo_venta: string;
   precio_snapshot: number | null;
   notas_admin: string | null;
+  registrado_por_email: string | null;
   clinica_clientes: { nombre: string; apellidos: string | null; telefono: string | null } | null;
 }
 
@@ -184,9 +185,18 @@ function estadoPago(fila: FilaCita, cobradoPorCita: Map<string, number>): Estado
   if (fila.tipo_venta === 'programa') return 'incluido_programa';
   const cobrado = cobradoPorCita.get(fila.id) ?? 0;
   const precio = fila.precio_snapshot ?? 0;
-  if (cobrado <= 0) return 'pendiente_pago';
-  if (precio > 0 && cobrado < precio) return 'pago_parcial';
-  return 'pagado';
+  if (cobrado > 0) return precio > 0 && cobrado < precio ? 'pago_parcial' : 'pagado';
+  // Histórico importado de Salonized: sus cobros se gestionaron ALLÍ y no
+  // existen en nuestro libro. Una cita pasada/cerrada del histórico no es
+  // deuda real del OS — sin esto, cientos de citas antiguas inflarían
+  // "sin abonar" y todos los KPIs de cobro (las cuentas deben tener sentido).
+  if (fila.registrado_por_email === 'importacion-salonized') {
+    if (['realizada', 'validada', 'liquidada'].includes(fila.estado)) return 'pagado';
+    if (['cancelada_a_tiempo', 'cancelada_tarde', 'no_show'].includes(fila.estado)) {
+      return 'no_requiere_pago';
+    }
+  }
+  return 'pendiente_pago';
 }
 
 // ── Carga ───────────────────────────────────────────────────────────────────
@@ -209,7 +219,7 @@ export async function cargarAgendaReal(): Promise<AgendaReal | null> {
 
   const [citas, profesionales, servicios, canales, cobros] = await Promise.all([
     rest<FilaCita>(
-      `clinica_citas?select=id,cliente_id,profesional_id,servicio_id,canal_id,inicio,fin,estado,tipo_venta,precio_snapshot,notas_admin,clinica_clientes(nombre,apellidos,telefono)&inicio=gte.${desde}&inicio=lte.${hasta}&order=inicio.asc&limit=5000`,
+      `clinica_citas?select=id,cliente_id,profesional_id,servicio_id,canal_id,inicio,fin,estado,tipo_venta,precio_snapshot,notas_admin,registrado_por_email,clinica_clientes(nombre,apellidos,telefono)&inicio=gte.${desde}&inicio=lte.${hasta}&order=inicio.asc&limit=5000`,
     ),
     rest<FilaProfesional>(`clinica_profesionales?select=*&activo=is.true&order=nombre.asc`),
     rest<FilaServicio>(`clinica_servicios?select=*&activo=is.true&order=nombre.asc`),

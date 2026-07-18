@@ -183,7 +183,10 @@ def main() -> None:
             elif str(a.get("end_at", "")) < ahora:
                 estado = "realizada"
             else:
-                estado = "reservada"
+                # Reserva firme hecha en Salonized (programas, huecos cerrados):
+                # entra CONFIRMADA para que "sin confirmar" mida solo lo que
+                # de verdad requiere accion de recepcion en el OS.
+                estado = "confirmada"
             valores.append(
                 f"({q(cli)}::uuid, {q(prof)}::uuid, {q(srv['id'])}::uuid, "
                 f"{q(a['start_at'])}::timestamptz, {q(a['end_at'])}::timestamptz, "
