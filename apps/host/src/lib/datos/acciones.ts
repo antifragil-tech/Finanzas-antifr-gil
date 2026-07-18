@@ -53,13 +53,76 @@ function fechaValida(fecha: string): boolean {
 }
 
 /** Redirige a la página de origen conservando el periodo activo. Nunca retorna. */
-function volver(fd: FormData, aviso: { ok?: string; error?: string }): never {
+function volver(
+  fd: FormData,
+  aviso: { ok?: string; error?: string },
+  extra?: Record<string, string>,
+): never {
   const mes = texto(fd, '_mes');
   const params = new URLSearchParams();
   if (mesValido(mes)) params.set('mes', mes);
   if (aviso.ok) params.set('ok', aviso.ok);
   if (aviso.error) params.set('error', aviso.error);
+  for (const [k, v] of Object.entries(extra ?? {})) params.set(k, v);
   redirect(`/operativa?${params.toString()}`);
+}
+
+/**
+ * Saldo actual de una cuenta ANCLADA: saldo_ancla + cobros − gastos desde la
+ * fecha del ancla. Devuelve null si la cuenta no tiene ancla fijada (p. ej.
+ * caja hasta que se cuente el efectivo). Es la base del arqueo continuo:
+ * cada pago/cobro registrado en Operativa muestra este saldo para CONFIRMAR.
+ */
+async function saldoCuentaAnclada(
+  tipo: 'banco' | 'caja',
+): Promise<{ id: string; nombre: string; saldo: number } | null> {
+  const cuentas = await consultar<{
+    id: string;
+    nombre: string;
+    saldo_ancla: number | null;
+    saldo_ancla_fecha: string | null;
+  }>(
+    `cuenta_tesoreria?select=id,nombre,saldo_ancla,saldo_ancla_fecha&tipo=eq.${tipo}&activa=is.true&limit=1`,
+  );
+  const c = cuentas[0];
+  if (!c || c.saldo_ancla === null || !c.saldo_ancla_fecha) return null;
+  const [cobros, gastos] = await Promise.all([
+    consultar<{ importe: number }>(
+      `cobros?select=importe&cuenta_tesoreria_id=eq.${c.id}&fecha=gte.${c.saldo_ancla_fecha}`,
+    ),
+    consultar<{ importe: number }>(
+      `gastos_operativos?select=importe&cuenta_tesoreria=eq.${tipo}&fecha=gte.${c.saldo_ancla_fecha}`,
+    ),
+  ]);
+  const saldo =
+    Number(c.saldo_ancla) +
+    cobros.reduce((s, x) => s + Number(x.importe), 0) -
+    gastos.reduce((s, x) => s + Number(x.importe), 0);
+  return { id: c.id, nombre: c.nombre, saldo: Math.round(saldo * 100) / 100 };
+}
+
+/** Registra la confirmación (o descuadre) del saldo mostrado tras un apunte. */
+export async function confirmarSaldo(fd: FormData): Promise<void> {
+  const cuentaId = texto(fd, 'cuenta_id');
+  const saldoCalculado = numero(fd, 'saldo_calculado');
+  const coincide = texto(fd, 'coincide') === 'si';
+  const saldoReportado = numero(fd, 'saldo_reportado');
+  if (!cuentaId || saldoCalculado === null)
+    volver(fd, { error: 'Confirmación de saldo incompleta.' });
+  const r = await insertar('confirmaciones_saldo', {
+    cuenta_tesoreria_id: cuentaId,
+    saldo_calculado: saldoCalculado,
+    coincide,
+    ...(saldoReportado !== null ? { saldo_reportado: saldoReportado } : {}),
+    registrado_por_email: 'operativa-web',
+  });
+  if (!r.ok) volver(fd, { error: r.error });
+  revalidarFinanzas();
+  volver(fd, {
+    ok: coincide
+      ? 'Saldo confirmado: la cuenta cuadra.'
+      : 'Descuadre registrado: revisa si falta algún apunte de hoy.',
+  });
 }
 
 interface ResultadoInsert<T> {
@@ -187,6 +250,9 @@ export async function crearGasto(fd: FormData): Promise<void> {
   const importe = numero(fd, 'importe');
   const documentoRecibido = fd.get('documento_recibido') === 'on';
   const nota = texto(fd, 'nota');
+  const pagadoCon = texto(fd, 'pagado_con');
+  if (pagadoCon && pagadoCon !== 'banco' && pagadoCon !== 'caja')
+    volver(fd, { error: 'Gasto: cuenta de pago no válida.' });
 
   if (!fechaValida(fecha))
     volver(fd, { error: 'Gasto: la fecha debe ser una fecha ISO válida (AAAA-MM-DD).' });
@@ -204,11 +270,24 @@ export async function crearGasto(fd: FormData): Promise<void> {
     capa,
     documento_tipo: 'factura_recibida',
     documento_recibido: documentoRecibido,
+    ...(pagadoCon ? { cuenta_tesoreria: pagadoCon } : {}),
     ...(nota ? { nota } : {}),
   });
   if (!r.ok) volver(fd, { error: r.error });
 
   revalidarFinanzas();
+  // Arqueo continuo: si el gasto ya está PAGADO, mostrar el saldo restante
+  // de esa cuenta y pedir confirmación de que coincide con la realidad.
+  if (pagadoCon === 'banco' || pagadoCon === 'caja') {
+    const s = await saldoCuentaAnclada(pagadoCon);
+    if (s) {
+      volver(
+        fd,
+        { ok: `Gasto registrado: ${concepto} (${fecha}).` },
+        { conf_cuenta: s.nombre, conf_id: s.id, conf_saldo: String(s.saldo) },
+      );
+    }
+  }
   volver(fd, { ok: `Gasto registrado: ${concepto} (${fecha}).` });
 }
 

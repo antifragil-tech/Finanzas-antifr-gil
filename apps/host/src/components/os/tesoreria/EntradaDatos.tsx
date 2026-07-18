@@ -80,6 +80,14 @@ export function EntradaDatos({ mes }: { mes?: string | undefined }) {
             <span className="field-label">Fecha (de pago)</span>
             <input type="date" name="fecha" required className="field-input" />
           </label>
+          <label>
+            <span className="field-label">Pagado con</span>
+            <select name="pagado_con" className="field-input">
+              <option value="banco">Banco</option>
+              <option value="caja">Caja (efectivo)</option>
+              <option value="">Aún no pagado</option>
+            </select>
+          </label>
           <label className="md:col-span-2">
             <span className="field-label">Concepto</span>
             <input
